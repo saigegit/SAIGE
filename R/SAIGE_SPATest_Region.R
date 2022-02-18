@@ -552,10 +552,11 @@ if(!is.null(markerInfo)){
  # print(RegionData)
  # print("posNA")
  # print(posNA)
+  RegionData = RegionData[-posNA, ]
     if(length(posNA) != 0){
-    #print(head(RegionData[posNA,1:2]))
-    stop("Total ",length(posNA)," markers in 'RegionFile' are not in 'GenoFile'.
-         Please remove these markers before region-level analysis.")
+    cat("Total ",length(posNA)," markers in 'RegionFile' are not in 'GenoFile'.")
+    #stop("Total ",length(posNA)," markers in 'RegionFile' are not in 'GenoFile'.
+    #     Please remove these markers before region-level analysis.")
     }
 }
 
