@@ -68,8 +68,8 @@ option_list <- list(
 
   make_option("--isCateVarianceRatio", type="logical", default=FALSE,
     help="Required. Whether to estimate variance ratio based on different MAC categories. If yes, variance ratio will be estiamted for multiple MAC categories corresponding to cateVarRatioMinMACVecExclude and cateVarRatioMaxMACVecInclude. Currently, if isCateVarianceRatio=TRUE, then LOCO=FALSE [default=FALSE]"),
-  make_option("--relatednessCutoff", type="numeric", default=0.125,
-    help="Optional. Threshold to treat two samples as unrelated when the sparse GRM is used [default=0.125]"),
+  make_option("--relatednessCutoff", type="numeric", default=0,
+    help="Optional. Threshold (minimum relatedness coefficient) to treat two samples as unrelated when the sparse GRM is used [default=0]"),
   make_option("--cateVarRatioMinMACVecExclude",type="character", default="10,20.5",
     help="Optional. vector of float. Lower bound for MAC categories. The length equals to the number of MAC categories for variance ratio estimation. [default='10,20.5']"),
   make_option("--cateVarRatioMaxMACVecInclude",type="character", default="20.5",

@@ -12,7 +12,7 @@ setSparseSigma = function(sparseSigmaFile){
 }	
 
 
-setSparseSigma_new = function(sparseGRMFile, sparseGRMSampleIDFile, sampleIDInModel, tauVec, W, traitType){
+setSparseSigma_new = function(sparseGRMFile, sparseGRMSampleIDFile, relatednessCutoff, sampleIDInModel, tauVec, W, traitType){
 
   Check_File_Exist(sparseGRMFile, "sparseGRMFile")
   Check_File_Exist(sparseGRMSampleIDFile, "sparseGRMSampleIDFile")
@@ -40,6 +40,14 @@ setSparseSigma_new = function(sparseGRMFile, sparseGRMSampleIDFile, sampleIDInMo
   }else{
     print("Subsetting GRM")
   }
+  removeIndex = which(sparseGRM@x < relatednessCutoff)
+  if(length(removeIndex) > 0){
+	cat("Removing ", length(removeIndex), " elements in the sparse GRM < ", relatednessCutoff, ".\n")  
+  	sparseGRM@x = sparseGRM@x[-removeIndex]
+	sparseGRM@i = sparseGRM@i[-removeIndex]
+	sparseGRM@j = sparseGRM@j[-removeIndex]
+  }
+
   sparseGRM@x = sparseGRM@x * tauVec[2]  
   #sparseSigma = sparseGRM * tauVec[2]
   if(traitType == "binary"){

@@ -33,6 +33,7 @@
 #' @param LOCO logical. Whether to apply the leave-one-chromosome-out option. By default, TRUE
 #' @param sparseGRMFile character. Path to the pre-calculated sparse GRM file. By default, ""
 #' @param sparseGRMSampleIDFile character. Path to the sample ID file for the pre-calculated sparse GRM. No header is included. The order of sample IDs is corresponding to the order of samples in the sparse GRM. By default, ""
+#' @param relatednessCutoff float. The threshold for coefficient of relatedness to treat two samples as unrelated in the sparse GRM.
 #' @param condition character. For conditional analysis. Genetic marker ids (chr:pos_ref/alt if sav/vcf dosage input , marker id if bgen input) seperated by comma. e.g.chr3:101651171_C/T,chr3:101651186_G/A, Note that currently conditional analysis is only for bgen,vcf,sav input.
 #' @param groupFile character. Path to the file containing the group information for gene-based tests. Each line is for one gene/set of variants. The first element is for gene/set name. The rest of the line is for variant ids included in this gene/set. For vcf/sav, the genetic marker ids are in the format chr:pos_ref/alt. For bgen, the genetic marker ids should match the ids in the bgen file. Each element in the line is seperated by tab.
 #' @param weights.beta vector of numeric. parameters for the beta distribution to weight genetic markers with MAF > weightMAFcutoff in gene-based tests.By default, "c(1,25)". More options can be seen in the SKAT library. NOTE: this argument is not fully developed. currently, weights.beta.common is euqal to weights.beta.rare
@@ -85,6 +86,7 @@ SPAGMMATtest = function(bgenFile = "",
                  condition="",
 		 sparseGRMFile="",
                  sparseGRMSampleIDFile="",
+		 relatednessCutoff = 0, 
                  groupFile="",
                  weights.beta=c(1,25),
                  weights_for_condition = NULL,
@@ -210,7 +212,7 @@ SPAGMMATtest = function(bgenFile = "",
     isSparseGRM = TRUE
     if(sparseGRMFile != ""){ 
       #sparseSigmaRList = setSparseSigma(sparseSigmaFile)
-      sparseSigmaRList = setSparseSigma_new(sparseGRMFile, sparseGRMSampleIDFile, obj.model$sampleID, obj.model$theta, obj.model$mu2,  obj.model$traitType)
+      sparseSigmaRList = setSparseSigma_new(sparseGRMFile, sparseGRMSampleIDFile, relatednessCutoff, obj.model$sampleID, obj.model$theta, obj.model$mu2,  obj.model$traitType)
       isSparseGRM = TRUE
     }else{
       sparseSigmaRList = list(nSubj = 0, locations = matrix(0,nrow=2,ncol=2), values = rep(0,2))  
