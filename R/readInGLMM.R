@@ -103,6 +103,7 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
              obj.glmm.null$mu2 = (1/tau[1])*rep(1,N)
            }
  #if(FALSE){
+
  if(is_Firth_beta){
 	if(obj.glmm.null$traitType == "binary"){
 		if(is.null(obj.glmm.null$offset)){
@@ -128,6 +129,12 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
 		}
 	}	
   }
+
+  
+ if(is.null(obj.glmm.null$offset)){
+	 obj.glmm.null$offset = rep(0,nrow(obj.glmm.null$X))
+  }
+
  #}	 
  return(obj.glmm.null)    
 }

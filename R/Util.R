@@ -12,7 +12,7 @@ checkArgsNumeric = function(arg0, arg0name, minVal, maxVal){
 
 Check_File_Exist<-function(file, filetype){
     if (!file.exists(file)) {
-        stop("ERROR! ", filetype , file, " does not exsit\n")
+        stop("ERROR! ", filetype , " ", file, " does not exsit\n")
     }
 }
 

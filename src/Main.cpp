@@ -1098,7 +1098,8 @@ Rcpp::List mainRegionInCPP(
 
       
     }else{   // Ultra-Rare Variants (URV)
-      //std::cout << "MAC: " << MAC << std::endl;	    
+      //std::cout << "MAC: " << MAC << std::endl;
+      //std::cout << "info " << info << std::endl;
       indicatorVec.at(i) = 2;
       arma::vec MAFIndicatorVec(maxMAFVec.n_elem);
       MAFIndicatorVec.zeros();

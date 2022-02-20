@@ -526,21 +526,33 @@ SAIGE.getRegionList_new = function(marker_group_line,
 
     
 uRegion = unique(RegionData$REGION)    
-    
+
 if(!is.null(markerInfo)){
   # updated on 2021-08-05
   colnames(markerInfo)[which(colnames(markerInfo) == "ID")] = "MARKER"
-  #colnames(markerInfo)[6] = "genoIndex"
-  #colnames(markerInfo)[1] = "CHROM"
-  RegionData = merge(RegionData, markerInfo[,c("MARKER","genoIndex"),drop=F], by.x = "SNP", by.y = "MARKER", all.x = T, sort = F)
+  RegionData = merge(RegionData, markerInfo[,c("CHROM","MARKER","genoIndex"),drop=F], by.x = "SNP", by.y = "MARKER", all.x = T, sort = F)
+
   if(!is.null(markerInfo$ID2)){
+	colnames(markerInfo)[which(colnames(markerInfo) == "MARKER")] = "MARKER2"
+  	markerInfo$MARKER2 = NULL
 	colnames(markerInfo)[which(colnames(markerInfo) == "ID2")] = "MARKER"
 	colnames(markerInfo)[which(colnames(markerInfo) == "genoIndex")] = "genoIndex2"
-  	RegionData = merge(RegionData, markerInfo[,c("MARKER","genoIndex2"), drop=F], by.x = "SNP", by.y = "MARKER", all.x = T, sort = F)
+	colnames(markerInfo)[which(colnames(markerInfo) == "CHROM")] = "CHROM2"
+
+	
+
+
+  	RegionData = merge(RegionData, markerInfo[,c("CHROM2","MARKER","genoIndex2"), drop=F], by.x = "SNP", by.y = "MARKER", all.x = T, sort = F)
+
+
 	posNA = which(is.na(RegionData$genoIndex) & !is.na(RegionData$genoIndex2))
+
+
 	if(length(posNA) != 0){
 		RegionData$genoIndex[posNA] = RegionData$genoIndex2[posNA]
+		RegionData$CHROM[posNA] = RegionData$CHROM2[posNA]
 	}
+
 	RegionData$genoIndex2 = NULL	
   }	  
   posNA = which(is.na(RegionData$genoIndex))
@@ -589,6 +601,7 @@ if(nrow(RegionData) != 0){
       genoIndex = as.numeric(RegionData$genoIndex[posSNP])
       chrom = RegionData$CHROM[posSNP]
       uchrom = unique(chrom)
+      print(uchrom)
       if(length(uchrom) != 1)
         stop("In region ",r,", markers are from multiple chromosomes.")
     }
