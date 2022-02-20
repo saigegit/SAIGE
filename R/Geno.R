@@ -80,6 +80,16 @@ checkGenoInput = function(bgenFile = "",
     return(dosageFileType)
 }	
 
+
+splitreformatMarkerIDinBgen = function(x){
+	a = strsplit(x, split=":")[[1]]
+	b=x
+	if(length(a) == 4){
+		b = paste0(a[1],":",a[2],"_",a[3],"/",a[4])
+	}
+	return(b)
+}
+
 setGenoInput = function(bgenFile = "",
                  bgenFileIndex = "",
                  vcfFile = "",
@@ -133,7 +143,7 @@ setGenoInput = function(bgenFile = "",
     
     colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT")
     markerInfo$genoIndex = 1:nrow(markerInfo) - 1  # -1 is to convert 'R' to 'C++' 
-    
+    markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)    
     sampleInfo = data.table::fread(famFile)
     samplesInGeno = sampleInfo$V2
     #SampleIDs = updateSampleIDs(SampleIDs, samplesInGeno)
@@ -168,7 +178,9 @@ setGenoInput = function(bgenFile = "",
       markerInfo = bgiData[,c(1,2,3,5,6,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     
     colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT","genoIndex")
+    markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)
     markerInfo$ID = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$REF, "/", markerInfo$ALT)    
+
     setBGENobjInCPP(bgenFile, bgenFileIndex, t_SampleInBgen = samplesInGeno, t_SampleInModel = sampleInModel, AlleleOrder)
   }
   
@@ -198,7 +210,13 @@ setGenoInput = function(bgenFile = "",
       stop("'idstoIncludeFile' of ", idstoIncludeFile, " should only include one column.")
     IDsToInclude = IDsToInclude[,1]
 
-    posRows = which(markerInfo$ID %in% IDsToInclude)
+    if(!is.null(markerInfo$ID2)){
+
+    	posRows = which((markerInfo$ID %in% IDsToInclude) | (markerInfo$ID2 %in% IDsToInclude))
+    }else{
+	posRows = which((markerInfo$ID %in% IDsToInclude))
+
+    }	    
     if(length(posRows) != 0)
       markersInclude = c(markersInclude, markerInfo$ID[posRows])
     anyInclude = TRUE
@@ -364,7 +382,19 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 	#}
 	conditionDat = data.frame(SNP = condition_original, condIndex = seq(1,length(condition_original)))
    	if(genoType != "vcf"){
-		markerInfo_conditionDat = merge(conditionDat, markerInfo, by.x="SNP", by.y="ID", sort = F)
+		markerInfo_conditionDat = merge(conditionDat, markerInfo[,c("ID","genoIndex"),drop=F], by.x="SNP", by.y="ID", sort = F, all.x=T)
+		if(!is.null(markerInfo$ID2)){
+		colnames(markerInfo)[which(colnames(markerInfo) == "genoIndex")] = "genoIndex2"
+		markerInfo_conditionDat = merge(conditionDat, markerInfo[,c("ID2","genoIndex2"),drop=F], by.x="SNP", by.y="ID2", sort = F, all.x=T)
+		posNA = which(is.na(markerInfo_conditionDat$genoIndex) & !is.na(markerInfo_conditionDat$genoIndex2))
+        	if(length(posNA) != 0){
+                	markerInfo_conditionDat$genoIndex[posNA] = markerInfo_conditionDat$genoIndex2[posNA]
+        	}
+		markerInfo_conditionDat$genoIndex2 = NULL
+
+		}
+		markerInfo_conditionDat = markerInfo_conditionDat[which(!is.na(markerInfo_conditionDat$genoIndex)), , drop=F]
+
 		markerInfo_conditionDat = markerInfo_conditionDat[order(markerInfo_conditionDat$condIndex), ]	
 		#markerInfo_conditionDat = markerInfo_conditionDat[which()]
        		#posInd = which(markerInfo$ID %in% condition_original)

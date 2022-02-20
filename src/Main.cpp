@@ -963,7 +963,6 @@ Rcpp::List mainRegionInCPP(
     MACVec.at(i) = MAC;
     MAFVec.at(i) = MAF;
     imputationInfoVec.at(i) = imputeInfo;
-    
 
     if((missingRate > g_missingRate_cutoff) || (MAF > g_maxMAFLimit) || MAF == 0 || (imputeInfo < g_marker_minINFO_cutoff)){
       continue;  // does not pass QC

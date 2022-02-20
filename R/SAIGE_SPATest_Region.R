@@ -163,9 +163,14 @@ SAIGE.Region = function(objNull,
   #total_num_region = nRegions-indexChunk
   mth = 0
 
+  numberRegionsInChunk = 0
+  cat("indexChunk ", indexChunk, "\n")
+  cat("nRegions ", nRegions, "\n")
+
 
   for(i in (indexChunk+1):nRegions){
-    if(mth %% numLinesOutput == 0){
+   #cat("i is ", i, "\n")
+   if(mth ==  numberRegionsInChunk){
       if(i + numLinesOutput > nRegions){
   	      nregions_ro_read = nRegions - i + 1	      
 	      #cat("nlinetoread ", nlinetoread, "\n")    
@@ -176,20 +181,25 @@ SAIGE.Region = function(objNull,
       #marker_group_line = readLines(gf, n = nline_per_gene)
       marker_group_line = readLines(gf, n = nlinetoread)
       RegionList = SAIGE.getRegionList_new(marker_group_line, nline_per_gene, annolist, markerInfo)
-      cat("Read in ", nregions_ro_read, " regions from the group file.\n")
+      cat("Read in ", nregions_ro_read, " region(s) from the group file.\n")
       mth = 0
+      #numberRegionsInChunk = numLinesOutput
+      numberRegionsInChunk = length(RegionList)
+      #cat("numberRegionsInChunk ", numberRegionsInChunk, "\n")
     }
 
-
-    mth = mth + 1
+   mth = mth + 1
+   if(!is.null(RegionList)){
     pval.Region = NULL
     region = RegionList[[mth]]
-    regionName = names(RegionList)[mth]
     annolist = region$annoVec 
-    
-    if(length(annolist) == 0){
-      next
-    }	    
+    regionName = names(RegionList)[mth]
+
+    if(!is.null(region$SNP) & length(annolist) > 0){
+
+    #if(length(annolist) == 0){
+    #  next
+    #}	    
     SNP = region$SNP
     if(genoType != "vcf"){
     	genoIndex = as.character(region$genoIndex)
@@ -204,7 +214,8 @@ SAIGE.Region = function(objNull,
 		next
     	}	
     }
-	
+
+
     WEIGHT = region$WEIGHT
     annoIndicatorMat = region$annoIndicatorMat
 
@@ -220,6 +231,7 @@ SAIGE.Region = function(objNull,
     gc()
 
   OutList = as.data.frame(outList$OUT_DF) 	   
+
   noNAIndices = which(!is.na(OutList$p.value))
   if(length(noNAIndices) > 0){
  #if(length(outList) > 1){
@@ -258,15 +270,6 @@ SAIGE.Region = function(objNull,
         outList$G1tilde_P_G2tilde_Weighted_Mat = outList$G1tilde_P_G2tilde_Weighted_Mat[noNAIndices,,drop=F]
   }
 
- } 
-
-
-    #outList0 = mainRegion(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, isImputation, annolist, isCondition, regionTestType)
-    if(length(outList) == 0){
-      next
-    } 
-    #outList = outList0$outList
-
     if(isCondition){
       weightMat_G2_G2 = outList$G2_Weight_cond %*% t(outList$G2_Weight_cond)
     }	  
@@ -289,7 +292,6 @@ SAIGE.Region = function(objNull,
     }
     VarSVec = VarSVec[!is.na(VarSVec)]
     adjPVec = OutList$p.value
-    #adjPVec = adjPVec[!is.na(adjPVec)]
     
     varTestedIndices = which(rowSums(annoMAFIndicatorMat) > 0)
 
@@ -394,36 +396,14 @@ SAIGE.Region = function(objNull,
     pval.Region$Number_ultra_rare = outList$NumUltraRare_GroupVec[annoMAFIndVec]
 
 
-   #if(sum(!is.na(pval.Region$Pvalue)) > 0){
-   ##Combined using the Cauchy combination
-   #pvals = pval.Region$Pvalue
-   #pvals = pvals[!is.na(pvals)]
-   #cctpval = CCT(pvals)
-  
-
 if(length(annolist) > 1 | length(maxMAFlist) > 1){
 
    cctpval = get_CCT_pvalue(pval.Region$Pvalue)
-   #pvals = pval.Region$Pvalue_Burden
-   #pvals = pvals[!is.na(pvals)]
-   #cctpval_Burden = CCT(pvals) 
    cctpval_Burden = get_CCT_pvalue(pval.Region$Pvalue_Burden)
-   #pvals = pval.Region$Pvalue_SKAT
-   #pvals = pvals[!is.na(pvals)]
-   #cctpval_SKAT = CCT(pvals)
    cctpval_SKAT = get_CCT_pvalue(pval.Region$Pvalue_SKAT)
 
    cctVec = c(regionName, "Cauchy", NA, cctpval, cctpval_Burden, cctpval_SKAT, NA, NA)
    if(isCondition){
-        #pvals = pval.Region$Pvalue_cond
-   	#pvals = pvals[!is.na(pvals)]
-   	#cctpval = CCT(pvals)
-   	#pvals = pval.Region$Pvalue_Burden_cond
-   	#pvals = pvals[!is.na(pvals)]
-   	#cctpval_Burden = CCT(pvals)
-   	#pvals = pval.Region$Pvalue_SKAT_cond
-   	#pvals = pvals[!is.na(pvals)]
-   	#cctpval_SKAT = CCT(pvals)
 	cctpval = get_CCT_pvalue(pval.Region$Pvalue_cond)
    	cctpval_Burden = get_CCT_pvalue(pval.Region$Pvalue_Burden_cond)
 	cctpval_SKAT = get_CCT_pvalue(pval.Region$Pvalue_SKAT_cond)
@@ -431,7 +411,6 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
 	 cctVec = c(cctVec, cctpval, cctpval_Burden, cctpval_SKAT, NA, NA)
    }
    cctVec = c(cctVec, NA)
-   #cctVec = c(regionName, "Cauchy", NA, cctpval, cctpval_Burden, cctpval_SKAT, NA, NA, NA)
    if(traitType == "binary"){
      cctVec = c(cctVec, NA, NA)
    }
@@ -441,7 +420,6 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
 }
 
    if(regionTestType == "BURDEN"){
-     #pval.Region = pval.Region[,-c("Pvalue","Pvalue_SKAT")]
      pval.Region$Pvalue = NULL
      pval.Region$Pvalue_SKAT = NULL
 	if(isCondition){
@@ -449,9 +427,6 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
 		 pval.Region$Pvalue_SKAT_cond = NULL
 	}	
    }
-   #print(info.Region)
-   ##remove columns with all NA
-   #pval.Region <- pval.Region[,which(unlist(lapply(pval.Region, function(x)!all(is.na(x))))),with=F]
 
 
    writeOutputFile(Output = list(pval.Region,  OutList),
@@ -469,9 +444,19 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
    rm(resultDF)
 
    gc()
-   }
+  
+ }#if(length(noNAIndices) > 0){ 
+  }else{#if(!is.null(region)){
+    cat(regionName, " is empty.\n")
+  }
 
-  #}
+   }else{#if(!is.null(RegionList)){
+     cat("The chunk is empty\n")	   
+     mth = 0
+     pval.Region = NULL
+   }
+	   
+   }
 
   message = paste0("Analysis done! The results have been saved to '", OutputFile,"' and '",
                    paste0(OutputFile, ".markerInfo"),"'.")
@@ -512,15 +497,12 @@ SAIGE.getRegionList_new = function(marker_group_line,
 	  	geneList = c(geneList, gene)
 	  }
   }
-    #print("RegionData")
-    #print(RegionData)
     if(nline_per_gene == 2){
     	colnames(RegionData) = c("REGION", "SNP", "ANNO")
     }else if(nline_per_gene == 3){
 	colnames(RegionData) = c("REGION", "SNP", "ANNO", "WEIGHT")
     }	    
     RegionData = as.data.frame(RegionData)
-     
     #marker_group_line_list = strsplit(marker_group_line[1], split=c(" +", "\t"))[[1]]
     #gene=marker_group_line_list[1]
     #var=marker_group_line_list[3:length(marker_group_line_list)]
@@ -541,24 +523,35 @@ SAIGE.getRegionList_new = function(marker_group_line,
   #print(RegionData)
 
 ##for non-VCF files
+
+    
+uRegion = unique(RegionData$REGION)    
+    
 if(!is.null(markerInfo)){
   # updated on 2021-08-05
-  colnames(markerInfo)[3] = "MARKER"
-  colnames(markerInfo)[6] = "genoIndex"
-  colnames(markerInfo)[1] = "CHROM"
-  RegionData = merge(RegionData, markerInfo, by.y = "MARKER", by.x = "SNP", all.x = T, sort = F)
+  colnames(markerInfo)[which(colnames(markerInfo) == "ID")] = "MARKER"
+  #colnames(markerInfo)[6] = "genoIndex"
+  #colnames(markerInfo)[1] = "CHROM"
+  RegionData = merge(RegionData, markerInfo[,c("MARKER","genoIndex"),drop=F], by.x = "SNP", by.y = "MARKER", all.x = T, sort = F)
+  if(!is.null(markerInfo$ID2)){
+	colnames(markerInfo)[which(colnames(markerInfo) == "ID2")] = "MARKER"
+	colnames(markerInfo)[which(colnames(markerInfo) == "genoIndex")] = "genoIndex2"
+  	RegionData = merge(RegionData, markerInfo[,c("MARKER","genoIndex2"), drop=F], by.x = "SNP", by.y = "MARKER", all.x = T, sort = F)
+	posNA = which(is.na(RegionData$genoIndex) & !is.na(RegionData$genoIndex2))
+	if(length(posNA) != 0){
+		RegionData$genoIndex[posNA] = RegionData$genoIndex2[posNA]
+	}
+	RegionData$genoIndex2 = NULL	
+  }	  
   posNA = which(is.na(RegionData$genoIndex))
- # print("RegionData")
- # print(RegionData)
- # print("posNA")
- # print(posNA)
-  RegionData = RegionData[-posNA, ]
+  
     if(length(posNA) != 0){
-    cat("Total ",length(posNA)," markers in 'RegionFile' are not in 'GenoFile'.")
-    #stop("Total ",length(posNA)," markers in 'RegionFile' are not in 'GenoFile'.
-    #     Please remove these markers before region-level analysis.")
+      RegionData = RegionData[-posNA, , drop=F]
+      cat(length(posNA)," markers in 'RegionFile' are not in 'GenoFile'.\n")
     }
 }
+
+if(nrow(RegionData) != 0){
 
   #HeaderInRegionData = colnames(RegionData)
   HeaderInRegionData = unique(RegionData$ANNO)
@@ -571,15 +564,18 @@ if(!is.null(markerInfo)){
   }
 
   RegionList = list()
-  uRegion = unique(RegionData$REGION)
+  #uRegion = unique(RegionData$REGION)
   RegionData = as.data.frame(RegionData)
+
 
   for(r in uRegion){
              #print(paste0("Analyzing region ",r,"...."))
     #print(RegionData$REGION)
     #print(r)
     #which(as.vector(RegionData$REGION) == r)
+   
     posSNP = which(RegionData$REGION == r)
+    if(length(posSNP) > 0){
     SNP = RegionData$SNP[posSNP]
 
     if(nline_per_gene == 3){	
@@ -660,162 +656,27 @@ if(!is.null(markerInfo)){
                            annoIndicatorMat = annoIndicatorMat,
  #                          chrom = uchrom,
                            annoVec = annoVecNew)
-      }
-
-  }
-
-
-  return(RegionList)
-}
-
-
-
-
-
-
-
-
-# extract region-marker mapping from regionFile
-SAIGE.getRegionList = function(groupFile,
-			 annoVec, #c("lof","lof;missense" 
-                         markerInfo)
-{
-  cat("Start extracting marker-level information from 'groupFile' of", groupFile, "....\n")
-
-  Check_File_Exist(groupFile, "RegionFile")
-
-  # read group file
-  group_info_list =  ReadGroupFile(groupFile) #SAIGE_GENE_MultiVariantSet_Group.R
-  # Main Test
-  RegionData = NULL
-  ngroup<-length(group_info_list)
-  for(i in 1:ngroup){
-    gene=group_info_list[[i]]$geneID	  
-    var=group_info_list[[i]]$var
-    anno=group_info_list[[i]]$anno
-    RegionData = rbind(RegionData, cbind(rep(gene, length(var)), var, anno))
-  }
-  #print("RegionData")
-  #print(RegionData)
-  colnames(RegionData) = c("REGION", "SNP", "ANNO")
-  RegionData = as.data.frame(RegionData)
-  #print(RegionData)
-
-##for non-VCF files  
-if(!is.null(markerInfo)){
-  # updated on 2021-08-05
-  colnames(markerInfo)[3] = "MARKER"
-  colnames(markerInfo)[6] = "genoIndex"
-  colnames(markerInfo)[1] = "CHROM"
-  RegionData = merge(RegionData, markerInfo, by.y = "MARKER", by.x = "SNP", all.x = T, sort = F)
-  posNA = which(is.na(RegionData$genoIndex))
- # print("RegionData")
- # print(RegionData)
- # print("posNA")  
- # print(posNA)
-
-  if(length(posNA) != 0){
-    #print(head(RegionData[posNA,1:2]))
-    stop("Total ",length(posNA)," markers in 'RegionFile' are not in 'GenoFile'.
-         Please remove these markers before region-level analysis.")
-  }
-}
-
-  #HeaderInRegionData = colnames(RegionData)
-  HeaderInRegionData = unique(RegionData$ANNO)
-  RegionAnnoHeaderList = list()
-  if(length(annoVec) == 0){	
-	stop("At least one annotation is required\n")
-  }
-  for(q in 1:length(annoVec)){
-  	RegionAnnoHeaderList[[q]] = strsplit(annoVec[q],";")[[1]]
-  }	  
-
-  RegionList = list()
-  uRegion = unique(RegionData$REGION)
-  RegionData = as.data.frame(RegionData)
-
-  for(r in uRegion){
-    #print(paste0("Analyzing region ",r,"...."))
-    #print(RegionData$REGION)
-    #print(r)
-    #which(as.vector(RegionData$REGION) == r)
-    posSNP = which(RegionData$REGION == r)
-    SNP = RegionData$SNP[posSNP]
-
-
-    if(any(duplicated(SNP)))
-      stop("Please check RegionFile: in region ", r,": duplicated SNPs exist.")
-
-    if(!is.null(markerInfo)){
-      genoIndex = as.numeric(RegionData$genoIndex[posSNP])
-      chrom = RegionData$CHROM[posSNP]
-      uchrom = unique(chrom)
-      if(length(uchrom) != 1)
-        stop("In region ",r,", markers are from multiple chromosomes.")
     }
-
-    annoIndicatorMat = matrix(0, nrow=length(posSNP), ncol=length(annoVec)) 	 
-    annoVecNew = c() 
   
-    for(q in 1:length(annoVec)){
-	indiceVec = which(RegionData$ANNO[posSNP] %in% RegionAnnoHeaderList[[q]])
- 	if(length(indiceVec) > 0){
-	        annoVecNew = c(annoVecNew, annoVec[q])
-		annoIndicatorMat[indiceVec, q] = 1			
-		#annoIndicatorMat[which(RegionData$ANNO[posSNP] %in% RegionAnnoHeaderList[[q]]), q] = 1
-	}	
-    }
+   }else{ #if(length(posSNP) > 0){
+     RegionList[[r]] = list(SNP = NULL)
 
-  RegionAnnoHeaderListNew = list()
-  if(length(annoVecNew) == 0){
-	warning("No markers are found for at least one annotation, so region ", r, " is skipped\n")
-        #stop("At least one annotation is required\n")
-  }else{
-   if(length(annoVecNew) < length(annoVec)){
-        annoIndicatorMat = matrix(0, nrow=length(posSNP), ncol=length(annoVecNew))	   
-    for(q in 1:length(annoVecNew)){
-        RegionAnnoHeaderListNew[[q]] = strsplit(annoVecNew[q],";")[[1]]
-        indiceVec = which(RegionData$ANNO[posSNP] %in% RegionAnnoHeaderListNew[[q]])
-        #if(length(indiceVec) > 0){
-        annoIndicatorMat[indiceVec, q] = 1
-                #annoIndicatorMat[which(RegionData$ANNO[posSNP] %in% RegionAnnoHeaderList[[q]]), q] = 1
-    }
-   }else{
-	annoVecNew = annoVec
-   }	    
+   }
+}
 
-
-  }
-
-  annoIndicatorMat_rmind = which(rowSums(annoIndicatorMat) == 0) 
-  if(length(annoIndicatorMat_rmind) > 0){
-    SNP = SNP[-annoIndicatorMat_rmind]
-    annoIndicatorMat = annoIndicatorMat[-annoIndicatorMat_rmind,,drop=F]
-    if(!is.null(markerInfo)){
-      genoIndex = genoIndex[-annoIndicatorMat_rmind]
-    }
-  }
-	  
-   if(!is.null(markerInfo)){ 
-    RegionList[[r]] = list(SNP = SNP,
-			   annoIndicatorMat = annoIndicatorMat,
-                           genoIndex = genoIndex,
-#                           chrom = uchrom, 
-			   annoVec = annoVecNew)
-   }else{
-    RegionList[[r]] = list(SNP = SNP,
-			   annoIndicatorMat = annoIndicatorMat,
- #                          chrom = uchrom, 
-			   annoVec = annoVecNew)
-
-   }	   
-
-  }
-
+}else{#if(nrow(RegionData) == 0){
+	RegionList = NULL
+}
 
   return(RegionList)
 }
+
+
+
+
+
+
+
 
 
 
