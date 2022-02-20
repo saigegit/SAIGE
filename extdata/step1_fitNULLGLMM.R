@@ -3,8 +3,8 @@
 options(stringsAsFactors=F)
 
 ## load R libraries
-library(SAIGE)
-#library(SAIGE, lib.loc="/net/hunt/zhowei/project/imbalancedCaseCtrlMixedModel/Rpackage_SPAGMMAT/SAIGE_old_check/install_0.93")
+#library(SAIGE)
+library(SAIGE, lib.loc="/net/hunt/zhowei/project/imbalancedCaseCtrlMixedModel/Rpackage_SPAGMMAT/SAIGE_newgit/install_0.94")
 require(optparse) #install.packages("optparse")
 
 print(sessionInfo())
