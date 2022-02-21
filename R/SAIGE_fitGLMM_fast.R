@@ -696,6 +696,7 @@ fitNULLGLMM = function(plinkFile = "",
 		FemaleOnly = FALSE,
 		MaleCode = 0,	
 		MaleOnly = FALSE,
+		SampleIDIncludeFile = "",
 		isCovariateOffset = FALSE,
 		skipVarianceRatioEstimation = FALSE)
 {
@@ -865,6 +866,22 @@ fitNULLGLMM = function(plinkFile = "",
 		data = data[complete.cases(data),,drop=F]
 	    }		    
         }
+
+	if(SampleIDIncludeFile != ""){
+		if(!file.exists(SampleIDIncludeFile)){
+			stop("ERROR! SampleIDIncludeFile ", SampleIDIncludeFile, " does not exsit\n")
+		}else{
+			sampleIDInclude = data.table:::fread( SampleIDIncludeFile, header = F,  stringsAsFactors = FALSE, colClasses = c("character"), data.table=F)
+			sampleIDInclude = as.vector(sampleIDInclude[!duplicated(sampleIDInclude), ])
+			cat(length(sampleIDInclude), " non-duplicated sample IDs were found in SampleIDIncludeFile\n")
+			print(sampleIDInclude[1:10])
+			print(as.vector(data[,which(colnames(data) == sampleIDColinphenoFile)])[1:10])
+			data = data[which(as.vector(data[,which(colnames(data) == sampleIDColinphenoFile)]) %in% sampleIDInclude),,drop=F]
+			cat(nrow(data), " samples in sampleIDInclude have non-missing phenotypes and covariates\n")
+		}	
+
+	}	
+
 
 	if(length(qCovarCol) > 0){
 	    cat(qCovarCol, "are categorical covariates\n")

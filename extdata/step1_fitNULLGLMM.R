@@ -101,7 +101,10 @@ option_list <- list(
   make_option("--MaleCode", type="character", default="0",
    help="Optional. Values in the column for sex in the phenotype file are used for males [default, '0']"),
   make_option("--isCovariateOffset", type="logical", default=TRUE,
-   help="Optional. Whether to estimate fixed effect coeffciets. [default, 'TRUE']")
+   help="Optional. Whether to estimate fixed effect coeffciets. [default, 'TRUE']"),
+  make_option("--SampleIDIncludeFile", type="character",default="",
+    help="Path to the file that contains one column for IDs of samples who will be include for null model fitting.") 
+
 )
 
 
@@ -177,5 +180,6 @@ fitNULLGLMM(plinkFile=opt$plinkFile,
     	    FemaleCode=opt$FemaleCode,
 	    FemaleOnly=opt$FemaleOnly,
 	    MaleCode=opt$MaleCode,
-	    MaleOnly=opt$MaleOnly
+	    MaleOnly=opt$MaleOnly,
+	    SampleIDIncludeFile=opt$SampleIDIncludeFile
 	)	
