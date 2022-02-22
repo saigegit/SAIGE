@@ -752,7 +752,9 @@ Rcpp::List mainRegionInCPP(
   unsigned int q_anno_maf = q_anno*q_maf;
   arma::mat genoURMat(t_n, q_anno_maf, arma::fill::zeros);
 
-  arma::vec weightURVec(q_anno_maf, arma::fill::zeros);
+  arma::mat weightURMat(t_n, q_anno_maf, arma::fill::zeros);
+  //arma::mat weightURVec(t_n, arma::fill::zeros);
+  arma::mat weightURMat_cnt(t_n, q_anno_maf, arma::fill::zeros);
 
 
   unsigned int q = q0 + q_anno_maf;
@@ -871,6 +873,7 @@ Rcpp::List mainRegionInCPP(
   arma::vec P1Vec(t_n), P2Vec(t_n);
   //std::vector<double> GVec0(t_n);
   arma::vec GVec(t_n);
+  arma::vec GZeroVec(t_n);
   std::vector<uint> indexZeroVec;
   std::vector<uint> indexNonZeroVec;
 
@@ -1110,9 +1113,12 @@ Rcpp::List mainRegionInCPP(
                         if(MAFIndicatorVec(m) == 1){
                         	jm = j*q_maf + m;
 				genoURMat.col(jm) = arma::max(genoURMat.col(jm), GVec);
-
+				
 				if(isWeightCustomized){
-					weightURVec(jm) = std::max(weightURVec(jm), t_weight(i));  
+					GZeroVec = GVec;
+					GZeroVec.elem( find(GZeroVec > 0) ).ones();	
+					weightURMat.col(jm) = weightURMat.col(jm) +  t_weight(i) * GZeroVec;
+				        weightURMat_cnt.col(jm) = weightURMat_cnt.col(jm) + GZeroVec;	
 				}	
 				//arma::vec genoURMatcol_jm = genoURMat.col(jm);
 				//arma::uvec genoURMatcol_jm_nonzero = arma::find(genoURMatcol_jm != 0);
@@ -1206,6 +1212,10 @@ Rcpp::List mainRegionInCPP(
   //arma::mat P2Mat0 = P1Mat;
 
   if(i2 > 0){
+
+  if(isWeightCustomized){
+    weightURMat = weightURMat / weightURMat_cnt;
+  }
   int m1new = std::max(m1, q_anno_maf);
  if(t_regionTestType != "BURDEN"){
   P1Mat.resize(m1new, P1Mat.n_cols);
@@ -1245,12 +1255,12 @@ Rcpp::List mainRegionInCPP(
     	double MAF = std::min(altFreq, 1 - altFreq);
 	double w0;
 	if(isWeightCustomized){
-            w0 = weightURVec(jm);		    
+	    genoSumMat.col(jm) = genoSumMat.col(jm) + genoURVec % (weightURMat.col(jm));
     	}else{
             w0 = boost::math::pdf(beta_dist, MAF);
+	    genoSumMat.col(jm) = genoSumMat.col(jm) + genoURVec * w0;
     	}
 	//double w0 = boost::math::pdf(beta_dist, MAF);	
-	genoSumMat.col(jm) = genoSumMat.col(jm) + genoURVec * w0;
 	arma::vec genoSumMatvec1 = genoSumMat.col(jm);
 	arma::vec genoSumMatvec2 = XV * genoSumMatvec1;
 	arma::vec genoSumMatvec3 = genoSumMatvec1 - XXVX_inv * genoSumMatvec2;
