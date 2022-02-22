@@ -305,7 +305,7 @@ SPAGMMATtest = function(bgenFile = "",
 		condition_weights = rep(0, length(condition_genoIndex))
 	}	
 
-	condition_genoIndex = as.character(condition_genoIndex)
+	condition_genoIndex = as.character(format(condition_genoIndex, scientific = FALSE))
 
 	assign_conditionMarkers_factors(genoType, condition_genoIndex,  n, condition_weights)
 	 #print("OK2")

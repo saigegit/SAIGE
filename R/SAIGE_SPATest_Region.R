@@ -210,7 +210,7 @@ SAIGE.Region = function(objNull,
     #}	    
     SNP = region$SNP
     if(genoType != "vcf"){
-    	genoIndex = as.character(region$genoIndex)
+    	genoIndex = as.character(format(region$genoIndex, scientific = FALSE))
     }else{
         SNPlist = paste(c(regionName, SNP), collapse = "\t") 
         set_iterator_inVcf(SNPlist, chrom1, 1, 200000000)

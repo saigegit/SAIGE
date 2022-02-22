@@ -171,7 +171,7 @@ SAIGE.Marker = function(objNull,
 #time_left = system.time({
     if(genoType != "vcf"){	
       tempList = genoIndexList[[i]]
-      genoIndex = as.character(tempList$genoIndex)
+      genoIndex = as.character(format(tempList$genoIndex, scientific = FALSE))
       tempChrom = tempList$chrom
     }
 
