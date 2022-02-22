@@ -742,7 +742,7 @@ Rcpp::List mainRegionInCPP(
   bool isWeightCustomized = false;
 	
 
-  std::cout << "okk1" << std::endl;
+  //std::cout << "okk1" << std::endl;
   unsigned int q0 = t_genoIndex.size();                 // number of markers (before QC) in one region
   if(!(t_weight.is_zero()) && t_weight.n_elem == q0){
      isWeightCustomized = true;	
@@ -757,13 +757,13 @@ Rcpp::List mainRegionInCPP(
 
   unsigned int q = q0 + q_anno_maf;
   arma::imat annoMAFIndicatorMat(q, q_anno_maf, arma::fill::zeros);
-  std::cout << "okk2" << std::endl;
+  //std::cout << "okk2" << std::endl;
   arma::ivec annoMAFIndicatorVec(q_anno_maf);
   annoMAFIndicatorVec.zeros();
 	
   unsigned int q_cond = (ptr_gSAIGEobj->m_VarInvMat_cond).n_rows;	
   arma::rowvec G1tilde_P_G2tilde_Vec(q_cond);
-  std::cout << "okk3" << std::endl;
+  //std::cout << "okk3" << std::endl;
   boost::math::beta_distribution<> beta_dist(g_weights_beta[0], g_weights_beta[1]);
 
   bool isCondition = ptr_gSAIGEobj->m_isCondition;
