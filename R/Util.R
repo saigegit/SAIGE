@@ -531,9 +531,13 @@ writeOutputFile = function(Output,
   if(n1 != 0){
     for(i in 1:n1){
       if(Start){
-        write.table(Output[[i]], OutputFile[[i]], quote = F, sep = "\t", append = F, col.names = T, row.names = F)
+	if(!is.null(Output[[i]])){
+          write.table(Output[[i]], OutputFile[[i]], quote = F, sep = "\t", append = F, col.names = T, row.names = F)
+	}
       }else{
-        write.table(Output[[i]], OutputFile[[i]], quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+	if(!is.null(Output[[i]])){
+          write.table(Output[[i]], OutputFile[[i]], quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+	}
         #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
       }
     }
@@ -549,7 +553,6 @@ writeOutputFile = function(Output,
 }
 
 
-
-
-
-
+isContainValue = function(x, val){
+	return(val %in% x)
+}

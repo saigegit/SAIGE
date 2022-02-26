@@ -90,7 +90,8 @@ SAIGE.Region = function(objNull,
 			r.corr,
 			isOverWriteOutput,
 			is_single_in_groupTest,
-			is_no_weight_in_groupTest){
+			is_no_weight_in_groupTest,
+			is_output_markerList_in_groupTest){
   OutputFileIndex = NULL	
   if(is.null(OutputFileIndex))
     OutputFileIndex = paste0(OutputFile, ".index")
@@ -117,7 +118,7 @@ SAIGE.Region = function(objNull,
     out.method = SKAT:::SKAT_Check_Method(method="optimal.adj", r.corr=0)
     method=out.method$method
     r.corr=out.method$r.corr
-    cat("SKAT-O test will be performed. P-values for BUTDEN and SKAT tests will also be output\n.")
+    cat("SKAT-O test will be performed. P-values for BUTDEN and SKAT tests will also be output\n")
     regionTestType = "SKAT-O"
     is_single_in_groupTest = TRUE
     cat("is_single_in_groupTest = TRUE. Single-variant assoc tests results will be output\n")
@@ -140,6 +141,10 @@ SAIGE.Region = function(objNull,
   is_weight_included = region_list$is_weight_included
   if(is_no_weight_in_groupTest & is_weight_included){
     stop("is_no_weight_in_groupTest = TRUE but weights are found in the group file.\n")
+  }
+
+  if(is_no_weight_in_groupTest){
+     cat("No weights are used in the group test\n")
   }
 
   if(is_weight_included){
@@ -217,7 +222,6 @@ SAIGE.Region = function(objNull,
 
       if(is_no_weight_in_groupTest){
 	WEIGHT = rep(1, length(SNP))
-        cat("No weights are used in the group test\n")
       }else{	      
         WEIGHT = region$WEIGHT
       }
@@ -231,16 +235,15 @@ SAIGE.Region = function(objNull,
       rm(region)
       gc()
 
-      outList = mainRegionInCPP(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest) 
+      outList = mainRegionInCPP(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest) 
       rm(genoIndex)
       gc()
-
 
     if(is_single_in_groupTest){	  
       OutList = as.data.frame(outList$OUT_DF) 	   
       noNAIndices = which(!is.na(OutList$p.value))
       URindices = which(OutList$MarkerID == "UR")
-      if(length(WEIGHT) > 0){
+      if(sum(WEIGHT) > 0){
         AnnoWeights = c(WEIGHT, rep(1, length(URindices)))
       }
       if(length(noNAIndices) > 0){  	
@@ -263,10 +266,15 @@ SAIGE.Region = function(objNull,
        OutList = OutList[noNAIndices, , drop=F]
      }
     }
+#print("noNAIndices")
+#print(noNAIndices)
+
+annoMAFIndicatorMat = outList$annoMAFIndicatorMat
+
+if((sum(outList$NumUltraRare_GroupVec) + sum(outList$NumRare_GroupVec)) > 0){
 
 if(regionTestType != "BURDEN"){
      #is_single_in_groupTest is TRUE
-     if(length(noNAIndices) > 0){
 
        if(traitType == "binary"){	     
          outList$gyVec = outList$gyVec[noNAIndices]
@@ -280,22 +288,30 @@ if(regionTestType != "BURDEN"){
        }	  
         
        ### Get annotation maf indicators
-       annoMAFIndicatorMat = outList$annoMAFIndicatorMat
 
        ### 3. Adjust for saddlepoint approximation
        #notNAindice = which(!is.na(outList$TstatVec_flip))
-       StatVec = outList$TstatVec_flip[notNAindice]
+       #print("notNAindice")
+       #print(notNAindice)
+       StatVec = outList$TstatVec_flip[noNAIndices]
        VarSVec = diag(outList$VarMat)
        VarSVec = VarSVec[!is.na(VarSVec)]
        adjPVec = OutList$p.value
-    
-       varTestedIndices = which(rowSums(annoMAFIndicatorMat) > 0)
-       annoMAFIndicatorMat = annoMAFIndicatorMat[varTestedIndices, , drop=F]
-       MAFVec = outList$MAFVec[varTestedIndices]
-       AnnoWeights = dbeta(MAFVec,1,25)
+   
+		
+       #varTestedIndices = which(apply(annoMAFIndicatorMat, 1, isContainValue, val=1))
+       #print("varTestedIndices")
+       #print(varTestedIndices)
+       #varTestedIndices = which(rowSums(annoMAFIndicatorMat) > 0)
+       #annoMAFIndicatorMat = annoMAFIndicatorMat[varTestedIndices, , drop=F]
+       #MAFVec = outList$MAFVec[varTestedIndices]
+       annoMAFIndicatorMat = annoMAFIndicatorMat[noNAIndices, , drop=F]
+       MAFVec = outList$MAFVec[noNAIndices]
+       #AnnoWeights = dbeta(MAFVec,1,25)
 
-       if(length(WEIGHT) > 0){
- 	 AnnoWeights = AnnoWeights[varTestedIndices] 
+       if(sum(WEIGHT) > 0){
+ 	 #AnnoWeights = AnnoWeights[varTestedIndices] 
+ 	 AnnoWeights = AnnoWeights[noNAIndices] 
        }else{
          AnnoWeights = dbeta(MAFVec,1,25)
        }
@@ -321,7 +337,7 @@ if(regionTestType != "BURDEN"){
 	for(m in 1:length(maxMAFlist)){
 		jm = (j-1)*(length(maxMAFlist)) + m
 		maxMAFName = maxMAFlist[m]
-		tempPos = which(annoMAFIndicatorMat[,jm] != 0)
+		tempPos = which(annoMAFIndicatorMat[,jm] == 1)
 	       if(length(tempPos) > 0){
 		annoMAFIndVec = c(annoMAFIndVec, jm)
 		Phi = wadjVarSMat[tempPos, tempPos, drop=F]
@@ -334,10 +350,9 @@ if(regionTestType != "BURDEN"){
 			re_phi = get_newPhi_scaleFactor(q.sum, mu.a, g.sum, p.new, Score, Phi, regionTestType)
 		        Phi = re_phi$val
                 }
-		cat("Score is ", Score, "\n")
-		cat("Phi is ", diag(Phi), "\n")
+		#cat("Score is ", Score, "\n")
+		#cat("Phi is ", diag(Phi), "\n")
 		groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType)
-		print("OK3")
 
 		gc()
 		resultDF = data.frame(Region = regionName,
@@ -376,9 +391,10 @@ if(regionTestType != "BURDEN"){
 	   }#if(length(tempPos) > 0){
     }#for(m in 1:length(maxMAFlist)){
 }#for(j in 1:length(annolist)){
-  }#if(length(noNAIndices) > 0){
+  #}#if(length(noNAIndices) > 0){
 
 }else{#if(regionTestType != "BURDEN"){
+	
     annoMAFIndVec = c()
     regionNameVec = c()
     GroupVec = c()
@@ -389,7 +405,7 @@ if(regionTestType != "BURDEN"){
         for(m in 1:length(maxMAFlist)){
                 jm = (j-1)*(length(maxMAFlist)) + m
                 maxMAFName = maxMAFlist[m]
-                tempPos = which(outList$annoMAFIndicatorMat[,jm] != 0)
+                tempPos = which(annoMAFIndicatorMat[,jm] == 1)
                if(length(tempPos) > 0){
                 	annoMAFIndVec = c(annoMAFIndVec, jm)
 			regionNameVec = c(regionNameVec, regionName)
@@ -452,28 +468,91 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
    pval.Region = rbind(pval.Region, cctVec)
 }
 
-   if(is_single_in_groupTest){
-     writeOutputFile(Output = list(pval.Region,  OutList),
-                    OutputFile = list(OutputFile, paste0(OutputFile, ".markerInfo")),
-                    OutputFileIndex = OutputFileIndex,
-                    AnalysisType = "Region",
-                    nEachChunk = 1,
-                    indexChunk = i,
-                    Start = (i==1),
-                    End = (i==nRegions))
-     rm(OutList)
-   }else{
-     writeOutputFile(Output = list(pval.Region),
-                    OutputFile = list(OutputFile),
-                    OutputFileIndex = OutputFileIndex,
-                    AnalysisType = "Region",
-                    nEachChunk = 1,
-                    indexChunk = i,
-                    Start = (i==1),
-                    End = (i==nRegions))
-     
+  Output_MarkerList = NULL
+  if(is_output_markerList_in_groupTest){
+    for(j in 1:length(annolist)){
+        AnnoName = annolist[j]
+        for(m in 1:length(maxMAFlist)){
+                jm = (j-1)*(length(maxMAFlist)) + m
+                maxMAFName = maxMAFlist[m]
+                tempPos = which(outList$annoMAFIndicatorMat[,jm] > 0)
+                marker_rare_pos = which(outList$markerIndcatorVec == 1)
+                marker_ultrarare_pos = which(outList$markerIndcatorVec == 2)
+                if(length(tempPos) > 0){
+                        if(length(marker_rare_pos) > 0){
+				markerind_b = which(marker_rare_pos %in% tempPos)
+				if(length(markerind_b) > 0){
+					markerind = marker_rare_pos[markerind_b]
+					SNPlist_rare = paste(SNP[markerind], collapse=",")
+				}else{
+					SNPlist_rare = ""
+				}	
+                        }else{
+                                SNPlist_rare = ""
+                        }
+                        if(length(marker_ultrarare_pos) > 0){
+				markerind_UR_b = which(marker_ultrarare_pos %in% tempPos)
+				if(length(markerind_UR_b) > 0){
+					markerindUR = marker_ultrarare_pos[markerind_UR_b]
+					SNPlist_Ultra_rare = paste(SNP[markerindUR], collapse=",")
+				}else{
+					SNPlist_Ultra_rare = ""
+				}	
+                        }else{
+                                SNPlist_Ultra_rare = ""
+                        }
+                        Output_MarkerList = rbind(Output_MarkerList, c(regionName, AnnoName, maxMAFName, SNPlist_rare, SNPlist_Ultra_rare))
+                }
 
+        }
+    }
+  }
+	
+
+   if(!is_single_in_groupTest){
+	   OutList = NULL
+   }else{
+	colnames(Output_MarkerList) = c("Region", "Group", "max_MAF", "Rare_Variants", "Ultra_Rare_Variants")	
    }	   
+     writeOutputFile(Output = list(pval.Region,  OutList, Output_MarkerList),
+                    OutputFile = list(OutputFile, paste0(OutputFile, ".singleAssoc.txt"), paste0(OutputFile, ".markerList.txt")),
+                    OutputFileIndex = OutputFileIndex,
+                    AnalysisType = "Region",
+                    nEachChunk = 1,
+                    indexChunk = i,
+                    Start = (i==1),
+                    End = (i==nRegions))
+
+   if(is_single_in_groupTest){
+     rm(OutList)
+    }
+
+   if(is_output_markerList_in_groupTest){
+     rm(Output_MarkerList)
+   } 	   
+   #}else{
+   #  writeOutputFile(Output = list(pval.Region),
+   #                 OutputFile = list(OutputFile),
+   #                 OutputFileIndex = OutputFileIndex,
+   #                 AnalysisType = "Region",
+   #                 nEachChunk = 1,
+   #                 indexChunk = i,
+   #                 Start = (i==1),
+   #                 End = (i==nRegions))
+    
+   #}
+
+
+
+
+     #writeOutputFile(Output = list(Output_MarkerList),
+     #               OutputFile = list(paste0(OutputFile,".markerList.txt")),
+     #               OutputFileIndex = OutputFileIndex,
+     #               AnalysisType = "Region",
+     #               nEachChunk = 1,
+     #               indexChunk = i,
+     #               Start = (i==1),
+     #               End = (i==nRegions))
 
    rm(outList)
    rm(pval.Region)
@@ -482,7 +561,7 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
    } 
    gc()
   
- #}#if(length(noNAIndices) > 0){ 
+ }#if(length(noNAIndices) > 0){ 
   }else{#if(!is.null(region)){
     cat(regionName, " is empty.\n")
   }
@@ -540,26 +619,6 @@ SAIGE.getRegionList_new = function(marker_group_line,
 	colnames(RegionData) = c("REGION", "SNP", "ANNO", "WEIGHT")
     }	    
     RegionData = as.data.frame(RegionData)
-    #marker_group_line_list = strsplit(marker_group_line[1], split=c(" +", "\t"))[[1]]
-    #gene=marker_group_line_list[1]
-    #var=marker_group_line_list[3:length(marker_group_line_list)]
-   #marker_group_line_list_anno = strsplit(marker_group_line[2], split=c(" +", "\t"))[[1]]
-   # anno=marker_group_line_list_anno[3:length(marker_group_line_list_anno)]
-
-##to read in weight
-    #RegionData = NULL
-    #print("RegionData Here")
-
-    #RegionData = rbind(RegionData, cbind(rep(gene, length(var)), var, anno))
-  #print("RegionData")
-  #print(RegionData)
-  #colnames(RegionData) = c("REGION", "SNP", "ANNO")
-  #RegionData = data.frame(REGION=rep(gene, length(var)), SNP = var, ANNO = anno)
- 
-  #RegionData = as.data.frame(RegionData)
-  #print(RegionData)
-
-##for non-VCF files
 
     
 uRegion = unique(RegionData$REGION)    
@@ -638,7 +697,6 @@ if(nrow(RegionData) != 0){
       genoIndex = as.numeric(RegionData$genoIndex[posSNP])
       chrom = RegionData$CHROM[posSNP]
       uchrom = unique(chrom)
-      print(uchrom)
       if(length(uchrom) != 1)
         stop("In region ",r,", markers are from multiple chromosomes.")
     }
@@ -717,7 +775,7 @@ if(nrow(RegionData) != 0){
 }else{#if(nrow(RegionData) == 0){
 	RegionList = NULL
 }
-
+print("HERE")
   return(RegionList)
 }
 

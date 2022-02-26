@@ -303,7 +303,7 @@ Rcpp::DataFrame mainMarkerInCPP(
 //printTime(timeoutput3, timeoutput4, "imputeGenoAndFlip");
     altFreqVec.at(i) = altFreq;         // allele frequencies of ALT allele, this is not always < 0.5.
     altCountsVec.at(i) = altCounts;         // allele frequencies of ALT allele, this is not always < 0.5.
-
+    MAC = std::min(altCounts, 2*n-altCounts);
    //std::cout << "MAC " << MAC << std::endl; 
    //std::cout << "info " << info << std::endl; 
     // analysis results for single-marker
@@ -326,9 +326,9 @@ Rcpp::DataFrame mainMarkerInCPP(
  
    if(!isSingleVarianceRatio){ 
         hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC);
-        if(!hasVarRatio){
-                ptr_gSAIGEobj->assignSingleVarianceRatio_withinput(ptr_gSAIGEobj->m_varRatio.front());
-        }
+        //if(!hasVarRatio){
+        //        ptr_gSAIGEobj->assignSingleVarianceRatio_withinput(ptr_gSAIGEobj->m_varRatio.front());
+        //}
    } 
    
     //check 'Main.cpp'
@@ -719,7 +719,8 @@ Rcpp::List mainRegionInCPP(
 			   bool t_isImputation,
 			   arma::vec & t_weight,
 			   arma::vec & t_weight_cond,
-			   bool t_isSingleinGroupTest)
+			   bool t_isSingleinGroupTest,
+			   bool t_isOutputMarkerList)
 {
 
   bool isWeightCustomized = false;
@@ -895,7 +896,7 @@ Rcpp::List mainRegionInCPP(
 
     arma::uvec indexZeroVec_arma, indexNonZeroVec_arma;
     MAF = std::min(altFreq, 1 - altFreq);
-    //MAC = std::min(altCounts, t_n *2 - altCounts);
+    MAC = std::min(altCounts, t_n *2 - altCounts);
     chrVec.at(i) = chr;
     posVec.at(i) = pds;
     refVec.at(i) = ref;
@@ -933,10 +934,10 @@ Rcpp::List mainRegionInCPP(
 
         if(!isSingleVarianceRatio){	    
           hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC);
-          if(!hasVarRatio){
-                std::cout << "Error! Marker " << info << " has MAC " << MAC << " and does not have variance ratio estimated." << std::endl;
-                exit(EXIT_FAILURE);
-          }
+          //if(!hasVarRatio){
+          //      std::cout << "Error! Marker " << info << " has MAC " << MAC << " and does not have variance ratio estimated." << std::endl;
+          //      exit(EXIT_FAILURE);
+          //}
         }
       
       
@@ -1027,11 +1028,13 @@ Rcpp::List mainRegionInCPP(
       arma::vec MAFIndicatorVec(maxMAFVec.n_elem);
       MAFIndicatorVec.zeros();
       MAFIndicatorVec.elem( find(maxMAFVec >= MAF) ).ones();
+      annoMAFIndicatorVec.zeros();
       for(unsigned int j = 0; j < q_anno; j++){
         if(annoIndicatorMat(i,j) == 1){
 		for(unsigned int m = 0; m < q_maf; m++){
                         if(MAFIndicatorVec(m) == 1){
                         	jm = j*q_maf + m;
+				annoMAFIndicatorVec(jm) = 2;
 				if(!isWeightCustomized){	
 					genoURMat.col(jm) = arma::max(genoURMat.col(jm), GVec);
 				}else{
@@ -1044,7 +1047,9 @@ Rcpp::List mainRegionInCPP(
 			}
 		}
 	}
-      }	
+      }
+      annoMAFIndicatorMat.row(i) = annoMAFIndicatorVec.t();
+
       i2 += 1;
     }
   
@@ -1141,13 +1146,13 @@ if(i2 > 0){
 	  if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){
 	    if(!isSingleVarianceRatio){	
         	hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC);
-        	if(!hasVarRatio){
-			hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(g_region_minMAC_cutoff);
-		}
-		if(!hasVarRatio){
-			ptr_gSAIGEobj->assignSingleVarianceRatio_withinput(1.0);	
+        	//if(!hasVarRatio){
+		//	hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(g_region_minMAC_cutoff);
+		//}
+		//if(!hasVarRatio){
+		//	ptr_gSAIGEobj->assignSingleVarianceRatio_withinput(1.0);	
 
-		}	
+		//}	
   	    }
 	    annoMAFIndicatorVec.zeros();
 	    annoMAFIndicatorVec(jm) = 1;
@@ -1350,9 +1355,9 @@ if(t_regionTestType == "BURDEN"){
           std::vector<uint32_t> indexForMissing;
 	  if(!isSingleVarianceRatio){
             hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC);
-            if(!hasVarRatio){
-                ptr_gSAIGEobj->assignSingleVarianceRatio_withinput(ptr_gSAIGEobj->m_varRatio.front());
-            }
+            //if(!hasVarRatio){
+            //    ptr_gSAIGEobj->assignSingleVarianceRatio_withinput(ptr_gSAIGEobj->m_varRatio.front());
+            //}
           }
 
           arma::uvec indexNonZeroVec_arma;
@@ -1384,7 +1389,7 @@ if(t_regionTestType == "BURDEN"){
   Rcpp::List OutList = Rcpp::List::create(
                                           Rcpp::Named("annoMAFIndicatorMat") = annoMAFIndicatorMat,
                                           Rcpp::Named("MAC_GroupVec") = MAC_GroupVec,
-                                          Rcpp::Named("NumRare_GroupVec") =NumRare_GroupVec,
+                                          Rcpp::Named("NumRare_GroupVec") = NumRare_GroupVec,
                                           Rcpp::Named("NumUltraRare_GroupVec") = NumUltraRare_GroupVec
                                           );
 
@@ -1471,6 +1476,10 @@ if(t_isSingleinGroupTest){
     OutList.push_back(OUT_BURDEN, "OUT_BURDEN");	
   }
 
+if(t_isOutputMarkerList){
+	OutList.push_back(indicatorVec, "markerIndcatorVec");
+}
+
   return OutList;
 }
 
@@ -1551,10 +1560,10 @@ void assign_conditionMarkers_factors(
 	ptr_gSAIGEobj->assignSingleVarianceRatio();	
   }else{
 	hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC);
-	if(!hasVarRatio){
-		std::cout << "Error! Conditioning marker " << info << " has MAC " << MAC << " and does not have variance ratio estimated." << std::endl;
-		exit(EXIT_FAILURE);
-	}	
+	//if(!hasVarRatio){
+	//	std::cout << "Error! Conditioning marker " << info << " has MAC " << MAC << " and does not have variance ratio estimated." << std::endl;
+	//	exit(EXIT_FAILURE);
+	//}	
   }	  
   
   flip = imputeGenoAndFlip(GVec, altFreq, altCounts, indexForMissing, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec, indexNonZeroVec);
@@ -1567,7 +1576,7 @@ void assign_conditionMarkers_factors(
 
 
   MAF = std::min(altFreq, 1 - altFreq);
-
+  MAC = std::min(altCounts, 2*t_n-altCounts);
 
   arma::vec gtildeVec;
    Unified_getMarkerPval(

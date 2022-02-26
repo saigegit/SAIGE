@@ -41,8 +41,8 @@ RegionSetUpConditional_binary_InCPP <- function(t_weight_cond) {
     .Call('_SAIGE_RegionSetUpConditional_binary_InCPP', PACKAGE = 'SAIGE', t_weight_cond)
 }
 
-mainRegionInCPP <- function(t_genoType, t_genoIndex, annoIndicatorMat, maxMAFVec, t_outputFile, t_traitType, t_n, P1Mat, P2Mat, t_regionTestType, t_isImputation, t_weight, t_weight_cond, t_isSingleinGroupTest) {
-    .Call('_SAIGE_mainRegionInCPP', PACKAGE = 'SAIGE', t_genoType, t_genoIndex, annoIndicatorMat, maxMAFVec, t_outputFile, t_traitType, t_n, P1Mat, P2Mat, t_regionTestType, t_isImputation, t_weight, t_weight_cond, t_isSingleinGroupTest)
+mainRegionInCPP <- function(t_genoType, t_genoIndex, annoIndicatorMat, maxMAFVec, t_outputFile, t_traitType, t_n, P1Mat, P2Mat, t_regionTestType, t_isImputation, t_weight, t_weight_cond, t_isSingleinGroupTest, t_isOutputMarkerList) {
+    .Call('_SAIGE_mainRegionInCPP', PACKAGE = 'SAIGE', t_genoType, t_genoIndex, annoIndicatorMat, maxMAFVec, t_outputFile, t_traitType, t_n, P1Mat, P2Mat, t_regionTestType, t_isImputation, t_weight, t_weight_cond, t_isSingleinGroupTest, t_isOutputMarkerList)
 }
 
 assign_conditionMarkers_factors <- function(t_genoType, t_genoIndex, t_n, t_weight_cond) {

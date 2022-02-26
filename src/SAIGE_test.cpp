@@ -665,6 +665,22 @@ bool SAIGEClass::assignVarianceRatio(double MAC){
 		hasVarRatio = true;
 	}	
     }
+
+    if(!hasVarRatio){	
+	if(MAC < m_cateVarRatioMinMACVecExclude(0)){
+		m_varRatioVal = m_varRatio(0);
+		hasVarRatio = true;
+	}	
+    }
+
+    if(!hasVarRatio){
+        if(MAC > m_cateVarRatioMaxMACVecInclude.back()){
+		//m_varRatioVal = m_varRatio(a-1);
+		m_varRatioVal = m_varRatio.back();
+                hasVarRatio = true;
+        }
+    }
+
     return(hasVarRatio);    
 }
 

@@ -162,8 +162,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // mainRegionInCPP
-Rcpp::List mainRegionInCPP(std::string t_genoType, std::vector<std::string>& t_genoIndex, arma::mat& annoIndicatorMat, arma::vec& maxMAFVec, std::string t_outputFile, std::string t_traitType, unsigned int t_n, arma::mat P1Mat, arma::mat P2Mat, std::string t_regionTestType, bool t_isImputation, arma::vec& t_weight, arma::vec& t_weight_cond, bool t_isSingleinGroupTest);
-RcppExport SEXP _SAIGE_mainRegionInCPP(SEXP t_genoTypeSEXP, SEXP t_genoIndexSEXP, SEXP annoIndicatorMatSEXP, SEXP maxMAFVecSEXP, SEXP t_outputFileSEXP, SEXP t_traitTypeSEXP, SEXP t_nSEXP, SEXP P1MatSEXP, SEXP P2MatSEXP, SEXP t_regionTestTypeSEXP, SEXP t_isImputationSEXP, SEXP t_weightSEXP, SEXP t_weight_condSEXP, SEXP t_isSingleinGroupTestSEXP) {
+Rcpp::List mainRegionInCPP(std::string t_genoType, std::vector<std::string>& t_genoIndex, arma::mat& annoIndicatorMat, arma::vec& maxMAFVec, std::string t_outputFile, std::string t_traitType, unsigned int t_n, arma::mat P1Mat, arma::mat P2Mat, std::string t_regionTestType, bool t_isImputation, arma::vec& t_weight, arma::vec& t_weight_cond, bool t_isSingleinGroupTest, bool t_isOutputMarkerList);
+RcppExport SEXP _SAIGE_mainRegionInCPP(SEXP t_genoTypeSEXP, SEXP t_genoIndexSEXP, SEXP annoIndicatorMatSEXP, SEXP maxMAFVecSEXP, SEXP t_outputFileSEXP, SEXP t_traitTypeSEXP, SEXP t_nSEXP, SEXP P1MatSEXP, SEXP P2MatSEXP, SEXP t_regionTestTypeSEXP, SEXP t_isImputationSEXP, SEXP t_weightSEXP, SEXP t_weight_condSEXP, SEXP t_isSingleinGroupTestSEXP, SEXP t_isOutputMarkerListSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -181,7 +181,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec& >::type t_weight(t_weightSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type t_weight_cond(t_weight_condSEXP);
     Rcpp::traits::input_parameter< bool >::type t_isSingleinGroupTest(t_isSingleinGroupTestSEXP);
-    rcpp_result_gen = Rcpp::wrap(mainRegionInCPP(t_genoType, t_genoIndex, annoIndicatorMat, maxMAFVec, t_outputFile, t_traitType, t_n, P1Mat, P2Mat, t_regionTestType, t_isImputation, t_weight, t_weight_cond, t_isSingleinGroupTest));
+    Rcpp::traits::input_parameter< bool >::type t_isOutputMarkerList(t_isOutputMarkerListSEXP);
+    rcpp_result_gen = Rcpp::wrap(mainRegionInCPP(t_genoType, t_genoIndex, annoIndicatorMat, maxMAFVec, t_outputFile, t_traitType, t_n, P1Mat, P2Mat, t_regionTestType, t_isImputation, t_weight, t_weight_cond, t_isSingleinGroupTest, t_isOutputMarkerList));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1964,7 +1965,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setSAIGEobjInCPP", (DL_FUNC) &_SAIGE_setSAIGEobjInCPP, 26},
     {"_SAIGE_setSparseSigmaInCPP", (DL_FUNC) &_SAIGE_setSparseSigmaInCPP, 3},
     {"_SAIGE_RegionSetUpConditional_binary_InCPP", (DL_FUNC) &_SAIGE_RegionSetUpConditional_binary_InCPP, 1},
-    {"_SAIGE_mainRegionInCPP", (DL_FUNC) &_SAIGE_mainRegionInCPP, 14},
+    {"_SAIGE_mainRegionInCPP", (DL_FUNC) &_SAIGE_mainRegionInCPP, 15},
     {"_SAIGE_assign_conditionMarkers_factors", (DL_FUNC) &_SAIGE_assign_conditionMarkers_factors, 4},
     {"_SAIGE_assign_conditionMarkers_factors_binary_region", (DL_FUNC) &_SAIGE_assign_conditionMarkers_factors_binary_region, 1},
     {"_SAIGE_set_iterator_inVcf", (DL_FUNC) &_SAIGE_set_iterator_inVcf, 4},

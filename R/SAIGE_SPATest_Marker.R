@@ -73,25 +73,6 @@ mainMarker = function(genoType, genoIndex, traitType, isMoreOutput, isImputation
 
 
 
-setMarker = function(objNull, chrom, impute_method, missing_cutoff, min_maf_marker, min_mac_marker, min_info_marker, omp_num_threads, isOutputMoreDetails)
-{
-  # Check Main.cpp
-  setMarker_GlobalVarsInCPP(impute_method,
-                            missing_cutoff,
-                            min_maf_marker,
-                            min_mac_marker,
-			    min_info_marker,
-                            omp_num_threads,
-			    isOutputMoreDetails
-                            )
-
-  # Check SAIGE.R
-  obj.setMarker = setMarker.SAIGE(objNull, control)
-
-  return(obj.setMarker)
-}
-
-
 
 
 SAIGE.Marker = function(objNull,

@@ -94,7 +94,8 @@ Rcpp::List mainRegionInCPP(
 			   bool t_isImputation,
 			   arma::vec & t_weight,
 			   arma::vec & t_weight_cond,
-			   bool t_isSingleinGroupTest);
+			   bool t_isSingleinGroupTest,
+			   bool t_isOutputMarkerList);
 
 
 

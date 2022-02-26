@@ -165,7 +165,7 @@ setGenoInput = function(bgenFile = "",
         samplesInGeno = as.character(sampleData[,1])
     }else{
 	samplesInGeno = getSampleIDsFromBGEN(bgenFile)
- 	print(samplesInGeno[1:100])		    
+ 	#print(samplesInGeno[1:100])		    
     }    
     db_con <- RSQLite::dbConnect(RSQLite::SQLite(), bgenFileIndex)
     on.exit(RSQLite::dbDisconnect(db_con), add = TRUE)
@@ -384,27 +384,27 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
    	if(genoType != "vcf"){
 		markerInfo_conditionDat = merge(conditionDat, markerInfo[,c("ID","genoIndex"),drop=F], by.x="SNP", by.y="ID", sort = F, all.x=T)
 		if(!is.null(markerInfo$ID2)){
-		colnames(markerInfo)[which(colnames(markerInfo) == "genoIndex")] = "genoIndex2"
-		markerInfo_conditionDat = merge(conditionDat, markerInfo[,c("ID2","genoIndex2"),drop=F], by.x="SNP", by.y="ID2", sort = F, all.x=T)
-		posNA = which(is.na(markerInfo_conditionDat$genoIndex) & !is.na(markerInfo_conditionDat$genoIndex2))
+			colnames(markerInfo)[which(colnames(markerInfo) == "genoIndex")] = "genoIndex2"
+			markerInfo_conditionDat = merge(markerInfo_conditionDat, markerInfo[,c("ID2","genoIndex2"),drop=F], by.x="SNP", by.y="ID2", sort = F, all.x=T)
+			posNA = which(is.na(markerInfo_conditionDat$genoIndex) & !is.na(markerInfo_conditionDat$genoIndex2))
         	if(length(posNA) != 0){
                 	markerInfo_conditionDat$genoIndex[posNA] = markerInfo_conditionDat$genoIndex2[posNA]
         	}
-		markerInfo_conditionDat$genoIndex2 = NULL
+			markerInfo_conditionDat$genoIndex2 = NULL
 
 		}
 		markerInfo_conditionDat = markerInfo_conditionDat[which(!is.na(markerInfo_conditionDat$genoIndex)), , drop=F]
 
 		markerInfo_conditionDat = markerInfo_conditionDat[order(markerInfo_conditionDat$condIndex), ]	
 		#markerInfo_conditionDat = markerInfo_conditionDat[which()]
-       		#posInd = which(markerInfo$ID %in% condition_original)
+       		#posInd = which(markerInfo_conditionDat %in% condition_original)
 		#if(length(posInd) == length(condition_original)){
 		if(nrow(markerInfo_conditionDat) == length(condition_original)){
 			cond_genoIndex = markerInfo_conditionDat$genoIndex
        			#cond_genoIndex = genoIndex[posInd]
 		}else{
 
-			stop(length(condition_original)-length(posInd), " conditioning markers are not found in the geno file. Please Check.\n")	
+			stop(length(condition_original)-nrow(markerInfo_conditionDat), " conditioning markers are not found in the geno file. Please Check.\n")	
 		}	
        }else{
 	        condition_group_line = paste(c("condition", condition_original), collapse = "\t")	
