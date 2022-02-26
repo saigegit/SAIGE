@@ -101,7 +101,8 @@ SPAGMMATtest = function(bgenFile = "",
 		 is_Firth_beta = FALSE,
 		 pCutoffforFirth = 0.01,
 		 is_overwrite_output = TRUE,
-		 is_single_in_groupTest = TRUE 
+		 is_single_in_groupTest = TRUE,
+		 is_no_weight_in_groupTest = FALSE 
 ){
    #cat("r.corr is ", r.corr, "\n")
    if(!(impute_method %in% c("best_guess", "mean","minor"))){
@@ -371,7 +372,8 @@ SPAGMMATtest = function(bgenFile = "",
 		     numLinesOutput,
 		     r.corr,
 		     is_overwrite_output,
-		     is_single_in_groupTest)
+		     is_single_in_groupTest,
+		     is_no_weight_in_groupTest)
 
 
     }	    

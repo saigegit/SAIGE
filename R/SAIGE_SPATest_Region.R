@@ -89,7 +89,8 @@ SAIGE.Region = function(objNull,
 			numLinesOutput,
 			r.corr,
 			isOverWriteOutput,
-			is_single_in_groupTest){
+			is_single_in_groupTest,
+			is_no_weight_in_groupTest){
   OutputFileIndex = NULL	
   if(is.null(OutputFileIndex))
     OutputFileIndex = paste0(OutputFile, ".index")
@@ -137,6 +138,10 @@ SAIGE.Region = function(objNull,
   region_list = checkGroupFile(groupFile)
   nRegions = region_list$nRegions
   is_weight_included = region_list$is_weight_included
+  if(is_no_weight_in_groupTest & is_weight_included){
+    stop("is_no_weight_in_groupTest = TRUE but weights are found in the group file.\n")
+  }
+
   if(is_weight_included){
     nline_per_gene = 3
   }else{
@@ -210,8 +215,13 @@ SAIGE.Region = function(objNull,
     	}	
       }
 
+      if(is_no_weight_in_groupTest){
+	WEIGHT = rep(1, length(SNP))
+        cat("No weights are used in the group test\n")
+      }else{	      
+        WEIGHT = region$WEIGHT
+      }
 
-      WEIGHT = region$WEIGHT
       annoIndicatorMat = region$annoIndicatorMat
 
       chrom = region$chrom
