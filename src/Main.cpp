@@ -41,7 +41,7 @@ static SAIGE::SAIGEClass* ptr_gSAIGEobj = NULL;
 // global variables for analysis
 std::string g_impute_method;      // "mean", "minor", or "drop", //drop is not allowed
 double g_missingRate_cutoff;
-unsigned int g_omp_num_threads;
+//unsigned int g_omp_num_threads;
 double g_marker_minMAF_cutoff;
 double g_marker_minMAC_cutoff;
 double g_region_minMAC_cutoff;    // for Rare Variants (RVs) whose MAC < this value, we aggregate these variants like SAIGE-GENE+ 
@@ -63,32 +63,37 @@ arma::vec g_weights_beta(2);
 bool  g_is_Firth_beta;
 double g_pCutoffforFirth;
 
+
+
 // [[Rcpp::export]]
-void setMarker_GlobalVarsInCPP(std::string t_impute_method,
-                               double t_missing_cutoff,
+void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
+		double t_missing_cutoff,
                                double t_min_maf_marker,
                                double t_min_mac_marker,
-			       double t_min_info_marker,
-                               unsigned int t_omp_num_threads,
-			       bool t_isOutputMoreDetails,
-			       int t_marker_chunksize,
+                               double t_min_info_marker,
 			       double t_dosage_zerod_cutoff,
-			       double t_dosage_zerod_MAC_cutoff,
-			       arma::vec & t_weights_beta
-			       )
-
+                               double t_dosage_zerod_MAC_cutoff,
+			       arma::vec & t_weights_beta)
 {
   g_impute_method = t_impute_method;
   g_missingRate_cutoff = t_missing_cutoff;
   g_marker_minMAF_cutoff = t_min_maf_marker;
   g_marker_minMAC_cutoff = t_min_mac_marker;
   g_marker_minINFO_cutoff = t_min_info_marker;
-  g_omp_num_threads = t_omp_num_threads;
-  g_isOutputMoreDetails = t_isOutputMoreDetails;
-  g_marker_chunksize = t_marker_chunksize;
   g_dosage_zerod_cutoff = t_dosage_zerod_cutoff;
   g_dosage_zerod_MAC_cutoff = t_dosage_zerod_MAC_cutoff;
   g_weights_beta = t_weights_beta;
+
+}
+// [[Rcpp::export]]
+void setMarker_GlobalVarsInCPP(
+			       bool t_isOutputMoreDetails,
+			       int t_marker_chunksize
+			       )
+
+{
+  g_isOutputMoreDetails = t_isOutputMoreDetails;
+  g_marker_chunksize = t_marker_chunksize;
 }
 
 
@@ -98,26 +103,15 @@ void setMarker_GlobalVarsInCPP(std::string t_impute_method,
   //g_method_to_CollapseUltraRare = t_method_to_CollapseUltraRare;
   //g_DosageCutoff_for_UltraRarePresence = t_DosageCutoff_for_UltraRarePresence;
 // [[Rcpp::export]]
-void setRegion_GlobalVarsInCPP(std::string t_impute_method,
-                               double t_missing_cutoff,
+void setRegion_GlobalVarsInCPP(
                                arma::vec t_max_maf_region,
                                unsigned int t_max_markers_region,
-                               unsigned int t_omp_num_threads,
-			       double t_MACCutoff_to_CollapseUltraRare,
-			       double t_dosage_zerod_cutoff,
-                               double t_dosage_zerod_MAC_cutoff,
-			       arma::vec & t_weights_beta)
+			       double t_MACCutoff_to_CollapseUltraRare)
 {
-  g_impute_method = t_impute_method;
-  g_missingRate_cutoff = t_missing_cutoff;
   g_region_maxMAF_cutoff = t_max_maf_region;
   g_maxMAFLimit = g_region_maxMAF_cutoff.max();
   g_region_maxMarkers_cutoff = t_max_markers_region;
-  g_omp_num_threads = t_omp_num_threads;
   g_region_minMAC_cutoff = t_MACCutoff_to_CollapseUltraRare;
-  g_dosage_zerod_cutoff = t_dosage_zerod_cutoff;
-  g_dosage_zerod_MAC_cutoff = t_dosage_zerod_MAC_cutoff;
-  g_weights_beta = t_weights_beta;
 }
 
 
@@ -916,9 +910,16 @@ Rcpp::List mainRegionInCPP(
     imputationInfoVec.at(i) = imputeInfo;
     int n = GVec.size();
 
-    if((missingRate > g_missingRate_cutoff) || (MAF > g_maxMAFLimit) || MAF == 0 || (imputeInfo < g_marker_minINFO_cutoff)){
-      continue;  // does not pass QC
-    }
+    //if((missingRate > g_missingRate_cutoff) || (MAF > g_maxMAFLimit) || MAF < g_marker_minMAF_cutoff || (imputeInfo < g_marker_minINFO_cutoff)){
+    //  continue;  // does not pass QC
+    //}
+
+   if((missingRate > g_missingRate_cutoff) || (MAF > g_maxMAFLimit) || (MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff) || (imputeInfo < g_marker_minINFO_cutoff)){
+      continue;
+   } 
+
+
+
 
     if(MAC > g_region_minMAC_cutoff){  // not Ultra-Rare Variants
 

@@ -70,9 +70,9 @@ option_list <- list(
     help="Whether to output heterozygous and homozygous counts in cases and controls. By default, FALSE. If True, the columns homN_Allele2_cases, hetN_Allele2_cases, homN_Allele2_ctrls, hetN_Allele2_ctrls will be output [default=TRUE]"),
   make_option("--is_overwrite_output", type="logical",default=TRUE,
     help="Whether to overwrite the output file if it exists. If FALSE, the program will continue the unfinished analysis instead of starting over from the beginining [default=TRUE]"),				
-  make_option("--maxMAFforGroupTest", type="character",default="0.0001,0.001,0.01",
+  make_option("--maxMAF_in_groupTest", type="character",default="0.0001,0.001,0.01",
     help="Max MAF for markers tested in group test seperated by comma. e.g. 0.0001,0.001,0.01, [default=0.01]"),
-  make_option("--function_group_test", type="character",default="lof,missense;lof,missense;lof;synonymous",
+  make_option("--annotation_in_groupTest", type="character",default="lof,missense;lof,missense;lof;synonymous",
     help="annotations of markers to be tested in the set-based tests seperated by comma. using ; to combine multiple annotations in the same test, e.g. lof,missense;lof,missense;lof;synonymous will test lof variants only, missense+lof variants, and missense+lof+synonymous variants. default: lof,missense;lof,missense;lof;synonymous"),
   make_option("--groupFile", type="character", default="",
     help="Path to the file containing the group information for gene-based tests. Each gene/set has 2 or 3 lines in the group file. The first element is the gene/set name. The second element in the first line is to indicate whether this line contains variant IDs (var), annotations (anno), or weights (weight). The line for weights is optional. If not specified, the default weights will be generated based on beta(MAF, 1, 25). Use --weights.beta to change the parameters for the Beta distribution. The variant ids must be in the format chr:pos_ref/alt. Elements are seperated by tab or space."),
@@ -92,7 +92,7 @@ option_list <- list(
     help="parameters for the beta distribution to weight genetic markers in gene-based tests."),
   make_option("--r.corr", type="numeric", default=0,
     help="More options can be seen in the SKAT library"),
-  make_option("--max_markers_region", type="numeric", default=100,
+  make_option("--markers_per_chunk_in_groupTest", type="numeric", default=100,
     help="Number of markers in each chunk when calculating the variance covariance matrix in the gene-based tests  [default=100]."),
 
 
@@ -148,10 +148,10 @@ if(is.null(opt$weights_for_condition)){
 	weights_for_condition <- convertoNumeric(x=strsplit(opt$weights_for_condition,",")[[1]], "weights_for_condition")
 }
 
-maxMAFforGroupTest <- convertoNumeric(x=strsplit(opt$maxMAFforGroupTest,",")[[1]], "maxMAFforGroupTest")
+maxMAF_in_groupTest <- convertoNumeric(x=strsplit(opt$maxMAF_in_groupTest,",")[[1]], "maxMAF_in_groupTest")
 
-function_group_test = gsub(":",";",opt$function_group_test)
-function_group_test = unlist(strsplit(function_group_test,",")[[1]])
+annotation_in_groupTest = gsub(":",";",opt$annotation_in_groupTest)
+annotation_in_groupTest = unlist(strsplit(annotation_in_groupTest,",")[[1]])
 
 #try(if(length(which(opt == "")) > 0) stop("Missing arguments"))
 
@@ -199,8 +199,8 @@ SPAGMMATtest(vcfFile=opt$vcfFile,
 	     is_overwrite_output = opt$is_overwrite_output,
 	     
 
-	     maxMAFforGroupTest = maxMAFforGroupTest,
-	     function_group_test = function_group_test,
+	     maxMAF_in_groupTest = maxMAF_in_groupTest,
+	     annotation_in_groupTest = annotation_in_groupTest,
 	     groupFile = opt$groupFile,
 	     sparseGRMFile=opt$sparseGRMFile,
              sparseGRMSampleIDFile=opt$sparseGRMSampleIDFile,
@@ -210,7 +210,7 @@ SPAGMMATtest(vcfFile=opt$vcfFile,
              cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
 	     weights.beta = weights.beta,
 	     r.corr = opt$r.corr,
-	     max_markers_region = opt$max_markers_region,
+	     markers_per_chunk_in_groupTest = opt$markers_per_chunk_in_groupTest,
 
 
 	     

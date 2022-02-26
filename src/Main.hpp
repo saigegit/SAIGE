@@ -4,30 +4,28 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 
-void setMarker_GlobalVarsInCPP(std::string t_impute_method,
-                               double t_missing_cutoff,
+
+void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
+                double t_missing_cutoff,
                                double t_min_maf_marker,
                                double t_min_mac_marker,
                                double t_min_info_marker,
-                               unsigned int t_omp_num_threads,
-                               bool t_isOutputMoreDetails,
-			       int t_marker_chunksize,
-			       double t_dosage_zerod_cutoff,
+                               double t_dosage_zerod_cutoff,
                                double t_dosage_zerod_MAC_cutoff,
-			       arma::vec & t_weights_beta);
+                               arma::vec & t_weights_beta);
+
+void setMarker_GlobalVarsInCPP(
+                               bool t_isOutputMoreDetails,
+                               int t_marker_chunksize
+                               );
 
 
-                               //std::string t_method_to_CollapseUltraRare,
-                               //double t_DosageCutoff_for_UltraRarePresence,
-void setRegion_GlobalVarsInCPP(std::string t_impute_method,
-                               double t_missing_cutoff,
+void setRegion_GlobalVarsInCPP(
                                arma::vec t_max_maf_region,
                                unsigned int t_max_markers_region,
-                               unsigned int t_omp_num_threads,
-                               double t_MACCutoff_to_CollapseUltraRare,
-			       double t_dosage_zerod_cutoff,
-                               double t_dosage_zerod_MAC_cutoff,
-			       arma::vec & t_weights_beta);
+                               double t_MACCutoff_to_CollapseUltraRare);
+
+
 
 Rcpp::DataFrame mainMarkerInCPP(
                            std::string & t_genoType,     // "PLINK", "BGEN"

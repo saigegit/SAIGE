@@ -69,9 +69,9 @@ option_list <- list(
   make_option("--is_output_moreDetails", type="logical",default=TRUE,
     help="Whether to output heterozygous and homozygous counts in cases and controls. By default, FALSE. If True, the columns homN_Allele2_cases, hetN_Allele2_cases, homN_Allele2_ctrls, hetN_Allele2_ctrls will be output [default=TRUE]"),
 
-  make_option("--maxMAFforGroupTest", type="character",default="0.0001,0.001,0.01",
+  make_option("--maxMAF_in_groupTest", type="character",default="0.0001,0.001,0.01",
     help="Max MAF for markers tested in group test seperated by comma. e.g. 0.0001,0.001,0.01, [default=0.01]"),
-  make_option("--function_group_test", type="character",default="lof,missense;lof,missense;lof;synonymous",
+  make_option("--annotation_in_groupTest", type="character",default="lof,missense;lof,missense;lof;synonymous",
     help="annotations of markers to be tested in the set-based tests seperated by comma. using ; to combine multiple annotations in the same test, e.g. lof,missense;lof,missense;lof;synonymous will test lof variants only, missense+lof variants, and missense+lof+synonymous variants. default: lof,missense;lof,missense;lof;synonymous"),
   make_option("--groupFile", type="character", default="",
     help="Path to the file containing the group information for gene-based tests. Each line is for one gene/set of variants. The first element is for gene/set name. The rest of the line is for variant ids included in this gene/set. For vcf/sav, the genetic marker ids are in the format chr:pos_ref/alt. For bgen, the genetic marker ids should match the ids in the bgen file. Each element in the line is seperated by tab."),
@@ -87,7 +87,7 @@ option_list <- list(
     help="parameters for the beta distribution to weight genetic markers in gene-based tests."),
   make_option("--r.corr", type="numeric", default=0,
     help="More options can be seen in the SKAT library"),
-  make_option("--max_markers_region", type="numeric", default=100,
+  make_option("--markers_per_chunk_in_groupTest", type="numeric", default=100,
     help="Number of markers in each chunk when calculating the variance covariance matrix in the gene-based tests  [default=100]."),
 
 
@@ -144,10 +144,10 @@ if(is.null(opt$weights_for_G2_cond)){
 	weights_for_G2_cond <- convertoNumeric(x=strsplit(opt$weights_for_G2_cond,",")[[1]], "weights_for_G2_cond")
 }
 
-maxMAFforGroupTest <- convertoNumeric(x=strsplit(opt$maxMAFforGroupTest,",")[[1]], "maxMAFforGroupTest")
+maxMAF_in_groupTest <- convertoNumeric(x=strsplit(opt$maxMAF_in_groupTest,",")[[1]], "maxMAF_in_groupTest")
 
-function_group_test = gsub(":",";",opt$function_group_test)
-function_group_test = unlist(strsplit(function_group_test,",")[[1]])
+annotation_in_groupTest = gsub(":",";",opt$annotation_in_groupTest)
+annotation_in_groupTest = unlist(strsplit(annotation_in_groupTest,",")[[1]])
 
 #try(if(length(which(opt == "")) > 0) stop("Missing arguments"))
 
@@ -194,8 +194,8 @@ SPAGMMATtest(vcfFile=opt$vcfFile,
 	     is_output_moreDetails =opt$is_output_moreDetails,
 	     
 
-	     maxMAFforGroupTest = maxMAFforGroupTest,
-	     function_group_test = function_group_test,
+	     maxMAF_in_groupTest = maxMAF_in_groupTest,
+	     annotation_in_groupTest = annotation_in_groupTest,
 	     groupFile = opt$groupFile,
 	     sparseSigmaFile = opt$sparseSigmaFile,
 	     MACCutoff_to_CollapseUltraRare = opt$MACCutoff_to_CollapseUltraRare,	
@@ -203,7 +203,7 @@ SPAGMMATtest(vcfFile=opt$vcfFile,
              cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
 	     weights.beta = weights.beta,
 	     r.corr = opt$r.corr,
-	     max_markers_region = opt$max_markers_region,
+	     markers_per_chunk_in_groupTest = opt$markers_per_chunk_in_groupTest,
 
 
 	     

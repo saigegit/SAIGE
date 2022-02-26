@@ -110,7 +110,7 @@ SPAGMMATtest = function(bgenFile = "",
      stop("impute_method should be 'best_guess', 'mean' or 'minor'.")
    }
 
-   	   
+print("OK")   	   
 
 
    checkArgsListBool(is_imputed_data = is_imputed_data,
@@ -128,9 +128,9 @@ SPAGMMATtest = function(bgenFile = "",
                      SPAcutoff = SPAcutoff,
                      dosage_zerod_cutoff = dosage_zerod_cutoff,
 		     dosage_zerod_MAC_cutoff = dosage_zerod_MAC_cutoff,
+		     markers_per_chunk = markers_per_chunk
 		     )
     #if(file.exists(SAIGEOutputFile)) {print("ok -2 file exist")} 
-
 
 
     ##check and create the output file
@@ -141,21 +141,22 @@ SPAGMMATtest = function(bgenFile = "",
     OutputFileIndex = paste0(OutputFile, ".index") 
 
     ##check the variance ratio file and extract the variance ratio vector
+    setAssocTest_GlobalVarsInCPP(impute_method,
+                            max_missing,
+                            min_MAF,
+                            min_MAC,
+                            min_Info,
+			dosage_zerod_cutoff,
+                        dosage_zerod_MAC_cutoff,
+			weights.beta)	
 
     if(groupFile == ""){
       isGroupTest = FALSE
       cat("single-variant association test will be performed\n")
-	  setMarker_GlobalVarsInCPP(impute_method,
-				    max_missing,
-                            min_MAF,
-                            min_MAC,
-                            min_Info,
-                            1,
+
+      setMarker_GlobalVarsInCPP(
 			    is_output_moreDetails,
-			    markers_per_chunk,
-			    dosage_zerod_cutoff,
-			    dosage_zerod_MAC_cutoff,
-			    weights.beta
+			    markers_per_chunk
                             )
 
     }else{
@@ -185,19 +186,13 @@ SPAGMMATtest = function(bgenFile = "",
 
 				#method_to_CollapseUltraRare,
 				#DosageCutoff_for_UltraRarePresence,
-      setRegion_GlobalVarsInCPP(impute_method,
-                                max_missing,
+      setRegion_GlobalVarsInCPP(
 				maxMAF_in_groupTest,
 				markers_per_chunk_in_groupTest,
-				1,
-				MACCutoff_to_CollapseUltraRare,
-				dosage_zerod_cutoff,
-                            	dosage_zerod_MAC_cutoff,
-				weights.beta
+				MACCutoff_to_CollapseUltraRare
                             )
      #cat("dosage_zerod_cutoff is ", dosage_zerod_cutoff, "\n")
      #cat("dosage_zerod_MAC_cutoff is ", dosage_zerod_MAC_cutoff, "\n")
-
 
     }
     
