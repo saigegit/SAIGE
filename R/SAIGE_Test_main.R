@@ -100,7 +100,8 @@ SPAGMMATtest = function(bgenFile = "",
                  max_markers_region = 100,   #new
 		 is_Firth_beta = FALSE,
 		 pCutoffforFirth = 0.01,
-		 is_overwrite_output = TRUE 
+		 is_overwrite_output = TRUE,
+		 is_single_in_groupTest = TRUE 
 ){
    #cat("r.corr is ", r.corr, "\n")
    if(!(impute_method %in% c("best_guess", "mean","minor"))){
@@ -369,7 +370,8 @@ SPAGMMATtest = function(bgenFile = "",
 		     condition_weights,
 		     numLinesOutput,
 		     r.corr,
-		     is_overwrite_output)
+		     is_overwrite_output,
+		     is_single_in_groupTest)
 
 
     }	    

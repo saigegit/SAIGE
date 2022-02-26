@@ -95,7 +95,8 @@ Rcpp::List mainRegionInCPP(
                            std::string t_regionTestType,
 			   bool t_isImputation,
 			   arma::vec & t_weight,
-			   arma::vec & t_weight_cond);
+			   arma::vec & t_weight_cond,
+			   bool t_isSingleinGroupTest);
 
 
 

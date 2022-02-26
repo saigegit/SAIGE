@@ -280,23 +280,17 @@ get_newPhi_scaleFactor = function(q.sum, mu.a, g.sum, p.new, Score, Phi, regionT
 }
 
 get_SKAT_pvalue = function(Score, Phi, r.corr, regionTestType){
-	if(regionTestType == "BURDEN"){
-		Q = try((SKAT:::SKAT_META_Optimal_Get_Q(Score, r.corr)$Q.r), silent = TRUE)
-		Q.res = NULL
-        	a <- as.matrix(sum(Phi))
-        	out_SKAT_List <- try(SKAT:::Get_Liu_PVal(Q, a, Q.res), silent = TRUE)
-	}else{
-
-                out_SKAT_List = try(SKAT:::Met_SKAT_Get_Pvalue(Score = Score,
-                                                         Phi = Phi,
-                                                         r.corr = r.corr,
-                                                         method = "optimal.adj",
-                                                         Score.Resampling = NULL),
-                              silent = TRUE)
-	}
+	#if(regionTestType != "BURDEN"){
+        #        out_SKAT_List = try(SKAT:::Met_SKAT_Get_Pvalue(Score = Score,
+        #                                                 Phi = Phi,
+        #                                                 r.corr = r.corr,
+        #                                                 method = "optimal.adj",
+        #                                                 Score.Resampling = NULL),
+        #                      silent = TRUE)
+	#}
 
 
-	if(regionTestType != "BURDEN"){
+	#if(regionTestType != "BURDEN"){
                 BETA_Burden = sum(Score)/(sum(diag(Phi)))
                 if(class(out_SKAT_List) == "try-error"){
                         Pvalue = c(NA, NA, NA)
@@ -322,14 +316,14 @@ get_SKAT_pvalue = function(Score, Phi, r.corr, regionTestType){
 
                 }
 		return(list(Pvalue_SKATO = Pvalue[1], Pvalue_Burden = Pvalue[3], Pvalue_SKAT = Pvalue[2], BETA_Burden = BETA_Burden, SE_Burden = SE_Burden))
-	}else{
-		BETA_Burden = sum(Score)/(sum(Phi))
-		Pvalue_Burden = out_SKAT_List$p.value
-		SE_Burden = abs(BETA_Burden/qnorm(Pvalue_Burden/2))
-		Pvalue_SKATO = NA
-		Pvalue_SKAT = NA
-		return(list(Pvalue_SKATO = NA, Pvalue_Burden = Pvalue_Burden, Pvalue_SKAT = NA, BETA_Burden = BETA_Burden, SE_Burden = SE_Burden))
-	}	
+	#}else{
+	#	BETA_Burden = sum(Score)/(sum(Phi))
+	#	Pvalue_Burden = out_SKAT_List$p.value
+	#	SE_Burden = abs(BETA_Burden/qnorm(Pvalue_Burden/2))
+	#	Pvalue_SKATO = NA
+	#	Pvalue_SKAT = NA
+	#	return(list(Pvalue_SKATO = NA, Pvalue_Burden = Pvalue_Burden, Pvalue_SKAT = NA, BETA_Burden = BETA_Burden, SE_Burden = SE_Burden))
+	#}	
 
 }
 
