@@ -79,14 +79,14 @@ SAIGE.Region = function(objNull,
 			groupFile, 
 			annolist, 
 			maxMAFlist,
-		        max_markers_region,	
+		        markers_per_chunk_in_groupTest,	
 			genoType, 
 			markerInfo,
 			traitType,
 			isImputation,
 			isCondition,
 			weight_cond,
-			numLinesOutput,
+			groups_per_chunk,
 			r.corr,
 			isOverWriteOutput,
 			is_single_in_groupTest,
@@ -161,8 +161,8 @@ SAIGE.Region = function(objNull,
     }
   }
 
-  P1Mat = matrix(0, max_markers_region, n);
-  P2Mat = matrix(0, n, max_markers_region);
+  P1Mat = matrix(0, markers_per_chunk_in_groupTest, n);
+  P2Mat = matrix(0, n, markers_per_chunk_in_groupTest);
 
   chrom1 = "FakeCHR";
 
@@ -178,10 +178,10 @@ SAIGE.Region = function(objNull,
   for(i in (indexChunk+1):nRegions){
    #cat("i is ", i, "\n")
    if(mth ==  numberRegionsInChunk){
-      if(i + numLinesOutput > nRegions){
+      if(i + groups_per_chunk > nRegions){
   	      nregions_ro_read = nRegions - i + 1	      
       }else{
-	      nregions_ro_read = numLinesOutput
+	      nregions_ro_read = groups_per_chunk
       }
       nlinetoread = nregions_ro_read * nline_per_gene	
       marker_group_line = readLines(gf, n = nlinetoread)

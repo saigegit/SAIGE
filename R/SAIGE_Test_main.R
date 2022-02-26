@@ -17,7 +17,7 @@
 #' @param IsDropMissingDosages logical. whether to drop missing dosages (TRUE) or to mean impute missing dosages (FALSE). By default, FALSE. This option only works for bgen, vcf, and sav input.
 #' @param minMAC numeric. Minimum minor allele count of markers to test. By default, 0.5. The higher threshold between minMAC and minMAF will be used
 #' @param minMAF numeric. Minimum minor allele frequency of markers to test. By default 0. The higher threshold between minMAC and minMAF will be used
-#' @param maxMAFforGroupTest numeric. Maximum minor allele frequency of markers to test in group test. By default 0.5.
+#' @param maxMAF_in_groupTest numeric. Maximum minor allele frequency of markers to test in group test. By default 0.5.
 #' @param minInfo numeric. Minimum imputation info of markers to test. By default, 0. This option only works for bgen, vcf, and sav input
 #' @param sampleFile character. Path to the file that contains one column for IDs of samples in the bgen file with NO header
 #' @param GMMATmodelFile character. Path to the input file containing the glmm model, which is output from previous step. Will be used by load()
@@ -82,7 +82,9 @@ SPAGMMATtest = function(bgenFile = "",
                  cateVarRatioMaxMACVecInclude=c(20.5),
                  SPAcutoff=2,
                  SAIGEOutputFile = "",
-                 numLinesOutput = 10,
+                 markers_per_chunk = 10000,
+		 groups_per_chunk = 100,
+		 markers_per_chunk_in_groupTest = 100, #new
                  condition="",
 		 sparseGRMFile="",
                  sparseGRMSampleIDFile="",
@@ -95,9 +97,8 @@ SPAGMMATtest = function(bgenFile = "",
                  dosage_zerod_MAC_cutoff = 10,
                  is_output_moreDetails = FALSE, #new
                  MACCutoff_to_CollapseUltraRare = 10,
-                 function_group_test =c("lof", "missense", "synonymous"),  #new
-                 maxMAFforGroupTest = c(0.01, 0.1),
-                 max_markers_region = 100,   #new
+                 annotation_in_groupTest =c("lof", "missense", "synonymous"),  #new
+		 maxMAF_in_groupTest = c(0.01, 0.1),
 		 is_Firth_beta = FALSE,
 		 pCutoffforFirth = 0.01,
 		 is_overwrite_output = TRUE,
@@ -125,9 +126,9 @@ SPAGMMATtest = function(bgenFile = "",
                      min_MAF = min_MAF,
                      min_Info = min_Info,
                      SPAcutoff = SPAcutoff,
-                     numLinesOutput = numLinesOutput,
                      dosage_zerod_cutoff = dosage_zerod_cutoff,
-		     dosage_zerod_MAC_cutoff = dosage_zerod_MAC_cutoff)
+		     dosage_zerod_MAC_cutoff = dosage_zerod_MAC_cutoff,
+		     )
     #if(file.exists(SAIGEOutputFile)) {print("ok -2 file exist")} 
 
 
@@ -151,7 +152,7 @@ SPAGMMATtest = function(bgenFile = "",
                             min_Info,
                             1,
 			    is_output_moreDetails,
-			    numLinesOutput,
+			    markers_per_chunk,
 			    dosage_zerod_cutoff,
 			    dosage_zerod_MAC_cutoff,
 			    weights.beta
@@ -165,8 +166,8 @@ SPAGMMATtest = function(bgenFile = "",
       checkArgsList_for_Region(
                                     MACCutoff_to_CollapseUltraRare,
                                     #DosageCutoff_for_UltraRarePresence,
-                                    maxMAFforGroupTest = maxMAFforGroupTest,
-				    max_markers_region = max_markers_region)
+                                    maxMAF_in_groupTest = maxMAF_in_groupTest,
+				    markers_per_chunk_in_groupTest = markers_per_chunk_in_groupTest)
 
 
 
@@ -186,8 +187,8 @@ SPAGMMATtest = function(bgenFile = "",
 				#DosageCutoff_for_UltraRarePresence,
       setRegion_GlobalVarsInCPP(impute_method,
                                 max_missing,
-				maxMAFforGroupTest,
-				max_markers_region,
+				maxMAF_in_groupTest,
+				markers_per_chunk_in_groupTest,
 				1,
 				MACCutoff_to_CollapseUltraRare,
 				dosage_zerod_cutoff,
@@ -339,13 +340,12 @@ SPAGMMATtest = function(bgenFile = "",
     if(!isGroupTest){
     OutputFile = SAIGEOutputFile
 
-    nMarkersEachChunk = numLinesOutput
     #if(file.exists(SAIGEOutputFile)) {print("ok 2 file exist")}
         SAIGE.Marker(obj.model,
                    objGeno,
                    OutputFile,
                    OutputFileIndex,
-                   nMarkersEachChunk,
+                   markers_per_chunk,
                    is_output_moreDetails,
 		   is_imputed_data,
                    LOCO,
@@ -360,16 +360,16 @@ SPAGMMATtest = function(bgenFile = "",
 		     OutputFile,
 		     MACCutoff_to_CollapseUltraRare,
                      groupFile,
-                     function_group_test,
-                     maxMAFforGroupTest,
-                     max_markers_region,
+                     annotation_in_groupTest,
+                     maxMAF_in_groupTest,
+                     markers_per_chunk_in_groupTest,
                      genoType,
                      markerInfo,
 		     obj.model$traitType,
 		     is_imputed_data,
 		     isCondition,
 		     condition_weights,
-		     numLinesOutput,
+		     groups_per_chunk,
 		     r.corr,
 		     is_overwrite_output,
 		     is_single_in_groupTest,

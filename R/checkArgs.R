@@ -44,7 +44,6 @@ min_MAC,
 min_MAF,
 min_Info,
 SPAcutoff,
-numLinesOutput,
 dosage_zerod_cutoff,
 dosage_zerod_MAC_cutoff){
 
@@ -55,7 +54,6 @@ dosage_zerod_MAC_cutoff){
 	checkArgNumeric(min_MAF, deparse(substitute(min_MAF,)), 0, 0.5)
 	checkArgNumeric(min_Info, deparse(substitute(min_Info,)), 0, 1)
 	checkArgNumeric(SPAcutoff, deparse(substitute(SPAcutoff)), 0.5, 4)
-	checkArgNumeric(numLinesOutput, deparse(substitute(numLinesOutput,)), 1, 10000)
 	checkArgNumeric(dosage_zerod_cutoff, deparse(substitute(dosage_zerod_cutoff)), 0, 0.5)
 	checkArgNumeric(dosage_zerod_MAC_cutoff, deparse(substitute(dosage_zerod_MAC_cutoff)), dosage_zerod_cutoff, 100)
 	dosage_zerod_MAC_cutoff
@@ -84,8 +82,8 @@ checkArgsListBool = function(is_imputed_data,
 				    #DosageCutoff_for_UltraRarePresence,
 checkArgsList_for_Region = function( 
 				    MACCutoff_to_CollapseUltraRare,
-				    maxMAFforGroupTest,
-				    max_markers_region){
+				    maxMAF_in_groupTest,
+				    markers_per_chunk_in_groupTest){
 
 
     #if (method_to_CollapseUltraRare != "") {
@@ -118,13 +116,13 @@ checkArgsList_for_Region = function(
     #    cat("Ultra rare variants won't be collpased for set-based association tests\n")
     #}
 
-    if(length(maxMAFforGroupTest) < 1){
-      stop("maxMAFforGroupTest should contain at least one numeric value between 0 and 0.5\n")
+    if(length(maxMAF_in_groupTest) < 1){
+      stop("maxMAF_in_groupTest should contain at least one numeric value between 0 and 0.5\n")
     }else{	    
-      for(i in 1:length(maxMAFforGroupTest)){
-        checkArgNumeric(maxMAFforGroupTest[i], deparse(substitute(maxMAFforGroupTest[i])), 0, 0.5, FALSE, TRUE)
+      for(i in 1:length(maxMAF_in_groupTest)){
+        checkArgNumeric(maxMAF_in_groupTest[i], deparse(substitute(maxMAF_in_groupTest[i])), 0, 0.5, FALSE, TRUE)
       } 
     }
-    checkArgNumeric(max_markers_region, deparse(substitute(max_markers_region)), 1, 10000, TRUE, TRUE)
+    checkArgNumeric(markers_per_chunk_in_groupTest, deparse(substitute(markers_per_chunk_in_groupTest)), 1, 10000, TRUE, TRUE)
 }
 
