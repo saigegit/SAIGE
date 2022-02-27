@@ -214,14 +214,14 @@ Rcpp::DataFrame mainMarkerInCPP(
    indexForMissing.clear();
    //t_GVec0.clear();
    //t_GVec.clear();
-   //arma::vec timeoutput1 = getTime();
+   arma::vec timeoutput1 = getTime();
    bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
                                           isOnlyOutputNonZero, // bool t_isOnlyOutputNonZero,
                                           indexNonZeroVec, t_GVec, t_isImputation);
-   //arma::vec timeoutput2 = getTime();   
-//printTime(timeoutput1, timeoutput2, "Unified_getOneMarker"); 
+   arma::vec timeoutput2 = getTime();   
+   printTime(timeoutput1, timeoutput2, "Unified_getOneMarker"); 
 //
    if(!isReadMarker){
       //std::cout << "isReadMarker " << isReadMarker << std::endl;
@@ -492,9 +492,12 @@ bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN", "Vcf"
   bool isBoolRead = true;
   if(t_genoType == "plink"){
    bool isTrueGenotype = true;
+   arma::vec timeoutput1 = getTime();
    ptr_gPLINKobj->getOneMarker(t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, 
                                        t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero,
                                        isTrueGenotype, t_GVec);   // t_isTrueGenotype, only used for PLINK format.
+   arma::vec timeoutput2 = getTime();
+        printTime(timeoutput1, timeoutput2, "Unified_getOneMarker a");
   }
   
   if(t_genoType == "bgen"){
@@ -870,6 +873,7 @@ Rcpp::List mainRegionInCPP(
     std::remove(end);
     bool isOutputIndexForMissing = true;
     bool isOnlyOutputNonZero = false;
+  arma::vec timeoutput1 = getTime();
     bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
@@ -877,7 +881,12 @@ Rcpp::List mainRegionInCPP(
                                           indexNonZeroVec,
 					  GVec,
 					  t_isImputation);
-    if(!isReadMarker){
+   arma::vec timeoutput2 = getTime();
+   printTime(timeoutput1, timeoutput2, "Unified_getOneMarker");
+
+
+
+   if(!isReadMarker){
       std::cout << "Reading " <<  i << "th marker failed." << std::endl;
       break;
     }	    

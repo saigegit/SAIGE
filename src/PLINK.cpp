@@ -166,7 +166,7 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex,        // different meanings 
   int numMissing = 0;
   
   //std::vector<double> OneMarkerG1;
-  
+ arma::vec timeoutput1 = getTime(); 
   // t_isTrueGenotype = FALSE is used only when calculating GRM
   if(!t_isTrueGenotype){
     if(t_isOutputIndexForMissing)
@@ -182,7 +182,7 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex,        // different meanings 
   uint64_t posSeek = 3 + m_numBytesofEachMarker0 * t_gIndex;
   m_ibedFile.seekg(posSeek);
   m_ibedFile.read((char*)(&m_OneMarkerG4[0]), m_numBytesofEachMarker0);
-  
+
   t_indexForMissing.clear();
   t_indexForNonZero.clear();
   
@@ -203,7 +203,7 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex,        // different meanings 
     t_alt = m_ref[t_gIndex];
     genoMaps = m_genoMaps_ref_first;
   }
- 
+ arma::vec timeoutput2 = getTime();
   uint j = 0; 
   for(uint32_t i = 0; i < m_N; i++)
   {
@@ -240,6 +240,7 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex,        // different meanings 
     }
   }
   
+ arma::vec timeoutput3 = getTime();
   int count = m_N - numMissing;
   t_missingRate = (double)numMissing / (double)m_N;
   t_imputeInfo = 1;
@@ -252,7 +253,11 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex,        // different meanings 
     t_altCounts = 2 * (double)count * t_altFreq;
   }
   
+ arma::vec timeoutput4 = getTime();
   //return OneMarkerG1;
+     printTime(timeoutput1, timeoutput2, "Unified_getOneMarker 1");
+     printTime(timeoutput2, timeoutput3, "Unified_getOneMarker 2");
+     printTime(timeoutput3, timeoutput4, "Unified_getOneMarker 3");
 }
 
 // C++ version of which(). Note: start from 0, not 1 
