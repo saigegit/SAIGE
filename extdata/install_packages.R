@@ -6,6 +6,7 @@ req_packages <- c("R.utils", "Rcpp", "RcppParallel", "RcppArmadillo", "data.tabl
 for (pack in req_packages) {
     if(!require(pack, character.only = TRUE)) {
         install.packages(pack, repos = "https://cloud.r-project.org")
+	print(packageVersion(pack))
     }
 }
 install.packages("RSQLite", repos='http://cran.rstudio.com/')
