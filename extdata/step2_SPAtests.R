@@ -3,6 +3,7 @@
 #options(stringsAsFactors=F, scipen = 999)
 options(stringsAsFactors=F)
 library(SAIGE)
+#library(SAIGE, lib.loc="/net/hunt/zhowei/project/imbalancedCaseCtrlMixedModel/Rpackage_SPAGMMAT/SAIGE_newgit/install_0.99.1_test")
 #library(SAIGE, lib.loc="../../install_0.94")
 BLASctl_installed <- require(RhpcBLASctl)
 library(optparse)
@@ -36,7 +37,7 @@ option_list <- list(
   make_option("--AlleleOrder", type="character",default="alt-first",
     help="alt-first or ref-first for bgen or PLINK files"),
   make_option("--idstoIncludeFile", type="character",default="",
-    help="Path to a file containing variant ids to be included from the dosage file. The file does not have a header and each line is for a marker ID."),
+    help="Path to a file containing variant ids to be included from the dosage file. The file does not have a header and each line is for a marker ID. Marker ids are in the format chr:pos_ref/alt"),
   make_option("--rangestoIncludeFile", type="character",default="",
     help="Path to a file containing genome regions to be included from the dosage file. The file contains three columns for chromosome, start, and end respectively with no header. Note for vcf and sav files, only the first line in the file will be used."),
   make_option("--chrom", type="character",default="",
@@ -64,10 +65,12 @@ option_list <- list(
     help="Path to the input file containing the variance ratio, which is output from the previous step"),
   make_option("--SAIGEOutputFile", type="character", default="",
     help="Path to the output file containing assoc test results"),
-  make_option("--numLinesOutput", type="numeric",default=1000,
-    help="Number of  markers to be output each time [default=1000]"),
+  make_option("--markers_per_chunk", type="numeric",default=10000,
+    help="Number of markers to be tested and output in each chunk in the single-variant assoc tests [default=10000]"),
+  make_option("--groups_per_chunk", type="numeric",default=100,
+    help="Number of groups/sets to be read in and tested in each chunk in the set-based assoc tests [default=100]"),
   make_option("--is_output_moreDetails", type="logical",default=FALSE,
-    help="Whether to output heterozygous and homozygous counts in cases and controls. By default, FALSE. If True, the columns homN_Allele2_cases, hetN_Allele2_cases, homN_Allele2_ctrls, hetN_Allele2_ctrls will be output [default=TRUE]"),
+    help="Whether to output heterozygous and homozygous counts in cases and controls. By default, FALSE. If True, the columns homN_Allele2_cases, hetN_Allelelogical2_cases, homN_Allele2_ctrls, hetN_Allele2_ctrls will be output [default=FALSE]"),
   make_option("--is_overwrite_output", type="logical",default=TRUE,
     help="Whether to overwrite the output file if it exists. If FALSE, the program will continue the unfinished analysis instead of starting over from the beginining [default=TRUE]"),				
   make_option("--maxMAF_in_groupTest", type="character",default="0.0001,0.001,0.01",
@@ -91,11 +94,9 @@ option_list <- list(
   make_option("--weights.beta", type="character", default="1,25",
     help="parameters for the beta distribution to weight genetic markers in gene-based tests."),
   make_option("--r.corr", type="numeric", default=0,
-    help="More options can be seen in the SKAT library"),
+    help="If r.corr = 1, only Burden tests will be performed. If r.corr = 0, SKAT-O tests will be performed and results for Burden tests and SKAT tests will be output too. [default = 0]"),
   make_option("--markers_per_chunk_in_groupTest", type="numeric", default=100,
-    help="Number of markers in each chunk when calculating the variance covariance matrix in the gene-based tests  [default=100]."),
-
-
+    help="Number of markers in each chunk when calculating the variance covariance matrix in the set/group-based tests  [default=100]."),
   make_option("--condition", type="character",default="",
     help="For conditional analysis. Variant ids are in the format chr:pos_ref/alt and seperated by by comma. e.g.chr3:101651171_C/T,chr3:101651186_G/A"),
   make_option("--weights_for_condition",type="character", default=NULL,
@@ -107,6 +108,13 @@ mean, p-value based on traditional score test is returned. Default value is 2.")
     help="If is_imputed_data = TRUE, For variants with MAC <= dosage_zerod_MAC_cutoff, dosages <= dosageZerodCutoff with be set to 0. [default=0.2]"),
   make_option("--dosage_zerod_MAC_cutoff", type="numeric", default=10,
    help="If is_imputed_data = TRUE, For variants with MAC <= dosage_zerod_MAC_cutoff, dosages <= dosageZerodCutoff with be set to 0. [default=10]"),
+
+  make_option("--is_single_in_groupTest", type="logical", default=FALSE,
+    help="Whether to output single-variant assoc test results when perform group tests. Note, single-variant assoc test results will always be output when SKAT and SKAT-O tests are conducted with --r.corr=0. This parameter should only be used when only Burden tests are condcuted with --r.corr=1, [default=TRUE]"), 
+  make_option("--is_no_weight_in_groupTest", type="logical", default=FALSE,
+    help="Whether no weights are used in group Test. If FALSE, weights will be calcuated based on MAF from the Beta distribution with paraemters weights.beta or weights will be extracted from the group File if available [default=FALSE]"),
+  make_option("--is_output_markerList_in_groupTest", type="logical", default=FALSE,
+    help="Whether to output the marker lists included in the set-based tests for each mask.[default=TRUE]"),
 
   make_option("--is_Firth_beta", type="logical", default=FALSE,
     help="Whether to estimate effect sizes using approx Firth, only for binary traits [default=FALSE]"),
@@ -177,11 +185,9 @@ SPAGMMATtest(vcfFile=opt$vcfFile,
 	     bimFile=opt$bimFile,
 	     famFile=opt$famFile,
 	     AlleleOrder=opt$AlleleOrder,
-
 	     idstoIncludeFile = opt$idstoIncludeFile,
 	     rangestoIncludeFile = opt$rangestoIncludeFile,
 	     chrom=opt$chrom,
-
              is_imputed_data=opt$is_imputed_data,
              min_MAF = opt$minMAF,
              min_MAC = opt$minMAC,
@@ -189,16 +195,14 @@ SPAGMMATtest(vcfFile=opt$vcfFile,
              max_missing = opt$maxMissing,	
 	     impute_method = opt$impute_method,
 	     LOCO=opt$LOCO,
-
-
              GMMATmodelFile=opt$GMMATmodelFile,
              varianceRatioFile=opt$varianceRatioFile,
-             SAIGEOutputFile=opt$SAIGEOutputFile,
-	     numLinesOutput=opt$numLinesOutput,
+             SAIGEOutputFile=opt$SAIGEOutputFile,	
+	     markers_per_chunk=opt$markers_per_chunk,
+	     groups_per_chunk=opt$groups_per_chunk,
+             markers_per_chunk_in_groupTest=opt$markers_per_chunk_in_groupTest,
 	     is_output_moreDetails =opt$is_output_moreDetails,
 	     is_overwrite_output = opt$is_overwrite_output,
-	     
-
 	     maxMAF_in_groupTest = maxMAF_in_groupTest,
 	     annotation_in_groupTest = annotation_in_groupTest,
 	     groupFile = opt$groupFile,
@@ -210,17 +214,19 @@ SPAGMMATtest(vcfFile=opt$vcfFile,
              cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
 	     weights.beta = weights.beta,
 	     r.corr = opt$r.corr,
-	     markers_per_chunk_in_groupTest = opt$markers_per_chunk_in_groupTest,
-
-
-	     
 	     condition = opt$condition,
 	     weights_for_condition = weights_for_condition, 
-	     
 	     SPAcutoff = opt$SPAcutoff,
 	     dosage_zerod_cutoff = opt$dosage_zerod_cutoff,
 	     dosage_zerod_MAC_cutoff = opt$dosage_zerod_MAC_cutoff,
-
 	     is_Firth_beta = opt$is_Firth_beta,
-	     pCutoffforFirth = opt$pCutoffforFirth  
+	     pCutoffforFirth = opt$pCutoffforFirth,
+	     is_single_in_groupTest = opt$is_single_in_groupTest,
+             is_no_weight_in_groupTest = opt$is_no_weight_in_groupTest,
+	     is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest 
 )
+
+if(BLASctl_installed){
+  # Restore originally configured BLAS thread count
+  blas_set_num_threads(original_num_threads)
+}
