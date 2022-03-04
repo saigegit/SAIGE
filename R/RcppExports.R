@@ -69,6 +69,10 @@ fast_logistf_fit <- function(x, y, weight, offset, firth, col_fit, init, maxit, 
     .Call('_SAIGE_fast_logistf_fit', PACKAGE = 'SAIGE', x, y, weight, offset, firth, col_fit, init, maxit, maxstep, maxhs, lconv, gconv, xconv)
 }
 
+closeGenoFile <- function(t_genoType) {
+    invisible(.Call('_SAIGE_closeGenoFile', PACKAGE = 'SAIGE', t_genoType))
+}
+
 closeGenoFile_plink <- function() {
     invisible(.Call('_SAIGE_closeGenoFile_plink', PACKAGE = 'SAIGE'))
 }

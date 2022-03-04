@@ -359,10 +359,12 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   }  
  //arma::vec timeoutput3 = getTime();
   if(!isScoreFast){
+	//std::cout << "scoreTest " << std::endl;  
   	is_gtilde = true;
   	scoreTest(t_GVec, t_Beta, t_seBeta, t_pval_str, t_altFreq, t_Tstat, t_var1, t_var2, t_gtilde, m_flagSparseGRM, t_P2Vec, t_gy, is_region);
   }else{
   	is_gtilde = false;
+	//std::cout << "scoreTestFast "  << std::endl;  
 	//arma::uvec iIndexVec = arma::find(t_GVec > 0);
         scoreTestFast(t_GVec, iIndex, t_Beta, t_seBeta, t_pval_str, t_altFreq, t_Tstat, t_var1, t_var2);
   }
@@ -628,8 +630,10 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
         bool logp=false;
 
         if(p_iIndexComVecSize >= 0.5){
+		//std::cout << "SPA_fast " << std::endl;
                 SPA_fast(m_mu, t_gtilde, q_c, qinv_c, pval_noadj_c, false, gNA, gNB, muNA, muNB, NAmu, NAsigma, tol1, m_traitType, SPApval_c, t_isSPAConverge_c);
         }else{
+		//std::cout << "SPA " << std::endl;
                 SPA(m_mu, t_gtilde, q_c, qinv_c, pval_noadj_c, tol1, logp, m_traitType, SPApval_c, t_isSPAConverge_c);
         }
 

@@ -84,7 +84,7 @@ SPAGMMATtest = function(bgenFile = "",
                  SAIGEOutputFile = "",
                  markers_per_chunk = 10000,
 		 groups_per_chunk = 100,
-		 markers_per_chunk_in_groupTest = 100, #new
+		 markers_per_chunk_in_groupTest = 1000, #new
                  condition="",
 		 sparseGRMFile="",
                  sparseGRMSampleIDFile="",
@@ -165,6 +165,8 @@ print("OK")
       Check_File_Exist(groupFile, "groupFile")
       cat("group-based test will be performed\n")
       #checkArgsList_for_Region(method_to_CollapseUltraRare,
+      #order the max MAF from lowest to highest
+      maxMAF_in_groupTest = maxMAF_in_groupTest[order(maxMAF_in_groupTest)]
       checkArgsList_for_Region(
                                     MACCutoff_to_CollapseUltraRare,
                                     #DosageCutoff_for_UltraRarePresence,
@@ -289,7 +291,8 @@ print("OK")
 		     t_is_Firth_beta = is_Firth_beta,
 		     t_pCutoffforFirth = pCutoffforFirth,
 		     t_offset = obj.model$offset)
-
+  rm(sparseSigmaRList)
+  gc()
    #process condition
     if (isCondition) {
 	 #print("OK1")
@@ -324,7 +327,10 @@ print("OK")
 	condition_weights = c(0)
     }	    
 
-
+    traitType = obj.model$traitType
+    mu = obj.model$mu
+    rm(obj.model)
+    gc()
     #if(file.exists(SAIGEOutputFile)) {print("ok 0 file exist")} 
 
 
@@ -337,7 +343,7 @@ print("OK")
     OutputFile = SAIGEOutputFile
 
     #if(file.exists(SAIGEOutputFile)) {print("ok 2 file exist")}
-        SAIGE.Marker(obj.model,
+        SAIGE.Marker(traitType,
                    objGeno,
                    OutputFile,
                    OutputFileIndex,
@@ -351,7 +357,7 @@ print("OK")
     }else{
 		     #method_to_CollapseUltraRare,
                      #DosageCutoff_for_UltraRarePresence,
-	SAIGE.Region(obj.model,
+	SAIGE.Region(mu,
 		     objGeno,
 		     OutputFile,
 		     MACCutoff_to_CollapseUltraRare,
@@ -361,7 +367,7 @@ print("OK")
                      markers_per_chunk_in_groupTest,
                      genoType,
                      markerInfo,
-		     obj.model$traitType,
+		     traitType,
 		     is_imputed_data,
 		     isCondition,
 		     condition_weights,

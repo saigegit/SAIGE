@@ -125,7 +125,7 @@ setGenoInput = function(bgenFile = "",
   if(dosageFileType == "plink"){
     if(is.null(AlleleOrder)) AlleleOrder = "alt-first"
 
-    cat("allle order in the plink file is ", AlleleOrder, ".\n")
+    cat("allele order in the plink file is ", AlleleOrder, ".\n")
 
     if(bimFile == ""){
     	bimFile = gsub("bed$", "bim", bedFile)
@@ -415,4 +415,7 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 	stop("condition is empty!")
    }
    return(cond_genoIndex)
-}	
+}
+
+
+

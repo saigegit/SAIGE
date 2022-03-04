@@ -265,6 +265,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// closeGenoFile
+void closeGenoFile(std::string& t_genoType);
+RcppExport SEXP _SAIGE_closeGenoFile(SEXP t_genoTypeSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string& >::type t_genoType(t_genoTypeSEXP);
+    closeGenoFile(t_genoType);
+    return R_NilValue;
+END_RCPP
+}
 // closeGenoFile_plink
 void closeGenoFile_plink();
 RcppExport SEXP _SAIGE_closeGenoFile_plink() {
@@ -1972,6 +1982,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_check_Vcf_end", (DL_FUNC) &_SAIGE_check_Vcf_end, 0},
     {"_SAIGE_move_forward_iterator_Vcf", (DL_FUNC) &_SAIGE_move_forward_iterator_Vcf, 1},
     {"_SAIGE_fast_logistf_fit", (DL_FUNC) &_SAIGE_fast_logistf_fit, 13},
+    {"_SAIGE_closeGenoFile", (DL_FUNC) &_SAIGE_closeGenoFile, 1},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
     {"_SAIGE_getAlleleFreqVec", (DL_FUNC) &_SAIGE_getAlleleFreqVec, 0},

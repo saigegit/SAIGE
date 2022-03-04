@@ -104,6 +104,8 @@ public:
   uint32_t getN(){return m_N;};
   uint32_t getM0(){return m_M0;};
   uint32_t getM(){return m_M;};
+
+  void closegenofile();
 };
 
 }

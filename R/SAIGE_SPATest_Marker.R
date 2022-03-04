@@ -75,7 +75,7 @@ mainMarker = function(genoType, genoIndex, traitType, isMoreOutput, isImputation
 
 
 
-SAIGE.Marker = function(objNull,
+SAIGE.Marker = function(traitType,
 			objGeno,
                         OutputFile,
                         OutputFileIndex = NULL,
@@ -180,7 +180,7 @@ SAIGE.Marker = function(objNull,
     }	    
     # main function to calculate summary statistics for markers in one chunk
     #time_mainMarker = system.time({resMarker = mainMarker(genoType, genoIndex, objNull$traitType, isMoreOutput, isImputation, isCondition)})
-    resMarker = as.data.frame(mainMarkerInCPP(genoType, objNull$traitType, genoIndex, isMoreOutput, isImputation)) 
+    resMarker = as.data.frame(mainMarkerInCPP(genoType, traitType, genoIndex, isMoreOutput, isImputation)) 
     resMarker = resMarker[which(!is.na(resMarker$BETA)), ]
 
 #    print("time_mainMarker")

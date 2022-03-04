@@ -512,5 +512,8 @@ void BgenClass::setIsDropMissingDosagesInBgen (bool t_isDropmissingdosagesInBgen
   m_isDropMissingDosagesInBgen = t_isDropmissingdosagesInBgen;
 }
 
+void BgenClass::closegenofile(){
+	fclose(m_fin);
+}
 
 }  

@@ -177,5 +177,5 @@ arma::vec fast_logistf_fit(arma::mat & x,
 
 Rcpp::List RegionSetUpConditional_binary_InCPP(arma::vec & t_weight_cond);
 
-
+void closeGenoFile(std::string & t_genoType);
 #endif

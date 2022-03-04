@@ -37,7 +37,7 @@ CCT <- function(pvals, weights=NULL){
     return(0)
   }
   if(is.one){
-    warning("There are p-values that are exactly 1!")
+    #warning("There are p-values that are exactly 1!")
     return(min(1,(min(pvals))*(length(pvals))))
   }
 

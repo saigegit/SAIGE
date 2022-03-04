@@ -30,8 +30,9 @@ private:
   unsigned long long int m_numBytesofEachMarker0, m_numBytesofEachMarker;
   
   // input file stream of .bed file
-  std::ifstream m_ibedFile;
-  
+  //std::ifstream m_ibedFile;
+  FILE *m_fin; 
+
   // PLINK files
   std::string m_bimFile, m_famFile, m_bedFile;
   std::vector<uint32_t> m_posSampleInPlink;
@@ -150,7 +151,7 @@ public:
     return chrVec;
   }
 
-
+  void closegenofile();
 
 };
 

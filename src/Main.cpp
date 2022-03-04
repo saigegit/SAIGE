@@ -214,14 +214,13 @@ Rcpp::DataFrame mainMarkerInCPP(
    indexForMissing.clear();
    //t_GVec0.clear();
    //t_GVec.clear();
-   arma::vec timeoutput1 = getTime();
    bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
                                           isOnlyOutputNonZero, // bool t_isOnlyOutputNonZero,
                                           indexNonZeroVec, t_GVec, t_isImputation);
-   arma::vec timeoutput2 = getTime();   
-   printTime(timeoutput1, timeoutput2, "Unified_getOneMarker"); 
+   //arma::vec timeoutput2 = getTime();   
+   //printTime(timeoutput1, timeoutput2, "Unified_getOneMarker"); 
 //
    if(!isReadMarker){
       //std::cout << "isReadMarker " << isReadMarker << std::endl;
@@ -292,7 +291,7 @@ Rcpp::DataFrame mainMarkerInCPP(
     // Check UTIL.cpp
     //
     //
-    arma::vec timeoutput3 = getTime();
+    //arma::vec timeoutput3 = getTime();
     indexZeroVec.clear();
     indexNonZeroVec.clear();
 
@@ -321,7 +320,7 @@ Rcpp::DataFrame mainMarkerInCPP(
     indexNonZeroVec.clear();
     t_P2Vec.clear();
     G1tilde_P_G2tilde_Vec.clear();    
-    arma::vec timeoutput5 = getTime(); 
+    //arma::vec timeoutput5 = getTime(); 
  
  
    if(!isSingleVarianceRatio){ 
@@ -492,12 +491,12 @@ bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN", "Vcf"
   bool isBoolRead = true;
   if(t_genoType == "plink"){
    bool isTrueGenotype = true;
-   arma::vec timeoutput1 = getTime();
+   //arma::vec timeoutput1 = getTime();
    ptr_gPLINKobj->getOneMarker(t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, 
                                        t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero,
                                        isTrueGenotype, t_GVec);   // t_isTrueGenotype, only used for PLINK format.
-   arma::vec timeoutput2 = getTime();
-        printTime(timeoutput1, timeoutput2, "Unified_getOneMarker a");
+   //arma::vec timeoutput2 = getTime();
+     //   printTime(timeoutput1, timeoutput2, "Unified_getOneMarker a");
   }
   
   if(t_genoType == "bgen"){
@@ -725,7 +724,7 @@ Rcpp::List mainRegionInCPP(
 			   bool t_isSingleinGroupTest,
 			   bool t_isOutputMarkerList)
 {
-
+  //arma::vec timeoutput1 = getTime();
   bool isWeightCustomized = false;
   unsigned int q0 = t_genoIndex.size();                 // number of markers (before QC) in one region
   if(!(t_weight.is_zero()) && t_weight.n_elem == q0){
@@ -741,6 +740,9 @@ Rcpp::List mainRegionInCPP(
   arma::imat annoMAFIndicatorMat(q, q_anno_maf, arma::fill::zeros);
   arma::ivec annoMAFIndicatorVec(q_anno_maf);
   annoMAFIndicatorVec.zeros();
+  arma::vec maxMAFperAnno(q_anno, arma::fill::zeros);
+
+
 
   //setting up conditional markers  
   unsigned int q_cond = (ptr_gSAIGEobj->m_VarInvMat_cond).n_rows;	
@@ -873,7 +875,7 @@ Rcpp::List mainRegionInCPP(
     std::remove(end);
     bool isOutputIndexForMissing = true;
     bool isOnlyOutputNonZero = false;
-  arma::vec timeoutput1 = getTime();
+  //arma::vec timeoutput1 = getTime();
     bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
@@ -881,10 +883,8 @@ Rcpp::List mainRegionInCPP(
                                           indexNonZeroVec,
 					  GVec,
 					  t_isImputation);
-   arma::vec timeoutput2 = getTime();
-   printTime(timeoutput1, timeoutput2, "Unified_getOneMarker");
-
-
+   //arma::vec timeoutput2 = getTime();
+  // printTime(timeoutput1, timeoutput2, "Unified_getOneMarker");
 
    if(!isReadMarker){
       std::cout << "Reading " <<  i << "th marker failed." << std::endl;
@@ -998,6 +998,7 @@ Rcpp::List mainRegionInCPP(
       annoMAFIndicatorVec.zeros();
       for(unsigned int j = 0; j < q_anno; j++){
         if(annoIndicatorMat(i,j) == 1){
+		maxMAFperAnno(j) = std::max(maxMAFperAnno(j), MAF);
 		for(unsigned int m = 0; m < q_maf; m++){
 			if(MAFIndicatorVec(m) == 1){
 				jm = j*q_maf + m;	
@@ -1040,6 +1041,7 @@ Rcpp::List mainRegionInCPP(
       annoMAFIndicatorVec.zeros();
       for(unsigned int j = 0; j < q_anno; j++){
         if(annoIndicatorMat(i,j) == 1){
+		maxMAFperAnno(j) = std::max(maxMAFperAnno(j), MAF);
 		for(unsigned int m = 0; m < q_maf; m++){
                         if(MAFIndicatorVec(m) == 1){
                         	jm = j*q_maf + m;
@@ -1095,10 +1097,10 @@ Rcpp::List mainRegionInCPP(
   }
 
 
-  
 if(i2 > 0){
   int m1new = std::max(m1, q_anno_maf);
   if(isWeightCustomized){
+    weightURMat_cnt.replace(0, 1); 	  
     genoURMat = genoURMat / weightURMat_cnt;
     weightURMat.ones();    
   }
@@ -1324,6 +1326,21 @@ if(t_regionTestType != "BURDEN"){
   }
 }  //if(t_regionTestType != "BURDEN"){
 
+
+//read and test single markers done
+//arma::vec timeoutput2 = getTime();
+//printTime(timeoutput1, timeoutput2, "read and test single markers done");
+
+
+//check the max MAF of all markers
+//if there are sets containing the same markers
+arma::uvec q_maf_for_anno(q_anno);
+for(unsigned int j = 0; j < q_anno; j++){
+	arma::uvec jtemp = find(maxMAFVec >= maxMAFperAnno(j));
+	q_maf_for_anno(j) = jtemp.min();
+}
+
+
 //If only conduct Burden test
 arma::vec BURDEN_pval_Vec(q_anno_maf);
 BURDEN_pval_Vec.zeros();
@@ -1339,16 +1356,23 @@ arma::vec BURDEN_seBeta_cVec(q_anno_maf);
 BURDEN_seBeta_cVec.zeros();
 
 Rcpp::DataFrame OUT_BURDEN = Rcpp::DataFrame::create();
-unsigned int i;
+unsigned int i= 0;
+unsigned int q_maf_m;
+bool isPolyMarker = true;
 if(t_regionTestType == "BURDEN"){
      for(unsigned int j = 0; j < q_anno; j++){
+       q_maf_m = q_maf_for_anno(j);	    
+       isPolyMarker = true;	
        for(unsigned int m = 0; m < q_maf; m++){
-        jm = j*q_maf+m;
+       //for(unsigned int m = 0; m < q_maf_m; m++){
+	jm = j*q_maf+m;
 	i = jm;
+	//jm = i;
+      if(m <= q_maf_m){
         arma::vec genoSumVec = genoSumMat.col(jm);
         int n = genoSumVec.size();
         arma::uvec indexForNonZero = arma::find(genoSumVec != 0);
-	arma::uvec indexZeroVec_arma = arma::find(genoSumVec > 0);
+	arma::uvec indexZeroVec_arma = arma::find(genoSumVec == 0);
         if(indexForNonZero.n_elem > 0){
         //URindVec.push_back(jm+1);
           double altFreq = arma::mean(genoSumVec)/2;
@@ -1372,8 +1396,12 @@ if(t_regionTestType == "BURDEN"){
           arma::uvec indexNonZeroVec_arma;
           //indexZeroVec_arma = arma::conv_to<arma::uvec>::from(indexZeroVec);
           indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
-
+	  //arma::vec timeoutput_getp = getTime();
           ptr_gSAIGEobj->getMarkerPval(genoSumVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec);
+	  //std::cout << "pval " << pval << std::endl;
+	  //std::cout << "altFreq " << altFreq << std::endl;
+	  //arma::vec timeoutput_getp2 = getTime();
+	  //printTime(timeoutput_getp, timeoutput_getp2, "get p  done");
 	  BURDEN_pval_Vec(i) = pval;
 	  BURDEN_Beta_Vec(i) = Beta;
 	  BURDEN_seBeta_Vec(i) = seBeta;
@@ -1382,8 +1410,26 @@ if(t_regionTestType == "BURDEN"){
 	    BURDEN_Beta_cVec(i) = Beta_c;
 	    BURDEN_seBeta_cVec(i) = seBeta_c;            
           }		  
-         }
-       }	
+	  //i = i + 1;
+         }else{
+	   isPolyMarker = false;	 
+	   //i = (j+1)*q_maf;
+	 }
+     }else{
+	if(isPolyMarker){
+	  BURDEN_pval_Vec(i) = pval;
+          BURDEN_Beta_Vec(i) = Beta;
+          BURDEN_seBeta_Vec(i) = seBeta;
+          if(isCondition){
+            BURDEN_pval_cVec(i) = pval_c;
+            BURDEN_Beta_cVec(i) = Beta_c;
+            BURDEN_seBeta_cVec(i) = seBeta_c;
+          }
+	}
+     } 	     
+	//std::cout << "i " << i << std::endl;
+
+       }
      }
 
      OUT_BURDEN["Pvalue_Burden"] = BURDEN_pval_Vec;
@@ -1393,13 +1439,18 @@ if(t_regionTestType == "BURDEN"){
      OUT_BURDEN["Beta_Burden_c"] = BURDEN_Beta_cVec;
      OUT_BURDEN["seBeta_Burden_c"] = BURDEN_seBeta_cVec;
 
+//arma::vec timeoutput3 = getTime();
+//printTime(timeoutput2, timeoutput3, "burden test done");
 }
 
+
+  q_maf_for_anno = q_maf_for_anno + 1;
   Rcpp::List OutList = Rcpp::List::create(
                                           Rcpp::Named("annoMAFIndicatorMat") = annoMAFIndicatorMat,
                                           Rcpp::Named("MAC_GroupVec") = MAC_GroupVec,
                                           Rcpp::Named("NumRare_GroupVec") = NumRare_GroupVec,
-                                          Rcpp::Named("NumUltraRare_GroupVec") = NumUltraRare_GroupVec
+                                          Rcpp::Named("NumUltraRare_GroupVec") = NumUltraRare_GroupVec,
+					  Rcpp::Named("q_maf_for_annoVec") = q_maf_for_anno
                                           );
 
 
@@ -1746,4 +1797,14 @@ arma::vec fast_logistf_fit(arma::mat & x,
 	return beta;
 }
 
-
+// [[Rcpp::export]]
+void closeGenoFile(std::string & t_genoType)
+{
+  if(t_genoType == "bgen"){
+    ptr_gBGENobj->closegenofile();
+  }else if(t_genoType == "vcf"){
+    ptr_gVCFobj->closegenofile();
+  }else if(t_genoType == "plink"){
+    ptr_gPLINKobj->closegenofile();
+  }	  
+}
