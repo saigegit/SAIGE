@@ -14,10 +14,10 @@ set -eu
 #Rscript -e 'devtools::install_github("leeshawn/SPAtest")'
 
 ##Install MetaSKAT from github
-#devtools::install_github("leeshawn/MetaSKAT")
+devtools::install_github("leeshawn/MetaSKAT")
 
 ##install savvy library
-#rm -rf thirdParty/cget
+rm -rf thirdParty/cget
 
-#cget ignore --prefix thirdParty/cget xz
-#cget install -DCMAKE_C_FLAGS="-fPIC" -DCMAKE_CXX_FLAGS="-fPIC" --prefix thirdParty/cget -f thirdParty/requirements.txt
+cget ignore --prefix thirdParty/cget xz
+cget install -DCMAKE_C_FLAGS="-fPIC" -DCMAKE_CXX_FLAGS="-fPIC" --prefix thirdParty/cget -f thirdParty/requirements.txt
