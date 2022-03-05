@@ -262,7 +262,12 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex,        // different meanings 
   t_missingRate = (double)numMissing / (double)m_N;
   t_imputeInfo = 1;
   t_altCounts = (double)sum;
-  t_altFreq = t_altCounts/ (double)count / 2;
+
+  if(count > 0){
+        t_altFreq = t_altCounts/ (double)count / 2;
+  }else{
+        t_altFreq = 0;
+  }
   
   // updated on 03/14/2021
   if(m_AlleleOrder == "ref-first"){

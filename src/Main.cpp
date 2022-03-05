@@ -895,11 +895,6 @@ Rcpp::List mainRegionInCPP(
 
     double MAF = std::min(altFreq, 1 - altFreq);
     double w0;
-    if(isWeightCustomized){
-	w0 = t_weight(i);
-    }else{
-	w0 = boost::math::pdf(beta_dist, MAF);
-    }
     double MAC = MAF * 2 * t_n * (1 - missingRate);   // checked on 08-10-2021
     flip = imputeGenoAndFlip(GVec, altFreq, altCounts, indexForMissing, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec, indexNonZeroVec);
 
@@ -928,7 +923,11 @@ Rcpp::List mainRegionInCPP(
       continue;
    } 
 
-
+    if(isWeightCustomized){
+        w0 = t_weight(i);
+    }else{
+        w0 = boost::math::pdf(beta_dist, MAF);
+    }
 
 
     if(MAC > g_region_minMAC_cutoff){  // not Ultra-Rare Variants
