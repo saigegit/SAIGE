@@ -2,6 +2,10 @@
 #install required R packages, from Finnge/SAIGE-IT
 
 #req_packages <- c("R.utils", "Rcpp", "RcppParallel", "RcppArmadillo", "data.table", "RcppEigen", "Matrix", "methods", "BH", "optparse", "SPAtest", "MetaSKAT", "roxygen2", "rversions","devtools", "SKAT")
+install.packages("ellipsis", repos='http://cran.rstudio.com/')
+print(packageVersion("ellipsis"))
+install.packages("vctrs", repos='http://cran.rstudio.com/')
+print(packageVersion("vctrs"))
 req_packages <- c("R.utils", "Rcpp", "RcppParallel", "RcppArmadillo", "data.table", "RcppEigen", "Matrix", "methods", "BH", "optparse", "SPAtest", "roxygen2", "rversions","devtools", "SKAT", "RhpcBLASctl", "qlcMatrix", "dplyr", "dbplyr")
 for (pack in req_packages) {
     if(!require(pack, character.only = TRUE)) {
@@ -13,10 +17,6 @@ devtools::install_version("Rcpp", version = "1.0.7", repos = "http://cran.us.r-p
 print(packageVersion("Rcpp"))
 install.packages("RSQLite", repos='http://cran.rstudio.com/')
 print(packageVersion("RSQLite"))
-install.packages("ellipsis", repos='http://cran.rstudio.com/')
-print(packageVersion("ellipsis"))
-install.packages("vctrs", repos='http://cran.rstudio.com/')
-print(packageVersion("vctrs"))
 
 #devtools::install_github("leeshawn/SPAtest")
 #devtools::install_github("leeshawn/MetaSKAT")
