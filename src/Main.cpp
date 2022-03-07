@@ -1258,9 +1258,11 @@ if(i2 > 0){
   nchunks = mPassCVVecsize;
 
 
-arma::mat VarMat(i1, i1);
+arma::mat VarMat;
+//(i1, i1);
 
 if(t_regionTestType != "BURDEN"){
+  VarMat.resize(i1, i1);	
   if(nchunks == 1){
     VarMat = P1Mat * P2Mat;
   }
