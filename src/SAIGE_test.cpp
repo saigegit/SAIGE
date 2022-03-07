@@ -14,7 +14,6 @@
 #include "getMem.hpp"
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
-
 #include <boost/iostreams/filter/zstd.hpp>
 #include <boost/date_time.hpp>
 #include <boost/math/distributions/normal.hpp>

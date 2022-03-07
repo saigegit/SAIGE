@@ -21,6 +21,7 @@
 #include "VCF.hpp"
 #include "SAIGE_test.hpp"
 #include "UTIL.hpp"
+#include "CCT.hpp"
 
 #include <Rcpp.h>
 #include "getMem.hpp"
@@ -1355,6 +1356,9 @@ arma::vec BURDEN_Beta_cVec(q_anno_maf);
 BURDEN_Beta_cVec.zeros();
 arma::vec BURDEN_seBeta_cVec(q_anno_maf);
 BURDEN_seBeta_cVec.zeros();
+
+
+
 
 Rcpp::DataFrame OUT_BURDEN = Rcpp::DataFrame::create();
 unsigned int i= 0;
