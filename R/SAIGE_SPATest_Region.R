@@ -126,6 +126,13 @@ SAIGE.Region = function(mu,
     method = NULL
     cat("BURDEN test will be performed\n")
     regionTestType = "BURDEN"
+
+    #output the result from Rcpp
+    isOpenOutFile = openOutfile(traitType)
+    if(!isOpenOutFile){
+	stop("Output file can't be opened\n")
+    }
+
     if(is_single_in_groupTest){
       cat("is_single_in_groupTest = TRUE. Single-variant assoc tests results will be output\n")
     }else{
@@ -243,7 +250,7 @@ cth_chunk_to_output=1
       #gc()
 
       #time_mainRegionInCPP = system.time({outList = mainRegionInCPP(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest)})
-      outList = mainRegionInCPP(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest)
+      outList = mainRegionInCPP(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolist, regionName)
 #print("time_mainRegionInCPP")
 #print(time_mainRegionInCPP)
       rm(region)
@@ -434,41 +441,11 @@ if(regionTestType != "BURDEN"){
   #}#if(length(noNAIndices) > 0){
 
 gc()
-}else{#if(regionTestType != "BURDEN"){
- #ta0 = proc.time()	
-    annoMAFIndVec = c()
-    regionNameVec = c()
-    GroupVec = c()
-    max_MAFVec = c() 
-    groupOutList = outList$OUT_BURDEN 
-    for(j in 1:length(annolist)){
-        AnnoName = annolist[j]
-        for(m in 1:length(maxMAFlist)){
-                jm = (j-1)*(length(maxMAFlist)) + m
-                maxMAFName = maxMAFlist[m]
-                tempPos = which(annoMAFIndicatorMat[,jm] == 1)
-               if(length(tempPos) > 0){
-                	annoMAFIndVec = c(annoMAFIndVec, jm)
-			regionNameVec = c(regionNameVec, regionName)
-			GroupVec = c(GroupVec, AnnoName)
-			max_MAFVec = c(max_MAFVec, maxMAFName)
-		}
-	}
-    }
-    if(length(annoMAFIndVec) > 0){
-     pval.Region = data.frame(Region = regionNameVec, Group = GroupVec, max_MAF = max_MAFVec,
-			      Pvalue_Burden =  groupOutList$Pvalue_Burden[annoMAFIndVec,1],
-			      BETA_Burden = groupOutList$Beta_Burden[annoMAFIndVec,1],
-			      SE_Burden = groupOutList$seBeta_Burden[annoMAFIndVec,1])
-
-     if(isCondition){
-       pval.Region$Pvalue_Burden_cond = groupOutList$Pvalue_Burden_c[annoMAFIndVec,1]
-       pval.Region$BETA_Burden_cond = groupOutList$Beta_Burden_c[annoMAFIndVec,1]
-       pval.Region$SE_Burden_cond = groupOutList$seBeta_Burden_c[annoMAFIndVec,1]
-     }	     
-    }	
 }
 
+
+
+if(regionTestType != "BURDEN"){
 
     if(length(annoMAFIndVec) > 0){
       pval.Region$MAC = outList$MAC_GroupVec[annoMAFIndVec]
@@ -516,7 +493,7 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
 #print(ta0 - tb0)
 #print("ta1 - ta0")
 #print(ta1 - ta0)
-
+}#if(regionTestType != "BURDEN"){
 
   Output_MarkerList = NULL
   if(is_output_markerList_in_groupTest){
@@ -573,15 +550,6 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
    }else{
 	Output_MarkerList.all = NULL
    }	   
-     #writeOutputFile(Output = list(pval.Region,  OutList, Output_MarkerList),
-     #               OutputFile = list(OutputFile, paste0(OutputFile, ".singleAssoc.txt"), paste0(OutputFile, ".markerList.txt")),
-     #               OutputFileIndex = OutputFileIndex,
-     #               AnalysisType = "Region",
-     #               nEachChunk = 1,
-     #               indexChunk = i,
-     #               Start = (i==1),
-     #               End = (i==nRegions))
-
 
   indexChunk = i
   #Start = (i==1)
@@ -590,8 +558,9 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
   AnalysisType = "Region"
   nEachChunk = 1
 
+if(regionTestType != "BURDEN"){  
 pval.Region.all = rbind(pval.Region.all, pval.Region)
-
+}
 
 
 
@@ -607,7 +576,7 @@ if(mth ==  numberRegionsInChunk){
   print("write to output")
   #cat("n1 is ", n1, "\n")
   #cat("n2 is ", n2, "\n")
- 
+ if(FALSE){
       if(Start){
         if(!is.null(pval.Region.all)){
           write.table(pval.Region.all, OutputFile, quote = F, sep = "\t", append = F, col.names = T, row.names = F)
@@ -653,6 +622,11 @@ if(mth ==  numberRegionsInChunk){
   if(End)
     write.table(message5, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
 
+}#if(FALSE)
+
+
+
+
 pval.Region.all = NULL
 OutList.all = NULL
 Output_MarkerList.all = NULL
@@ -672,29 +646,6 @@ gc()
    if(is_output_markerList_in_groupTest){
      rm(Output_MarkerList)
    } 	   
-   #}else{
-   #  writeOutputFile(Output = list(pval.Region),
-   #                 OutputFile = list(OutputFile),
-   #                 OutputFileIndex = OutputFileIndex,
-   #                 AnalysisType = "Region",
-   #                 nEachChunk = 1,
-   #                 indexChunk = i,
-   #                 Start = (i==1),
-   #                 End = (i==nRegions))
-    
-   #}
-
-
-
-
-     #writeOutputFile(Output = list(Output_MarkerList),
-     #               OutputFile = list(paste0(OutputFile,".markerList.txt")),
-     #               OutputFileIndex = OutputFileIndex,
-     #               AnalysisType = "Region",
-     #               nEachChunk = 1,
-     #               indexChunk = i,
-     #               Start = (i==1),
-     #               End = (i==nRegions))
 
    rm(outList)
    rm(pval.Region)

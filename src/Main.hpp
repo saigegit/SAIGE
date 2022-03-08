@@ -12,7 +12,8 @@ void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
                                double t_min_info_marker,
                                double t_dosage_zerod_cutoff,
                                double t_dosage_zerod_MAC_cutoff,
-                               arma::vec & t_weights_beta);
+                               arma::vec & t_weights_beta,
+			       std::string t_outputFilePrefix);
 
 void setMarker_GlobalVarsInCPP(
                                bool t_isOutputMoreDetails,
@@ -95,7 +96,9 @@ Rcpp::List mainRegionInCPP(
 			   arma::vec & t_weight,
 			   arma::vec & t_weight_cond,
 			   bool t_isSingleinGroupTest,
-			   bool t_isOutputMarkerList);
+			   bool t_isOutputMarkerList,
+			   std::vector<std::string> & annoStringVec,
+                           std::string regionName);
 
 
 
@@ -178,4 +181,6 @@ arma::vec fast_logistf_fit(arma::mat & x,
 Rcpp::List RegionSetUpConditional_binary_InCPP(arma::vec & t_weight_cond);
 
 void closeGenoFile(std::string & t_genoType);
+
+bool openOutfile(std::string  t_traitType);
 #endif

@@ -152,7 +152,8 @@ print("OK")
                             min_Info,
 			dosage_zerod_cutoff,
                         dosage_zerod_MAC_cutoff,
-			weights.beta)	
+			weights.beta, 
+			OutputFile)	
 
     if(groupFile == ""){
       isGroupTest = FALSE

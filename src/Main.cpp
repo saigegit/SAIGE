@@ -8,7 +8,7 @@
 #include <chrono>         // std::chrono::seconds
 // std::this_thread::sleep_for (std::chrono::seconds(1));
 #include <cstdio>         // std::remove
-
+#include <fstream>
 // Currently, omp does not work well, will check it later
 // error: SET_VECTOR_ELT() can only be applied to a 'list', not a 'character'
 // remove all Rcpp::List to check if it works
@@ -63,8 +63,8 @@ arma::vec g_weights_beta(2);
 
 bool  g_is_Firth_beta;
 double g_pCutoffforFirth;
-
-
+std::ofstream OutFile;
+std::string g_outputFilePrefix;
 
 // [[Rcpp::export]]
 void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
@@ -74,7 +74,8 @@ void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
                                double t_min_info_marker,
 			       double t_dosage_zerod_cutoff,
                                double t_dosage_zerod_MAC_cutoff,
-			       arma::vec & t_weights_beta)
+			       arma::vec & t_weights_beta, 
+			       std::string t_outputFilePrefix)
 {
   g_impute_method = t_impute_method;
   g_missingRate_cutoff = t_missing_cutoff;
@@ -84,6 +85,7 @@ void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
   g_dosage_zerod_cutoff = t_dosage_zerod_cutoff;
   g_dosage_zerod_MAC_cutoff = t_dosage_zerod_MAC_cutoff;
   g_weights_beta = t_weights_beta;
+  g_outputFilePrefix = t_outputFilePrefix;
 
 }
 // [[Rcpp::export]]
@@ -723,7 +725,9 @@ Rcpp::List mainRegionInCPP(
 			   arma::vec & t_weight,
 			   arma::vec & t_weight_cond,
 			   bool t_isSingleinGroupTest,
-			   bool t_isOutputMarkerList)
+			   bool t_isOutputMarkerList, 
+			   std::vector<std::string> & annoStringVec,
+			   std::string regionName)
 {
   //arma::vec timeoutput1 = getTime();
   bool isWeightCustomized = false;
@@ -1345,30 +1349,36 @@ for(unsigned int j = 0; j < q_anno; j++){
 
 //If only conduct Burden test
 arma::vec BURDEN_pval_Vec(q_anno_maf);
-BURDEN_pval_Vec.zeros();
-arma::vec BURDEN_Beta_Vec(q_anno_maf);
-BURDEN_Beta_Vec.zeros();
-arma::vec BURDEN_seBeta_Vec(q_anno_maf);
-BURDEN_seBeta_Vec.zeros();
+//BURDEN_pval_Vec.zeros();
+BURDEN_pval_Vec.fill(-1.0);
+//arma::vec BURDEN_Beta_Vec(q_anno_maf);
+//BURDEN_Beta_Vec.zeros();
+//arma::vec BURDEN_seBeta_Vec(q_anno_maf);
+//BURDEN_seBeta_Vec.zeros();
 arma::vec BURDEN_pval_cVec(q_anno_maf);
-BURDEN_pval_cVec.zeros();
-arma::vec BURDEN_Beta_cVec(q_anno_maf);
-BURDEN_Beta_cVec.zeros();
-arma::vec BURDEN_seBeta_cVec(q_anno_maf);
-BURDEN_seBeta_cVec.zeros();
+//BURDEN_pval_cVec.zeros();
+BURDEN_pval_cVec.fill(-1.0);
+//arma::vec BURDEN_Beta_cVec(q_anno_maf);
+//BURDEN_Beta_cVec.zeros();
+//arma::vec BURDEN_seBeta_cVec(q_anno_maf);
+//BURDEN_seBeta_cVec.zeros();
 
 
 
 
-Rcpp::DataFrame OUT_BURDEN = Rcpp::DataFrame::create();
+//Rcpp::DataFrame OUT_BURDEN = Rcpp::DataFrame::create();
 unsigned int i= 0;
 unsigned int q_maf_m;
 bool isPolyMarker = true;
+std::string AnnoName;
+double maxMAFName;
 if(t_regionTestType == "BURDEN"){
      for(unsigned int j = 0; j < q_anno; j++){
-       q_maf_m = q_maf_for_anno(j);	    
+       q_maf_m = q_maf_for_anno(j);
+       AnnoName = annoStringVec[j]; 
        isPolyMarker = true;	
        for(unsigned int m = 0; m < q_maf; m++){
+	maxMAFName = maxMAFVec(m); 
        //for(unsigned int m = 0; m < q_maf_m; m++){
 	jm = j*q_maf+m;
 	i = jm;
@@ -1408,13 +1418,47 @@ if(t_regionTestType == "BURDEN"){
 	  //arma::vec timeoutput_getp2 = getTime();
 	  //printTime(timeoutput_getp, timeoutput_getp2, "get p  done");
 	  BURDEN_pval_Vec(i) = pval;
-	  BURDEN_Beta_Vec(i) = Beta;
-	  BURDEN_seBeta_Vec(i) = seBeta;
+	  //BURDEN_Beta_Vec(i) = Beta;
+	  //BURDEN_seBeta_Vec(i) = seBeta;
+	  
 	  if(isCondition){
 	    BURDEN_pval_cVec(i) = pval_c;
-	    BURDEN_Beta_cVec(i) = Beta_c;
-	    BURDEN_seBeta_cVec(i) = seBeta_c;            
-          }		  
+	  //  BURDEN_Beta_cVec(i) = Beta_c;
+	  //  BURDEN_seBeta_cVec(i) = seBeta_c;            
+          }
+	   OutFile << regionName;
+           OutFile << "\t";
+	   OutFile << AnnoName;
+	   OutFile << "\t";
+	   OutFile << maxMAFName;
+           OutFile << "\t";
+           OutFile << pval; 	   
+           OutFile << "\t";
+           OutFile << Beta; 	   
+           OutFile << "\t";
+           OutFile << seBeta; 	   
+           OutFile << "\t";
+	   if(isCondition){
+           OutFile << pval_c; 	   
+           OutFile << "\t";
+           OutFile << Beta_c; 	   
+           OutFile << "\t";
+           OutFile << seBeta_c; 	   
+           OutFile << "\t";
+	   }	
+	  
+	   OutFile << MAC_GroupVec(i);
+	   OutFile << "\t"; 
+           if(t_traitType == "binary"){
+		OutFile << MACCase_GroupVec(i);
+	   	OutFile << "\t"; 
+		OutFile << MACControl_GroupVec(i);
+	   	OutFile << "\t"; 
+	   }
+	   OutFile << NumRare_GroupVec(i);
+	   OutFile << "\t";
+	   OutFile << NumUltraRare_GroupVec(i);
+	   OutFile << "\n";
 	  //i = i + 1;
          }else{
 	   isPolyMarker = false;	 
@@ -1423,13 +1467,47 @@ if(t_regionTestType == "BURDEN"){
      }else{
 	if(isPolyMarker){
 	  BURDEN_pval_Vec(i) = pval;
-          BURDEN_Beta_Vec(i) = Beta;
-          BURDEN_seBeta_Vec(i) = seBeta;
+          //BURDEN_Beta_Vec(i) = Beta;
+          //BURDEN_seBeta_Vec(i) = seBeta;
           if(isCondition){
             BURDEN_pval_cVec(i) = pval_c;
-            BURDEN_Beta_cVec(i) = Beta_c;
-            BURDEN_seBeta_cVec(i) = seBeta_c;
+          //  BURDEN_Beta_cVec(i) = Beta_c;
+          //  BURDEN_seBeta_cVec(i) = seBeta_c;
           }
+
+           OutFile << regionName;
+           OutFile << "\t";
+           OutFile << AnnoName;
+           OutFile << "\t";
+           OutFile << maxMAFName;
+           OutFile << "\t";
+           OutFile << pval;
+           OutFile << "\t";
+           OutFile << Beta;
+           OutFile << "\t";
+           OutFile << seBeta;
+           OutFile << "\t";
+           if(isCondition){
+           OutFile << pval_c;
+           OutFile << "\t";
+           OutFile << Beta_c;
+           OutFile << "\t";
+           OutFile << seBeta_c;
+           OutFile << "\t";
+           }
+
+           OutFile << MAC_GroupVec(i);
+           OutFile << "\t";
+           if(t_traitType == "binary"){
+                OutFile << MACCase_GroupVec(i);
+                OutFile << "\t";
+                OutFile << MACControl_GroupVec(i);
+                OutFile << "\t";
+           }
+           OutFile << NumRare_GroupVec(i);
+           OutFile << "\t";
+           OutFile << NumUltraRare_GroupVec(i);
+	   OutFile << "\n";
 	}
      } 	     
 	//std::cout << "i " << i << std::endl;
@@ -1437,12 +1515,52 @@ if(t_regionTestType == "BURDEN"){
        }
      }
 
-     OUT_BURDEN["Pvalue_Burden"] = BURDEN_pval_Vec;
-     OUT_BURDEN["Beta_Burden"] = BURDEN_Beta_Vec;
-     OUT_BURDEN["seBeta_Burden"] = BURDEN_seBeta_Vec;
-     OUT_BURDEN["Pvalue_Burden_c"] = BURDEN_pval_cVec;
-     OUT_BURDEN["Beta_Burden_c"] = BURDEN_Beta_cVec;
-     OUT_BURDEN["seBeta_Burden_c"] = BURDEN_seBeta_cVec;
+     //OUT_BURDEN["Pvalue_Burden"] = BURDEN_pval_Vec;
+     //OUT_BURDEN["Beta_Burden"] = BURDEN_Beta_Vec;
+     //OUT_BURDEN["seBeta_Burden"] = BURDEN_seBeta_Vec;
+     //OUT_BURDEN["Pvalue_Burden_c"] = BURDEN_pval_cVec;
+     //OUT_BURDEN["Beta_Burden_c"] = BURDEN_Beta_cVec;
+     //OUT_BURDEN["seBeta_Burden_c"] = BURDEN_seBeta_cVec;
+
+           OutFile << regionName;
+           OutFile << "\tCauchy\tNA\t";
+           //OutFile << AnnoName;
+           //OutFile << "\t";
+           //OutFile << maxMAFName;
+           //OutFile << "\t";
+	   //arma::uvec nonMissingPvalVecInd = arma::find(BURDEN_seBeta_Vec > 0);
+	   arma::uvec nonMissingPvalVecInd = arma::find(BURDEN_pval_Vec >= 0);
+	   arma::vec nonMissingPvalVec = BURDEN_pval_Vec.elem(nonMissingPvalVecInd);
+	   double cctpval = CCT_cpp(nonMissingPvalVec);
+           OutFile << cctpval;
+           OutFile << "\tNA\tNA\t";
+           //OutFile << Beta;
+           //OutFile << "\t";
+           //OutFile << seBeta;
+           //OutFile << "\t";
+           if(isCondition){
+	   arma::vec nonMissingPvalVec_cond = BURDEN_pval_cVec.elem(nonMissingPvalVecInd);
+	   double cctpval_cond = CCT_cpp(nonMissingPvalVec_cond);	   
+           OutFile << cctpval_cond;
+           OutFile << "\tNA\tNA\t";
+           //OutFile << Beta_c;
+           //OutFile << "\t";
+           //OutFile << seBeta_c;
+           //OutFile << "\t";
+           }
+
+           //OutFile << MAC_GroupVec(i);
+           OutFile << "NA\t";
+           if(t_traitType == "binary"){
+                //OutFile << MACCase_GroupVec(i);
+                OutFile << "NA\t";
+                //MACCtrl_GroupVec(i);
+                OutFile << "NA\t";
+           }
+           //OutFile << NumRare_GroupVec(i);
+           OutFile << "NA\t";
+           //OutFile << NumUltraRare_GroupVec(i);
+           OutFile << "NA\n";
 
 //arma::vec timeoutput3 = getTime();
 //printTime(timeoutput2, timeoutput3, "burden test done");
@@ -1537,9 +1655,13 @@ if(t_isSingleinGroupTest){
       OutList.push_back(TstatAdjCond, "TstatAdjCond");
       OutList.push_back(VarMatAdjCond, "VarMatAdjCond"); 
     }  
-  }else{
-    OutList.push_back(OUT_BURDEN, "OUT_BURDEN");	
   }
+
+
+//else{
+//        //output to file for BURDEN tests
+//    OutList.push_back(OUT_BURDEN, "OUT_BURDEN");	
+//  }
 
 if(t_isOutputMarkerList){
 	OutList.push_back(indicatorVec, "markerIndcatorVec");
@@ -1813,3 +1935,22 @@ void closeGenoFile(std::string & t_genoType)
     ptr_gPLINKobj->closegenofile();
   }	  
 }
+
+// [[Rcpp::export]]
+bool openOutfile(std::string t_traitType){ 
+	bool isopen;
+	OutFile.open(g_outputFilePrefix.c_str());
+	isopen = OutFile.is_open();
+	if(isopen){
+		OutFile << "Region\tGroup\tmax_MAF\tPvalue_Burden\tBETA_Burden\tSE_Burden\t";
+		if(ptr_gSAIGEobj->m_isCondition){
+			OutFile << "Pvalue_Burden_c\tBeta_Burden_c\tseBeta_Burden_c\t";
+		}
+		OutFile << "MAC\t";
+		if(t_traitType == "binary"){	
+			OutFile << "MAC_case\tMAC_control\t";
+		}
+		OutFile << "Number_rare\tNumber_ultra_rare\n";
+	}	
+	return(isopen);
+}	
