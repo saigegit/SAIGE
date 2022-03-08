@@ -24,13 +24,15 @@ namespace PLINK {
 PlinkClass::PlinkClass(std::string t_bimFile,
                        std::string t_famFile,
                        std::string t_bedFile,
-                       std::vector<std::string> t_SampleInModel,
+                       //std::vector<std::string> t_SampleInModel,
                        std::string t_AlleleOrder)
 {
   setPlinkobj(t_bimFile, t_famFile, t_bedFile);
-  setPosSampleInPlink(t_SampleInModel);
+  //setPosSampleInPlink(t_SampleInModel);
   m_AlleleOrder = t_AlleleOrder;
 }
+
+
 
 // set PlinkClass by reading PLINK files
 void PlinkClass::setPlinkobj(std::string t_bimFile,
@@ -106,7 +108,7 @@ void PlinkClass::readFamFile()
 } 
 
 
-void PlinkClass::setPosSampleInPlink(std::vector<std::string> t_SampleInModel)
+void PlinkClass::setPosSampleInPlink(std::vector<std::string> & t_SampleInModel)
 {
   std::cout << "Setting position of samples in PLINK files...." << std::endl;
   m_N = t_SampleInModel.size();
@@ -283,7 +285,7 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex,        // different meanings 
 }
 
 // C++ version of which(). Note: start from 0, not 1 
-std::vector<unsigned int> whichCPP(std::vector<std::string> strVec, 
+std::vector<unsigned int> whichCPP(std::vector<std::string> & strVec, 
                                    std::string strValue)
 {
   std::vector<unsigned int> indexVec;

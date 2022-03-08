@@ -567,9 +567,9 @@ void setPLINKobjInCPP(std::string t_bimFile,
   ptr_gPLINKobj = new PLINK::PlinkClass(t_bimFile,
                                         t_famFile,
                                         t_bedFile,
-                                        t_SampleInModel,
+                                        //t_SampleInModel,
                                         t_AlleleOrder);
-  
+  ptr_gPLINKobj->setPosSampleInPlink(t_SampleInModel);
   
 }
 
@@ -718,8 +718,8 @@ Rcpp::List mainRegionInCPP(
                            std::string t_outputFile,
 			   std::string t_traitType,
                            unsigned int t_n,           // sample size  
-                           arma::mat P1Mat,            // edited on 2021-08-19: to avoid repeated memory allocation of P1Mat and P2Mat
-                           arma::mat P2Mat, 
+                           arma::mat & P1Mat,            // edited on 2021-08-19: to avoid repeated memory allocation of P1Mat and P2Mat
+                           arma::mat & P2Mat, 
 			   std::string t_regionTestType, 
 			   bool t_isImputation,
 			   arma::vec & t_weight,
@@ -729,6 +729,7 @@ Rcpp::List mainRegionInCPP(
 			   std::vector<std::string> & annoStringVec,
 			   std::string regionName)
 {
+
   //arma::vec timeoutput1 = getTime();
   bool isWeightCustomized = false;
   unsigned int q0 = t_genoIndex.size();                 // number of markers (before QC) in one region

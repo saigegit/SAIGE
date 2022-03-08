@@ -73,7 +73,6 @@ setSparseSigma_new = function(sparseGRMFile, sparseGRMSampleIDFile, relatednessC
 			#method_to_CollapseUltraRare,
 ##working
 SAIGE.Region = function(mu,
-			objGeno,
 			OutputFile,
                         MACCutoff_to_CollapseUltraRare,
 			groupFile, 
@@ -221,9 +220,9 @@ cth_chunk_to_output=1
     if(!is.null(region$SNP) & length(annolist) > 0){
 
       SNP = region$SNP
-      if(genoType != "vcf"){
-    	genoIndex = as.character(format(region$genoIndex, scientific = FALSE))
-      }else{
+      if(genoType == "vcf"){
+    	#genoIndex = as.character(format(region$genoIndex, scientific = FALSE))
+      #}else{
         SNPlist = paste(c(regionName, SNP), collapse = "\t") 
         set_iterator_inVcf(SNPlist, chrom1, 1, 200000000)
         isVcfEnd =  check_Vcf_end()
@@ -250,7 +249,7 @@ cth_chunk_to_output=1
       #gc()
 
       #time_mainRegionInCPP = system.time({outList = mainRegionInCPP(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest)})
-      outList = mainRegionInCPP(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolist, regionName)
+      outList = mainRegionInCPP(genoType, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolist, regionName)
 #print("time_mainRegionInCPP")
 #print(time_mainRegionInCPP)
       rm(region)
@@ -857,7 +856,7 @@ if(nrow(RegionData) != 0){
     RegionList[[r]] = list(SNP = SNP,
 			   WEIGHT=WEIGHT,
                            annoIndicatorMat = annoIndicatorMat,
-                           genoIndex = genoIndex,
+                           genoIndex =  as.character(format(genoIndex, scientific = FALSE))
 #                           chrom = uchrom,
                            annoVec = annoVecNew)
    }else{

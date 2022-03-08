@@ -212,7 +212,6 @@ print("OK")
 	LOCO = FALSE
         print("LOCO = FASLE and leave-one-chromosome-out is not applied")
     }	    
-
     sparseSigmaRList = list()
     isSparseGRM = TRUE
     if(sparseGRMFile != ""){ 
@@ -223,7 +222,6 @@ print("OK")
       sparseSigmaRList = list(nSubj = 0, locations = matrix(0,nrow=2,ncol=2), values = rep(0,2))  
       isSparseGRM = FALSE 
     }	    
-
 
     nsample = length(obj.model$y)
     cateVarRatioMaxMACVecInclude = c(cateVarRatioMaxMACVecInclude, nsample)	
@@ -248,9 +246,10 @@ print("OK")
                  AlleleOrder = AlleleOrder,
                  sampleInModel = obj.model$sampleID)
 
-    markerInfo = objGeno$markerInfo
-    genoIndex = markerInfo$genoIndex
-    genoType = objGeno$dosageFileType
+    #markerInfo = objGeno$markerInfo
+    #genoIndex = objGeno$markerInfo$genoIndex
+    #genoType = objGeno$dosageFileType
+    genoType = objGeno$genoType
 
 
 
@@ -301,7 +300,7 @@ print("OK")
     if (isCondition) {
 	 #print("OK1")
         n = length(obj.model$y) #sample size
-	condition_genoIndex=extract_genoIndex_condition(condition, markerInfo, genoType)
+	condition_genoIndex=extract_genoIndex_condition(condition, objGeno$markerInfo, genoType)
 	if(!is.null(weights_for_condition)){
                 condition_weights = unlist(strsplit(weights_for_condition, ","))
 		if(length(condition_weights) != length(condition_genoIndex)){
@@ -334,7 +333,7 @@ print("OK")
     traitType = obj.model$traitType
     mu = obj.model$mu
     rm(obj.model)
-    gc()
+    print(gc(v=T))
     #if(file.exists(SAIGEOutputFile)) {print("ok 0 file exist")} 
 
 
@@ -348,7 +347,9 @@ print("OK")
 
     #if(file.exists(SAIGEOutputFile)) {print("ok 2 file exist")}
         SAIGE.Marker(traitType,
-                   objGeno,
+		      genoType,
+                        objGeno$markerInfo$genoIndex,
+                        objGeno$markerInfo$CHROM,
                    OutputFile,
                    OutputFileIndex,
                    markers_per_chunk,
@@ -362,7 +363,6 @@ print("OK")
 		     #method_to_CollapseUltraRare,
                      #DosageCutoff_for_UltraRarePresence,
 	SAIGE.Region(mu,
-		     objGeno,
 		     OutputFile,
 		     MACCutoff_to_CollapseUltraRare,
                      groupFile,
@@ -370,7 +370,7 @@ print("OK")
                      maxMAF_in_groupTest,
                      markers_per_chunk_in_groupTest,
                      genoType,
-                     markerInfo,
+                     objGeno$markerInfo,
 		     traitType,
 		     is_imputed_data,
 		     isCondition,

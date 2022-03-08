@@ -133,21 +133,23 @@ setGenoInput = function(bgenFile = "",
     if(famFile == ""){
     	famFile = gsub("bed$", "fam", bedFile)
     } 
-    markerInfo = data.table::fread(bimFile, header = F)
+    markerInfo = data.table::fread(bimFile, header = F, select = c(1, 4, 5, 6))
     markerInfo = as.data.frame(markerInfo)
     
     if(AlleleOrder == "alt-first")
-      markerInfo = markerInfo[,c(1,4,2,6,5)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
+      markerInfo = markerInfo[,c(1,2,4,3)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
     if(AlleleOrder == "ref-first")
-      markerInfo = markerInfo[,c(1,4,2,5,6)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
-    
-    colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT")
+      markerInfo = markerInfo[,c(1,2,3,4)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
+    #colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT")
+    colnames(markerInfo) = c("CHROM", "POS", "REF", "ALT")
+    markerInfo$ID = paste0(markerInfo$CHROM,":",markerInfo$POS, "_", markerInfo$REF,"/", markerInfo$ALT)
     markerInfo$genoIndex = 1:nrow(markerInfo) - 1  # -1 is to convert 'R' to 'C++' 
-    markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)    
-    sampleInfo = data.table::fread(famFile)
-    samplesInGeno = sampleInfo$V2
+    #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)    
+    markerInfo$ID2 = paste0(markerInfo$CHROM,":",markerInfo$POS, "_", markerInfo$ALT,"/", markerInfo$REF)
+    #sampleInfo = data.table::fread(famFile, select = c(2), data.table=F)
+    #samplesInGeno = sampleInfo[,1]
     #SampleIDs = updateSampleIDs(SampleIDs, samplesInGeno)
-    markerInfo$ID = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$REF, "/", markerInfo$ALT) 
+    #markerInfo$ID = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$REF, "/", markerInfo$ALT) 
     setPLINKobjInCPP(bimFile, famFile, bedFile, sampleInModel, AlleleOrder)
   }
   
@@ -169,18 +171,20 @@ setGenoInput = function(bgenFile = "",
     }    
     db_con <- RSQLite::dbConnect(RSQLite::SQLite(), bgenFileIndex)
     on.exit(RSQLite::dbDisconnect(db_con), add = TRUE)
-    bgiData = dplyr::tbl(db_con, "Variant")
-    bgiData = as.data.frame(bgiData)
-    
+    markerInfo = dplyr::tbl(db_con, "Variant")
+    markerInfo = as.data.frame(markerInfo)
+     
     if(AlleleOrder == "alt-first")
-      markerInfo = bgiData[,c(1,2,3,6,5,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
+      markerInfo = markerInfo[,c(1,2,3,6,5,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     if(AlleleOrder == "ref-first")
-      markerInfo = bgiData[,c(1,2,3,5,6,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
+      markerInfo = markerInfo[,c(1,2,3,5,6,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     
-    colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT","genoIndex")
-    markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)
-    markerInfo$ID = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$REF, "/", markerInfo$ALT)    
 
+
+    colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT","genoIndex")
+    #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)
+    markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$REF, "/", markerInfo$ALT)    
+    #markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$ALT, "/", markerInfo$REF)
     setBGENobjInCPP(bgenFile, bgenFileIndex, t_SampleInBgen = samplesInGeno, t_SampleInModel = sampleInModel, AlleleOrder)
   }
   
@@ -318,7 +322,13 @@ if(FALSE){
   }
   #genoList = list(genoType = genoType, markerInfo = markerInfo, SampleIDs = SampleIDs, AlleleOrder = AlleleOrder, GenoFile = GenoFile, GenoFileIndex = GenoFileIndex, anyQueue = anyQueue)
   #genoList = list(dosageFileType = dosageFileType, markerInfo = markerInfo, anyQueue = anyQueue, genoType = dosageFileType)
-  genoList = list(dosageFileType = dosageFileType, markerInfo = markerInfo, genoType = dosageFileType)
+  #genoList = list(dosageFileType = dosageFileType, markerInfo = markerInfo, genoType = dosageFileType)
+  if(!is.null(markerInfo)){
+    markerInfo$POS = NULL
+    markerInfo$REF = NULL
+    markerInfo$ALT = NULL
+  }	  
+  genoList = list(markerInfo = markerInfo, genoType = dosageFileType)
   return(genoList)
 }
 

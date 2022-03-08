@@ -76,7 +76,9 @@ mainMarker = function(genoType, genoIndex, traitType, isMoreOutput, isImputation
 
 
 SAIGE.Marker = function(traitType,
-			objGeno,
+			genoType,
+                        genoIndex,
+			CHROM,
                         OutputFile,
                         OutputFileIndex = NULL,
                         nMarkersEachChunk, 
@@ -91,7 +93,7 @@ SAIGE.Marker = function(traitType,
   if(is.null(OutputFileIndex))
     OutputFileIndex = paste0(OutputFile, ".index")
   
-  genoType = objGeno$genoType
+  #genoType = objGeno$genoType
 
   outIndex = checkOutputFile(OutputFile, OutputFileIndex, "Marker", format(nMarkersEachChunk, scientific=F), isOverWriteOutput)    # this function is in 'Util.R'
   outIndex = outIndex$indexChunk
@@ -101,12 +103,14 @@ SAIGE.Marker = function(traitType,
 
   ## set up an object for genotype
   if(genoType != "vcf"){
-    markerInfo = objGeno$markerInfo
+      #markerInfo = objGeno$markerInfo
     if(LOCO){
-      markerInfo = markerInfo[which(markerInfo$CHROM == chrom),]  
+      genoIndex = genoIndex[which(CHROM == chrom)]
+      CHROM = CHROM[which(CHROM == chrom)]  
+      #markerInfo = markerInfo[which(markerInfo$CHROM == chrom),]  
     }
-    CHROM = markerInfo$CHROM
-    genoIndex = markerInfo$genoIndex
+    #CHROM = markerInfo$CHROM
+    #genoIndex = markerInfo$genoIndex
     ##only for one chrom
     # all markers were split into multiple chunks,
     #print(markerInfo[1:10,])
@@ -114,7 +118,7 @@ SAIGE.Marker = function(traitType,
 
     genoIndexList = splitMarker(genoIndex, nMarkersEachChunk, CHROM);
     nChunks = length(genoIndexList)
-    cat("Number of all markers to test:\t", nrow(markerInfo), "\n")
+    cat("Number of all markers to test:\t", length(genoIndex), "\n")
     cat("Number of markers in each chunk:\t", nMarkersEachChunk, "\n")
     cat("Number of chunks for all markers:\t", nChunks, "\n")
     if(outIndex > nChunks){

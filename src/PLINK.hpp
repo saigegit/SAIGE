@@ -72,15 +72,15 @@ public:
   PlinkClass(std::string t_bimFile,
              std::string t_famFile,
              std::string t_bedFile,
-             std::vector<std::string> t_SampleInModel,
              std::string t_AlleleOrder);
   
+             //std::vector<std::string> t_SampleInModel,dd
   // setup PlinkClass
   void setPlinkobj(std::string t_bimFile,
                    std::string t_famFile,
                    std::string t_bedFile);
   
-  void setPosSampleInPlink(std::vector<std::string> t_SampleInModel);
+  void setPosSampleInPlink(std::vector<std::string> & t_SampleInModel);
   std::vector<uint32_t> getPosMarkerInPlink(std::vector<std::string> t_MarkerReqstd);
   
   void getOneMarker(uint64_t & t_gIndex,        // different meanings for different genoType
