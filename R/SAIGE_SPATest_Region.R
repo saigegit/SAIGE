@@ -720,40 +720,45 @@ SAIGE.getRegionList_new = function(marker_group_line,
 	colnames(RegionData) = c("REGION", "SNP", "ANNO", "WEIGHT")
     }	    
     RegionData = as.data.frame(RegionData)
-
+    setDT(RegionData)
+    setkey(RegionData, "SNP")
     
 uRegion = unique(RegionData$REGION)    
 
 if(!is.null(markerInfo)){
   # updated on 2021-08-05
-  colnames(markerInfo)[which(colnames(markerInfo) == "ID")] = "MARKER"
-  RegionData = merge(RegionData, markerInfo[,c("CHROM","MARKER","genoIndex"),drop=F], by.x = "SNP", by.y = "MARKER", all.x = T, sort = F)
+  #colnames(markerInfo)[which(colnames(markerInfo) == "ID")] = "MARKER"
+  RegionData = merge(RegionData, markerInfo, by.x = "SNP", by.y = "ID", all.x = T, sort = F) 
+  #markerInfo[,c("CHROM","MARKER","genoIndex"),drop=F], by.x = "SNP", by.y = "MARKER", all.x = T, sort = F)
 
   if(!is.null(markerInfo$ID2)){
-	colnames(markerInfo)[which(colnames(markerInfo) == "MARKER")] = "MARKER2"
-  	markerInfo$MARKER2 = NULL
-	colnames(markerInfo)[which(colnames(markerInfo) == "ID2")] = "MARKER"
-	colnames(markerInfo)[which(colnames(markerInfo) == "genoIndex")] = "genoIndex2"
-	colnames(markerInfo)[which(colnames(markerInfo) == "CHROM")] = "CHROM2"
-
+	#colnames(markerInfo)[which(colnames(markerInfo) == "MARKER")] = "MARKER2"
+  	#markerInfo$MARKER2 = NULL
+	#colnames(markerInfo)[which(colnames(markerInfo) == "ID2")] = "MARKER"
+	#colnames(markerInfo)[which(colnames(markerInfo) == "genoIndex")] = "genoIndex2"
+	#colnames(markerInfo)[which(colnames(markerInfo) == "CHROM")] = "CHROM2"
+        RegionData = merge(RegionData, markerInfo, by.x = "SNP", by.y = "ID2", all.x = T, sort = F)
 	
-  	RegionData = merge(RegionData, markerInfo[,c("CHROM2","MARKER","genoIndex2"), drop=F], by.x = "SNP", by.y = "MARKER", all.x = T, sort = F)
-
-
+  	#RegionData = merge(RegionData, markerInfo[,c("CHROM2","MARKER","genoIndex2"), drop=F], by.x = "SNP", by.y = "MARKER", all.x = T, sort = F)
+        setnames(RegionData, "genoIndex.x", "genoIndex")
+        setnames(RegionData, "genoIndex.y", "genoIndex2")
+        setnames(RegionData, "CHROM.x", "CHROM")
+        setnames(RegionData, "CHROM.y", "CHROM2")
 	posNA = which(is.na(RegionData$genoIndex) & !is.na(RegionData$genoIndex2))
-
 
 	if(length(posNA) != 0){
 		RegionData$genoIndex[posNA] = RegionData$genoIndex2[posNA]
 		RegionData$CHROM[posNA] = RegionData$CHROM2[posNA]
 	}
-
-	RegionData$genoIndex2 = NULL	
+         markerInfo[,genoIndex2:=NULL] 
+         markerInfo[,CHROM2:=NULL] 
+	
+	#RegionData$genoIndex2 = NULL	
   }	  
   posNA = which(is.na(RegionData$genoIndex))
   
     if(length(posNA) != 0){
-      RegionData = RegionData[-posNA, , drop=F]
+      RegionData = RegionData[which(!is.na(RegionData$genoIndex))]
       cat(length(posNA)," markers in 'RegionFile' are not in 'GenoFile'.\n")
     }
 }
@@ -772,7 +777,7 @@ if(nrow(RegionData) != 0){
 
   RegionList = list()
   #uRegion = unique(RegionData$REGION)
-  RegionData = as.data.frame(RegionData)
+  #RegionData = as.data.frame(RegionData)
 
 
   for(r in uRegion){
