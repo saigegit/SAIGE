@@ -393,8 +393,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
  
   
   unsigned int iIndexComVecSize = iIndexComVec.n_elem;
-  unsigned int iIndexSize = iIndex.n_elem;
- 
+  unsigned int iIndexSize = iIndex.n_elem; 
   arma::vec gNB(iIndexSize, arma::fill::none);
   arma::vec gNA(iIndexComVecSize, arma::fill::none);
   arma::vec muNB(iIndexSize, arma::fill::none);

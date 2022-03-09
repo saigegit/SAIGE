@@ -133,19 +133,20 @@ setGenoInput = function(bgenFile = "",
     if(famFile == ""){
     	famFile = gsub("bed$", "fam", bedFile)
     } 
-    markerInfo = data.table::fread(bimFile, header = F, select = c(1, 4, 5, 6))
+    markerInfo = data.table::fread(bimFile, header = F, select = c(1, 2, 4, 5, 6))
     markerInfo = as.data.frame(markerInfo)
     
     if(AlleleOrder == "alt-first")
-      markerInfo = markerInfo[,c(1,2,4,3)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
+      markerInfo = markerInfo[,c(1,2,3,5,4)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
     if(AlleleOrder == "ref-first")
-      markerInfo = markerInfo[,c(1,2,3,4)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
+      markerInfo = markerInfo[,c(1,2,3,4,5)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
+    
+    colnames(markerInfo) = c("CHROM", "ID", "POS", "REF", "ALT")
     #colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT")
-    colnames(markerInfo) = c("CHROM", "POS", "REF", "ALT")
-    markerInfo$ID = paste0(markerInfo$CHROM,":",markerInfo$POS, "_", markerInfo$REF,"/", markerInfo$ALT)
+    #markerInfo$ID = paste0(markerInfo$CHROM,":",markerInfo$POS, "_", markerInfo$REF,"/", markerInfo$ALT)
     markerInfo$genoIndex = 1:nrow(markerInfo) - 1  # -1 is to convert 'R' to 'C++' 
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)    
-    markerInfo$ID2 = paste0(markerInfo$CHROM,":",markerInfo$POS, "_", markerInfo$ALT,"/", markerInfo$REF)
+    markerInfo$ID2 = paste0(markerInfo$CHROM,":",markerInfo$POS, ":", markerInfo$REF,":", markerInfo$ALT)
     #sampleInfo = data.table::fread(famFile, select = c(2), data.table=F)
     #samplesInGeno = sampleInfo[,1]
     #SampleIDs = updateSampleIDs(SampleIDs, samplesInGeno)
@@ -183,7 +184,7 @@ setGenoInput = function(bgenFile = "",
 
     colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT","genoIndex")
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)
-    markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$REF, "/", markerInfo$ALT)    
+    markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,":", markerInfo$REF, ":", markerInfo$ALT)    
     #markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$ALT, "/", markerInfo$REF)
     setBGENobjInCPP(bgenFile, bgenFileIndex, t_SampleInBgen = samplesInGeno, t_SampleInModel = sampleInModel, AlleleOrder)
   }
@@ -327,7 +328,7 @@ if(FALSE){
     markerInfo$POS = NULL
     markerInfo$REF = NULL
     markerInfo$ALT = NULL
-  }	  
+  }
   genoList = list(markerInfo = markerInfo, genoType = dosageFileType)
   return(genoList)
 }

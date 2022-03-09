@@ -191,8 +191,6 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex,        // different meanings 
   }
  
    
-  if(!t_isOnlyOutputNonZero)
-    OneMarkerG1.set_size(m_N);
   
   uint64_t posSeek = 3 + m_numBytesofEachMarker0 * t_gIndex;
   if(t_gIndex > 0){
@@ -276,7 +274,10 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex,        // different meanings 
     t_altFreq = 1 - t_altFreq;
     t_altCounts = 2 * (double)count * t_altFreq;
   }
-  
+ 
+  if(t_isOnlyOutputNonZero){
+    OneMarkerG1.resize(j);
+  }
  //arma::vec timeoutput4 = getTime();
   //return OneMarkerG1;
    //  printTime(timeoutput1, timeoutput2, "Unified_getOneMarker 1");

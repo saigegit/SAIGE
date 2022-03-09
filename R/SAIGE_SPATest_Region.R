@@ -253,7 +253,7 @@ cth_chunk_to_output=1
 #print("time_mainRegionInCPP")
 #print(time_mainRegionInCPP)
       rm(region)
-      rm(genoIndex)
+      #rm(genoIndex)
       #gc()
     #tb0 = proc.time()
     if(is_single_in_groupTest){	  
@@ -433,10 +433,6 @@ if(regionTestType != "BURDEN"){
     }#for(m in 1:length(maxMAFlist)){
 }#for(j in 1:length(annolist)){
 
-
-
-
-
   #}#if(length(noNAIndices) > 0){
 
 gc()
@@ -533,6 +529,7 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
         }
     }
   }
+
 #ta2 = proc.time()	
 #print("ta2 - ta1")
 #print(ta2 - ta1)
@@ -569,7 +566,6 @@ if(mth ==  numberRegionsInChunk){
   message3 = paste("nEachChunk =", nEachChunk)
   message4 = paste("Have completed the analysis of chunk", indexChunk)
   message5 = "Have completed the analyses of all chunks."
-
   #n1 = length(Output)
   #n2 = length(OutputFile)
   print("write to output")
@@ -578,48 +574,48 @@ if(mth ==  numberRegionsInChunk){
  if(FALSE){
       if(Start){
         if(!is.null(pval.Region.all)){
-          write.table(pval.Region.all, OutputFile, quote = F, sep = "\t", append = F, col.names = T, row.names = F)
+          fwrite(pval.Region.all, OutputFile, quote = F, sep = "\t", append = F, col.names = T, row.names = F)
         }
       }else{
         if(!is.null(pval.Region.all)){
-          write.table(pval.Region.all, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+          fwrite(pval.Region.all, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
         }
         #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
       }
 
       if(Start){
         if(!is.null(OutList.all)){
-          write.table(OutList.all, paste0(OutputFile, ".singleAssoc.txt"), quote = F, sep = "\t", append = F, col.names = T, row.names = F)
+          fwrite(OutList.all, paste0(OutputFile, ".singleAssoc.txt"), quote = F, sep = "\t", append = F, col.names = T, row.names = F)
         }
       }else{
         if(!is.null(OutList.all)){
-          write.table(OutList.all, paste0(OutputFile, ".singleAssoc.txt"), quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+          fwrite(OutList.all, paste0(OutputFile, ".singleAssoc.txt"), quote = F, sep = "\t", append = T, col.names = F, row.names = F)
         }
         #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
       }
+}
 
 
-
-        if(Start){
+     if(Start){
         if(!is.null(Output_MarkerList.all)){
-          write.table(Output_MarkerList.all, paste0(OutputFile, ".markerList.txt"), quote = F, sep = "\t", append = F, col.names = T, row.names = F)
+          fwrite(Output_MarkerList.all, paste0(OutputFile, ".markerList.txt"), quote = F, sep = "\t", append = F, col.names = T, row.names = F)
         }
       }else{
         if(!is.null(Output_MarkerList.all)){
-          write.table(Output_MarkerList.all, paste0(OutputFile, ".markerList.txt"), quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+          fwrite(Output_MarkerList.all, paste0(OutputFile, ".markerList.txt"), quote = F, sep = "\t", append = T, col.names = F, row.names = F)
         }
         #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
       }
 
-
+if(FALSE){
   #print("write Output 2")
   if(Start)
-    write.table(c(message1, message2, message3), OutputFileIndex,
+    fwrite(c(message1, message2, message3), OutputFileIndex,
                 quote = F, sep = "\t", append = F, col.names = F, row.names = F)
-    write.table(message4, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+    fwrite(message4, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
 
   if(End)
-    write.table(message5, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+    fwrite(message5, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
 
 }#if(FALSE)
 
@@ -856,7 +852,7 @@ if(nrow(RegionData) != 0){
     RegionList[[r]] = list(SNP = SNP,
 			   WEIGHT=WEIGHT,
                            annoIndicatorMat = annoIndicatorMat,
-                           genoIndex =  as.character(format(genoIndex, scientific = FALSE))
+                           genoIndex =  as.character(format(genoIndex, scientific = FALSE)),
 #                           chrom = uchrom,
                            annoVec = annoVecNew)
    }else{
