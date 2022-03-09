@@ -305,6 +305,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// openOutfile_singleinGroup
+bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation);
+RcppExport SEXP _SAIGE_openOutfile_singleinGroup(SEXP t_traitTypeSEXP, SEXP t_isImputationSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type t_traitType(t_traitTypeSEXP);
+    Rcpp::traits::input_parameter< bool >::type t_isImputation(t_isImputationSEXP);
+    rcpp_result_gen = Rcpp::wrap(openOutfile_singleinGroup(t_traitType, t_isImputation));
+    return rcpp_result_gen;
+END_RCPP
+}
 // closeGenoFile_plink
 void closeGenoFile_plink();
 RcppExport SEXP _SAIGE_closeGenoFile_plink() {
@@ -2015,6 +2027,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_fast_logistf_fit", (DL_FUNC) &_SAIGE_fast_logistf_fit, 13},
     {"_SAIGE_closeGenoFile", (DL_FUNC) &_SAIGE_closeGenoFile, 1},
     {"_SAIGE_openOutfile", (DL_FUNC) &_SAIGE_openOutfile, 1},
+    {"_SAIGE_openOutfile_singleinGroup", (DL_FUNC) &_SAIGE_openOutfile_singleinGroup, 2},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
     {"_SAIGE_getAlleleFreqVec", (DL_FUNC) &_SAIGE_getAlleleFreqVec, 0},

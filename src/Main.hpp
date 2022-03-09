@@ -183,4 +183,6 @@ Rcpp::List RegionSetUpConditional_binary_InCPP(arma::vec & t_weight_cond);
 void closeGenoFile(std::string & t_genoType);
 
 bool openOutfile(std::string  t_traitType);
+
+bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation);
 #endif

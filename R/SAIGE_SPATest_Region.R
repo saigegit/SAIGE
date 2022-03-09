@@ -129,12 +129,17 @@ SAIGE.Region = function(mu,
     #output the result from Rcpp
     isOpenOutFile = openOutfile(traitType)
     if(!isOpenOutFile){
-	stop("Output file can't be opened\n")
+	stop("Output file ", OutputFile, " can't be opened\n")
     }
 
     if(is_single_in_groupTest){
       cat("is_single_in_groupTest = TRUE. Single-variant assoc tests results will be output\n")
-    }else{
+    isOpenOutFile_singleinGroup = openOutfile_singleinGroup(traitType, isImputation)
+    if(!isOpenOutFile_singleinGroup){
+        stop("Output file ", OutputFile, ".singleAssoc.txt can't be opened\n")
+    }
+
+   }else{
       cat("is_single_in_groupTest = FALSE. Single-variant assoc tests results will not be output\n")
     }
   }else{
@@ -256,9 +261,18 @@ cth_chunk_to_output=1
       #rm(genoIndex)
       #gc()
     #tb0 = proc.time()
-    if(is_single_in_groupTest){	  
-      OutList = as.data.frame(outList$OUT_DF) 	   
-      noNAIndices = which(!is.na(OutList$p.value))
+if(is_single_in_groupTest){
+      #OutList = as.data.frame(outList$OUT_DF)
+            noNAIndices = which(!is.na(outList$pvalVec))
+      if(sum(WEIGHT) > 0){
+        AnnoWeights = c(WEIGHT, rep(1, outList$numofUR))
+      }
+}
+
+if(FALSE){
+if(is_single_in_groupTest){	  
+      #OutList = as.data.frame(outList$OUT_DF) 	   
+      noNAIndices = which(!is.na(outList$p.value))
       URindices = which(OutList$MarkerID == "UR")
       if(sum(WEIGHT) > 0){
         AnnoWeights = c(WEIGHT, rep(1, length(URindices)))
@@ -283,16 +297,9 @@ cth_chunk_to_output=1
        OutList = OutList[noNAIndices, , drop=F]
      }
     }
-#print("noNAIndices")
-#print(noNAIndices)
 
-#tb1 = proc.time()
-#print("tb1-tb0")
-#print(tb1-tb0)
-#print("tb1-tp1")
-#print(tb1-tp1)
-#print("tb0-tp1 mainRegioninRcpp")
-#print(tb0-tp1)
+}#if(FALSE){
+
 
 annoMAFIndicatorMat = outList$annoMAFIndicatorMat
 
@@ -321,7 +328,7 @@ if(regionTestType != "BURDEN"){
        StatVec = outList$TstatVec_flip[noNAIndices]
        VarSVec = diag(outList$VarMat)
        VarSVec = VarSVec[!is.na(VarSVec)]
-       adjPVec = OutList$p.value
+       adjPVec = outList$p.value
    
 		
        #varTestedIndices = which(apply(annoMAFIndicatorMat, 1, isContainValue, val=1))
@@ -340,8 +347,8 @@ if(regionTestType != "BURDEN"){
        }else{
          AnnoWeights = dbeta(MAFVec,1,25)
        }
-
        weightMat = AnnoWeights %*% t(AnnoWeights)
+
        if(isCondition){    
     	 weightMat_G1_G2 = AnnoWeights %*% t(outList$G2_Weight_cond)
        }	
@@ -433,7 +440,6 @@ if(regionTestType != "BURDEN"){
     }#for(m in 1:length(maxMAFlist)){
 }#for(j in 1:length(annolist)){
 
-  #}#if(length(noNAIndices) > 0){
 
 gc()
 }
@@ -533,13 +539,6 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
 #ta2 = proc.time()	
 #print("ta2 - ta1")
 #print(ta2 - ta1)
-
-   if(!is_single_in_groupTest){
-	   OutList = NULL
-   }else{
-	   OutList.all = rbind(OutList.all, OutList)
-   }	   
-   
    if(is_output_markerList_in_groupTest){
 	colnames(Output_MarkerList) = c("Region", "Group", "max_MAF", "Rare_Variants", "Ultra_Rare_Variants")
 	Output_MarkerList.all = rbind(Output_MarkerList.all, Output_MarkerList)   
@@ -571,7 +570,7 @@ if(mth ==  numberRegionsInChunk){
   print("write to output")
   #cat("n1 is ", n1, "\n")
   #cat("n2 is ", n2, "\n")
- if(FALSE){
+if(regionTestType != "BURDEN"){  
       if(Start){
         if(!is.null(pval.Region.all)){
           fwrite(pval.Region.all, OutputFile, quote = F, sep = "\t", append = F, col.names = T, row.names = F)
@@ -582,7 +581,10 @@ if(mth ==  numberRegionsInChunk){
         }
         #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
       }
+}
 
+
+ if(FALSE){
       if(Start){
         if(!is.null(OutList.all)){
           fwrite(OutList.all, paste0(OutputFile, ".singleAssoc.txt"), quote = F, sep = "\t", append = F, col.names = T, row.names = F)
@@ -634,9 +636,9 @@ gc()
 #print(tp2 - tp1)
 #print("tp2 - ta2")
 #print(tp2 - ta2)
-   if(is_single_in_groupTest){
-     rm(OutList)
-    }
+   #if(is_single_in_groupTest){
+   #  rm(OutList)
+   # }
 
    if(is_output_markerList_in_groupTest){
      rm(Output_MarkerList)
