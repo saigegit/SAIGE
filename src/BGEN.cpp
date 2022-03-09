@@ -65,9 +65,13 @@ void BgenClass::setBgenObj(const std::string t_bgenFileName,
   /****code from BOLT-LMM v2.3.4***/
   
   /********** READ HEADER v1.2**********/
+  //m_ibgenFile.open(m_bgenFile.c_str(), std::ios::binary);
   m_fin = fopen(t_bgenFileName.c_str(), "rb");
+  //chr offset; m_ibgenFile.read(&offset, 4, 1); //cout << "offset: " << offset << endl;
   uint32_t offset; fread(&offset, 4, 1, m_fin); //cout << "offset: " << offset << endl;
   uint32_t L_H; fread(&L_H, 4, 1, m_fin); //cout << "L_H: " << L_H << endl;
+  
+  
   fread(&m_M0, 4, 1, m_fin); std::cout << "snpBlocks (Mbgen): " << m_M0 << std::endl;
   assert(m_M0 != 0);
   //unsigned int Nbgen; fread(&Nbgen, 4, 1, m_fin); std::cout << "samples (Nbgen): " << Nbgen << std::endl;
@@ -351,7 +355,8 @@ double dosage_new;
 
 }
 
-void BgenClass::getOneMarker(uint64_t & t_gIndex,        // different meanings for different genoType
+void BgenClass::getOneMarker(uint64_t & t_gIndex_prev,
+			uint64_t & t_gIndex,        // different meanings for different genoType
                                   std::string& t_ref,       // REF allele
                                   std::string& t_alt,       // ALT allele (should probably be minor allele, otherwise, computation time will increase)
                                   std::string& t_marker,    // marker ID extracted from genotype file
@@ -369,11 +374,28 @@ void BgenClass::getOneMarker(uint64_t & t_gIndex,        // different meanings f
 				  arma::vec & dosages,
 				  bool t_isImputation)
 {
+  uint64_t posSeek;
+
+  
+  if(t_gIndex > 0){
+    if(t_gIndex_prev == 0){
+          fseek(m_fin, t_gIndex, SEEK_SET);
+          //m_ibedFile.seekg(posSeek, ios_base::beg);
+    }else{
+	  posSeek = t_gIndex-t_gIndex_prev;
+          //posSeek = m_numBytesofEachMarker0 * (t_gIndex-t_gIndex_prev-1);
+          if(posSeek > 0){
+                //m_ibedFile.seekg(posSeek, ios_base::cur);
+                fseek(m_fin, posSeek, SEEK_CUR);
+          }
+   }
+  }
+
 
   //arma::vec timeoutput1 = getTime();	
-  if(t_gIndex > 0){
-	  fseek(m_fin, t_gIndex, SEEK_SET);
-  }
+  //if(t_gIndex > 0){
+  //	  fseek(m_fin, t_gIndex, SEEK_SET);
+  //}
   //arma::vec timeoutput2 = getTime();
 
   std::string SNPID, RSID, chromosome, first_allele,second_allele ;

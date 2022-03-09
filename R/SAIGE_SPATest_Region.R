@@ -166,7 +166,6 @@ SAIGE.Region = function(mu,
 
   gf = file(groupFile, "r")
 
-
   cat("indexChunk is ", indexChunk, "\n")
 
   skipline = indexChunk*nline_per_gene
@@ -194,20 +193,19 @@ SAIGE.Region = function(mu,
   numberRegionsInChunk = 0
   cat("indexChunk ", indexChunk, "\n")
   cat("nRegions ", nRegions, "\n")
-pval.Region.all = NULL
-OutList.all = NULL
-Output_MarkerList.all = NULL
-cth_chunk_to_output=1
+  pval.Region.all = NULL
+  OutList.all = NULL
+  Output_MarkerList.all = NULL
+  cth_chunk_to_output=1
 
   for(i in (indexChunk+1):nRegions){
-   #cat("i is ", i, "\n")
    if(mth ==  numberRegionsInChunk){
       if(i + groups_per_chunk > nRegions){
   	      nregions_ro_read = nRegions - i + 1	      
       }else{
 	      nregions_ro_read = groups_per_chunk
       }
-      nlinetoread = nregions_ro_read * nline_per_gene	
+      nlinetoread = nregions_ro_read * nline_per_gene
       marker_group_line = readLines(gf, n = nlinetoread)
       RegionList = SAIGE.getRegionList_new(marker_group_line, nline_per_gene, annolist, markerInfo)
       cat("Read in ", nregions_ro_read, " region(s) from the group file.\n")
@@ -233,6 +231,7 @@ cth_chunk_to_output=1
         isVcfEnd =  check_Vcf_end()
     	if(!isVcfEnd){
 		genoIndex = rep("0", length(SNP))
+		genoIndex_after = rep("0", length(SNP))
     	}else{
         	warning("No markers in region ", regionName, " are found in the VCF file")
 		next
@@ -254,7 +253,7 @@ cth_chunk_to_output=1
       #gc()
 
       #time_mainRegionInCPP = system.time({outList = mainRegionInCPP(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest)})
-      outList = mainRegionInCPP(genoType, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolist, regionName)
+      outList = mainRegionInCPP(genoType, region$genoIndex_after, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolist, regionName)
 #print("time_mainRegionInCPP")
 #print(time_mainRegionInCPP)
       rm(region)
@@ -744,6 +743,11 @@ if(!is.null(markerInfo)){
         setnames(RegionData, "genoIndex.y", "genoIndex2")
         setnames(RegionData, "CHROM.x", "CHROM")
         setnames(RegionData, "CHROM.y", "CHROM2")
+	if(!is.null(markerInfo$size_in_bytes.x)){
+		setnames(RegionData, "genoIndex_after.x", "genoIndex_after")
+		markerInfo[,genoIndex_after.y:=NULL]
+
+	}
 	posNA = which(is.na(RegionData$genoIndex) & !is.na(RegionData$genoIndex2))
 
 	if(length(posNA) != 0){
@@ -751,8 +755,7 @@ if(!is.null(markerInfo)){
 		RegionData$CHROM[posNA] = RegionData$CHROM2[posNA]
 	}
          markerInfo[,genoIndex2:=NULL] 
-         markerInfo[,CHROM2:=NULL] 
-	
+         markerInfo[,CHROM2:=NULL] 	
 	#RegionData$genoIndex2 = NULL	
   }	  
   posNA = which(is.na(RegionData$genoIndex))
@@ -799,6 +802,9 @@ if(nrow(RegionData) != 0){
 
     if(!is.null(markerInfo)){
       genoIndex = as.numeric(RegionData$genoIndex[posSNP])
+      if(!is.null(RegionData$genoIndex_after)){
+		genoIndex_after = as.numeric(RegionData$genoIndex[posSNP])	
+      }
       chrom = RegionData$CHROM[posSNP]
       uchrom = unique(chrom)
       if(length(uchrom) != 1)
@@ -848,6 +854,10 @@ if(nrow(RegionData) != 0){
     annoIndicatorMat = annoIndicatorMat[-annoIndicatorMat_rmind,,drop=F]
     if(!is.null(markerInfo)){
       genoIndex = genoIndex[-annoIndicatorMat_rmind]
+     if(!is.null(RegionData$genoIndex_after)){
+                genoIndex_after = genoIndex_after[-annoIndicatorMat_rmind]
+      }
+
     }
   }
 
@@ -862,6 +872,12 @@ if(nrow(RegionData) != 0){
                            genoIndex =  as.character(format(genoIndex, scientific = FALSE)),
 #                           chrom = uchrom,
                            annoVec = annoVecNew)
+    if(!is.null(RegionData$genoIndex_after)){
+	RegionList[[r]]$genoIndex_after = as.character(format(genoIndex_after, scientific = FALSE)) 
+     }else{
+	RegionList[[r]]$genoIndex_after = rep("0", length(genoIndex))	
+     }
+
    }else{
     RegionList[[r]] = list(SNP = SNP,
 			   WEIGHT=WEIGHT,

@@ -130,6 +130,7 @@ void setRegion_GlobalVarsInCPP(
 Rcpp::DataFrame mainMarkerInCPP(
                            std::string & t_genoType,     // "PLINK", "BGEN"
 			   std::string & t_traitType,
+			   std::vector<std::string> & t_genoIndex_prev,
 			   std::vector<std::string> & t_genoIndex,
 			   bool & t_isMoreOutput,
 			   bool & t_isImputation)
@@ -201,13 +202,33 @@ Rcpp::DataFrame mainMarkerInCPP(
     double altFreq, altCounts, missingRate, imputeInfo, AF_case, AF_ctrl, N_case_hom, N_ctrl_het, N_case_het, N_ctrl_hom; 
     std::string chr, ref, alt, marker;
     uint32_t pd, N_case, N_ctrl, N;
+
+    //free(end);
+
+
     bool flip = false;
     std::string t_genoIndex_str = t_genoIndex.at(i);
-
     char* end;
     uint64_t gIndex = std::strtoull( t_genoIndex_str.c_str(), &end,10 );
-    //free(end);
     std::remove(end);
+
+    uint64_t gIndex_prev;
+    if(i == 0){
+        gIndex_prev = 0;
+    }else{
+        char* end_prev;
+	std::string t_genoIndex_prev_str;
+        if(t_genoType == "bgen"){
+            t_genoIndex_prev_str = t_genoIndex_prev.at(i);
+        }else if(t_genoType == "plink"){
+            t_genoIndex_prev_str = t_genoIndex.at(i-1);
+        }
+        gIndex_prev = std::strtoull( t_genoIndex_prev_str.c_str(), &end_prev,10 );
+        std::remove(end_prev);
+    }
+
+
+
 
     //Main.cpp
     //PLINK or BGEN 
@@ -221,7 +242,7 @@ Rcpp::DataFrame mainMarkerInCPP(
    indexForMissing.clear();
    //t_GVec0.clear();
    //t_GVec.clear();
-   bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
+   bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
                                           isOnlyOutputNonZero, // bool t_isOnlyOutputNonZero,
@@ -476,6 +497,7 @@ Rcpp::DataFrame mainMarkerInCPP(
 
 // a unified function to get single marker from genotype file
 bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN", "Vcf"
+                               uint64_t & t_gIndex_prev,        // different meanings for different genoType
                                uint64_t & t_gIndex,        // different meanings for different genoType
                                std::string& t_ref,       // REF allele
                                std::string& t_alt,       // ALT allele (should probably be minor allele, otherwise, computation time will increase)
@@ -498,8 +520,10 @@ bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN", "Vcf"
   bool isBoolRead = true;
   if(t_genoType == "plink"){
    bool isTrueGenotype = true;
+   //t_gIndex_prev is after reading the last marker
+
    //arma::vec timeoutput1 = getTime();
-   ptr_gPLINKobj->getOneMarker(t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, 
+   ptr_gPLINKobj->getOneMarker(t_gIndex_prev, t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, 
                                        t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero,
                                        isTrueGenotype, t_GVec);   // t_isTrueGenotype, only used for PLINK format.
    //arma::vec timeoutput2 = getTime();
@@ -508,7 +532,7 @@ bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN", "Vcf"
   
   if(t_genoType == "bgen"){
     //bool isBoolRead = true;
-    ptr_gBGENobj->getOneMarker(t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, 
+    ptr_gBGENobj->getOneMarker(t_gIndex_prev, t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, 
                                       t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero,
                                       isBoolRead, t_GVec, t_isImputation);
   }
@@ -716,6 +740,7 @@ Rcpp::List RegionSetUpConditional_binary_InCPP(arma::vec & t_weight_cond){
 // [[Rcpp::export]]
 Rcpp::List mainRegionInCPP(
                            std::string t_genoType,     // "PLINK", "BGEN"
+                           std::vector<std::string> & t_genoIndex_prev,
                            std::vector<std::string> & t_genoIndex,
 			   arma::mat & annoIndicatorMat,
 			   arma::vec & maxMAFVec, 
@@ -882,10 +907,6 @@ Rcpp::List mainRegionInCPP(
     std::string chr, ref, alt, marker;
     uint32_t pd;
     bool flip = false;
-    std::string t_genoIndex_str = t_genoIndex.at(i);
-    char* end;
-    uint64_t gIndex = std::strtoull( t_genoIndex_str.c_str(), &end,10 );
-    std::remove(end);
     bool isOutputIndexForMissing = true;
     bool isOnlyOutputNonZero = false;
     //arma::vec timeoutput1a = getTime();
@@ -896,7 +917,30 @@ Rcpp::List mainRegionInCPP(
 
     GVec.resize(t_n);
     GVec.zeros();
-    bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
+
+   std::string t_genoIndex_str = t_genoIndex.at(i);
+    char* end;
+    uint64_t gIndex = std::strtoull( t_genoIndex_str.c_str(), &end,10 );
+    std::remove(end);
+
+    uint64_t gIndex_prev;
+    if(i == 0){
+        gIndex_prev = 0;
+    }else{
+        char* end_prev;
+        std::string t_genoIndex_prev_str;
+        if(t_genoType == "bgen"){
+            t_genoIndex_prev_str = t_genoIndex_prev.at(i);
+        }else if(t_genoType == "plink"){
+            t_genoIndex_prev_str = t_genoIndex.at(i-1);
+        }
+        gIndex_prev = std::strtoull( t_genoIndex_prev_str.c_str(), &end_prev,10 );
+        std::remove(end_prev);
+    }
+
+
+
+    bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
                                           isOnlyOutputNonZero, // bool t_isOnlyOutputNonZero,
@@ -1569,9 +1613,9 @@ if(t_regionTestType == "BURDEN"){
            OutFile << "NA\t";
            OutFile << "NA\n";
 
-//arma::vec timeoutput3 = getTime();
-//printTime(timeoutput2, timeoutput3, "burden test done");
-}else{
+ //arma::vec timeoutput3 = getTime();
+ //printTime(timeoutput2, timeoutput3, "burden test done");
+ }else{
 
   q_maf_for_anno = q_maf_for_anno + 1;
   OutList.push_back(MAC_GroupVec, "MAC_GroupVec");
@@ -1601,10 +1645,10 @@ if(t_regionTestType == "BURDEN"){
       OutList.push_back(VarMatAdjCond, "VarMatAdjCond"); 
     }  
 
-}
+ }
 
-int numofUR = 0;
-if(t_isSingleinGroupTest){
+ int numofUR = 0;
+ if(t_isSingleinGroupTest){
   OutList.push_back(pvalVec, "pvalVec");
   for(unsigned int k = 0; k < pvalVec.size(); k++){ 
 	if(std::isfinite(pvalVec.at(k))){
@@ -1683,11 +1727,11 @@ if(t_isSingleinGroupTest){
   }
   OutList.push_back(numofUR, "numofUR");
 
-}
+ }
 
-if(t_isOutputMarkerList){
+ if(t_isOutputMarkerList){
 	OutList.push_back(indicatorVec, "markerIndcatorVec");
-}
+ }
 
 
 
@@ -1695,18 +1739,18 @@ if(t_isOutputMarkerList){
   OutList.push_back(NumUltraRare_GroupVec, "NumUltraRare_GroupVec");
 
 
-if(t_regionTestType != "BURDEN" || t_isOutputMarkerList){
+ if(t_regionTestType != "BURDEN" || t_isOutputMarkerList){
   OutList.push_back(annoMAFIndicatorMat, "annoMAFIndicatorMat");
-}
+ }
   
   return OutList;
-}
-
+ }
 
 
 // [[Rcpp::export]]
 void assign_conditionMarkers_factors(
                            std::string t_genoType,     // "plink", "bgen", "vcf"
+			   std::vector<std::string> & t_genoIndex_prev,
                            std::vector<std::string> & t_genoIndex,
                            unsigned int t_n, 
 			   arma::vec & t_weight_cond
@@ -1753,12 +1797,34 @@ void assign_conditionMarkers_factors(
 
     bool isOutputIndexForMissing = true;
     bool isOnlyOutputNonZero = false; 
-    std::string t_genoIndex_str = t_genoIndex.at(i);
 
+
+
+
+    std::string t_genoIndex_str = t_genoIndex.at(i);
     char* end;
     uint64_t gIndex = std::strtoull( t_genoIndex_str.c_str(), &end,10 );
     std::remove(end);
-    bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
+
+    uint64_t gIndex_prev;
+    if(i == 0){
+        gIndex_prev = 0;
+    }else{
+        char* end_prev;
+	std::string t_genoIndex_prev_str;
+        if(t_genoType == "bgen"){
+            t_genoIndex_prev_str = t_genoIndex_prev.at(i);
+        }else if(t_genoType == "plink"){
+            t_genoIndex_prev_str = t_genoIndex.at(i-1);
+        }
+        gIndex_prev = std::strtoull( t_genoIndex_prev_str.c_str(), &end_prev,10 );
+        std::remove(end_prev);
+    }
+
+
+
+
+    bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
                                           isOnlyOutputNonZero, // bool t_isOnlyOutputNonZero,

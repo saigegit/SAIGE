@@ -31,11 +31,13 @@ void setRegion_GlobalVarsInCPP(
 Rcpp::DataFrame mainMarkerInCPP(
                            std::string & t_genoType,     // "PLINK", "BGEN"
                            std::string & t_traitType,
+			   std::vector<std::string> & t_genoIndex_prev,
                            std::vector<std::string>  & t_genoIndex,
                            bool & t_isMoreOutput,
                            bool & t_isImputation);
 
 bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN"
+				uint64_t & t_gIndex_prev,
                                uint64_t & t_gIndex,        // different meanings for different genoType
                                std::string& t_ref,       // REF allele
                                std::string& t_alt,       // ALT allele (should probably be minor allele, otherwise, computation time will increase)
@@ -83,6 +85,7 @@ void Unified_getMarkerPval(
 
 Rcpp::List mainRegionInCPP(
                            std::string t_genoType,     // "PLINK", "BGEN"
+			   std::vector<std::string> & t_genoIndex_prev,
                            std::vector<std::string> & t_genoIndex,
                            arma::mat & annoIndicatorMat,
                            arma::vec & maxMAFVec,
@@ -150,12 +153,14 @@ void setSAIGEobjInCPP(arma::mat & t_XVX,
         double t_pCutoffforFirth, 
 	arma::vec & t_offset);
 
-
 void assign_conditionMarkers_factors(
-                           std::string t_genoType,     // "PLINK", "BGEN"
+                           std::string t_genoType,     // "plink", "bgen", "vcf"
+                           std::vector<std::string> & t_genoIndex_prev,
                            std::vector<std::string> & t_genoIndex,
                            unsigned int t_n,
-			    arma::vec & t_weight_cond);
+                           arma::vec & t_weight_cond
+                           )
+
 
 void assign_conditionMarkers_factors_binary_region(
                            arma::vec & scalefactor_G2_cond);
@@ -182,7 +187,8 @@ Rcpp::List RegionSetUpConditional_binary_InCPP(arma::vec & t_weight_cond);
 
 void closeGenoFile(std::string & t_genoType);
 
-bool openOutfile(std::string  t_traitType);
+bool openOutfile(std::string t_traitType);
 
 bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation);
+
 #endif

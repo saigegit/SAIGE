@@ -183,21 +183,22 @@ setGenoInput = function(bgenFile = "",
     #markerInfo = as.data.frame(markerInfo)
     #markerInfo = as.data.frame(markerInfo)
     markerInfo = as.data.table(markerInfo, keep.rownames = FALSE)
-    rmcol = setdiff(names(markerInfo), c("chromosome", "position", "rsid", "allele1", "allele2", 'file_start_position'))
+    rmcol = setdiff(names(markerInfo), c("chromosome", "position", "rsid", "allele1", "allele2", 'file_start_position', 'size_in_bytes'))
     markerInfo = markerInfo[, !..rmcol]
 
     if(AlleleOrder == "alt-first")
-      names(markerInfo) = c("CHROM", "POS", "ID", "ALT", "REF", "genoIndex")
+      names(markerInfo) = c("CHROM", "POS", "ID", "ALT", "REF", "genoIndex", "size_in_bytes")
       #markerInfo = markerInfo[,c(1,2,3,6,5,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     if(AlleleOrder == "ref-first")
-      names(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT", "genoIndex")  
+      names(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT", "genoIndex", "size_in_bytes")  
       #markerInfo = markerInfo[,c(1,2,3,5,6,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)
     markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,":", markerInfo$REF, ":", markerInfo$ALT)
-
+    markerInfo$genoIndex_after = markerInfo$genoIndex + markerInfo$size_in_bytes
 #    markerInfo[,POS:=NULL]
     markerInfo[,REF:=NULL]
     markerInfo[,ALT:=NULL]
+    markerInfo[,size_in_bytes:=NULL]
     setkeyv(markerInfo, c("ID","ID2"))
 
     #markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$ALT, "/", markerInfo$REF)
@@ -405,11 +406,15 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 	#	weight_original = unlist(strsplit(weight_cond, ","))
 	#}
 	conditionDat = data.frame(SNP = condition_original, condIndex = seq(1,length(condition_original)))
-   	if(genoType != "vcf"){
-		markerInfo_conditionDat = merge(conditionDat, markerInfo[,c("ID","genoIndex"),drop=F], by.x="SNP", by.y="ID", sort = F, all.x=T)
+	conditionDat = setDT(conditionDat)
+
+	if(genoType != "vcf"){
+		markerInfo_conditionDat = merge(conditionDat, markerInfo, by.x="SNP", by.y="ID", sort = F, all.x=T)
 		if(!is.null(markerInfo$ID2)){
-			colnames(markerInfo)[which(colnames(markerInfo) == "genoIndex")] = "genoIndex2"
-			markerInfo_conditionDat = merge(markerInfo_conditionDat, markerInfo[,c("ID2","genoIndex2"),drop=F], by.x="SNP", by.y="ID2", sort = F, all.x=T)
+		        setnames(markerInfo, "genoIndex", "genoIndex2")	
+			#colnames(markerInfo)[which(colnames(markerInfo) == "genoIndex")] = "genoIndex2"
+
+			markerInfo_conditionDat = merge(markerInfo_conditionDat, markerInfo, by.x="SNP", by.y="ID2", sort = F, all.x=T)
 			posNA = which(is.na(markerInfo_conditionDat$genoIndex) & !is.na(markerInfo_conditionDat$genoIndex2))
         	if(length(posNA) != 0){
                 	markerInfo_conditionDat$genoIndex[posNA] = markerInfo_conditionDat$genoIndex2[posNA]
@@ -425,6 +430,7 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 		#if(length(posInd) == length(condition_original)){
 		if(nrow(markerInfo_conditionDat) == length(condition_original)){
 			cond_genoIndex = markerInfo_conditionDat$genoIndex
+			cond_genoIndex_after = markerInfo_conditionDat$genoIndex_after
        			#cond_genoIndex = genoIndex[posInd]
 		}else{
 
@@ -433,13 +439,12 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
        }else{
 	        condition_group_line = paste(c("condition", condition_original), collapse = "\t")	
 		set_iterator_inVcf(condition_group_line, "1", 1, 200000000)
-      		cond_genoIndex = rep(-1, length(condition_original)) 
+      		cond_genoIndex = rep(-1, length(condition_original))
+		cond_genoIndex_after = rep(-1, length(condition_original))
        }
    }else{
 	stop("condition is empty!")
    }
-   return(cond_genoIndex)
+   return(list(cond_genoIndex = cond_genoIndex, cond_genoIndex_prev = cond_genoIndex_after ))
 }
-
-
-
+ 

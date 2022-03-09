@@ -46,7 +46,8 @@ min_Info,
 SPAcutoff,
 dosage_zerod_cutoff,
 dosage_zerod_MAC_cutoff,
-markers_per_chunk){
+markers_per_chunk, 
+groups_per_chunk){
 
 	checkArgNumeric(start, deparse(substitute(start)), 1, 250000000)
         checkArgNumeric(end, deparse(substitute(end)), 1, 250000000)
@@ -59,7 +60,9 @@ markers_per_chunk){
 	checkArgNumeric(dosage_zerod_MAC_cutoff, deparse(substitute(dosage_zerod_MAC_cutoff)), dosage_zerod_cutoff, 100)
         cat("Any dosages <= ", dosage_zerod_cutoff, " for genetic variants with MAC <= ", dosage_zerod_MAC_cutoff, " are set to be 0 in group tests\n")
 	checkArgNumeric(markers_per_chunk, deparse(substitute(markers_per_chunk)), minVal=1000)
-	
+	checkArgNumeric(groups_per_chunk, deparse(substitute(groups_per_chunk)), minVal=1)
+
+
 }
 
 

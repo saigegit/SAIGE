@@ -132,7 +132,8 @@ print("OK")
                      SPAcutoff = SPAcutoff,
                      dosage_zerod_cutoff = dosage_zerod_cutoff,
 		     dosage_zerod_MAC_cutoff = dosage_zerod_MAC_cutoff,
-		     markers_per_chunk = markers_per_chunk
+		     markers_per_chunk = markers_per_chunk,
+		     groups_per_chunk = groups_per_chunk
 		     )
     #if(file.exists(SAIGEOutputFile)) {print("ok -2 file exist")} 
 
@@ -252,7 +253,6 @@ print("OK")
     genoType = objGeno$genoType
 
 
-
    if (condition != "") {
         isCondition = TRUE
         #n = length(obj.model$y) #sample size
@@ -303,16 +303,16 @@ print("OK")
 	condition_genoIndex=extract_genoIndex_condition(condition, objGeno$markerInfo, genoType)
 	if(!is.null(weights_for_condition)){
                 condition_weights = unlist(strsplit(weights_for_condition, ","))
-		if(length(condition_weights) != length(condition_genoIndex)){
+		if(length(condition_weights) != length(condition_genoIndex$condition_genoIndex)){
 			stop("The length of the provided weights for conditioning markers is not equal to the number of conditioning markers\n")
 		}	
         }else{
-		condition_weights = rep(0, length(condition_genoIndex))
+		condition_weights = rep(0, length(condition_genoIndex$condition_genoIndex))
 	}	
 
-	condition_genoIndex = as.character(format(condition_genoIndex, scientific = FALSE))
-
-	assign_conditionMarkers_factors(genoType, condition_genoIndex,  n, condition_weights)
+	condition_genoIndex_a = as.character(format(condition_genoIndex$condition_genoIndex, scientific = FALSE))
+	condition_genoIndex_prev_a = as.character(format(condition_genoIndex$condition_genoIndex_prev, scientific = FALSE)) 
+	assign_conditionMarkers_factors(genoType, condition_genoIndex_prev_a, condition_genoIndex_a,  n, condition_weights)
 	 #print("OK2")
 	if(obj.model$traitType == "binary" & isGroupTest){
 		outG2cond = RegionSetUpConditional_binary_InCPP(condition_weights)
