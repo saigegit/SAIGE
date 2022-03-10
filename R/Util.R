@@ -556,3 +556,31 @@ writeOutputFile = function(Output,
 isContainValue = function(x, val){
 	return(val %in% x)
 }
+
+
+writeOutputFileIndex = function(
+                           OutputFileIndex,
+                           AnalysisType,
+                           nEachChunk,
+                           indexChunk,
+                           Start,   # TRUE or FALSE, to indicate is the 'Output' is the first one to save into 'OutputFile'
+                           End)     # TRUE or FALSE, to indicate is the 'Output' is the last one to save into 'OutputFile'
+{
+  ## The following messages are for 'OutputFileIndex'
+  message1 = "This is the output index file for SAIGE package to record the end point in case users want to restart the analysis. Please do not modify this file."
+  message2 = paste("This is a", AnalysisType, "level analysis.")
+  message3 = paste("nEachChunk =", nEachChunk)
+  message4 = paste("Have completed the analysis of chunk", indexChunk)
+  message5 = "Have completed the analyses of all chunks."
+
+  print("write to output")
+
+  #print("write Output 2")
+  if(Start)
+    write.table(c(message1, message2, message3), OutputFileIndex,
+                quote = F, sep = "\t", append = F, col.names = F, row.names = F)
+  write.table(message4, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+
+  if(End)
+    write.table(message5, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+}

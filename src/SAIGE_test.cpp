@@ -343,8 +343,11 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
                           	double& t_pval_noSPA_c,
                            	double& t_Tstat_c,
                            	double& t_varT_c,
-			   	arma::rowvec & t_G1tilde_P_G2tilde)
+			   	arma::rowvec & t_G1tilde_P_G2tilde, 
+				bool & t_isFirth,
+				bool & t_isFirthConverge)
 {
+  t_isFirth = false;
   //arma::vec adjGVec = getadjGFast(t_GVec);
   std::string t_pval_str;
   double t_var2, t_SPApval;
@@ -523,6 +526,8 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
    }
 
    if(m_traitType!="quantitative" & m_is_Firth_beta & t_pval <= m_pCutoffforFirth){
+	t_isFirth = true;
+
 	if(!is_gtilde){
                 getadjG(t_GVec, t_gtilde);
                 is_gtilde = true;
@@ -532,7 +537,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 	arma::vec init(2, arma::fill::zeros);
 	//std::cout << "t_Beta " << t_Beta << std::endl;
 	//std::cout << "t_seBeta " << t_seBeta << std::endl;
-	fast_logistf_fit_simple(x, m_y, m_offset, true, init, 50, 15, 15, 1e-5, 1e-5, 1e-5, t_Beta ,t_seBeta);	
+	fast_logistf_fit_simple(x, m_y, m_offset, true, init, 50, 15, 15, 1e-5, 1e-5, 1e-5, t_Beta ,t_seBeta, t_isFirthConverge);	
 	//std::cout << "t_Beta after " << t_Beta << std::endl;
 	//std::cout << "t_seBeta after " << t_seBeta << std::endl;
    }
@@ -750,7 +755,9 @@ void SAIGEClass::fast_logistf_fit_simple(arma::mat & x,
         double gconv,
         double xconv,
         double & beta_G,
-        double & sebeta_G){
+        double & sebeta_G, 
+	bool & isfirthconverge){
+  isfirthconverge = false;	
   int n = x.n_rows;
   int k = x.n_cols;
   arma::vec beta = init;
@@ -814,6 +821,7 @@ void SAIGEClass::fast_logistf_fit_simple(arma::mat & x,
         pi_0 = arma::exp(pi_0) + 1;
         pi = 1/pi_0;
         if((iter == maxit) || ( (arma::max(arma::abs(delta)) <= xconv) & (abs(U_star).is_zero(gconv)))){
+		isfirthconverge = true;
                 break;
         }
   }

@@ -108,6 +108,11 @@ SAIGE.Region = function(mu,
     return(message)
   }
 
+ isappend=FALSE
+ if(!Start){ 
+  isappend=TRUE
+ }
+
   n = length(mu) #sample size 
 
 
@@ -127,26 +132,28 @@ SAIGE.Region = function(mu,
     regionTestType = "BURDEN"
 
     #output the result from Rcpp
-    isOpenOutFile = openOutfile(traitType)
+    isOpenOutFile = openOutfile(traitType, isappend)
     if(!isOpenOutFile){
 	stop("Output file ", OutputFile, " can't be opened\n")
     }
 
-    if(is_single_in_groupTest){
-      cat("is_single_in_groupTest = TRUE. Single-variant assoc tests results will be output\n")
-    isOpenOutFile_singleinGroup = openOutfile_singleinGroup(traitType, isImputation)
-    if(!isOpenOutFile_singleinGroup){
-        stop("Output file ", OutputFile, ".singleAssoc.txt can't be opened\n")
-    }
-
-   }else{
-      cat("is_single_in_groupTest = FALSE. Single-variant assoc tests results will not be output\n")
-    }
   }else{
     stop("r.corr needs to be either 1 (BURDEN test) or 0 (SKAT-O test)\n")
   }	  
 
-  ##check group file
+  if(is_single_in_groupTest){
+      cat("is_single_in_groupTest = TRUE. Single-variant assoc tests results will be output\n")
+    isOpenOutFile_singleinGroup = openOutfile_singleinGroup(traitType, isImputation, isappend)
+    if(!isOpenOutFile_singleinGroup){
+        stop("Output file ", OutputFile, ".singleAssoc.txt can't be opened\n")
+    }
+
+  }else{
+      cat("is_single_in_groupTest = FALSE. Single-variant assoc tests results will not be output\n")
+  }
+
+
+##check group file
   region_list = checkGroupFile(groupFile)
   nRegions = region_list$nRegions
   is_weight_included = region_list$is_weight_included
@@ -231,7 +238,7 @@ SAIGE.Region = function(mu,
         isVcfEnd =  check_Vcf_end()
     	if(!isVcfEnd){
 		genoIndex = rep("0", length(SNP))
-		genoIndex_after = rep("0", length(SNP))
+		genoIndex_prev = rep("0", length(SNP))
     	}else{
         	warning("No markers in region ", regionName, " are found in the VCF file")
 		next
@@ -253,7 +260,7 @@ SAIGE.Region = function(mu,
       #gc()
 
       #time_mainRegionInCPP = system.time({outList = mainRegionInCPP(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest)})
-      outList = mainRegionInCPP(genoType, region$genoIndex_after, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolist, regionName)
+      outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolist, regionName)
 #print("time_mainRegionInCPP")
 #print(time_mainRegionInCPP)
       rm(region)
@@ -553,10 +560,11 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
   nEachChunk = 1
 
 if(regionTestType != "BURDEN"){  
-pval.Region.all = rbind(pval.Region.all, pval.Region)
+    pval.Region.all = rbind(pval.Region.all, pval.Region)
 }
 
 
+# output
 
 if(mth ==  numberRegionsInChunk){
   message1 = "This is the output index file for SAIGE package to record the end point in case users want to restart the analysis. Please do not modify this file."
@@ -569,7 +577,7 @@ if(mth ==  numberRegionsInChunk){
   print("write to output")
   #cat("n1 is ", n1, "\n")
   #cat("n2 is ", n2, "\n")
-if(regionTestType != "BURDEN"){  
+  if(regionTestType != "BURDEN"){  
       if(Start){
         if(!is.null(pval.Region.all)){
           fwrite(pval.Region.all, OutputFile, quote = F, sep = "\t", append = F, col.names = T, row.names = F)
@@ -580,48 +588,21 @@ if(regionTestType != "BURDEN"){
         }
         #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
       }
-}
+  }
 
 
- if(FALSE){
-      if(Start){
-        if(!is.null(OutList.all)){
-          fwrite(OutList.all, paste0(OutputFile, ".singleAssoc.txt"), quote = F, sep = "\t", append = F, col.names = T, row.names = F)
-        }
-      }else{
-        if(!is.null(OutList.all)){
-          fwrite(OutList.all, paste0(OutputFile, ".singleAssoc.txt"), quote = F, sep = "\t", append = T, col.names = F, row.names = F)
-        }
-        #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
-      }
-}
-
-
-     if(Start){
-        if(!is.null(Output_MarkerList.all)){
-          fwrite(Output_MarkerList.all, paste0(OutputFile, ".markerList.txt"), quote = F, sep = "\t", append = F, col.names = T, row.names = F)
-        }
-      }else{
-        if(!is.null(Output_MarkerList.all)){
-          fwrite(Output_MarkerList.all, paste0(OutputFile, ".markerList.txt"), quote = F, sep = "\t", append = T, col.names = F, row.names = F)
-        }
-        #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
-      }
-
-if(FALSE){
+#if(FALSE){
   #print("write Output 2")
-  if(Start)
+  if(Start){
     fwrite(c(message1, message2, message3), OutputFileIndex,
                 quote = F, sep = "\t", append = F, col.names = F, row.names = F)
-    fwrite(message4, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+  }
+  fwrite(message4, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
 
-  if(End)
+  if(End){
     fwrite(message5, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
-
-}#if(FALSE)
-
-
-
+  }
+#}#if(FALSE)
 
 pval.Region.all = NULL
 OutList.all = NULL
@@ -743,9 +724,9 @@ if(!is.null(markerInfo)){
         setnames(RegionData, "genoIndex.y", "genoIndex2")
         setnames(RegionData, "CHROM.x", "CHROM")
         setnames(RegionData, "CHROM.y", "CHROM2")
-	if(!is.null(markerInfo$size_in_bytes.x)){
-		setnames(RegionData, "genoIndex_after.x", "genoIndex_after")
-		markerInfo[,genoIndex_after.y:=NULL]
+	if(!is.null(markerInfo$genoIndex_prev.x)){
+		setnames(RegionData, "genoIndex_prev.x", "genoIndex_prev")
+		markerInfo[,genoIndex_prev.y:=NULL]
 
 	}
 	posNA = which(is.na(RegionData$genoIndex) & !is.na(RegionData$genoIndex2))
@@ -802,8 +783,8 @@ if(nrow(RegionData) != 0){
 
     if(!is.null(markerInfo)){
       genoIndex = as.numeric(RegionData$genoIndex[posSNP])
-      if(!is.null(RegionData$genoIndex_after)){
-		genoIndex_after = as.numeric(RegionData$genoIndex[posSNP])	
+      if(!is.null(RegionData$genoIndex_prev)){
+		genoIndex_prev = as.numeric(RegionData$genoIndex_prev[posSNP])	
       }
       chrom = RegionData$CHROM[posSNP]
       uchrom = unique(chrom)
@@ -854,8 +835,8 @@ if(nrow(RegionData) != 0){
     annoIndicatorMat = annoIndicatorMat[-annoIndicatorMat_rmind,,drop=F]
     if(!is.null(markerInfo)){
       genoIndex = genoIndex[-annoIndicatorMat_rmind]
-     if(!is.null(RegionData$genoIndex_after)){
-                genoIndex_after = genoIndex_after[-annoIndicatorMat_rmind]
+     if(!is.null(RegionData$genoIndex_prev)){
+                genoIndex_prev = genoIndex_prev[-annoIndicatorMat_rmind]
       }
 
     }
@@ -872,10 +853,10 @@ if(nrow(RegionData) != 0){
                            genoIndex =  as.character(format(genoIndex, scientific = FALSE)),
 #                           chrom = uchrom,
                            annoVec = annoVecNew)
-    if(!is.null(RegionData$genoIndex_after)){
-	RegionList[[r]]$genoIndex_after = as.character(format(genoIndex_after, scientific = FALSE)) 
+    if(!is.null(RegionData$genoIndex_prev)){
+	RegionList[[r]]$genoIndex_prev = as.character(format(genoIndex_prev, scientific = FALSE)) 
      }else{
-	RegionList[[r]]$genoIndex_after = rep("0", length(genoIndex))	
+	RegionList[[r]]$genoIndex_prev = c("-1")	
      }
 
    }else{

@@ -18,7 +18,7 @@ setRegion_GlobalVarsInCPP <- function(t_max_maf_region, t_max_markers_region, t_
 }
 
 mainMarkerInCPP <- function(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation) {
-    .Call('_SAIGE_mainMarkerInCPP', PACKAGE = 'SAIGE', t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation)
+    invisible(.Call('_SAIGE_mainMarkerInCPP', PACKAGE = 'SAIGE', t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation))
 }
 
 setPLINKobjInCPP <- function(t_bimFile, t_famFile, t_bedFile, t_SampleInModel, t_AlleleOrder) {
@@ -69,20 +69,24 @@ move_forward_iterator_Vcf <- function(i) {
     invisible(.Call('_SAIGE_move_forward_iterator_Vcf', PACKAGE = 'SAIGE', i))
 }
 
-fast_logistf_fit <- function(x, y, weight, offset, firth, col_fit, init, maxit, maxstep, maxhs, lconv, gconv, xconv) {
-    .Call('_SAIGE_fast_logistf_fit', PACKAGE = 'SAIGE', x, y, weight, offset, firth, col_fit, init, maxit, maxstep, maxhs, lconv, gconv, xconv)
+fast_logistf_fit <- function(x, y, weight, offset, firth, col_fit, init, maxit, maxstep, maxhs, lconv, gconv, xconv, isfirthconverge) {
+    .Call('_SAIGE_fast_logistf_fit', PACKAGE = 'SAIGE', x, y, weight, offset, firth, col_fit, init, maxit, maxstep, maxhs, lconv, gconv, xconv, isfirthconverge)
 }
 
 closeGenoFile <- function(t_genoType) {
     invisible(.Call('_SAIGE_closeGenoFile', PACKAGE = 'SAIGE', t_genoType))
 }
 
-openOutfile <- function(t_traitType) {
-    .Call('_SAIGE_openOutfile', PACKAGE = 'SAIGE', t_traitType)
+openOutfile <- function(t_traitType, isappend) {
+    .Call('_SAIGE_openOutfile', PACKAGE = 'SAIGE', t_traitType, isappend)
 }
 
-openOutfile_singleinGroup <- function(t_traitType, t_isImputation) {
-    .Call('_SAIGE_openOutfile_singleinGroup', PACKAGE = 'SAIGE', t_traitType, t_isImputation)
+openOutfile_singleinGroup <- function(t_traitType, t_isImputation, isappend) {
+    .Call('_SAIGE_openOutfile_singleinGroup', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend)
+}
+
+openOutfile_single <- function(t_traitType, t_isImputation, isappend) {
+    .Call('_SAIGE_openOutfile_single', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend)
 }
 
 closeGenoFile_plink <- function() {

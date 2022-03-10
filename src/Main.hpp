@@ -28,7 +28,7 @@ void setRegion_GlobalVarsInCPP(
 
 
 
-Rcpp::DataFrame mainMarkerInCPP(
+void mainMarkerInCPP(
                            std::string & t_genoType,     // "PLINK", "BGEN"
                            std::string & t_traitType,
 			   std::vector<std::string> & t_genoIndex_prev,
@@ -80,7 +80,9 @@ void Unified_getMarkerPval(
                            double& t_pval_noSPA_c,
                            double& t_Tstat_c,
                            double& t_varT_c,
-			   arma::rowvec & t_G1tilde_P_G2tilde_Vec);
+			   arma::rowvec & t_G1tilde_P_G2tilde_Vec,
+			    bool & t_isFirth,
+			   bool & t_isFirthConverge);
 
 
 Rcpp::List mainRegionInCPP(
@@ -159,7 +161,7 @@ void assign_conditionMarkers_factors(
                            std::vector<std::string> & t_genoIndex,
                            unsigned int t_n,
                            arma::vec & t_weight_cond
-                           )
+                           );
 
 
 void assign_conditionMarkers_factors_binary_region(
@@ -187,8 +189,49 @@ Rcpp::List RegionSetUpConditional_binary_InCPP(arma::vec & t_weight_cond);
 
 void closeGenoFile(std::string & t_genoType);
 
-bool openOutfile(std::string t_traitType);
+bool openOutfile(std::string t_traitType, bool isappend);
 
-bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation);
+
+bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, bool isappend);
+
+bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend);
+
+void writeOutfile_single(bool t_isMoreOutput,
+      bool t_isImputation,
+                        bool t_isCondition,
+                         int mFirth,
+                         int mFirthConverge,
+                        std::string t_traitType,
+                        std::vector<std::string> & chrVec,
+                        std::vector<std::string> & posVec,
+                        std::vector<std::string> & markerVec,
+                        std::vector<std::string> & refVec,
+                        std::vector<std::string> & altVec,
+                        std::vector<double> & altCountsVec,
+                        std::vector<double> & altFreqVec,
+                        std::vector<double> & imputationInfoVec,
+                        std::vector<double> & missingRateVec,
+                        std::vector<double> & BetaVec,
+                        std::vector<double> & seBetaVec,
+                        std::vector<double> & TstatVec,
+                        std::vector<double> & varTVec,
+                        std::vector<double> & pvalVec,
+                        std::vector<double> & pvalNAVec,
+                        std::vector<bool>  & isSPAConvergeVec,
+                        std::vector<double> & Beta_cVec,
+                        std::vector<double> & seBeta_cVec,
+                        std::vector<double> & Tstat_cVec,
+                        std::vector<double> & varT_cVec,
+                        std::vector<double> & pval_cVec,
+                        std::vector<double> & pvalNA_cVec,
+                        std::vector<double> & AF_caseVec,
+                        std::vector<double> & AF_ctrlVec,
+                        std::vector<uint32_t> & N_caseVec,
+                        std::vector<uint32_t> & N_ctrlVec,
+                        std::vector<double>  & N_case_homVec,
+                        std::vector<double>  & N_ctrl_hetVec,
+                        std::vector<double>  & N_case_hetVec,
+                        std::vector<double>  & N_ctrl_homVec,
+                        std::vector<uint32_t> & N_Vec);
 
 #endif

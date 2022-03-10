@@ -154,6 +154,7 @@ setGenoInput = function(bgenFile = "",
     markerInfo[,REF:=NULL]
     markerInfo[,ALT:=NULL]
     setkeyv(markerInfo, c("ID","ID2"))
+    #markerInfo$genoIndex_prev = NULL
     #sampleInfo = data.table::fread(famFile, select = c(2), data.table=F)
     #samplesInGeno = sampleInfo[,1]
     #SampleIDs = updateSampleIDs(SampleIDs, samplesInGeno)
@@ -194,7 +195,7 @@ setGenoInput = function(bgenFile = "",
       #markerInfo = markerInfo[,c(1,2,3,5,6,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)
     markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,":", markerInfo$REF, ":", markerInfo$ALT)
-    markerInfo$genoIndex_after = markerInfo$genoIndex + markerInfo$size_in_bytes
+    markerInfo$genoIndex_prev = markerInfo$genoIndex + markerInfo$size_in_bytes
 #    markerInfo[,POS:=NULL]
     markerInfo[,REF:=NULL]
     markerInfo[,ALT:=NULL]
@@ -335,12 +336,12 @@ if(FALSE){
         set_iterator_inVcf(inSNPlist, in_chrom, in_beg_pd, in_end_pd)
       }
     } 
-    markerInfo = NULL
+    markerInfo = data.table(CHROM=NULL, genoIndex_prev=NULL, genoIndex=NULL)
   }
   #genoList = list(genoType = genoType, markerInfo = markerInfo, SampleIDs = SampleIDs, AlleleOrder = AlleleOrder, GenoFile = GenoFile, GenoFileIndex = GenoFileIndex, anyQueue = anyQueue)
   #genoList = list(dosageFileType = dosageFileType, markerInfo = markerInfo, anyQueue = anyQueue, genoType = dosageFileType)
   #genoList = list(dosageFileType = dosageFileType, markerInfo = markerInfo, genoType = dosageFileType)
-  if(!is.null(markerInfo)){
+  if(nrow(markerInfo) != 0){
     markerInfo[,POS:=NULL]
   }
   genoList = list(markerInfo = markerInfo, genoType = dosageFileType)
@@ -430,7 +431,7 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 		#if(length(posInd) == length(condition_original)){
 		if(nrow(markerInfo_conditionDat) == length(condition_original)){
 			cond_genoIndex = markerInfo_conditionDat$genoIndex
-			cond_genoIndex_after = markerInfo_conditionDat$genoIndex_after
+			cond_genoIndex_prev = markerInfo_conditionDat$genoIndex_prev
        			#cond_genoIndex = genoIndex[posInd]
 		}else{
 
@@ -440,11 +441,11 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 	        condition_group_line = paste(c("condition", condition_original), collapse = "\t")	
 		set_iterator_inVcf(condition_group_line, "1", 1, 200000000)
       		cond_genoIndex = rep(-1, length(condition_original))
-		cond_genoIndex_after = rep(-1, length(condition_original))
+		cond_genoIndex_prev = rep(-1, length(condition_original))
        }
    }else{
 	stop("condition is empty!")
    }
-   return(list(cond_genoIndex = cond_genoIndex, cond_genoIndex_prev = cond_genoIndex_after ))
+   return(list(cond_genoIndex = cond_genoIndex, cond_genoIndex_prev = cond_genoIndex_prev ))
 }
  

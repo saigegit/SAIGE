@@ -1,82 +1,6 @@
-mainMarker = function(genoType, genoIndex, traitType, isMoreOutput, isImputation, isCondition)
-{
-    # Check 'Main.cpp'
-   #time_mainMarkerInCPP = system.time({OutList = mainMarkerInCPP(genoType, traitType, genoIndex, isMoreOutput)})
-   OutList = mainMarkerInCPP(genoType, traitType, genoIndex, isMoreOutput)
-
-   #print("time_mainMarkerInCPP")
-   #print(time_mainMarkerInCPP)
-
-   OutList$CHR = sapply(strsplit(as.character(OutList$infoVec), ":"), "[[", 1) 
-   OutList$POS = sapply(strsplit(as.character(OutList$infoVec), ":"), "[[", 2) 
-   OutList$Allele1 = sapply(strsplit(as.character(OutList$infoVec), ":"), "[[", 3) 
-   OutList$Allele2 = sapply(strsplit(as.character(OutList$infoVec), ":"), "[[", 4) 
-
-   obj.mainMarker = data.frame(CHR = OutList$CHR, 
-			       POS = OutList$POS,
-			       MarkerID = OutList$markerVec, 
-			       Allele1 = OutList$Allele1,
-			       Allele2 = OutList$Allele2,
-			       AC_Allele2 = OutList$altCountsVec,
-			       AF_Allele2 = OutList$altFreqVec)
-  if(isImputation){
-    obj.mainMarker$imputationInfo = OutList$imputationInfo
-  }else{
-    obj.mainMarker$MissingRate = OutList$missingRateVec
-  }
-
-  obj.mainMarker$BETA = OutList$BetaVec
-  obj.mainMarker$SE = OutList$seBetaVec
-  obj.mainMarker$Tstat = OutList$TstatVec
-  obj.mainMarker$var = OutList$varTVec
-  obj.mainMarker$p.value = OutList$pvalVec
-
-  if(traitType == "binary"){
-    obj.mainMarker$p.value.NA = OutList$pvalNAVec
-    obj.mainMarker$Is.SPA.converge = OutList$isSPAConvergeVec
-    if(isCondition){
-       obj.mainMarker$BETA_c = OutList$Beta_cVec
-       obj.mainMarker$SE_c = OutList$seBeta_cVec
-       obj.mainMarker$Tstat_c = OutList$Tstat_cVec
-       obj.mainMarker$var_c = OutList$varT_cVec
-       obj.mainMarker$p.value_c = OutList$pval_cVec
-      obj.mainMarker$p.value.NA_c = OutList$pvalNA_cVec
-    }	    
-    obj.mainMarker$AF_caseVec = OutList$AF_caseVec
-    obj.mainMarker$AF_ctrlVec = OutList$AF_ctrlVec
-    obj.mainMarker$N_caseVec = OutList$N_caseVec
-    obj.mainMarker$N_ctrlVec = OutList$N_ctrlVec
-
-    if(isMoreOutput){
-      obj.mainMarker$N_case_homVec = OutList$N_case_homVec
-      obj.mainMarker$N_case_hetVec = OutList$N_case_hetVec
-      obj.mainMarker$N_ctrl_homVec = OutList$N_ctrl_homVec
-      obj.mainMarker$N_ctrl_hetVec = OutList$N_ctrl_hetVec
-    }
-
-  }else if(traitType == "quantitative"){
-    if(isCondition){
-       obj.mainMarker$BETA_c = OutList$Beta_cVec
-       obj.mainMarker$SE_c = OutList$seBeta_cVec
-       obj.mainMarker$Tstat_c = OutList$Tstat_cVec
-       obj.mainMarker$var_c = OutList$varT_cVec
-       obj.mainMarker$p.value_c = OutList$pval_cVec
-    }	    
-    obj.mainMarker$N = obj.mainMarker$N_Vec
-  } 	  
-
-  noNAIndices = which(!is.na(OutList$pvalVec))
-  obj.mainMarker = obj.mainMarker[noNAIndices,]
-  rm(OutList)
-  return(obj.mainMarker)
-}
-
-
-
-
-
 SAIGE.Marker = function(traitType,
 			genoType,
+			genoIndex_prev,
                         genoIndex,
 			CHROM,
                         OutputFile,
@@ -97,8 +21,19 @@ SAIGE.Marker = function(traitType,
 
   outIndex = checkOutputFile(OutputFile, OutputFileIndex, "Marker", format(nMarkersEachChunk, scientific=F), isOverWriteOutput)    # this function is in 'Util.R'
   outIndex = outIndex$indexChunk
-  if(outIndex != 1)
+  isappend = FALSE
+  if(outIndex != 1){
     cat("Restart the analysis from chunk:\t", outIndex, "\n")
+    isappend = TRUE
+  }  
+
+  isOpenOutFile_single = openOutfile_single(traitType, isImputation, isappend)
+
+  if(!isOpenOutFile_single){
+    stop("Output file ", OutputFile, " can't be opened\n")
+  }
+
+
 
 
   ## set up an object for genotype
@@ -106,6 +41,9 @@ SAIGE.Marker = function(traitType,
       #markerInfo = objGeno$markerInfo
     if(LOCO){
       genoIndex = genoIndex[which(CHROM == chrom)]
+      if(!is.null(genoIndex_prev)){
+	genoIndex_prev = genoIndex_prev[which(CHROM == chrom)]
+      }
       CHROM = CHROM[which(CHROM == chrom)]  
       #markerInfo = markerInfo[which(markerInfo$CHROM == chrom),]  
     }
@@ -116,7 +54,7 @@ SAIGE.Marker = function(traitType,
     #print(markerInfo[1:10,])
     #print(genoIndex[1:10])    
 
-    genoIndexList = splitMarker(genoIndex, nMarkersEachChunk, CHROM);
+    genoIndexList = splitMarker(genoIndex, genoIndex_prev, nMarkersEachChunk, CHROM);
     nChunks = length(genoIndexList)
     cat("Number of all markers to test:\t", length(genoIndex), "\n")
     cat("Number of markers in each chunk:\t", nMarkersEachChunk, "\n")
@@ -158,6 +96,11 @@ SAIGE.Marker = function(traitType,
       tempList = genoIndexList[[i]]
       genoIndex = as.character(format(tempList$genoIndex, scientific = FALSE))
       tempChrom = tempList$chrom
+      if(!is.null(genoIndex_prev)){
+      	genoIndex_prev = as.character(format(tempList$genoIndex_prev, scientific = FALSE))
+      }else{
+	genoIndex_prev = c("-1")
+      }
     }
 
     #print("tempList")
@@ -183,32 +126,39 @@ SAIGE.Marker = function(traitType,
       cat(paste0("(",Sys.time(),") ---- Analyzing Chunk ", i, " :  chrom ", chrom," ---- \n"))
     }	    
     # main function to calculate summary statistics for markers in one chunk
-    #time_mainMarker = system.time({resMarker = mainMarker(genoType, genoIndex, objNull$traitType, isMoreOutput, isImputation, isCondition)})
-    resMarker = as.data.frame(mainMarkerInCPP(genoType, traitType, genoIndex, isMoreOutput, isImputation)) 
-    resMarker = resMarker[which(!is.na(resMarker$BETA)), ]
+   
+   #resMarker = as.data.frame(mainMarkerInCPP(genoType, traitType, genoIndex_prev, genoIndex, isMoreOutput, isImputation)) 
+   #resMarker = resMarker[which(!is.na(resMarker$BETA)), ]
 
-#    print("time_mainMarker")
-#   print(time_mainMarker)    
-
+  mainMarkerInCPP(genoType, traitType, genoIndex_prev, genoIndex, isMoreOutput, isImputation)
 
     #timeoutput=system.time({writeOutputFile(Output = list(resMarker),
-  if(nrow(resMarker) > 0){
+  #if(nrow(resMarker) > 0){
 
   if(genoType == "vcf"){
     isEnd_Output =  check_Vcf_end()
   }else{
     isEnd_Output = (i==nChunks)	
   }
-  writeOutputFile(Output = list(resMarker),
-                    OutputFile = list(OutputFile),
-                    OutputFileIndex = OutputFileIndex,
-                    AnalysisType = "Marker",
-                    nEachChunk = format(nMarkersEachChunk, scientific=F),
-                    indexChunk = i,
-                    Start = (i==1),
-                    End = isEnd_Output)
+  
+  #}
 
-  }
+  writeOutputFileIndex(OutputFileIndex = OutputFileIndex,
+			AnalysisType = "Marker",
+			nEachChunk = format(nMarkersEachChunk, scientific=F),
+			indexChunk = i,
+			Start = (i==1),
+			End = isEnd_Output)
+
+  #writeOutputFile(Output = list(resMarker),
+  #                  OutputFile = list(OutputFile),
+  #                  OutputFileIndex = OutputFileIndex,
+  #                  AnalysisType = "Marker",
+  #                  nEachChunk = format(nMarkersEachChunk, scientific=F),
+  #                  indexChunk = i,
+  #                  Start = (i==1),
+  #                  End = isEnd_Output)
+
                     #End = (i==nChunks))})
     #print("timeoutput")
     #print(timeoutput)
@@ -241,7 +191,7 @@ SAIGE.Marker = function(traitType,
 }
 
 
-splitMarker = function(genoIndex, nMarkersEachChunk, CHROM)
+splitMarker = function(genoIndex, genoIndex_prev, nMarkersEachChunk, CHROM)
 {
   genoIndexList = list()
   iTot = 1;
@@ -250,6 +200,9 @@ splitMarker = function(genoIndex, nMarkersEachChunk, CHROM)
   for(chrom in uCHROM){
     pos = which(CHROM == chrom)
     gIdx = genoIndex[pos]
+    if(!is.null(genoIndex_prev)){
+	gIndprev = genoIndex_prev[pos]
+    }
     M = length(gIdx)
 
     idxStart = seq(1, M, nMarkersEachChunk)
@@ -262,6 +215,9 @@ splitMarker = function(genoIndex, nMarkersEachChunk, CHROM)
       idxMarker = idxStart[i]:idxEnd[i]
       genoIndexList[[iTot]] = list(chrom = chrom,
                                    genoIndex = gIdx[idxMarker])
+      if(!is.null(genoIndex_prev)){
+	genoIndexList[[iTot]]$genoIndex_prev = gIndprev[idxMarker] 	     }
+
       iTot = iTot + 1;
     }
   }

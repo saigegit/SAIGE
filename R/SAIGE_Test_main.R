@@ -251,8 +251,11 @@ print("OK")
     #genoIndex = objGeno$markerInfo$genoIndex
     #genoType = objGeno$dosageFileType
     genoType = objGeno$genoType
-
-
+    #if(!is.null(objGeno$markerInfo)){
+#	if(is.null(objGeno$markerInfo$genoIndex_prev)){
+#		objGeno$markerInfo$genoIndex_prev = c("-1")
+#	}
+ #   }
    if (condition != "") {
         isCondition = TRUE
         #n = length(obj.model$y) #sample size
@@ -347,9 +350,10 @@ print("OK")
 
     #if(file.exists(SAIGEOutputFile)) {print("ok 2 file exist")}
         SAIGE.Marker(traitType,
-		      genoType,
-                        objGeno$markerInfo$genoIndex,
-                        objGeno$markerInfo$CHROM,
+		   genoType,
+                   objGeno$markerInfo$genoIndex_prev,
+                   objGeno$markerInfo$genoIndex,
+                   objGeno$markerInfo$CHROM,
                    OutputFile,
                    OutputFileIndex,
                    markers_per_chunk,

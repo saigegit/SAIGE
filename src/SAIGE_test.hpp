@@ -154,7 +154,9 @@ class SAIGEClass
                                 double& t_pval_noSPA_c,
                                 double& t_Tstat_c,
                                 double& t_varT_c,
-                                arma::rowvec & t_G1tilde_P_G2tilde);
+                                arma::rowvec & t_G1tilde_P_G2tilde,
+				 bool & t_isFirth,
+                                bool & t_isFirthConverge);
 
 
     void getindices(arma::uvec & t_case_indices,
@@ -202,7 +204,8 @@ class SAIGEClass
         double gconv,
         double xconv,
         double & beta_G,
-        double & sebeta_G);	
+        double & sebeta_G,
+	bool & isfirthconverge);	
 
 
 

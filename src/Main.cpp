@@ -66,8 +66,10 @@ bool  g_is_Firth_beta;
 double g_pCutoffforFirth;
 std::ofstream OutFile;
 std::ofstream OutFile_singleInGroup;
+std::ofstream OutFile_single;
 std::string g_outputFilePrefixGroup;
 std::string g_outputFilePrefixSingleInGroup;
+std::string g_outputFilePrefixSingle;
 
 // [[Rcpp::export]]
 void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
@@ -90,6 +92,7 @@ void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
   g_weights_beta = t_weights_beta;
   g_outputFilePrefixGroup = t_outputFilePrefix;
   g_outputFilePrefixSingleInGroup = t_outputFilePrefix + ".singleAssoc.txt";
+  g_outputFilePrefixSingle = t_outputFilePrefix;
 
 }
 // [[Rcpp::export]]
@@ -127,7 +130,7 @@ void setRegion_GlobalVarsInCPP(
                            //std::vector<uint32_t> & t_genoIndex,
 
 // [[Rcpp::export]]
-Rcpp::DataFrame mainMarkerInCPP(
+void mainMarkerInCPP(
                            std::string & t_genoType,     // "PLINK", "BGEN"
 			   std::string & t_traitType,
 			   std::vector<std::string> & t_genoIndex_prev,
@@ -194,6 +197,9 @@ Rcpp::DataFrame mainMarkerInCPP(
 	isSingleVarianceRatio = false;
   }
 
+  int mFirth = 0;
+  int mFirthConverge = 0;
+
   for(int i = 0; i < q; i++){
     if((i+1) % g_marker_chunksize == 0){
       std::cout << "Completed " << (i+1) << "/" << q << " markers in the chunk." << std::endl;
@@ -204,7 +210,6 @@ Rcpp::DataFrame mainMarkerInCPP(
     uint32_t pd, N_case, N_ctrl, N;
 
     //free(end);
-
 
     bool flip = false;
     std::string t_genoIndex_str = t_genoIndex.at(i);
@@ -337,7 +342,7 @@ Rcpp::DataFrame mainMarkerInCPP(
     double Beta, seBeta, pval, pval_noSPA, Tstat, varT, gy;
     double Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c;
 
-    bool isSPAConverge, is_gtilde;
+    bool isSPAConverge, is_gtilde, is_Firth, is_FirthConverge;
     //arma::vec t_P2Vec;
     //arma::vec t_P2Vec;
 
@@ -364,8 +369,17 @@ Rcpp::DataFrame mainMarkerInCPP(
 		    t_GVec, 
                           false, // bool t_isOnlyOutputNonZero, 
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,   
-			  altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec);
+			  altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge);
 
+
+   if(t_traitType == "binary"){
+     if(is_Firth){
+       mFirth = mFirth + 1;
+       if(is_FirthConverge){
+		mFirthConverge = mFirthConverge + 1;
+       }
+     }
+   }
 //arma::vec timeoutput6 = getTime();
 //printTime(timeoutput5, timeoutput6, "Unified_getMarkerPval");
 
@@ -434,6 +448,46 @@ Rcpp::DataFrame mainMarkerInCPP(
     //t_GVec.clear();
   }
 
+  //output
+  writeOutfile_single(t_isMoreOutput,
+      t_isImputation,
+      isCondition,
+  mFirth,
+  mFirthConverge,
+  t_traitType,
+  chrVec,
+  posVec,
+  markerVec,
+  refVec,
+  altVec,
+  altCountsVec,
+  altFreqVec,
+  imputationInfoVec,
+  missingRateVec,
+  BetaVec,
+  seBetaVec,
+  TstatVec,
+  varTVec,
+  pvalVec,
+  pvalNAVec,
+  isSPAConvergeVec,
+  Beta_cVec,
+  seBeta_cVec,
+  Tstat_cVec,
+  varT_cVec,
+  pval_cVec,
+  pvalNA_cVec,
+  AF_caseVec,
+  AF_ctrlVec,
+  N_caseVec,
+  N_ctrlVec,
+  N_case_homVec,
+  N_ctrl_hetVec,
+  N_case_hetVec,
+  N_ctrl_homVec,
+  N_Vec);
+
+/*
   //Rcpp::List OutList = Rcpp::List::create(Rcpp::Named("markerVec") = markerVec,
   Rcpp::DataFrame OUT_DF = Rcpp::DataFrame::create(
   //Rcpp::List OutList = Rcpp::List::create(
@@ -489,7 +543,9 @@ Rcpp::DataFrame mainMarkerInCPP(
 	    }
 	     OUT_DF["N"] = N_Vec;
 	}	
-	return(OUT_DF);
+*/
+
+//return(OUT_DF);
 }
 
 
@@ -572,12 +628,14 @@ void Unified_getMarkerPval(
 			   double& t_pval_noSPA_c,
                            double& t_Tstat_c,
                            double& t_varT_c,
-			   arma::rowvec & t_G1tilde_P_G2tilde_Vec)
+			   arma::rowvec & t_G1tilde_P_G2tilde_Vec, 
+			   bool & t_isFirth,
+			   bool & t_isFirthConverge)
 {
     if(t_isOnlyOutputNonZero == true)
       Rcpp::stop("When using SAIGE method to calculate marker-level p-values, 't_isOnlyOutputNonZero' should be false.");   
 
-    ptr_gSAIGEobj->getMarkerPval(t_GVec, t_indexForNonZero_vec, t_indexForZero_vec, t_Beta, t_seBeta, t_pval, t_pval_noSPA, t_altFreq, t_Tstat, t_gy, t_varT, t_isSPAConverge, t_gtilde, is_gtilde, is_region, t_P2Vec, t_isCondition, t_Beta_c, t_seBeta_c, t_pval_c, t_pval_noSPA_c, t_Tstat_c, t_varT_c, t_G1tilde_P_G2tilde_Vec); //SAIGE_new.cpp
+    ptr_gSAIGEobj->getMarkerPval(t_GVec, t_indexForNonZero_vec, t_indexForZero_vec, t_Beta, t_seBeta, t_pval, t_pval_noSPA, t_altFreq, t_Tstat, t_gy, t_varT, t_isSPAConverge, t_gtilde, is_gtilde, is_region, t_P2Vec, t_isCondition, t_Beta_c, t_seBeta_c, t_pval_c, t_pval_noSPA_c, t_Tstat_c, t_varT_c, t_G1tilde_P_G2tilde_Vec, t_isFirth, t_isFirthConverge); //SAIGE_new.cpp
     
     //t_indexForNonZero_vec.clear();
   
@@ -874,7 +932,7 @@ Rcpp::List mainRegionInCPP(
   // conduct marker-level analysis
   double Beta, seBeta, pval, pval_noSPA, Tstat, varT, gy;
   double Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c;
-  bool isSPAConverge, is_gtilde;
+  bool isSPAConverge, is_gtilde, is_Firth, is_FirthConverge;
   arma::vec P1Vec(t_n), P2Vec(t_n);
   arma::vec GVec(t_n);
   arma::vec GZeroVec(t_n);
@@ -1015,7 +1073,7 @@ Rcpp::List mainRegionInCPP(
         Unified_getMarkerPval(
                     GVec,
                     false, // bool t_isOnlyOutputNonZero,
-          indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec);
+          indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge);
         BetaVec.at(i) = Beta * (1 - 2*flip);  // Beta if flip = false, -1 * Beta is flip = true       
         seBetaVec.at(i) = seBeta;       
         pvalVec.at(i) = pval;
@@ -1262,7 +1320,7 @@ if(i2 > 0){
             indexZeroVec_arma = arma::conv_to<arma::uvec>::from(indexZeroVec);
             indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
 
-            ptr_gSAIGEobj->getMarkerPval(genoURVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec);
+            ptr_gSAIGEobj->getMarkerPval(genoURVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge);
 
 
             BetaVec.at(i) = Beta* (1 - 2*flip);
@@ -1480,7 +1538,7 @@ if(t_regionTestType == "BURDEN"){
           }
 	  
 	  //arma::vec timeoutput_getp = getTime();
-          ptr_gSAIGEobj->getMarkerPval(genoSumVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, isregion, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec);
+          ptr_gSAIGEobj->getMarkerPval(genoSumVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, isregion, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge);
 	  //arma::vec timeoutput_getp2 = getTime();
 	  //printTime(timeoutput_getp, timeoutput_getp2, "get p  done");
 	  BURDEN_pval_Vec(i) = pval;
@@ -1776,7 +1834,7 @@ void assign_conditionMarkers_factors(
   //std::vector<double> GVec0(t_n);
   arma::vec GVec(t_n);
   double Beta, seBeta, pval, pval_noSPA, Tstat, varT, gy, w0G2_cond;
-  bool isSPAConverge, is_gtilde;
+  bool isSPAConverge, is_gtilde, is_Firth, is_FirthConverge;
   arma::vec P2Vec(t_n);
 
   //std::vector<uint> indexZeroVec;
@@ -1867,7 +1925,7 @@ void assign_conditionMarkers_factors(
    Unified_getMarkerPval(
                     GVec,
                     false, // bool t_isOnlyOutputNonZero,
-                    indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec);
+                    indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge);
       P1Mat.row(i) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*gtildeVec.t();
       P2Mat.col(i) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*P2Vec;
       //P1Mat.row(i) = gtildeVec.t();
@@ -1949,7 +2007,8 @@ arma::vec fast_logistf_fit(arma::mat & x,
 	int maxhs, 
 	double lconv, 
 	double gconv, 
-	double xconv){
+	double xconv, 
+	bool & isfirthconverge){
   int n = x.n_rows;
   int k = x.n_cols;
   arma::vec beta = init;
@@ -1961,6 +2020,7 @@ arma::vec fast_logistf_fit(arma::mat & x,
   arma::vec beta_old;
   arma::mat oneVec(k, 1 , arma::fill::ones);
   arma::mat XX_covs(k, k, arma::fill::zeros);
+  isfirthconverge = false;
   while(iter <= maxit){
 	beta_old = beta;
 	arma::vec wpi = weight % pi % (1 - pi);
@@ -2011,6 +2071,7 @@ arma::vec fast_logistf_fit(arma::mat & x,
   	pi_0 = arma::exp(pi_0) + 1;
   	pi = 1/pi_0;
 	if((iter == maxit) || ( (arma::max(arma::abs(delta)) <= xconv) & (abs(U_star).is_zero(gconv)))){
+		isfirthconverge = true;
 		break;
 	}
   }
@@ -2035,10 +2096,10 @@ void closeGenoFile(std::string & t_genoType)
 }
 
 // [[Rcpp::export]]
-bool openOutfile(std::string t_traitType){ 
+bool openOutfile(std::string t_traitType, bool isappend){
 	bool isopen;
+	if(!isappend){
 	OutFile.open(g_outputFilePrefixGroup.c_str());
-	isopen = OutFile.is_open();
 	if(isopen){
 		OutFile << "Region\tGroup\tmax_MAF\tPvalue_Burden\tBETA_Burden\tSE_Burden\t";
 		if(ptr_gSAIGEobj->m_isCondition){
@@ -2050,14 +2111,18 @@ bool openOutfile(std::string t_traitType){
 		}
 		OutFile << "Number_rare\tNumber_ultra_rare\n";
 	}
-	return(isopen);
+     }else{
+	OutFile.open(g_outputFilePrefixGroup.c_str(), std::ofstream::out | std::ofstream::app) ;					
+     }
+     isopen = OutFile.is_open();
+     return(isopen);
 }
 
 // [[Rcpp::export]]
-bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation){
+bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, bool isappend){
         bool isopen;
+     if(!isappend){
         OutFile_singleInGroup.open(g_outputFilePrefixSingleInGroup.c_str());
-        isopen = OutFile_singleInGroup.is_open();
         if(isopen){
                 OutFile_singleInGroup << "CHR\tPOS\tMarkerID\tAllele1\tAllele2\tAC_Allele2\tAF_Allele2\t";
 		if(t_isImputation){
@@ -2068,7 +2133,7 @@ bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation){
 		}
 		OutFile_singleInGroup << "BETA\tSE\tTstat\tvar\tp.value\t";
 	        if(t_traitType == "binary"){
-                        OutFile_singleInGroup << "p.value.NA\tIs.SPA.converge\t";
+                        OutFile_singleInGroup << "p.value.NA\tIs.SPA\t";
                 }	
 
                 if(ptr_gSAIGEobj->m_isCondition){
@@ -2083,6 +2148,180 @@ bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation){
 		}	
 
         }
-        return(isopen);
+    }else{
+       OutFile_singleInGroup.open(g_outputFilePrefixSingleInGroup.c_str(), std::ofstream::out | std::ofstream::app);
+    }
+      isopen = OutFile_singleInGroup.is_open();
+      return(isopen);
 }
 
+
+// [[Rcpp::export]]
+bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend){
+      bool isopen;
+      if(!isappend){
+        OutFile_single.open(g_outputFilePrefixSingle.c_str());
+        isopen = OutFile_single.is_open();
+        if(isopen){
+                OutFile_single << "CHR\tPOS\tMarkerID\tAllele1\tAllele2\tAC_Allele2\tAF_Allele2\t";
+                if(t_isImputation){
+                        OutFile_single << "imputationInfo\t";
+                }else{
+
+                        OutFile_single << "MissingRate\t";
+                }
+                OutFile_single << "BETA\tSE\tTstat\tvar\tp.value\t";
+                if(t_traitType == "binary"){
+                        OutFile_single << "p.value.NA\tIs.SPA\t";
+                }
+
+                if(ptr_gSAIGEobj->m_isCondition){
+                        OutFile_single << "BETA_c\tSE_c\tTstat_c\tvar_c\tp.value_c\t";
+                }
+
+                if(t_traitType == "binary"){
+                        OutFile_single << "p.value.NA_c\tIs.SPA.converge\tAF_case\tAF_ctrl\tN_case\tN_ctrl\n";
+                }else if(t_traitType == "quantitative"){
+                        OutFile_single << "N\n";
+
+                }
+
+        }
+     }else{
+        OutFile_single.open(g_outputFilePrefixSingle.c_str(), std::ofstream::out | std::ofstream::app);
+        isopen = OutFile_single.is_open();
+     }
+
+     return(isopen);
+}
+
+
+void writeOutfile_single(bool t_isMoreOutput,
+			bool t_isImputation,
+			bool t_isCondition,
+                         int mFirth,
+                         int mFirthConverge,
+                        std::string t_traitType,
+                        std::vector<std::string> & chrVec,
+                        std::vector<std::string> & posVec,
+                        std::vector<std::string> & markerVec,
+                        std::vector<std::string> & refVec,
+                        std::vector<std::string> & altVec,
+                        std::vector<double> & altCountsVec,
+                        std::vector<double> & altFreqVec,
+                        std::vector<double> & imputationInfoVec,
+                        std::vector<double> & missingRateVec,
+                        std::vector<double> & BetaVec,
+                        std::vector<double> & seBetaVec,
+                        std::vector<double> & TstatVec,
+                        std::vector<double> & varTVec,
+                        std::vector<double> & pvalVec,
+                        std::vector<double> & pvalNAVec,
+                        std::vector<bool>  & isSPAConvergeVec,
+                        std::vector<double> & Beta_cVec,
+                        std::vector<double> & seBeta_cVec,
+                        std::vector<double> & Tstat_cVec,
+                        std::vector<double> & varT_cVec,
+                        std::vector<double> & pval_cVec,
+                        std::vector<double> & pvalNA_cVec,
+                        std::vector<double> & AF_caseVec,
+                        std::vector<double> & AF_ctrlVec,
+                        std::vector<uint32_t> & N_caseVec,
+                        std::vector<uint32_t> & N_ctrlVec,
+                        std::vector<double>  & N_case_homVec,
+                        std::vector<double>  & N_ctrl_hetVec,
+                        std::vector<double>  & N_case_hetVec,
+                        std::vector<double>  & N_ctrl_homVec,
+                        std::vector<uint32_t> & N_Vec
+
+){
+  int numtest = 0;
+  for(unsigned int k = 0; k < pvalVec.size(); k++){
+        if(!std::isnan(pvalVec.at(k))){
+                numtest = numtest + 1;
+                OutFile_single << chrVec.at(k);
+                OutFile_single << "\t";
+                OutFile_single << posVec.at(k);
+                OutFile_single << "\t";
+                OutFile_single << markerVec.at(k);
+                OutFile_single << "\t";
+                OutFile_single << refVec.at(k);
+                OutFile_single << "\t";
+                OutFile_single << altVec.at(k);
+                OutFile_single << "\t";
+                OutFile_single << altCountsVec.at(k);
+                OutFile_single << "\t";
+                OutFile_single << altFreqVec.at(k);
+                OutFile_single << "\t";
+
+                if(t_isImputation){
+                        OutFile_single << imputationInfoVec.at(k);
+                        OutFile_single << "\t";
+                }else{
+                        OutFile_single << missingRateVec.at(k);
+                        OutFile_single << "\t";
+
+                }
+                OutFile_single << BetaVec.at(k);
+                OutFile_single << "\t";
+                OutFile_single << seBetaVec.at(k);
+                OutFile_single << "\t";
+                OutFile_single << TstatVec.at(k);
+                OutFile_single << "\t";
+                OutFile_single << varTVec.at(k);
+                OutFile_single << "\t";
+                OutFile_single << pvalVec.at(k);
+                OutFile_single << "\t";
+
+                if(t_traitType == "binary"){
+                        OutFile_single << pvalNAVec.at(k);
+                        OutFile_single << "\t";
+                        OutFile_single << std::boolalpha << isSPAConvergeVec.at(k);
+                        OutFile_single << "\t";
+                }
+                if(t_isCondition){
+                        OutFile_single << Beta_cVec.at(k);
+                        OutFile_single << "\t";
+                        OutFile_single << seBeta_cVec.at(k);
+                        OutFile_single << "\t";
+                        OutFile_single << Tstat_cVec.at(k);
+                        OutFile_single << "\t";
+                        OutFile_single << varT_cVec.at(k);
+                        OutFile_single << "\t";
+                        OutFile_single << pval_cVec.at(k);
+                        OutFile_single << "\t";
+                        OutFile_single << pvalNA_cVec.at(k);
+                        OutFile_single << "\t";
+                }
+                if(t_traitType == "binary"){
+                        OutFile_single << AF_caseVec.at(k);
+                        OutFile_single << "\t";
+                        OutFile_single << AF_ctrlVec.at(k);
+                        OutFile_single << "\t";
+                        OutFile_single << N_caseVec.at(k);
+                        OutFile_single << "\t";
+                        OutFile_single << N_ctrlVec.at(k);
+
+                        if(t_isMoreOutput){
+                                OutFile_single << "\t";
+                                OutFile_single << N_case_homVec.at(k);
+                                OutFile_single << "\t";
+                                OutFile_single << N_case_hetVec.at(k);
+                                OutFile_single << "\t";
+                                OutFile_single << N_ctrl_homVec.at(k);
+                                OutFile_single << "\t";
+                                OutFile_single << N_ctrl_hetVec.at(k);
+                        }
+                        OutFile_single << "\n";
+                }else if(t_traitType == "quantitative"){
+                        OutFile_single << N_Vec.at(k);
+                        OutFile_single << "\n";
+
+                }
+        }
+  }
+  std::cout << numtest << " markers were tested." << std::endl;
+  if(t_traitType == "binary"){
+    std::cout << "Firth approx was applied to " << mFirth << " markers. " << mFirthConverge << " sucessfully converged." <<std::endl;
+   }
+}

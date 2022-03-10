@@ -65,10 +65,9 @@ BEGIN_RCPP
 END_RCPP
 }
 // mainMarkerInCPP
-Rcpp::DataFrame mainMarkerInCPP(std::string& t_genoType, std::string& t_traitType, std::vector<std::string>& t_genoIndex_prev, std::vector<std::string>& t_genoIndex, bool& t_isMoreOutput, bool& t_isImputation);
+void mainMarkerInCPP(std::string& t_genoType, std::string& t_traitType, std::vector<std::string>& t_genoIndex_prev, std::vector<std::string>& t_genoIndex, bool& t_isMoreOutput, bool& t_isImputation);
 RcppExport SEXP _SAIGE_mainMarkerInCPP(SEXP t_genoTypeSEXP, SEXP t_traitTypeSEXP, SEXP t_genoIndex_prevSEXP, SEXP t_genoIndexSEXP, SEXP t_isMoreOutputSEXP, SEXP t_isImputationSEXP) {
 BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string& >::type t_genoType(t_genoTypeSEXP);
     Rcpp::traits::input_parameter< std::string& >::type t_traitType(t_traitTypeSEXP);
@@ -76,8 +75,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::vector<std::string>& >::type t_genoIndex(t_genoIndexSEXP);
     Rcpp::traits::input_parameter< bool& >::type t_isMoreOutput(t_isMoreOutputSEXP);
     Rcpp::traits::input_parameter< bool& >::type t_isImputation(t_isImputationSEXP);
-    rcpp_result_gen = Rcpp::wrap(mainMarkerInCPP(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation));
-    return rcpp_result_gen;
+    mainMarkerInCPP(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation);
+    return R_NilValue;
 END_RCPP
 }
 // setPLINKobjInCPP
@@ -265,8 +264,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // fast_logistf_fit
-arma::vec fast_logistf_fit(arma::mat& x, arma::vec& y, arma::vec& weight, arma::vec& offset, bool firth, arma::uvec& col_fit, arma::vec init, int maxit, int maxstep, int maxhs, double lconv, double gconv, double xconv);
-RcppExport SEXP _SAIGE_fast_logistf_fit(SEXP xSEXP, SEXP ySEXP, SEXP weightSEXP, SEXP offsetSEXP, SEXP firthSEXP, SEXP col_fitSEXP, SEXP initSEXP, SEXP maxitSEXP, SEXP maxstepSEXP, SEXP maxhsSEXP, SEXP lconvSEXP, SEXP gconvSEXP, SEXP xconvSEXP) {
+arma::vec fast_logistf_fit(arma::mat& x, arma::vec& y, arma::vec& weight, arma::vec& offset, bool firth, arma::uvec& col_fit, arma::vec init, int maxit, int maxstep, int maxhs, double lconv, double gconv, double xconv, bool& isfirthconverge);
+RcppExport SEXP _SAIGE_fast_logistf_fit(SEXP xSEXP, SEXP ySEXP, SEXP weightSEXP, SEXP offsetSEXP, SEXP firthSEXP, SEXP col_fitSEXP, SEXP initSEXP, SEXP maxitSEXP, SEXP maxstepSEXP, SEXP maxhsSEXP, SEXP lconvSEXP, SEXP gconvSEXP, SEXP xconvSEXP, SEXP isfirthconvergeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -283,7 +282,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type lconv(lconvSEXP);
     Rcpp::traits::input_parameter< double >::type gconv(gconvSEXP);
     Rcpp::traits::input_parameter< double >::type xconv(xconvSEXP);
-    rcpp_result_gen = Rcpp::wrap(fast_logistf_fit(x, y, weight, offset, firth, col_fit, init, maxit, maxstep, maxhs, lconv, gconv, xconv));
+    Rcpp::traits::input_parameter< bool& >::type isfirthconverge(isfirthconvergeSEXP);
+    rcpp_result_gen = Rcpp::wrap(fast_logistf_fit(x, y, weight, offset, firth, col_fit, init, maxit, maxstep, maxhs, lconv, gconv, xconv, isfirthconverge));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -298,25 +298,40 @@ BEGIN_RCPP
 END_RCPP
 }
 // openOutfile
-bool openOutfile(std::string t_traitType);
-RcppExport SEXP _SAIGE_openOutfile(SEXP t_traitTypeSEXP) {
+bool openOutfile(std::string t_traitType, bool isappend);
+RcppExport SEXP _SAIGE_openOutfile(SEXP t_traitTypeSEXP, SEXP isappendSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type t_traitType(t_traitTypeSEXP);
-    rcpp_result_gen = Rcpp::wrap(openOutfile(t_traitType));
+    Rcpp::traits::input_parameter< bool >::type isappend(isappendSEXP);
+    rcpp_result_gen = Rcpp::wrap(openOutfile(t_traitType, isappend));
     return rcpp_result_gen;
 END_RCPP
 }
 // openOutfile_singleinGroup
-bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation);
-RcppExport SEXP _SAIGE_openOutfile_singleinGroup(SEXP t_traitTypeSEXP, SEXP t_isImputationSEXP) {
+bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, bool isappend);
+RcppExport SEXP _SAIGE_openOutfile_singleinGroup(SEXP t_traitTypeSEXP, SEXP t_isImputationSEXP, SEXP isappendSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type t_traitType(t_traitTypeSEXP);
     Rcpp::traits::input_parameter< bool >::type t_isImputation(t_isImputationSEXP);
-    rcpp_result_gen = Rcpp::wrap(openOutfile_singleinGroup(t_traitType, t_isImputation));
+    Rcpp::traits::input_parameter< bool >::type isappend(isappendSEXP);
+    rcpp_result_gen = Rcpp::wrap(openOutfile_singleinGroup(t_traitType, t_isImputation, isappend));
+    return rcpp_result_gen;
+END_RCPP
+}
+// openOutfile_single
+bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend);
+RcppExport SEXP _SAIGE_openOutfile_single(SEXP t_traitTypeSEXP, SEXP t_isImputationSEXP, SEXP isappendSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type t_traitType(t_traitTypeSEXP);
+    Rcpp::traits::input_parameter< bool >::type t_isImputation(t_isImputationSEXP);
+    Rcpp::traits::input_parameter< bool >::type isappend(isappendSEXP);
+    rcpp_result_gen = Rcpp::wrap(openOutfile_single(t_traitType, t_isImputation, isappend));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -2027,10 +2042,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_set_iterator_inVcf", (DL_FUNC) &_SAIGE_set_iterator_inVcf, 4},
     {"_SAIGE_check_Vcf_end", (DL_FUNC) &_SAIGE_check_Vcf_end, 0},
     {"_SAIGE_move_forward_iterator_Vcf", (DL_FUNC) &_SAIGE_move_forward_iterator_Vcf, 1},
-    {"_SAIGE_fast_logistf_fit", (DL_FUNC) &_SAIGE_fast_logistf_fit, 13},
+    {"_SAIGE_fast_logistf_fit", (DL_FUNC) &_SAIGE_fast_logistf_fit, 14},
     {"_SAIGE_closeGenoFile", (DL_FUNC) &_SAIGE_closeGenoFile, 1},
-    {"_SAIGE_openOutfile", (DL_FUNC) &_SAIGE_openOutfile, 1},
-    {"_SAIGE_openOutfile_singleinGroup", (DL_FUNC) &_SAIGE_openOutfile_singleinGroup, 2},
+    {"_SAIGE_openOutfile", (DL_FUNC) &_SAIGE_openOutfile, 2},
+    {"_SAIGE_openOutfile_singleinGroup", (DL_FUNC) &_SAIGE_openOutfile_singleinGroup, 3},
+    {"_SAIGE_openOutfile_single", (DL_FUNC) &_SAIGE_openOutfile_single, 3},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
     {"_SAIGE_getAlleleFreqVec", (DL_FUNC) &_SAIGE_getAlleleFreqVec, 0},
