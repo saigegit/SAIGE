@@ -217,14 +217,14 @@ void mainMarkerInCPP(
     uint64_t gIndex = std::strtoull( t_genoIndex_str.c_str(), &end,10 );
     std::remove(end);
 
-    uint64_t gIndex_prev;
+    uint64_t gIndex_prev = 0;
     if(i == 0){
         gIndex_prev = 0;
     }else{
         char* end_prev;
 	std::string t_genoIndex_prev_str;
         if(t_genoType == "bgen"){
-            t_genoIndex_prev_str = t_genoIndex_prev.at(i);
+            t_genoIndex_prev_str = t_genoIndex_prev.at(i-1);
         }else if(t_genoType == "plink"){
             t_genoIndex_prev_str = t_genoIndex.at(i-1);
         }
@@ -247,6 +247,7 @@ void mainMarkerInCPP(
    indexForMissing.clear();
    //t_GVec0.clear();
    //t_GVec.clear();
+   //
    bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
@@ -307,8 +308,8 @@ void mainMarkerInCPP(
     double MAF = std::min(altFreq, 1 - altFreq);
     double MAC = MAF * n * (1 - missingRate) *2;
     
-   /* 
     
+    /*
     std::cout << "missingRate " << missingRate << std::endl;
    std::cout << "MAF " << MAF << std::endl;
    std::cout << "MAC " << MAC << std::endl;
@@ -666,6 +667,7 @@ void setBGENobjInCPP(std::string t_bgenFileName,
                      std::vector<std::string> & t_SampleInModel,
                      std::string t_AlleleOrder)
 {
+  std::cout << "t_SampleInBgen " << t_SampleInBgen.size() << std::endl;
   ptr_gBGENobj = new BGEN::BgenClass(t_bgenFileName,
                                      t_bgenFileIndex,
                                      t_SampleInBgen,
@@ -976,26 +978,25 @@ Rcpp::List mainRegionInCPP(
     GVec.resize(t_n);
     GVec.zeros();
 
-   std::string t_genoIndex_str = t_genoIndex.at(i);
+    std::string t_genoIndex_str = t_genoIndex.at(i);
     char* end;
     uint64_t gIndex = std::strtoull( t_genoIndex_str.c_str(), &end,10 );
     std::remove(end);
 
-    uint64_t gIndex_prev;
+    uint64_t gIndex_prev = 0;
     if(i == 0){
         gIndex_prev = 0;
     }else{
         char* end_prev;
         std::string t_genoIndex_prev_str;
         if(t_genoType == "bgen"){
-            t_genoIndex_prev_str = t_genoIndex_prev.at(i);
+            t_genoIndex_prev_str = t_genoIndex_prev.at(i-1);
         }else if(t_genoType == "plink"){
             t_genoIndex_prev_str = t_genoIndex.at(i-1);
         }
         gIndex_prev = std::strtoull( t_genoIndex_prev_str.c_str(), &end_prev,10 );
         std::remove(end_prev);
     }
-
 
 
     bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
@@ -1038,7 +1039,10 @@ Rcpp::List mainRegionInCPP(
     MAFVec.at(i) = MAF;
     imputationInfoVec.at(i) = imputeInfo;
 
-    //arma::vec timeoutput3a = getTime();
+
+
+
+//arma::vec timeoutput3a = getTime();
     //printTime(timeoutput2a, timeoutput3a, "Unified_getOneMarker 2");
    if((missingRate > g_missingRate_cutoff) || (MAF > g_maxMAFLimit) || (MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff) || (imputeInfo < g_marker_minINFO_cutoff)){
       continue;
@@ -1074,7 +1078,8 @@ Rcpp::List mainRegionInCPP(
                     GVec,
                     false, // bool t_isOnlyOutputNonZero,
           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge);
-        BetaVec.at(i) = Beta * (1 - 2*flip);  // Beta if flip = false, -1 * Beta is flip = true       
+
+	BetaVec.at(i) = Beta * (1 - 2*flip);  // Beta if flip = false, -1 * Beta is flip = true       
         seBetaVec.at(i) = seBeta;       
         pvalVec.at(i) = pval;
         pvalNAVec.at(i) = pval_noSPA;
@@ -1278,8 +1283,8 @@ if(i2 > 0){
     	  double MAF = std::min(altFreq, 1 - altFreq);
 	  double w0;
 	  double MAC = MAF * 2 * t_n * (1 - missingRate);
-	  //std::vector<uint32_t> indexForMissing;
-    	  //flip = imputeGenoAndFlip(genoURVec, altFreq, altCounts, indexForMissing, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec, indexNonZeroVec);
+	  std::vector<uint32_t> indexForMissing;
+    	  flip = imputeGenoAndFlip(genoURVec, altFreq, altCounts, indexForMissing, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec, indexNonZeroVec);
 	  if(isWeightCustomized){
 	    //genoSumMat.col(jm) = genoSumMat.col(jm) + genoURVec % (weightURMat.col(jm));
 	    //genoSumMat.col(jm) = genoSumMat.col(jm) + genoURVec;
@@ -1376,10 +1381,19 @@ if(i2 > 0){
         P1Mat.row(i1InChunk) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*gtildeVec.t();
         P2Mat.col(i1InChunk) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*P2Vec;
       } //if(t_regionTestType != "BURDEN"){
-    }//if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){	
-
-
-
+    }else{//if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){	
+            MAC_GroupVec(jm) = MAC_GroupVec(jm) + MAC;
+	                arma::vec dosage_case, dosage_ctrl;
+            if(t_traitType == "binary"){
+                        dosage_case = genoURVec.elem(ptr_gSAIGEobj->m_case_indices);
+                        dosage_ctrl = genoURVec.elem(ptr_gSAIGEobj->m_ctrl_indices);
+                        MACcasegroup = arma::accu(dosage_case);
+                        MACcontrolgroup = arma::accu(dosage_ctrl);
+                        MACCase_GroupVec(jm) = MACCase_GroupVec(jm) + MACcasegroup;
+                        MACControl_GroupVec(jm) = MACControl_GroupVec(jm) + MACcontrolgroup;
+            }
+    }
+  
     i1InChunk = i1InChunk + 1;
     i1 = i1 + 1;
     }
@@ -1709,6 +1723,7 @@ if(t_regionTestType == "BURDEN"){
  if(t_isSingleinGroupTest){
   OutList.push_back(pvalVec, "pvalVec");
   for(unsigned int k = 0; k < pvalVec.size(); k++){ 
+
 	if(std::isfinite(pvalVec.at(k))){
 		if(chrVec.at(k) == "UR"){
 			numofUR = numofUR + 1;
@@ -1750,7 +1765,7 @@ if(t_regionTestType == "BURDEN"){
         	if(t_traitType == "binary"){
 			OutFile_singleInGroup << pvalNAVec.at(k);
 			OutFile_singleInGroup << "\t";
-			OutFile_singleInGroup << isSPAConvergeVec.at(k);
+			OutFile_singleInGroup  << std::boolalpha <<  isSPAConvergeVec.at(k);
 			OutFile_singleInGroup << "\t";
 		}	
 		if(isCondition){
@@ -1864,22 +1879,24 @@ void assign_conditionMarkers_factors(
     uint64_t gIndex = std::strtoull( t_genoIndex_str.c_str(), &end,10 );
     std::remove(end);
 
-    uint64_t gIndex_prev;
+    uint64_t gIndex_prev = 0;
     if(i == 0){
         gIndex_prev = 0;
     }else{
         char* end_prev;
 	std::string t_genoIndex_prev_str;
         if(t_genoType == "bgen"){
-            t_genoIndex_prev_str = t_genoIndex_prev.at(i);
+            t_genoIndex_prev_str = t_genoIndex_prev.at(i-1);
+            gIndex_prev = std::strtoull( t_genoIndex_prev_str.c_str(), &end_prev,10 );
         }else if(t_genoType == "plink"){
             t_genoIndex_prev_str = t_genoIndex.at(i-1);
+            gIndex_prev = std::strtoull( t_genoIndex_prev_str.c_str(), &end_prev,10 );
         }
-        gIndex_prev = std::strtoull( t_genoIndex_prev_str.c_str(), &end_prev,10 );
-        std::remove(end_prev);
+	//else if(t_genoType == "vcf"){
+         //   gIndex_prev = 0;	
+	//}
+	std::remove(end_prev);
     }
-
-
 
 
     bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
@@ -1930,8 +1947,9 @@ void assign_conditionMarkers_factors(
       P2Mat.col(i) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*P2Vec;
       //P1Mat.row(i) = gtildeVec.t();
       //P2Mat.col(i) = P2Vec;
-     MAFVec(i) = MAF;
+      MAFVec(i) = MAF;
      //w0G2_cond = boost::math::pdf(beta_dist, MAF);
+    t_weight_cond.print();
 
      if(!t_weight_cond.is_zero()){
 	 w0G2_cond = t_weight_cond(i);
@@ -2100,6 +2118,7 @@ bool openOutfile(std::string t_traitType, bool isappend){
 	bool isopen;
 	if(!isappend){
 	OutFile.open(g_outputFilePrefixGroup.c_str());
+	isopen = OutFile.is_open();
 	if(isopen){
 		OutFile << "Region\tGroup\tmax_MAF\tPvalue_Burden\tBETA_Burden\tSE_Burden\t";
 		if(ptr_gSAIGEobj->m_isCondition){
@@ -2112,9 +2131,9 @@ bool openOutfile(std::string t_traitType, bool isappend){
 		OutFile << "Number_rare\tNumber_ultra_rare\n";
 	}
      }else{
-	OutFile.open(g_outputFilePrefixGroup.c_str(), std::ofstream::out | std::ofstream::app) ;					
+	OutFile.open(g_outputFilePrefixGroup.c_str(), std::ofstream::out | std::ofstream::app) ;				
+	isopen = OutFile.is_open();
      }
-     isopen = OutFile.is_open();
      return(isopen);
 }
 
@@ -2123,6 +2142,7 @@ bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, boo
         bool isopen;
      if(!isappend){
         OutFile_singleInGroup.open(g_outputFilePrefixSingleInGroup.c_str());
+	isopen = OutFile_singleInGroup.is_open();
         if(isopen){
                 OutFile_singleInGroup << "CHR\tPOS\tMarkerID\tAllele1\tAllele2\tAC_Allele2\tAF_Allele2\t";
 		if(t_isImputation){
@@ -2150,8 +2170,8 @@ bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, boo
         }
     }else{
        OutFile_singleInGroup.open(g_outputFilePrefixSingleInGroup.c_str(), std::ofstream::out | std::ofstream::app);
+       isopen = OutFile_singleInGroup.is_open();
     }
-      isopen = OutFile_singleInGroup.is_open();
       return(isopen);
 }
 

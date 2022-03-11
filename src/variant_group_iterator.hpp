@@ -40,11 +40,13 @@ public:
     std::string chrom(beg, colon_it);
     if (colon_it != end)
     {
-      auto underscore_it = std::find(++colon_it, end, '_');
+      //auto underscore_it = std::find(++colon_it, end, '_');
+      auto underscore_it = std::find(++colon_it, end, ':');
       std::uint64_t pos = static_cast<std::uint64_t>(std::atoll(std::string(colon_it, underscore_it).c_str()));
       if (underscore_it != end)
       {
-        auto slash_it = std::find(++underscore_it, end, '/');
+        //auto slash_it = std::find(++underscore_it, end, '/');
+        auto slash_it = std::find(++underscore_it, end, ':');
         std::string ref(underscore_it, slash_it);
         if (slash_it != end)
         {

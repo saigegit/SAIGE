@@ -77,6 +77,7 @@ SAIGE.Marker = function(traitType,
     if(!isVcfEnd){
     	#outIndex = 1
     	genoIndex = rep("0", nMarkersEachChunk) 
+    	genoIndex_prev = rep("0", nMarkersEachChunk) 
 	#nChunks = outIndex + 1
 	is_marker_test = TRUE
         i = outIndex
@@ -92,6 +93,8 @@ SAIGE.Marker = function(traitType,
   #for(i in outIndex:nChunks)
   #{
 #time_left = system.time({
+
+
     if(genoType != "vcf"){	
       tempList = genoIndexList[[i]]
       genoIndex = as.character(format(tempList$genoIndex, scientific = FALSE))

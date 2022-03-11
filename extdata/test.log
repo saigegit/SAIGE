@@ -1,0 +1,1291 @@
+Loading required package: RhpcBLASctl
+R version 3.6.1 (2019-07-05)
+Platform: x86_64-conda_cos6-linux-gnu (64-bit)
+Running under: Red Hat Enterprise Linux Server 7.9 (Maipo)
+
+Matrix products: default
+BLAS/LAPACK: /stanley/genetics/users/wzhou/.conda/envs/RSAIGE/lib/R/lib/libRblas.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] data.table_1.12.2      optparse_1.6.4         RhpcBLASctl_0.21-247.1
+[4] SAIGE_0.99.2          
+
+loaded via a namespace (and not attached):
+[1] compiler_3.6.1     Matrix_1.2-17      Rcpp_1.0.7         getopt_1.20.3     
+[5] grid_3.6.1         RcppParallel_4.4.4 lattice_0.20-38   
+$vcfFile
+[1] ""
+
+$vcfFileIndex
+[1] ""
+
+$vcfField
+[1] "DS"
+
+$savFile
+[1] ""
+
+$savFileIndex
+[1] ""
+
+$bgenFile
+[1] "./input/genotype_100markers.bgen"
+
+$bgenFileIndex
+[1] "./input/genotype_100markers.bgen.bgi"
+
+$sampleFile
+[1] "./input/samplelist.txt"
+
+$bedFile
+[1] ""
+
+$bimFile
+[1] ""
+
+$famFile
+[1] ""
+
+$AlleleOrder
+[1] "ref-first"
+
+$idstoIncludeFile
+[1] ""
+
+$rangestoIncludeFile
+[1] ""
+
+$chrom
+[1] "1"
+
+$is_imputed_data
+[1] FALSE
+
+$minMAF
+[1] 0
+
+$minMAC
+[1] 0.5
+
+$minInfo
+[1] 0
+
+$maxMissing
+[1] 0.15
+
+$impute_method
+[1] "best_guess"
+
+$LOCO
+[1] TRUE
+
+$GMMATmodelFile
+[1] "./output/example_binary_sparseGRM.rda"
+
+$varianceRatioFile
+[1] ""
+
+$SAIGEOutputFile
+[1] "./output/genotype_100markers_bgen_groupTest_out_sparseGRMforStep1.txt"
+
+$markers_per_chunk
+[1] 10000
+
+$groups_per_chunk
+[1] 100
+
+$is_output_moreDetails
+[1] FALSE
+
+$is_overwrite_output
+[1] TRUE
+
+$maxMAF_in_groupTest
+[1] "0.0001,0.001,0.01"
+
+$annotation_in_groupTest
+[1] "lof,missense:lof,missense:lof:synonymous"
+
+$groupFile
+[1] "./input/group_new_chrposa1a2.txt"
+
+$sparseGRMFile
+[1] "output/sparseGRM_relatednessCutoff_0.125_1000_randomMarkersUsed.sparseGRM.mtx"
+
+$sparseGRMSampleIDFile
+[1] "output/sparseGRM_relatednessCutoff_0.125_1000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt"
+
+$relatednessCutoff
+[1] 0
+
+$MACCutoff_to_CollapseUltraRare
+[1] 10
+
+$cateVarRatioMinMACVecExclude
+[1] "10,20.5"
+
+$cateVarRatioMaxMACVecInclude
+[1] "20.5"
+
+$weights.beta
+[1] "1,25"
+
+$r.corr
+[1] 0
+
+$markers_per_chunk_in_groupTest
+[1] 100
+
+$condition
+[1] ""
+
+$SPAcutoff
+[1] 2
+
+$dosage_zerod_cutoff
+[1] 0.2
+
+$dosage_zerod_MAC_cutoff
+[1] 10
+
+$is_single_in_groupTest
+[1] FALSE
+
+$is_no_weight_in_groupTest
+[1] FALSE
+
+$is_output_markerList_in_groupTest
+[1] FALSE
+
+$is_Firth_beta
+[1] FALSE
+
+$pCutoffforFirth
+[1] 0.01
+
+$help
+[1] FALSE
+
+[1] "opt$r.corr"
+[1] 0
+[1] "OK"
+dosage_zerod_cutoff  0.2 
+Any dosages <=  0.2  for genetic variants with MAC <=  10  are set to be 0 in group tests
+group-based test will be performed
+Ultra rare variants with MAC <=  10  will be collpased for set-based tests in the 'absence or presence' way.
+varianceRatioFile is not specified so variance ratio won't be used
+[1] "Leave-one-chromosome-out is not applied"
+[1] "LOCO = FASLE and leave-one-chromosome-out is not applied"
+length(sparseGRMSampleID$IndexGRM):  1000 
+nrow(sparseGRMSampleID):  1000 
+1000  samples have been used to fit the glmm null model
+[1] 1000    3
+    IID IndexInModel IndexGRM
+1   1a1            1        1
+113 1a2            2        2
+224 1a3            3        3
+335 1a4            4        4
+446 1a5            5        5
+557 1a6            6        6
+[1] "Subsetting GRM"
+dosageFile type is  bgen 
+[1] "Sample IDs were not found in the bgen file."
+t_SampleInBgen 10000
+snpBlocks (Mbgen): 100
+samples (Nbgen): 10000
+CompressedSNPBlocks: 1
+Layout: 2
+Setting position of samples in Bgen files....
+[1] "markerInfo"
+     CHROM POS    ID genoIndex       ID2 genoIndex_prev
+  1:     1   1   rs1        24   1:1:A:C            158
+  2:     1  10  rs10      1614  1:10:A:C           1789
+  3:     1 100 rs100     65067 1:100:A:C          65191
+  4:     1  11  rs11      1789  1:11:A:C           1940
+  5:     1  12  rs12      1940  1:12:A:C           2590
+  6:     1  13  rs13      2590  1:13:A:C           2723
+  7:     1  14  rs14      2723  1:14:A:C           3689
+  8:     1  15  rs15      3689  1:15:A:C           5285
+  9:     1  16  rs16      5285  1:16:A:C           5423
+ 10:     1  17  rs17      5423  1:17:A:C           5632
+ 11:     1  18  rs18      5632  1:18:A:C           5766
+ 12:     1  19  rs19      5766  1:19:A:C           5905
+ 13:     1   2   rs2       158   1:2:A:C            282
+ 14:     1  20  rs20      5905  1:20:A:C           8548
+ 15:     1  21  rs21      8548  1:21:A:C           8686
+ 16:     1  22  rs22      8686  1:22:A:C          10934
+ 17:     1  23  rs23     10934  1:23:A:C          13429
+ 18:     1  24  rs24     13429  1:24:A:C          13565
+ 19:     1  25  rs25     13565  1:25:A:C          13687
+ 20:     1  26  rs26     13687  1:26:A:C          16428
+ 21:     1  27  rs27     16428  1:27:A:C          18005
+ 22:     1  28  rs28     18005  1:28:A:C          18129
+ 23:     1  29  rs29     18129  1:29:A:C          20459
+ 24:     1   3   rs3       282   1:3:A:C            414
+ 25:     1  30  rs30     20459  1:30:A:C          22443
+ 26:     1  31  rs31     22443  1:31:A:C          22728
+ 27:     1  32  rs32     22728  1:32:A:C          22895
+ 28:     1  33  rs33     22895  1:33:A:C          23399
+ 29:     1  34  rs34     23399  1:34:A:C          23708
+ 30:     1  35  rs35     23708  1:35:A:C          23830
+ 31:     1  36  rs36     23830  1:36:A:C          23968
+ 32:     1  37  rs37     23968  1:37:A:C          24452
+ 33:     1  38  rs38     24452  1:38:A:C          25527
+ 34:     1  39  rs39     25527  1:39:A:C          25685
+ 35:     1   4   rs4       414   1:4:A:C            900
+ 36:     1  40  rs40     25685  1:40:A:C          25812
+ 37:     1  41  rs41     25812  1:41:A:C          25971
+ 38:     1  42  rs42     25971  1:42:A:C          26095
+ 39:     1  43  rs43     26095  1:43:A:C          26227
+ 40:     1  44  rs44     26227  1:44:A:C          26380
+ 41:     1  45  rs45     26380  1:45:A:C          26546
+ 42:     1  46  rs46     26546  1:46:A:C          26801
+ 43:     1  47  rs47     26801  1:47:A:C          26961
+ 44:     1  48  rs48     26961  1:48:A:C          29384
+ 45:     1  49  rs49     29384  1:49:A:C          29565
+ 46:     1   5   rs5       900   1:5:A:C           1032
+ 47:     1  50  rs50     29565  1:50:A:C          30832
+ 48:     1  51  rs51     30832  1:51:A:C          30950
+ 49:     1  52  rs52     30950  1:52:A:C          31053
+ 50:     1  53  rs53     31053  1:53:A:C          31156
+ 51:     1  54  rs54     31156  1:54:A:C          32862
+ 52:     1  55  rs55     32862  1:55:A:C          33012
+ 53:     1  56  rs56     33012  1:56:A:C          33201
+ 54:     1  57  rs57     33201  1:57:A:C          35205
+ 55:     1  58  rs58     35205  1:58:A:C          35452
+ 56:     1  59  rs59     35452  1:59:A:C          35582
+ 57:     1   6   rs6      1032   1:6:A:C           1143
+ 58:     1  60  rs60     35582  1:60:A:C          35838
+ 59:     1  61  rs61     35838  1:61:A:C          35974
+ 60:     1  62  rs62     35974  1:62:A:C          36103
+ 61:     1  63  rs63     36103  1:63:A:C          36267
+ 62:     1  64  rs64     36267  1:64:A:C          38969
+ 63:     1  65  rs65     38969  1:65:A:C          39169
+ 64:     1  66  rs66     39169  1:66:A:C          41628
+ 65:     1  67  rs67     41628  1:67:A:C          41752
+ 66:     1  68  rs68     41752  1:68:A:C          44116
+ 67:     1  69  rs69     44116  1:69:A:C          44232
+ 68:     1   7   rs7      1143   1:7:A:C           1263
+ 69:     1  70  rs70     44232  1:70:A:C          44474
+ 70:     1  71  rs71     44474  1:71:A:C          45175
+ 71:     1  72  rs72     45175  1:72:A:C          45336
+ 72:     1  73  rs73     45336  1:73:A:C          45466
+ 73:     1  74  rs74     45466  1:74:A:C          45677
+ 74:     1  75  rs75     45677  1:75:A:C          46547
+ 75:     1  76  rs76     46547  1:76:A:C          46665
+ 76:     1  77  rs77     46665  1:77:A:C          46816
+ 77:     1  78  rs78     46816  1:78:A:C          46957
+ 78:     1  79  rs79     46957  1:79:A:C          47531
+ 79:     1   8   rs8      1263   1:8:A:C           1408
+ 80:     1  80  rs80     47531  1:80:A:C          47664
+ 81:     1  81  rs81     47664  1:81:A:C          49535
+ 82:     1  82  rs82     49535  1:82:A:C          49638
+ 83:     1  83  rs83     49638  1:83:A:C          50141
+ 84:     1  84  rs84     50141  1:84:A:C          50280
+ 85:     1  85  rs85     50280  1:85:A:C          50443
+ 86:     1  86  rs86     50443  1:86:A:C          52329
+ 87:     1  87  rs87     52329  1:87:A:C          52432
+ 88:     1  88  rs88     52432  1:88:A:C          52554
+ 89:     1  89  rs89     52554  1:89:A:C          52757
+ 90:     1   9   rs9      1408   1:9:A:C           1614
+ 91:     1  90  rs90     52757  1:90:A:C          54008
+ 92:     1  91  rs91     54008  1:91:A:C          54354
+ 93:     1  92  rs92     54354  1:92:A:C          56032
+ 94:     1  93  rs93     56032  1:93:A:C          56216
+ 95:     1  94  rs94     56216  1:94:A:C          58816
+ 96:     1  95  rs95     58816  1:95:A:C          58936
+ 97:     1  96  rs96     58936  1:96:A:C          60531
+ 98:     1  97  rs97     60531  1:97:A:C          63197
+ 99:     1  98  rs98     63197  1:98:A:C          63327
+100:     1  99  rs99     63327  1:99:A:C          65067
+     CHROM POS    ID genoIndex       ID2 genoIndex_prev
+Garbage collection 18 = 10+2+6 (level 2) ... 
+94.9 Mbytes of cons cells used (65%)
+23.5 Mbytes of vectors used (37%)
+          used (Mb) gc trigger  (Mb) max used  (Mb)
+Ncells 1775273 94.9    2720554 145.3  2720554 145.3
+Vcells 3071588 23.5    8388608  64.0  5655880  43.2
+Start  TRUE 
+End  FALSE 
+SKAT-O test will be performed. P-values for BUTDEN and SKAT tests will also be output
+is_single_in_groupTest = TRUE. Single-variant assoc tests results will be output
+is_single_in_groupTest = TRUE. Single-variant assoc tests results will be output
+Start extracting marker-level information from 'groupFile' of ./input/group_new_chrposa1a2.txt ....
+indexChunk is  0 
+indexChunk  0 
+nRegions  2 
+[1] "RegionData 1"
+         SNP REGION     ANNO CHROM.x POS.x genoIndex.x  ID2 genoIndex_prev.x
+1: 1:100:A:C  GENE2      lof    <NA>    NA          NA <NA>               NA
+2:  1:10:A:C  GENE1      lof    <NA>    NA          NA <NA>               NA
+3:  1:11:A:C  GENE1 missense    <NA>    NA          NA <NA>               NA
+4:  1:12:A:C  GENE1 missense    <NA>    NA          NA <NA>               NA
+5:  1:13:A:C  GENE1 missense    <NA>    NA          NA <NA>               NA
+6:  1:14:A:C  GENE1 missense    <NA>    NA          NA <NA>               NA
+   CHROM.y POS.y    ID genoIndex.y genoIndex_prev.y
+1:       1   100 rs100       65067            65191
+2:       1    10  rs10        1614             1789
+3:       1    11  rs11        1789             1940
+4:       1    12  rs12        1940             2590
+5:       1    13  rs13        2590             2723
+6:       1    14  rs14        2723             3689
+[1] "RegionData 2"
+         SNP REGION     ANNO CHROM POS genoIndex  ID2 genoIndex_prev.x CHROM2
+1: 1:100:A:C  GENE2      lof  <NA>  NA        NA <NA>               NA      1
+2:  1:10:A:C  GENE1      lof  <NA>  NA        NA <NA>               NA      1
+3:  1:11:A:C  GENE1 missense  <NA>  NA        NA <NA>               NA      1
+4:  1:12:A:C  GENE1 missense  <NA>  NA        NA <NA>               NA      1
+5:  1:13:A:C  GENE1 missense  <NA>  NA        NA <NA>               NA      1
+6:  1:14:A:C  GENE1 missense  <NA>  NA        NA <NA>               NA      1
+   POS2    ID genoIndex2 genoIndex_prev.y
+1:  100 rs100      65067            65191
+2:   10  rs10       1614             1789
+3:   11  rs11       1789             1940
+4:   12  rs12       1940             2590
+5:   13  rs13       2590             2723
+6:   14  rs14       2723             3689
+[1] "RegionData 4"
+       SNP REGION ANNO CHROM POS genoIndex  ID2 genoIndex_prev CHROM2 POS2  ID
+1: 1:1:A:C  GENE1  lof     1   1        24 <NA>            158      1    1 rs1
+2: 1:2:A:C  GENE1  lof     1   2       158 <NA>            282      1    2 rs2
+3: 1:3:A:C  GENE1  lof     1   3       282 <NA>            414      1    3 rs3
+4: 1:4:A:C  GENE1  lof     1   4       414 <NA>            900      1    4 rs4
+5: 1:5:A:C  GENE1  lof     1   5       900 <NA>           1032      1    5 rs5
+6: 1:6:A:C  GENE1  lof     1   6      1032 <NA>           1143      1    6 rs6
+   genoIndex2 genoIndex_prev2
+1:         24             158
+2:        158             282
+3:        282             414
+4:        414             900
+5:        900            1032
+6:       1032            1143
+[1] "RegionData 4"
+       SNP REGION ANNO CHROM POS genoIndex  ID2 genoIndex_prev CHROM2 POS2  ID
+1: 1:1:A:C  GENE1  lof     1   1        24 <NA>            158      1    1 rs1
+2: 1:2:A:C  GENE1  lof     1   2       158 <NA>            282      1    2 rs2
+3: 1:3:A:C  GENE1  lof     1   3       282 <NA>            414      1    3 rs3
+4: 1:4:A:C  GENE1  lof     1   4       414 <NA>            900      1    4 rs4
+5: 1:5:A:C  GENE1  lof     1   5       900 <NA>           1032      1    5 rs5
+6: 1:6:A:C  GENE1  lof     1   6      1032 <NA>           1143      1    6 rs6
+   genoIndex2 genoIndex_prev2
+1:         24             158
+2:        158             282
+3:        282             414
+4:        414             900
+5:        900            1032
+6:       1032            1143
+Read in  2  region(s) from the group file.
+[1] "region"
+$SNP
+ [1] "1:51:A:C"  "1:52:A:C"  "1:53:A:C"  "1:54:A:C"  "1:55:A:C"  "1:56:A:C" 
+ [7] "1:57:A:C"  "1:58:A:C"  "1:59:A:C"  "1:60:A:C"  "1:61:A:C"  "1:62:A:C" 
+[13] "1:63:A:C"  "1:64:A:C"  "1:65:A:C"  "1:66:A:C"  "1:67:A:C"  "1:68:A:C" 
+[19] "1:69:A:C"  "1:70:A:C"  "1:71:A:C"  "1:72:A:C"  "1:73:A:C"  "1:74:A:C" 
+[25] "1:75:A:C"  "1:76:A:C"  "1:77:A:C"  "1:78:A:C"  "1:79:A:C"  "1:80:A:C" 
+[31] "1:81:A:C"  "1:82:A:C"  "1:83:A:C"  "1:84:A:C"  "1:85:A:C"  "1:86:A:C" 
+[37] "1:87:A:C"  "1:88:A:C"  "1:89:A:C"  "1:90:A:C"  "1:91:A:C"  "1:92:A:C" 
+[43] "1:93:A:C"  "1:94:A:C"  "1:95:A:C"  "1:96:A:C"  "1:97:A:C"  "1:98:A:C" 
+[49] "1:99:A:C"  "1:100:A:C"
+
+$WEIGHT
+[1] 0
+
+$annoIndicatorMat
+      [,1] [,2] [,3]
+ [1,]    0    1    1
+ [2,]    0    1    1
+ [3,]    0    1    1
+ [4,]    0    1    1
+ [5,]    0    1    1
+ [6,]    0    1    1
+ [7,]    0    1    1
+ [8,]    0    1    1
+ [9,]    0    1    1
+[10,]    0    1    1
+[11,]    0    1    1
+[12,]    0    1    1
+[13,]    0    1    1
+[14,]    0    1    1
+[15,]    0    1    1
+[16,]    0    1    1
+[17,]    0    1    1
+[18,]    0    1    1
+[19,]    0    1    1
+[20,]    0    1    1
+[21,]    0    1    1
+[22,]    0    1    1
+[23,]    0    1    1
+[24,]    0    1    1
+[25,]    0    1    1
+[26,]    0    1    1
+[27,]    0    1    1
+[28,]    0    1    1
+[29,]    0    1    1
+[30,]    0    1    1
+[31,]    1    1    1
+[32,]    1    1    1
+[33,]    1    1    1
+[34,]    1    1    1
+[35,]    1    1    1
+[36,]    1    1    1
+[37,]    1    1    1
+[38,]    1    1    1
+[39,]    1    1    1
+[40,]    1    1    1
+[41,]    1    1    1
+[42,]    1    1    1
+[43,]    1    1    1
+[44,]    1    1    1
+[45,]    1    1    1
+[46,]    1    1    1
+[47,]    1    1    1
+[48,]    1    1    1
+[49,]    1    1    1
+[50,]    1    1    1
+
+$genoIndex
+ [1] "30832" "30950" "31053" "31156" "32862" "33012" "33201" "35205" "35452"
+[10] "35582" "35838" "35974" "36103" "36267" "38969" "39169" "41628" "41752"
+[19] "44116" "44232" "44474" "45175" "45336" "45466" "45677" "46547" "46665"
+[28] "46816" "46957" "47531" "47664" "49535" "49638" "50141" "50280" "50443"
+[37] "52329" "52432" "52554" "52757" "54008" "54354" "56032" "56216" "58816"
+[46] "58936" "60531" "63197" "63327" "65067"
+
+$annoVec
+[1] "lof"                     "missense;lof"           
+[3] "missense;lof;synonymous"
+
+$genoIndex_prev
+ [1] "30950" "31053" "31156" "32862" "33012" "33201" "35205" "35452" "35582"
+[10] "35838" "35974" "36103" "36267" "38969" "39169" "41628" "41752" "44116"
+[19] "44232" "44474" "45175" "45336" "45466" "45677" "46547" "46665" "46816"
+[28] "46957" "47531" "47664" "49535" "49638" "50141" "50280" "50443" "52329"
+[37] "52432" "52554" "52757" "54008" "54354" "56032" "56216" "58816" "58936"
+[46] "60531" "63197" "63327" "65067" "65191"
+
+[1] "Analyzing Region GENE2 (1/2)."
+OK
+OK2a
+t_genoIndex.at(i) 30832
+t_genoIndex_prev.at(i) 30950
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 30950
+t_genoIndex_prev.at(i) 31053
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 31053
+t_genoIndex_prev.at(i) 31156
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 31156
+t_genoIndex_prev.at(i) 32862
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 32862
+t_genoIndex_prev.at(i) 33012
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 33012
+t_genoIndex_prev.at(i) 33201
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 33201
+t_genoIndex_prev.at(i) 35205
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 35205
+t_genoIndex_prev.at(i) 35452
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 35452
+t_genoIndex_prev.at(i) 35582
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 35582
+t_genoIndex_prev.at(i) 35838
+OK2
+OK3
+OK3a
+OK3b
+Start analyzing chunk 0.....
+OK3c
+OK3d
+OK2a
+t_genoIndex.at(i) 35838
+t_genoIndex_prev.at(i) 35974
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 35974
+t_genoIndex_prev.at(i) 36103
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 36103
+t_genoIndex_prev.at(i) 36267
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 36267
+t_genoIndex_prev.at(i) 38969
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 38969
+t_genoIndex_prev.at(i) 39169
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 39169
+t_genoIndex_prev.at(i) 41628
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 41628
+t_genoIndex_prev.at(i) 41752
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 41752
+t_genoIndex_prev.at(i) 44116
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 44116
+t_genoIndex_prev.at(i) 44232
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 44232
+t_genoIndex_prev.at(i) 44474
+OK2
+OK3
+OK3a
+OK3b
+OK3c
+OK3d
+OK2a
+t_genoIndex.at(i) 44474
+t_genoIndex_prev.at(i) 45175
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 45175
+t_genoIndex_prev.at(i) 45336
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 45336
+t_genoIndex_prev.at(i) 45466
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 45466
+t_genoIndex_prev.at(i) 45677
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 45677
+t_genoIndex_prev.at(i) 46547
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 46547
+t_genoIndex_prev.at(i) 46665
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 46665
+t_genoIndex_prev.at(i) 46816
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 46816
+t_genoIndex_prev.at(i) 46957
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 46957
+t_genoIndex_prev.at(i) 47531
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 47531
+t_genoIndex_prev.at(i) 47664
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 47664
+t_genoIndex_prev.at(i) 49535
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 49535
+t_genoIndex_prev.at(i) 49638
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 49638
+t_genoIndex_prev.at(i) 50141
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 50141
+t_genoIndex_prev.at(i) 50280
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 50280
+t_genoIndex_prev.at(i) 50443
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 50443
+t_genoIndex_prev.at(i) 52329
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 52329
+t_genoIndex_prev.at(i) 52432
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 52432
+t_genoIndex_prev.at(i) 52554
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 52554
+t_genoIndex_prev.at(i) 52757
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 52757
+t_genoIndex_prev.at(i) 54008
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 54008
+t_genoIndex_prev.at(i) 54354
+OK2
+OK3
+OK3a
+OK3b
+OK3c
+OK3d
+OK2a
+t_genoIndex.at(i) 54354
+t_genoIndex_prev.at(i) 56032
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 56032
+t_genoIndex_prev.at(i) 56216
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 56216
+t_genoIndex_prev.at(i) 58816
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 58816
+t_genoIndex_prev.at(i) 58936
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 58936
+t_genoIndex_prev.at(i) 60531
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 60531
+t_genoIndex_prev.at(i) 63197
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 63197
+t_genoIndex_prev.at(i) 63327
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 63327
+t_genoIndex_prev.at(i) 65067
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 65067
+t_genoIndex_prev.at(i) 65191
+OK2
+OK3
+OK3a
+HERE
+OK4
+In chunks 0-0, 15 markers are ultra-rare and 3 markers are not ultra-rare.
+Analyzing chunks (0/1, 0/1)........
+Analyzing chunks (1/1, 0/1)........
+Analyzing chunks (1/1, 1/1)........
+[1] "region"
+$SNP
+ [1] "1:1:A:C"  "1:2:A:C"  "1:3:A:C"  "1:4:A:C"  "1:5:A:C"  "1:6:A:C" 
+ [7] "1:7:A:C"  "1:8:A:C"  "1:9:A:C"  "1:10:A:C" "1:11:A:C" "1:12:A:C"
+[13] "1:13:A:C" "1:14:A:C" "1:15:A:C" "1:16:A:C" "1:17:A:C" "1:18:A:C"
+[19] "1:19:A:C" "1:20:A:C" "1:21:A:C" "1:22:A:C" "1:23:A:C" "1:24:A:C"
+[25] "1:25:A:C" "1:26:A:C" "1:27:A:C" "1:28:A:C" "1:29:A:C" "1:30:A:C"
+[31] "1:31:A:C" "1:32:A:C" "1:33:A:C" "1:34:A:C" "1:35:A:C" "1:36:A:C"
+[37] "1:37:A:C" "1:38:A:C" "1:39:A:C" "1:40:A:C" "1:41:A:C" "1:42:A:C"
+[43] "1:43:A:C" "1:44:A:C" "1:45:A:C" "1:46:A:C" "1:47:A:C" "1:48:A:C"
+[49] "1:49:A:C" "1:50:A:C"
+
+$WEIGHT
+[1] 0
+
+$annoIndicatorMat
+      [,1] [,2] [,3]
+ [1,]    1    1    1
+ [2,]    1    1    1
+ [3,]    1    1    1
+ [4,]    1    1    1
+ [5,]    1    1    1
+ [6,]    1    1    1
+ [7,]    1    1    1
+ [8,]    1    1    1
+ [9,]    1    1    1
+[10,]    1    1    1
+[11,]    0    1    1
+[12,]    0    1    1
+[13,]    0    1    1
+[14,]    0    1    1
+[15,]    0    1    1
+[16,]    0    1    1
+[17,]    0    1    1
+[18,]    0    1    1
+[19,]    0    1    1
+[20,]    0    1    1
+[21,]    0    1    1
+[22,]    0    1    1
+[23,]    0    1    1
+[24,]    0    1    1
+[25,]    0    1    1
+[26,]    0    1    1
+[27,]    0    1    1
+[28,]    0    1    1
+[29,]    0    1    1
+[30,]    0    1    1
+[31,]    1    1    1
+[32,]    1    1    1
+[33,]    1    1    1
+[34,]    1    1    1
+[35,]    1    1    1
+[36,]    1    1    1
+[37,]    1    1    1
+[38,]    1    1    1
+[39,]    1    1    1
+[40,]    1    1    1
+[41,]    1    1    1
+[42,]    1    1    1
+[43,]    1    1    1
+[44,]    1    1    1
+[45,]    1    1    1
+[46,]    1    1    1
+[47,]    1    1    1
+[48,]    1    1    1
+[49,]    1    1    1
+[50,]    1    1    1
+
+$genoIndex
+ [1] "   24" "  158" "  282" "  414" "  900" " 1032" " 1143" " 1263" " 1408"
+[10] " 1614" " 1789" " 1940" " 2590" " 2723" " 3689" " 5285" " 5423" " 5632"
+[19] " 5766" " 5905" " 8548" " 8686" "10934" "13429" "13565" "13687" "16428"
+[28] "18005" "18129" "20459" "22443" "22728" "22895" "23399" "23708" "23830"
+[37] "23968" "24452" "25527" "25685" "25812" "25971" "26095" "26227" "26380"
+[46] "26546" "26801" "26961" "29384" "29565"
+
+$annoVec
+[1] "lof"                     "missense;lof"           
+[3] "missense;lof;synonymous"
+
+$genoIndex_prev
+ [1] "  158" "  282" "  414" "  900" " 1032" " 1143" " 1263" " 1408" " 1614"
+[10] " 1789" " 1940" " 2590" " 2723" " 3689" " 5285" " 5423" " 5632" " 5766"
+[19] " 5905" " 8548" " 8686" "10934" "13429" "13565" "13687" "16428" "18005"
+[28] "18129" "20459" "22443" "22728" "22895" "23399" "23708" "23830" "23968"
+[37] "24452" "25527" "25685" "25812" "25971" "26095" "26227" "26380" "26546"
+[46] "26801" "26961" "29384" "29565" "30832"
+
+[1] "Analyzing Region GENE1 (2/2)."
+OK
+OK2a
+t_genoIndex.at(i)    24
+t_genoIndex_prev.at(i)   158
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i)   158
+t_genoIndex_prev.at(i)   282
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i)   282
+t_genoIndex_prev.at(i)   414
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i)   414
+t_genoIndex_prev.at(i)   900
+OK2
+OK3
+OK3a
+OK3b
+Start analyzing chunk 0.....
+OK3c
+OK3d
+OK2a
+t_genoIndex.at(i)   900
+t_genoIndex_prev.at(i)  1032
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i)  1032
+t_genoIndex_prev.at(i)  1143
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i)  1143
+t_genoIndex_prev.at(i)  1263
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i)  1263
+t_genoIndex_prev.at(i)  1408
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i)  1408
+t_genoIndex_prev.at(i)  1614
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i)  1614
+t_genoIndex_prev.at(i)  1789
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i)  1789
+t_genoIndex_prev.at(i)  1940
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i)  1940
+t_genoIndex_prev.at(i)  2590
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i)  2590
+t_genoIndex_prev.at(i)  2723
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i)  2723
+t_genoIndex_prev.at(i)  3689
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i)  3689
+t_genoIndex_prev.at(i)  5285
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i)  5285
+t_genoIndex_prev.at(i)  5423
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i)  5423
+t_genoIndex_prev.at(i)  5632
+OK2
+OK3
+OK3a
+OK3b
+OK3c
+OK3d
+OK2a
+t_genoIndex.at(i)  5632
+t_genoIndex_prev.at(i)  5766
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i)  5766
+t_genoIndex_prev.at(i)  5905
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i)  5905
+t_genoIndex_prev.at(i)  8548
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i)  8548
+t_genoIndex_prev.at(i)  8686
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i)  8686
+t_genoIndex_prev.at(i) 10934
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 10934
+t_genoIndex_prev.at(i) 13429
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 13429
+t_genoIndex_prev.at(i) 13565
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 13565
+t_genoIndex_prev.at(i) 13687
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 13687
+t_genoIndex_prev.at(i) 16428
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 16428
+t_genoIndex_prev.at(i) 18005
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 18005
+t_genoIndex_prev.at(i) 18129
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 18129
+t_genoIndex_prev.at(i) 20459
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 20459
+t_genoIndex_prev.at(i) 22443
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 22443
+t_genoIndex_prev.at(i) 22728
+OK2
+OK3
+OK3a
+OK3b
+OK3c
+OK3d
+OK2a
+t_genoIndex.at(i) 22728
+t_genoIndex_prev.at(i) 22895
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 22895
+t_genoIndex_prev.at(i) 23399
+OK2
+OK3
+OK3a
+OK3b
+OK3c
+OK3d
+OK2a
+t_genoIndex.at(i) 23399
+t_genoIndex_prev.at(i) 23708
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 23708
+t_genoIndex_prev.at(i) 23830
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 23830
+t_genoIndex_prev.at(i) 23968
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 23968
+t_genoIndex_prev.at(i) 24452
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 24452
+t_genoIndex_prev.at(i) 25527
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 25527
+t_genoIndex_prev.at(i) 25685
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 25685
+t_genoIndex_prev.at(i) 25812
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 25812
+t_genoIndex_prev.at(i) 25971
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 25971
+t_genoIndex_prev.at(i) 26095
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 26095
+t_genoIndex_prev.at(i) 26227
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 26227
+t_genoIndex_prev.at(i) 26380
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 26380
+t_genoIndex_prev.at(i) 26546
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 26546
+t_genoIndex_prev.at(i) 26801
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 26801
+t_genoIndex_prev.at(i) 26961
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 26961
+t_genoIndex_prev.at(i) 29384
+OK2
+OK3
+OK3a
+HERE
+OK2a
+t_genoIndex.at(i) 29384
+t_genoIndex_prev.at(i) 29565
+OK2
+OK3
+OK3a
+OK3b
+OK2a
+t_genoIndex.at(i) 29565
+t_genoIndex_prev.at(i) 30832
+OK2
+OK3
+OK3a
+HERE
+OK4
+In chunks 0-0, 17 markers are ultra-rare and 4 markers are not ultra-rare.
+Analyzing chunks (0/1, 0/1)........
+Analyzing chunks (1/1, 0/1)........
+Analyzing chunks (1/1, 1/1)........
+[1] "write to output"
+[1] "Analysis done! The set-based tests results have been saved to './output/genotype_100markers_bgen_groupTest_out_sparseGRMforStep1.txt'. The single-variant association tests results have been saved to './output/genotype_100markers_bgen_groupTest_out_sparseGRMforStep1.txt.singleAssoc.txt'."

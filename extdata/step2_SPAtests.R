@@ -2,8 +2,8 @@
 
 #options(stringsAsFactors=F, scipen = 999)
 options(stringsAsFactors=F)
-library(SAIGE)
-#library(SAIGE, lib.loc="/net/hunt/zhowei/project/imbalancedCaseCtrlMixedModel/Rpackage_SPAGMMAT/SAIGE_newgit/install_0.99.1_test")
+#library(SAIGE)
+library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/SAIGE/install_SAIGE_0.99.2_burdentestfast")
 #library(SAIGE, lib.loc="../../install_0.94")
 BLASctl_installed <- require(RhpcBLASctl)
 library(optparse)

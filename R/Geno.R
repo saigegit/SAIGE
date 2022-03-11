@@ -147,6 +147,7 @@ setGenoInput = function(bgenFile = "",
     #colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT")
     #markerInfo$ID = paste0(markerInfo$CHROM,":",markerInfo$POS, "_", markerInfo$REF,"/", markerInfo$ALT)
     markerInfo$genoIndex = 1:nrow(markerInfo) - 1  # -1 is to convert 'R' to 'C++' 
+    markerInfo$genoIndex_prev = rep(0, length(markerInfo$genoIndex))
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)    
     markerInfo$ID2 = paste0(markerInfo$CHROM,":",markerInfo$POS, ":", markerInfo$REF,":", markerInfo$ALT)
 #    markerInfo[,POS:=NULL]
@@ -172,7 +173,7 @@ setGenoInput = function(bgenFile = "",
     if(sampleFile != "" | !checkIfSampleIDsExist(bgenFile)){
 	print("Sample IDs were not found in the bgen file.")
 	Check_File_Exist(sampleFile)
-	sampleData = data.table::fread(sampleFile, header=F, colClasses = c("character"))
+	sampleData = data.table::fread(sampleFile, header=F, colClasses = c("character"), data.table=F)
         samplesInGeno = as.character(sampleData[,1])
     }else{
 	samplesInGeno = getSampleIDsFromBGEN(bgenFile)
@@ -200,8 +201,9 @@ setGenoInput = function(bgenFile = "",
     markerInfo[,REF:=NULL]
     markerInfo[,ALT:=NULL]
     markerInfo[,size_in_bytes:=NULL]
+    	
     setkeyv(markerInfo, c("ID","ID2"))
-
+     
     #markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$ALT, "/", markerInfo$REF)
     setBGENobjInCPP(bgenFile, bgenFileIndex, t_SampleInBgen = samplesInGeno, t_SampleInModel = sampleInModel, AlleleOrder)
   }
@@ -336,14 +338,16 @@ if(FALSE){
         set_iterator_inVcf(inSNPlist, in_chrom, in_beg_pd, in_end_pd)
       }
     } 
-    markerInfo = data.table(CHROM=NULL, genoIndex_prev=NULL, genoIndex=NULL)
+    #markerInfo = data.table(CHROM=NULL, POS=NULL, genoIndex_prev=NULL, genoIndex=NULL)
+    markerInfo = NULL
   }
   #genoList = list(genoType = genoType, markerInfo = markerInfo, SampleIDs = SampleIDs, AlleleOrder = AlleleOrder, GenoFile = GenoFile, GenoFileIndex = GenoFileIndex, anyQueue = anyQueue)
   #genoList = list(dosageFileType = dosageFileType, markerInfo = markerInfo, anyQueue = anyQueue, genoType = dosageFileType)
   #genoList = list(dosageFileType = dosageFileType, markerInfo = markerInfo, genoType = dosageFileType)
-  if(nrow(markerInfo) != 0){
-    markerInfo[,POS:=NULL]
-  }
+ # if(nrow(markerInfo) != 0){
+ #   markerInfo[,POS:=NULL]
+ # }
+
   genoList = list(markerInfo = markerInfo, genoType = dosageFileType)
   return(genoList)
 }
@@ -408,14 +412,29 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 	#}
 	conditionDat = data.frame(SNP = condition_original, condIndex = seq(1,length(condition_original)))
 	conditionDat = setDT(conditionDat)
+		#print("head(markerInfo)")
+		#print(head(markerInfo))
+		#CHROM POS    ID genoIndex       ID2 genoIndex_prev
 
 	if(genoType != "vcf"){
 		markerInfo_conditionDat = merge(conditionDat, markerInfo, by.x="SNP", by.y="ID", sort = F, all.x=T)
+		#print(markerInfo_conditionDat)
+		#print("markerInfo_conditionDat")
+		# SNP condIndex CHROM POS genoIndex  ID2 genoIndex_prev
 		if(!is.null(markerInfo$ID2)){
-		        setnames(markerInfo, "genoIndex", "genoIndex2")	
+		        #setnames(markerInfo, "genoIndex", "genoIndex2")	
 			#colnames(markerInfo)[which(colnames(markerInfo) == "genoIndex")] = "genoIndex2"
 
 			markerInfo_conditionDat = merge(markerInfo_conditionDat, markerInfo, by.x="SNP", by.y="ID2", sort = F, all.x=T)
+			#print("markerInfo_conditionDat")
+			#print(markerInfo_conditionDat)
+
+			        #SNP condIndex CHROM.x POS.x genoIndex.x  ID2 genoIndex_prev.x CHROM.y
+				#1: 1:33:A:C         1    <NA>    NA          NA <NA>               NA       1
+				   #POS.y   ID genoIndex.y genoIndex_prev.y
+				  # 1:    33 rs33       22895            23399
+			setnames(markerInfo_conditionDat, "genoIndex.x", "genoIndex")
+			setnames(markerInfo_conditionDat, "genoIndex.y", "genoIndex2")
 			posNA = which(is.na(markerInfo_conditionDat$genoIndex) & !is.na(markerInfo_conditionDat$genoIndex2))
         	if(length(posNA) != 0){
                 	markerInfo_conditionDat$genoIndex[posNA] = markerInfo_conditionDat$genoIndex2[posNA]
@@ -424,7 +443,6 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 
 		}
 		markerInfo_conditionDat = markerInfo_conditionDat[which(!is.na(markerInfo_conditionDat$genoIndex)), , drop=F]
-
 		markerInfo_conditionDat = markerInfo_conditionDat[order(markerInfo_conditionDat$condIndex), ]	
 		#markerInfo_conditionDat = markerInfo_conditionDat[which()]
        		#posInd = which(markerInfo_conditionDat %in% condition_original)
@@ -438,10 +456,12 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 			stop(length(condition_original)-nrow(markerInfo_conditionDat), " conditioning markers are not found in the geno file. Please Check.\n")	
 		}	
        }else{
-	        condition_group_line = paste(c("condition", condition_original), collapse = "\t")	
+	        condition_group_line = paste(c("condition", condition_original), collapse = "\t")
+		print("condition_original")
+		print(condition_original)
 		set_iterator_inVcf(condition_group_line, "1", 1, 200000000)
-      		cond_genoIndex = rep(-1, length(condition_original))
-		cond_genoIndex_prev = rep(-1, length(condition_original))
+      		cond_genoIndex = rep("0", length(condition_original))
+		cond_genoIndex_prev = rep("0", length(condition_original))
        }
    }else{
 	stop("condition is empty!")

@@ -101,6 +101,10 @@ SAIGE.Region = function(mu,
   Start = outList$Start
   End = outList$End	
 
+  cat("Start ", Start, "\n")
+  cat("End ", End, "\n")
+
+
   if(End)
   {
     message = paste0("The analysis has been completed in earlier analysis. Results are saved in '", OutputFile, "'. ",
@@ -125,13 +129,14 @@ SAIGE.Region = function(mu,
     cat("SKAT-O test will be performed. P-values for BUTDEN and SKAT tests will also be output\n")
     regionTestType = "SKAT-O"
     is_single_in_groupTest = TRUE
-    cat("is_single_in_groupTest = TRUE. Single-variant assoc tests results will be output\n")
+    #cat("is_single_in_groupTest = TRUE. Single-variant assoc tests results will be output\n")
   }else if(r.corr == 1){	  
     method = NULL
     cat("BURDEN test will be performed\n")
     regionTestType = "BURDEN"
 
     #output the result from Rcpp
+    cat("isappend ", isappend, "\n")
     isOpenOutFile = openOutfile(traitType, isappend)
     if(!isOpenOutFile){
 	stop("Output file ", OutputFile, " can't be opened\n")
@@ -224,6 +229,7 @@ SAIGE.Region = function(mu,
    if(!is.null(RegionList)){
     pval.Region = NULL
     region = RegionList[[mth]]
+
     annolist = region$annoVec 
     regionName = names(RegionList)[mth]
 
@@ -233,12 +239,14 @@ SAIGE.Region = function(mu,
       if(genoType == "vcf"){
     	#genoIndex = as.character(format(region$genoIndex, scientific = FALSE))
       #}else{
+        
+        #SNPlist = paste(c(regionName, SNP), collapse = "\t") 
         SNPlist = paste(c(regionName, SNP), collapse = "\t") 
         set_iterator_inVcf(SNPlist, chrom1, 1, 200000000)
         isVcfEnd =  check_Vcf_end()
     	if(!isVcfEnd){
-		genoIndex = rep("0", length(SNP))
-		genoIndex_prev = rep("0", length(SNP))
+		region$genoIndex = rep("0", length(SNP))
+		region$genoIndex_prev = rep("0", length(SNP))
     	}else{
         	warning("No markers in region ", regionName, " are found in the VCF file")
 		next
@@ -269,11 +277,13 @@ SAIGE.Region = function(mu,
     #tb0 = proc.time()
 if(is_single_in_groupTest){
       #OutList = as.data.frame(outList$OUT_DF)
-            noNAIndices = which(!is.na(outList$pvalVec))
+      noNAIndices = which(!is.na(outList$pvalVec))
       if(sum(WEIGHT) > 0){
         AnnoWeights = c(WEIGHT, rep(1, outList$numofUR))
       }
 }
+
+
 
 if(FALSE){
 if(is_single_in_groupTest){	  
@@ -334,8 +344,7 @@ if(regionTestType != "BURDEN"){
        StatVec = outList$TstatVec_flip[noNAIndices]
        VarSVec = diag(outList$VarMat)
        VarSVec = VarSVec[!is.na(VarSVec)]
-       adjPVec = outList$p.value
-   
+       adjPVec = outList$pvalVec[!is.na(outList$pvalVec)]
 		
        #varTestedIndices = which(apply(annoMAFIndicatorMat, 1, isContainValue, val=1))
        #print("varTestedIndices")
@@ -355,13 +364,15 @@ if(regionTestType != "BURDEN"){
        }
        weightMat = AnnoWeights %*% t(AnnoWeights)
 
+
        if(isCondition){    
     	 weightMat_G1_G2 = AnnoWeights %*% t(outList$G2_Weight_cond)
        }	
        wStatVec = StatVec * AnnoWeights
 
       wadjVarSMat = outList$VarMat * weightMat
-      if(isCondition){
+
+	if(isCondition){
 	  wStatVec_cond = wStatVec - outList$TstatAdjCond
           wadjVarSMat_cond = wadjVarSMat - outList$VarMatAdjCond	
       }
@@ -392,8 +403,6 @@ if(regionTestType != "BURDEN"){
 			re_phi = get_newPhi_scaleFactor(q.sum, mu.a, g.sum, p.new, Score, Phi, regionTestType)
 		        Phi = re_phi$val
                 }
-		#cat("Score is ", Score, "\n")
-		#cat("Phi is ", diag(Phi), "\n")
 		groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType)
 
 		resultDF = data.frame(Region = regionName,
@@ -589,18 +598,31 @@ if(mth ==  numberRegionsInChunk){
         #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
       }
   }
+      if(is_output_markerList_in_groupTest){ 
+        if(Start){
+        if(!is.null(Output_MarkerList.all)){
+          fwrite(Output_MarkerList.all, paste0(OutputFile, ".markerList.txt"), quote = F, sep = "\t", append = F, col.names = T, row.names = F, na="NA")
+        }
+      }else{
+        if(!is.null(Output_MarkerList.all)){
+          fwrite(Output_MarkerList.all, paste0(OutputFile, ".markerList.txt"), quote = F, sep = "\t", append = T, col.names = F, row.names = F, na="NA")
+        }
+        #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+      }
+    }
+
 
 
 #if(FALSE){
   #print("write Output 2")
   if(Start){
-    fwrite(c(message1, message2, message3), OutputFileIndex,
+    write.table(c(message1, message2, message3), OutputFileIndex,
                 quote = F, sep = "\t", append = F, col.names = F, row.names = F)
   }
-  fwrite(message4, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+  write.table(message4, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
 
   if(End){
-    fwrite(message5, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+    write.table(message5, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
   }
 #}#if(FALSE)
 
@@ -701,32 +723,29 @@ SAIGE.getRegionList_new = function(marker_group_line,
     }	    
     RegionData = as.data.frame(RegionData)
     setDT(RegionData)
-    setkey(RegionData, "SNP")
     
-uRegion = unique(RegionData$REGION)    
+#uRegion = unique(RegionData$REGION)    
 
 if(!is.null(markerInfo)){
-  # updated on 2021-08-05
-  #colnames(markerInfo)[which(colnames(markerInfo) == "ID")] = "MARKER"
+  setkey(RegionData, "SNP")
+  #print(markerInfo)
   RegionData = merge(RegionData, markerInfo, by.x = "SNP", by.y = "ID", all.x = T, sort = F) 
-  #markerInfo[,c("CHROM","MARKER","genoIndex"),drop=F], by.x = "SNP", by.y = "MARKER", all.x = T, sort = F)
 
   if(!is.null(markerInfo$ID2)){
-	#colnames(markerInfo)[which(colnames(markerInfo) == "MARKER")] = "MARKER2"
-  	#markerInfo$MARKER2 = NULL
-	#colnames(markerInfo)[which(colnames(markerInfo) == "ID2")] = "MARKER"
-	#colnames(markerInfo)[which(colnames(markerInfo) == "genoIndex")] = "genoIndex2"
-	#colnames(markerInfo)[which(colnames(markerInfo) == "CHROM")] = "CHROM2"
         RegionData = merge(RegionData, markerInfo, by.x = "SNP", by.y = "ID2", all.x = T, sort = F)
-	
-  	#RegionData = merge(RegionData, markerInfo[,c("CHROM2","MARKER","genoIndex2"), drop=F], by.x = "SNP", by.y = "MARKER", all.x = T, sort = F)
+	#SNP REGION     ANNO CHROM.x POS.x genoIndex2.x  ID2 genoIndex_prev.x CHROM.y POS.y    ID genoIndex2.y genoIndex_prev.y
         setnames(RegionData, "genoIndex.x", "genoIndex")
         setnames(RegionData, "genoIndex.y", "genoIndex2")
+        #setnames(RegionData, "genoIndex.y", "genoIndex")
         setnames(RegionData, "CHROM.x", "CHROM")
         setnames(RegionData, "CHROM.y", "CHROM2")
-	if(!is.null(markerInfo$genoIndex_prev.x)){
+        setnames(RegionData, "POS.x", "POS")
+        setnames(RegionData, "POS.y", "POS2")
+
+	if(!is.null(RegionData$genoIndex_prev.y)){
 		setnames(RegionData, "genoIndex_prev.x", "genoIndex_prev")
-		markerInfo[,genoIndex_prev.y:=NULL]
+		setnames(RegionData, "genoIndex_prev.y", "genoIndex_prev2")
+		#markerInfo[,genoIndex_prev.y:=NULL]
 
 	}
 	posNA = which(is.na(RegionData$genoIndex) & !is.na(RegionData$genoIndex2))
@@ -734,9 +753,11 @@ if(!is.null(markerInfo)){
 	if(length(posNA) != 0){
 		RegionData$genoIndex[posNA] = RegionData$genoIndex2[posNA]
 		RegionData$CHROM[posNA] = RegionData$CHROM2[posNA]
+		RegionData$POS[posNA] = RegionData$POS2[posNA]
+		if(!is.null(RegionData$genoIndex_prev)){
+			RegionData$genoIndex_prev[posNA] = RegionData$genoIndex_prev2[posNA]			
+		}
 	}
-         markerInfo[,genoIndex2:=NULL] 
-         markerInfo[,CHROM2:=NULL] 	
 	#RegionData$genoIndex2 = NULL	
   }	  
   posNA = which(is.na(RegionData$genoIndex))
@@ -745,10 +766,12 @@ if(!is.null(markerInfo)){
       RegionData = RegionData[which(!is.na(RegionData$genoIndex))]
       cat(length(posNA)," markers in 'RegionFile' are not in 'GenoFile'.\n")
     }
+   setorderv(RegionData, col=c("CHROM", "POS"))
 }
 
 if(nrow(RegionData) != 0){
 
+  
   #HeaderInRegionData = colnames(RegionData)
   HeaderInRegionData = unique(RegionData$ANNO)
   RegionAnnoHeaderList = list()
@@ -760,7 +783,7 @@ if(nrow(RegionData) != 0){
   }
 
   RegionList = list()
-  #uRegion = unique(RegionData$REGION)
+  uRegion = unique(RegionData$REGION)
   #RegionData = as.data.frame(RegionData)
 
 

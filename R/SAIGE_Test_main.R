@@ -114,8 +114,6 @@ SPAGMMATtest = function(bgenFile = "",
      stop("impute_method should be 'best_guess', 'mean' or 'minor'.")
    }
 
-print("OK")   	   
-
 
    checkArgsListBool(is_imputed_data = is_imputed_data,
                      LOCO = LOCO,
@@ -301,7 +299,6 @@ print("OK")
   gc()
    #process condition
     if (isCondition) {
-	 #print("OK1")
         n = length(obj.model$y) #sample size
 	condition_genoIndex=extract_genoIndex_condition(condition, objGeno$markerInfo, genoType)
 	if(!is.null(weights_for_condition)){
@@ -310,16 +307,14 @@ print("OK")
 			stop("The length of the provided weights for conditioning markers is not equal to the number of conditioning markers\n")
 		}	
         }else{
-		condition_weights = rep(0, length(condition_genoIndex$condition_genoIndex))
+		condition_weights = rep(0, length(condition_genoIndex$cond_genoIndex))
 	}	
 
-	condition_genoIndex_a = as.character(format(condition_genoIndex$condition_genoIndex, scientific = FALSE))
-	condition_genoIndex_prev_a = as.character(format(condition_genoIndex$condition_genoIndex_prev, scientific = FALSE)) 
+	condition_genoIndex_a = as.character(format(condition_genoIndex$cond_genoIndex, scientific = FALSE))
+	condition_genoIndex_prev_a = as.character(format(condition_genoIndex$cond_genoIndex_prev, scientific = FALSE)) 
 	assign_conditionMarkers_factors(genoType, condition_genoIndex_prev_a, condition_genoIndex_a,  n, condition_weights)
-	 #print("OK2")
 	if(obj.model$traitType == "binary" & isGroupTest){
 		outG2cond = RegionSetUpConditional_binary_InCPP(condition_weights)
-	 #print("OK3")
 
 
 	G2condList = get_newPhi_scaleFactor(q.sum = outG2cond$qsum_G2_cond, mu.a = obj.model$mu, g.sum = outG2cond$gsum_G2_cond, p.new = outG2cond$pval_G2_cond, Score = outG2cond$Score_G2_cond, Phi = outG2cond$VarMat_G2_cond, "SKAT-O")
@@ -327,7 +322,6 @@ print("OK")
 	scaleFactorVec = as.vector(G2condList$scaleFactor)
 	#print(scaleFactorVec)
 	assign_conditionMarkers_factors_binary_region(scaleFactorVec)
-	 #print("OK5")
 	}	
     }else{
 	condition_weights = c(0)
@@ -349,6 +343,11 @@ print("OK")
     OutputFile = SAIGEOutputFile
 
     #if(file.exists(SAIGEOutputFile)) {print("ok 2 file exist")}
+    if(!is.null(objGeno$markerInfo$CHROM)){
+    	setorderv(objGeno$markerInfo,col=c("CHROM","POS"))
+    }
+
+
         SAIGE.Marker(traitType,
 		   genoType,
                    objGeno$markerInfo$genoIndex_prev,
