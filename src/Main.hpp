@@ -24,7 +24,8 @@ void setMarker_GlobalVarsInCPP(
 void setRegion_GlobalVarsInCPP(
                                arma::vec t_max_maf_region,
                                unsigned int t_max_markers_region,
-                               double t_MACCutoff_to_CollapseUltraRare);
+                               double t_MACCutoff_to_CollapseUltraRare,
+			       double t_min_gourpmac_for_burdenonly);
 
 
 

@@ -2,8 +2,8 @@
 
 #options(stringsAsFactors=F, scipen = 999)
 options(stringsAsFactors=F)
-library(SAIGE)
-#library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/SAIGE/install_SAIGE_0.99.2_burdentestfast")
+#library(SAIGE)
+library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/SAIGE/install_SAIGE_0.99.3_minmacforburdenonly")
 #library(SAIGE, lib.loc="../../install_0.94")
 BLASctl_installed <- require(RhpcBLASctl)
 library(optparse)
@@ -49,6 +49,8 @@ option_list <- list(
     help="Minimum minor allele frequency for markers to be tested. The higher threshold between minMAC and minMAF will be used [default=0]."),
   make_option("--minMAC", type="numeric", default=0.5,
     help="Minimum minor allele count for markers to be tested. The higher threshold between minMAC and minMAF will be used [default=0.5]."),
+ make_option("--minGroupMAC_in_BurdenTest", type="numeric", default=5,
+    help="Only applied when only Burden tests are performed (r.corr=1). Minimum minor allele count in the Burden test for the psueodo marker. [default=5]."),
   make_option("--minInfo", type="numeric", default=0,
     help="Minimum Info for markers to be tested if is_imputed_data=TRUE [default=0]"),
   make_option("--maxMissing", type="numeric", default=0.15,
@@ -75,6 +77,8 @@ option_list <- list(
     help="Whether to overwrite the output file if it exists. If FALSE, the program will continue the unfinished analysis instead of starting over from the beginining [default=TRUE]"),				
   make_option("--maxMAF_in_groupTest", type="character",default="0.0001,0.001,0.01",
     help="Max MAF for markers tested in group test seperated by comma. e.g. 0.0001,0.001,0.01, [default=0.01]"),
+  make_option("--maxMAC_in_groupTest", type="character",default="0",
+    help="Max MAC for markers tested in group test seperated by comma.The list will be combined with maxMAF_in_groupTest. e.g. 1,2 . By default, 0 and no maxMAC cutoff are applied. [default=0]"),
   make_option("--annotation_in_groupTest", type="character",default="lof,missense;lof,missense;lof;synonymous",
     help="annotations of markers to be tested in the set-based tests seperated by comma. using ; to combine multiple annotations in the same test, e.g. lof,missense;lof,missense;lof;synonymous will test lof variants only, missense+lof variants, and missense+lof+synonymous variants. default: lof,missense;lof,missense;lof;synonymous"),
   make_option("--groupFile", type="character", default="",
@@ -156,7 +160,8 @@ if(is.null(opt$weights_for_condition)){
 	weights_for_condition <- convertoNumeric(x=strsplit(opt$weights_for_condition,",")[[1]], "weights_for_condition")
 }
 
-maxMAF_in_groupTest <- convertoNumeric(x=strsplit(opt$maxMAF_in_groupTest,",")[[1]], "maxMAF_in_groupTest")
+maxMAF_in_groupTest = convertoNumeric(x=strsplit(opt$maxMAF_in_groupTest,",")[[1]], "maxMAF_in_groupTest")
+maxMAC_in_groupTest = convertoNumeric(x=strsplit(opt$maxMAC_in_groupTest,",")[[1]], "maxMAC_in_groupTest")
 
 annotation_in_groupTest = gsub(":",";",opt$annotation_in_groupTest)
 annotation_in_groupTest = unlist(strsplit(annotation_in_groupTest,",")[[1]])
@@ -204,6 +209,8 @@ SPAGMMATtest(vcfFile=opt$vcfFile,
 	     is_output_moreDetails =opt$is_output_moreDetails,
 	     is_overwrite_output = opt$is_overwrite_output,
 	     maxMAF_in_groupTest = maxMAF_in_groupTest,
+	     maxMAC_in_groupTest = maxMAC_in_groupTest,
+	     minGroupMAC_in_BurdenTest = opt$minGroupMAC_in_BurdenTest,
 	     annotation_in_groupTest = annotation_in_groupTest,
 	     groupFile = opt$groupFile,
 	     sparseGRMFile=opt$sparseGRMFile,

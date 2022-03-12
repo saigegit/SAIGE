@@ -49,6 +49,7 @@ double g_marker_minMAC_cutoff;
 double g_region_minMAC_cutoff;    // for Rare Variants (RVs) whose MAC < this value, we aggregate these variants like SAIGE-GENE+ 
 double g_marker_minINFO_cutoff;
 arma::vec g_region_maxMAF_cutoff;
+double g_min_gourpmac_for_burdenonly;
 double g_maxMAFLimit;
 unsigned int g_region_maxMarkers_cutoff;   // maximal number of markers in one chunk, only used for region-based analysis to reduce memory usage
 bool g_isOutputMoreDetails;
@@ -116,12 +117,14 @@ void setMarker_GlobalVarsInCPP(
 void setRegion_GlobalVarsInCPP(
                                arma::vec t_max_maf_region,
                                unsigned int t_max_markers_region,
-			       double t_MACCutoff_to_CollapseUltraRare)
+			       double t_MACCutoff_to_CollapseUltraRare, 
+			       double t_min_gourpmac_for_burdenonly)
 {
   g_region_maxMAF_cutoff = t_max_maf_region;
   g_maxMAFLimit = g_region_maxMAF_cutoff.max();
   g_region_maxMarkers_cutoff = t_max_markers_region;
   g_region_minMAC_cutoff = t_MACCutoff_to_CollapseUltraRare;
+  g_min_gourpmac_for_burdenonly = t_min_gourpmac_for_burdenonly;
 }
 
 
@@ -1535,18 +1538,20 @@ if(t_regionTestType == "BURDEN"){
         int n = genoSumVec.size();
         arma::uvec indexNonZeroVec_arma = arma::find(genoSumVec != 0);
 	arma::uvec indexZeroVec_arma = arma::find(genoSumVec == 0);
-        if(indexNonZeroVec_arma.n_elem > 0){
-          double altFreq = arma::mean(genoSumVec)/2;
-          double altCounts = arma::accu(genoSumVec);
-          double missingRate = 0;
-          double imputeInfo = 1;
-          std::string chr, ref, alt, marker;
-          bool flip = false;
-          std::string info = "UR";
-          double MAF = std::min(altFreq, 1 - altFreq);
-          double w0;
-          double MAC = MAF * 2 * t_n * (1 - missingRate);
-          std::vector<uint32_t> indexForMissing;
+        double altFreq = arma::mean(genoSumVec)/2;
+        double altCounts = arma::accu(genoSumVec);
+        double missingRate = 0;
+        double imputeInfo = 1;
+        std::string chr, ref, alt, marker;
+        bool flip = false;
+        std::string info = "UR";
+        double MAF = std::min(altFreq, 1 - altFreq);
+        double w0;
+        double MAC = MAF * 2 * t_n * (1 - missingRate);
+        if(indexNonZeroVec_arma.n_elem > 0 && MAC >= g_min_gourpmac_for_burdenonly){
+	  //if(MAC >= g_min_gourpmac_for_burdenonly){
+          
+	  std::vector<uint32_t> indexForMissing;
 	  if(!isSingleVarianceRatio){
             hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC);
           }

@@ -47,7 +47,8 @@ SPAcutoff,
 dosage_zerod_cutoff,
 dosage_zerod_MAC_cutoff,
 markers_per_chunk, 
-groups_per_chunk){
+groups_per_chunk,
+minGroupMAC_in_BurdenTest){
 
 	checkArgNumeric(start, deparse(substitute(start)), 1, 250000000)
         checkArgNumeric(end, deparse(substitute(end)), 1, 250000000)
@@ -61,8 +62,12 @@ groups_per_chunk){
         cat("Any dosages <= ", dosage_zerod_cutoff, " for genetic variants with MAC <= ", dosage_zerod_MAC_cutoff, " are set to be 0 in group tests\n")
 	checkArgNumeric(markers_per_chunk, deparse(substitute(markers_per_chunk)), minVal=1000)
 	checkArgNumeric(groups_per_chunk, deparse(substitute(groups_per_chunk)), minVal=1)
-
-
+	cat("min_MAC ", min_MAC, "\n")
+	if(length(which(minGroupMAC_in_BurdenTest > 0)) > 0){
+		cat("Values in minGroupMAC_in_BurdenTest need to be >= min_MAC\n")
+	}
+	checkArgNumeric(minGroupMAC_in_BurdenTest, deparse(substitute(minGroupMAC_in_BurdenTest)), minVal=min_MAC)
+	
 }
 
 
@@ -88,6 +93,7 @@ checkArgsListBool = function(is_imputed_data,
 checkArgsList_for_Region = function( 
 				    MACCutoff_to_CollapseUltraRare,
 				    maxMAF_in_groupTest,
+				    maxMAC_in_groupTest,
 				    markers_per_chunk_in_groupTest){
 
 
@@ -128,6 +134,16 @@ checkArgsList_for_Region = function(
         checkArgNumeric(maxMAF_in_groupTest[i], deparse(substitute(maxMAF_in_groupTest[i])), 0, 0.5, FALSE, TRUE)
       } 
     }
+
+    
+    if(length(maxMAC_in_groupTest) < 1){
+      stop("maxMAC_in_groupTest should contain at least one numeric value >= 0\n")
+    }else{	    
+      for(i in 1:length(maxMAC_in_groupTest)){
+        checkArgNumeric(maxMAC_in_groupTest[i], deparse(substitute(maxMAC_in_groupTest[i])),  minVal=0)
+      } 
+    }
+
     checkArgNumeric(markers_per_chunk_in_groupTest, deparse(substitute(markers_per_chunk_in_groupTest)), 1, 10000, TRUE, TRUE)
 }
 

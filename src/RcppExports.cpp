@@ -53,14 +53,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // setRegion_GlobalVarsInCPP
-void setRegion_GlobalVarsInCPP(arma::vec t_max_maf_region, unsigned int t_max_markers_region, double t_MACCutoff_to_CollapseUltraRare);
-RcppExport SEXP _SAIGE_setRegion_GlobalVarsInCPP(SEXP t_max_maf_regionSEXP, SEXP t_max_markers_regionSEXP, SEXP t_MACCutoff_to_CollapseUltraRareSEXP) {
+void setRegion_GlobalVarsInCPP(arma::vec t_max_maf_region, unsigned int t_max_markers_region, double t_MACCutoff_to_CollapseUltraRare, double t_min_gourpmac_for_burdenonly);
+RcppExport SEXP _SAIGE_setRegion_GlobalVarsInCPP(SEXP t_max_maf_regionSEXP, SEXP t_max_markers_regionSEXP, SEXP t_MACCutoff_to_CollapseUltraRareSEXP, SEXP t_min_gourpmac_for_burdenonlySEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type t_max_maf_region(t_max_maf_regionSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type t_max_markers_region(t_max_markers_regionSEXP);
     Rcpp::traits::input_parameter< double >::type t_MACCutoff_to_CollapseUltraRare(t_MACCutoff_to_CollapseUltraRareSEXP);
-    setRegion_GlobalVarsInCPP(t_max_maf_region, t_max_markers_region, t_MACCutoff_to_CollapseUltraRare);
+    Rcpp::traits::input_parameter< double >::type t_min_gourpmac_for_burdenonly(t_min_gourpmac_for_burdenonlySEXP);
+    setRegion_GlobalVarsInCPP(t_max_maf_region, t_max_markers_region, t_MACCutoff_to_CollapseUltraRare, t_min_gourpmac_for_burdenonly);
     return R_NilValue;
 END_RCPP
 }
@@ -2028,7 +2029,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_CCT_cpp", (DL_FUNC) &_SAIGE_CCT_cpp, 1},
     {"_SAIGE_setAssocTest_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP, 9},
     {"_SAIGE_setMarker_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setMarker_GlobalVarsInCPP, 2},
-    {"_SAIGE_setRegion_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setRegion_GlobalVarsInCPP, 3},
+    {"_SAIGE_setRegion_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setRegion_GlobalVarsInCPP, 4},
     {"_SAIGE_mainMarkerInCPP", (DL_FUNC) &_SAIGE_mainMarkerInCPP, 6},
     {"_SAIGE_setPLINKobjInCPP", (DL_FUNC) &_SAIGE_setPLINKobjInCPP, 5},
     {"_SAIGE_setBGENobjInCPP", (DL_FUNC) &_SAIGE_setBGENobjInCPP, 5},

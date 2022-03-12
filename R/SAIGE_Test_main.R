@@ -29,7 +29,9 @@
 #' @param groups_per_chunk character. Number of groups/sets to be read in and tested in each chunk in the set-based assoc tests. By default, 100
 #' @param is_output_moreDetails logical. Whether to output heterozygous and homozygous counts in cases and controls. By default, FALSE. If True, the columns homN_Allele2_cases, hetN_Allelelogical2_cases, homN_Allele2_ctrls, hetN_Allele2_ctrls will be output. By default, FALSE
 #' @param is_overwrite_output logical. Whether to overwrite the output file if it exists. If FALSE, the program will continue the unfinished analysis instead of starting over from the beginining. By default, TRUE
-#' @param maxMAF_in_groupTest. vector of numeric. Max MAF for markers tested in group test seperated by comma. e.g. c(0.0001,0.001,0.01). By default, c(0.01) 
+#' @param maxMAF_in_groupTest. vector of numeric. Max MAF for markers tested in group test seperated by comma. e.g. c(0.0001,0.001,0.01). By default, c(0.01)
+#' @param maxMAC_in_groupTest. vector of numeric. Max MAC for markers tested in group test seperated by comma. This vector will be combined with maxMAF_in_groupTest. e.g. c(1) to only test singletons. By default, c(0) and no Max MAC cutoffs are applied.  
+#' @param minGroupMAC_in_BurdenTest numeric. Only applied when only Burden tests are performed (r.corr=1). Minimum minor allele count in the Burden test for the psueodo marker. By default, 5
 #' @param  annotation_in_groupTest. vector of character. annotations of markers to be tested in the set-based tests. using ; to combine multiple annotations in the same test. e.g. c("lof","missense;lof","missense;lof;synonymous")  will test lof variants only, missense+lof variants, and missense+lof+synonymous variants. By default:  c("lof","missense;lof","missense;lof;synonymous")
 #' @param groupFile character. Path to the file containing the group information for gene-based tests. Each gene/set has 2 or 3 lines in the group file. The first element is the gene/set name. The second element in the first line is to indicate whether this line contains variant IDs (var), annotations (anno), or weights (weight). The line for weights is optional. If not specified, the default weights will be generated based on beta(MAF, 1, 25). Use weights.beta to change the parameters for the Beta distribution. The variant ids must be in the format chr:pos_ref/alt. Elements are seperated by tab or space.
 #' @param sparseGRMFile character. Path to the pre-calculated sparse GRM file that was used in Step 1
@@ -102,6 +104,8 @@ SPAGMMATtest = function(bgenFile = "",
                  MACCutoff_to_CollapseUltraRare = 10,
                  annotation_in_groupTest =c("lof","missense;lof","missense;lof;synonymous"),  #new
 		 maxMAF_in_groupTest = c(0.01),
+		 maxMAC_in_groupTest = c(0),
+		 minGroupMAC_in_BurdenTest = 5,
 		 is_Firth_beta = FALSE,
 		 pCutoffforFirth = 0.01,
 		 is_overwrite_output = TRUE,
@@ -131,8 +135,11 @@ SPAGMMATtest = function(bgenFile = "",
                      dosage_zerod_cutoff = dosage_zerod_cutoff,
 		     dosage_zerod_MAC_cutoff = dosage_zerod_MAC_cutoff,
 		     markers_per_chunk = markers_per_chunk,
-		     groups_per_chunk = groups_per_chunk
+		     groups_per_chunk = groups_per_chunk,
+		     minGroupMAC_in_BurdenTest = minGroupMAC_in_BurdenTest
 		     )
+
+
     #if(file.exists(SAIGEOutputFile)) {print("ok -2 file exist")} 
 
 
@@ -170,12 +177,14 @@ SPAGMMATtest = function(bgenFile = "",
       #checkArgsList_for_Region(method_to_CollapseUltraRare,
       #order the max MAF from lowest to highest
       maxMAF_in_groupTest = maxMAF_in_groupTest[order(maxMAF_in_groupTest)]
+      maxMAC_in_groupTest = maxMAC_in_groupTest[order(maxMAC_in_groupTest)]
+
       checkArgsList_for_Region(
                                     MACCutoff_to_CollapseUltraRare,
                                     #DosageCutoff_for_UltraRarePresence,
                                     maxMAF_in_groupTest = maxMAF_in_groupTest,
+				    maxMAC_in_groupTest = maxMAC_in_groupTest,
 				    markers_per_chunk_in_groupTest = markers_per_chunk_in_groupTest)
-
 
 
 
@@ -195,7 +204,8 @@ SPAGMMATtest = function(bgenFile = "",
       setRegion_GlobalVarsInCPP(
 				maxMAF_in_groupTest,
 				markers_per_chunk_in_groupTest,
-				MACCutoff_to_CollapseUltraRare
+				MACCutoff_to_CollapseUltraRare,
+				minGroupMAC_in_BurdenTest
                             )
      #cat("dosage_zerod_cutoff is ", dosage_zerod_cutoff, "\n")
      #cat("dosage_zerod_MAC_cutoff is ", dosage_zerod_MAC_cutoff, "\n")
@@ -363,7 +373,18 @@ SPAGMMATtest = function(bgenFile = "",
 		   isCondition,
 		   is_overwrite_output)
     }else{
-		     #method_to_CollapseUltraRare,
+      maxMACbinind = which(maxMAC_in_groupTest > 0)	
+      if(length(maxMACbinind) > 0){ 
+	 maxMAC_in_groupTest_to_MAF = (maxMAC_in_groupTest[maxMACbinind])/(2*length(mu))
+	 cat("maxMAC_in_groupTest: ", maxMAC_in_groupTest, " is specified, corresponding to max MAF ", maxMAC_in_groupTest_to_MAF,"\n")
+	 for(i in 1:length(maxMACbinind)){
+	    checkArgNumeric(maxMAC_in_groupTest_to_MAF[i], deparse(substitute(maxMAC_in_groupTest_to_MAF[i])), 0, 0.5, FALSE, TRUE)
+	}
+        maxMAF_in_groupTest = unique(c(maxMAF_in_groupTest, maxMAC_in_groupTest_to_MAF))
+	maxMAF_in_groupTest = maxMAF_in_groupTest[order(maxMAF_in_groupTest)]
+	cat("max MAF cutoff ", maxMAF_in_groupTest, "will be applied\n")
+      }
+		    #method_to_CollapseUltraRare,
                      #DosageCutoff_for_UltraRarePresence,
 	SAIGE.Region(mu,
 		     OutputFile,
