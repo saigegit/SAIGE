@@ -2,8 +2,8 @@
 
 #options(stringsAsFactors=F, scipen = 999)
 options(stringsAsFactors=F)
-#library(SAIGE)
-library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/SAIGE/install_SAIGE_0.99.3_minmacforburdenonly")
+library(SAIGE)
+#library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/SAIGE/install_SAIGE_0.99.3_minmacforburdenonly")
 #library(SAIGE, lib.loc="../../install_0.94")
 BLASctl_installed <- require(RhpcBLASctl)
 library(optparse)

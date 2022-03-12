@@ -66,7 +66,6 @@ minGroupMAC_in_BurdenTest){
 	if(length(which(minGroupMAC_in_BurdenTest > 0)) > 0){
 		cat("Values in minGroupMAC_in_BurdenTest need to be >= min_MAC\n")
 	}
-	checkArgNumeric(minGroupMAC_in_BurdenTest, deparse(substitute(minGroupMAC_in_BurdenTest)), minVal=min_MAC)
 	
 }
 
