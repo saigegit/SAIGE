@@ -1954,7 +1954,7 @@ void assign_conditionMarkers_factors(
       //P2Mat.col(i) = P2Vec;
       MAFVec(i) = MAF;
      //w0G2_cond = boost::math::pdf(beta_dist, MAF);
-    t_weight_cond.print();
+    //t_weight_cond.print();
 
      if(!t_weight_cond.is_zero()){
 	 w0G2_cond = t_weight_cond(i);
