@@ -151,7 +151,7 @@ setGenoInput = function(bgenFile = "",
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)    
     markerInfo$ID2 = paste0(markerInfo$CHROM,":",markerInfo$POS, ":", markerInfo$REF,":", markerInfo$ALT)
 #    markerInfo[,POS:=NULL]
-    print(is.data.table(markerInfo))
+    #print(is.data.table(markerInfo))
     markerInfo[,REF:=NULL]
     markerInfo[,ALT:=NULL]
     setkeyv(markerInfo, c("ID","ID2"))
@@ -457,8 +457,8 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 		}	
        }else{
 	        condition_group_line = paste(c("condition", condition_original), collapse = "\t")
-		print("condition_original")
-		print(condition_original)
+		#print("condition_original")
+		#print(condition_original)
 		set_iterator_inVcf(condition_group_line, "1", 1, 200000000)
       		cond_genoIndex = rep("0", length(condition_original))
 		cond_genoIndex_prev = rep("0", length(condition_original))
