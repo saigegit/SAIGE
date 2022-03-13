@@ -273,7 +273,6 @@ void SAIGEClass::getadjGFast(arma::vec & t_GVec, arma::vec & g, arma::uvec & iIn
 {
 
   // To increase computational efficiency when lots of GVec elements are 0
- std::cout << "m_p " << m_p << std::endl;
  arma::vec m_XVG(m_p, arma::fill::zeros);
   for(int i = 0; i < iIndex.n_elem; i++){
       m_XVG += m_XV.col(iIndex(i)) * t_GVec(iIndex(i));
@@ -345,7 +344,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   bool isScoreFast = true;
 
 
-  if((t_altFreq > 0.05 && t_altFreq < 0.95) || m_flagSparseGRM || is_region){
+  if((t_altFreq >= 0.3 && t_altFreq <= 0.3) || m_flagSparseGRM || is_region){
     isScoreFast = false;
   }
 
@@ -519,10 +518,10 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
    if(m_traitType!="quantitative" & m_is_Firth_beta & t_pval <= m_pCutoffforFirth){
 	t_isFirth = true;
 
-	//if(!is_gtilde){
-        //        getadjGFast(t_GVec, t_gtilde, iIndex);
-        //        is_gtilde = true;
-        //}
+	if(!is_gtilde){
+                getadjGFast(t_GVec, t_gtilde, iIndex);
+                is_gtilde = true;
+        }
 	arma::mat x(t_GVec.n_elem, 2, arma::fill::ones);	
 	x.col(1) = t_gtilde;
 	//x.col(1) = t_GVec;

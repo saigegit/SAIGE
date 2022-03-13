@@ -964,6 +964,7 @@ Rcpp::List mainRegionInCPP(
   // cycle for q0 markers
   for(unsigned int i = 0; i < q0; i++)
   {
+
     // marker-level information
     double altFreq, altCounts, missingRate, imputeInfo;
     std::vector<uint32_t> indexForMissing;
@@ -1511,6 +1512,7 @@ arma::vec BURDEN_pval_Vec(q_anno_maf);
 BURDEN_pval_Vec.fill(-1.0);
 arma::vec BURDEN_pval_cVec(q_anno_maf);
 BURDEN_pval_cVec.fill(-1.0);
+
 
 
 bool isregion = true;
