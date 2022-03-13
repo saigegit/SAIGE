@@ -124,7 +124,7 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
 		     bool t_is_region){
     arma::vec Sm, var2m;
     double S, var2;
-    getadjG(t_GVec, t_gtilde);
+    getadjGFast(t_GVec, t_gtilde);
     if(t_is_region && m_traitType == "binary"){
       t_gy = dot(t_gtilde, m_y);
     }
@@ -280,16 +280,7 @@ void SAIGEClass::getadjGFast(arma::vec & t_GVec, arma::vec & g)
       m_XVG += m_XV.col(i) * t_GVec(i);
     }
   }
-
-   //g*=m_XXVX_inv
-  //g = t_GVec - m_XXVX_inv * m_XVG;
-  //arma::vec g1(m_n, arma::fill::zeros);
-   for(int i = 0; i < m_n; i++){
-  	g(i) = -dot(m_XXVX_inv.row(i), m_XVG);
-  }
-
-  g += t_GVec ;
-  
+  g = t_GVec - m_XXVX_inv * m_XVG; 
 }
 
 
@@ -529,7 +520,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 	t_isFirth = true;
 
 	if(!is_gtilde){
-                getadjG(t_GVec, t_gtilde);
+                getadjGFast(t_GVec, t_gtilde);
                 is_gtilde = true;
         }
 	arma::mat x(t_GVec.n_elem, 2, arma::fill::ones);	
@@ -550,7 +541,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
    //condition
    if(t_isCondition){
 	if(!is_gtilde){
-        	getadjG(t_GVec, t_gtilde);
+        	getadjGFast(t_GVec, t_gtilde);
         	is_gtilde = true;
         }
         t_G1tilde_P_G2tilde = sqrt(m_varRatioVal) * t_gtilde.t() * m_P2Mat_cond;
