@@ -257,16 +257,8 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
 
 
 void SAIGEClass::getadjG(arma::vec & t_GVec, arma::vec & g){
-/*	  double mem1, mem2;
-  process_mem_usage(mem1, mem2);
-   std::cout << "VM scoreTest a 2 in getadjG: " << mem1/10000 << "; RSS scoreTest a 2 in getadjGFast: " << mem2/10000 << std::endl;
-*/
    g = m_XV * t_GVec;
- // process_mem_usage(mem1, mem2);
- //  std::cout << "VM scoreTest a 2 1 in getadjG: " << mem1/10000 << "; RSS scoreTest a 2 in getadjGFast: " << mem2/10000 << std::endl;
     g = t_GVec - m_XXVX_inv * g;
- // process_mem_usage(mem1, mem2);
- //  std::cout << "VM scoreTest a 2 2 in getadjG: " << mem1/10000 << "; RSS scoreTest a 2 in getadjGFast: " << mem2/10000 << std::endl;
 }
 
 
@@ -280,6 +272,8 @@ void SAIGEClass::getadjGFast(arma::vec & t_GVec, arma::vec & g, arma::uvec & iIn
       m_XVG += m_XV.col(i) * t_GVec(i);
   }
   g = t_GVec - m_XXVX_inv * m_XVG; 
+
+//g=t_GVec;
 }
 
 
@@ -518,12 +512,13 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
    if(m_traitType!="quantitative" & m_is_Firth_beta & t_pval <= m_pCutoffforFirth){
 	t_isFirth = true;
 
-	if(!is_gtilde){
-                getadjGFast(t_GVec, t_gtilde, iIndex);
-                is_gtilde = true;
-        }
+	//if(!is_gtilde){
+        //        getadjGFast(t_GVec, t_gtilde, iIndex);
+        //        is_gtilde = true;
+        //}
 	arma::mat x(t_GVec.n_elem, 2, arma::fill::ones);	
-	x.col(1) = t_gtilde;
+	//x.col(1) = t_gtilde;
+	x.col(1) = t_GVec;
 	arma::vec init(2, arma::fill::zeros);
 	//std::cout << "t_Beta " << t_Beta << std::endl;
 	//std::cout << "t_seBeta " << t_seBeta << std::endl;

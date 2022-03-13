@@ -102,7 +102,7 @@ Get_Coef_LOCO = function(y, X, tau, family, alpha0, eta0,  offset, maxiterPCG, t
 
 
 #Fits the null glmm for binary traits
-glmmkin.ai_PCG_Rcpp_Binary = function(genofile, fit0, tau=c(0,0), fixtau = c(0,0), maxiter =20, tol = 0.02, verbose = TRUE, nrun=30, tolPCG = 1e-5, maxiterPCG = 500, subPheno, indicatorGenoSamplesWithPheno, obj.noK, out.transform, tauInit, memoryChunk, LOCO, chromosomeStartIndexVec, chromosomeEndIndexVec, traceCVcutoff, isCovariateTransform, isDiagofKinSetAsOne) {
+glmmkin.ai_PCG_Rcpp_Binary = function(genofile, Xorig, isCovariateOffset, fit0, tau=c(0,0), fixtau = c(0,0), maxiter =20, tol = 0.02, verbose = TRUE, nrun=30, tolPCG = 1e-5, maxiterPCG = 500, subPheno, indicatorGenoSamplesWithPheno, obj.noK, out.transform, tauInit, memoryChunk, LOCO, chromosomeStartIndexVec, chromosomeEndIndexVec, traceCVcutoff, isCovariateTransform, isDiagofKinSetAsOne) {
   #Fits the null generalized linear mixed model for a binary trait
   #Args:
   #  genofile: string. Plink file for the M1 markers to be used to construct the genetic relationship matrix 
@@ -259,9 +259,19 @@ glmmkin.ai_PCG_Rcpp_Binary = function(genofile, fit0, tau=c(0,0), fixtau = c(0,0
   }
 
   mu2 = mu * (1-mu)
+  #obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
+
+  if(!isCovariateOffset){
   obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
+  glmmResult = list(theta=tau, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, converged=converged,sampleID = subPheno$IID, obj.noK=obj.noK, y = y, X = X, traitType="binary", isCovariateOffset = isCovariateOffset)
+  }else{
+  obj.noK = ScoreTest_NULL_Model(mu, mu2, y, Xorig)
+  glmmResult = list(theta=tau, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, converged=converged,sampleID = subPheno$IID, obj.noK=obj.noK, y = y, X = Xorig, traitType="binary", isCovariateOffset = isCovariateOffset)
+  }
+
+
   #obj.noK = ScoreTest_NULL_Model_binary(mu, y, X) 
-  glmmResult = list(theta=tau, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, converged=converged,sampleID = subPheno$IID, obj.noK=obj.noK, y = y, X = X, traitType="binary")
+  #glmmResult = list(theta=tau, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, converged=converged,sampleID = subPheno$IID, obj.noK=obj.noK, y = y, X = X, traitType="binary")
 
   #LOCO: estimate fixed effect coefficients, random effects, and residuals for each chromoosme  
 
@@ -297,7 +307,12 @@ glmmkin.ai_PCG_Rcpp_Binary = function(genofile, fit0, tau=c(0,0), fixtau = c(0,0
 	}else{
 	  coef.alpha = alpha
 	}
-	obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
+	if(!isCovariateOffset){
+  	obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
+ 	 }else{
+  	obj.noK = ScoreTest_NULL_Model(mu, mu2, y, Xorig)
+  	}
+	#obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
         #obj.noK = ScoreTest_NULL_Model_binary(mu, y, X)
         glmmResult$LOCOResult[[j]] = list(isLOCO = TRUE, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, obj.noK = obj.noK)
         #glmmResult$LOCOResult[[j]] = list(isLOCO = TRUE, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov)
@@ -313,7 +328,7 @@ glmmkin.ai_PCG_Rcpp_Binary = function(genofile, fit0, tau=c(0,0), fixtau = c(0,0
 
 
 #Fits the null glmm for a quantitative trait
-glmmkin.ai_PCG_Rcpp_Quantitative = function(genofile, fit0, tau = c(0,0), fixtau = c(0,0), maxiter = 20, tol = 0.02, verbose = TRUE, nrun=30, tolPCG = 1e-5, maxiterPCG = 500, subPheno, indicatorGenoSamplesWithPheno, obj.noK, out.transform, tauInit, memoryChunk, LOCO, chromosomeStartIndexVec, chromosomeEndIndexVec, traceCVcutoff, isCovariateTransform, isDiagofKinSetAsOne){
+glmmkin.ai_PCG_Rcpp_Quantitative = function(genofile, Xorig, isCovariateOffset, fit0, tau = c(0,0), fixtau = c(0,0), maxiter = 20, tol = 0.02, verbose = TRUE, nrun=30, tolPCG = 1e-5, maxiterPCG = 500, subPheno, indicatorGenoSamplesWithPheno, obj.noK, out.transform, tauInit, memoryChunk, LOCO, chromosomeStartIndexVec, chromosomeEndIndexVec, traceCVcutoff, isCovariateTransform, isDiagofKinSetAsOne){
   #Fits the null linear mixed model for a quantitative trait
   #Args:
   #  genofile: string. Plink file for the M1 markers to be used to construct the genetic relationship matrix
@@ -505,10 +520,14 @@ glmmkin.ai_PCG_Rcpp_Quantitative = function(genofile, fit0, tau = c(0,0), fixtau
   }
 
   #coef.alpha<-Covariate_Transform_Back(alpha, out.transform$Param.transform)
-
-  obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X) 
+  if(!isCovariateOffset){
+  obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
+  lmmResult = list(theta=tau, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, converged=converged, sampleID = subPheno$IID, obj.noK=obj.noK, y=y, X=X, traitType="quantitative", isCovariateOffset = isCovariateOffset)
+  }else{
+  obj.noK = ScoreTest_NULL_Model(mu, mu2, y, Xorig)
+  lmmResult = list(theta=tau, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, converged=converged, sampleID = subPheno$IID, obj.noK=obj.noK, y=y, X=Xorig, traitType="quantitative", isCovariateOffset = isCovariateOffset)
+  }
   #lmmResult = list(theta=tau, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, converged=converged, sampleID = subPheno$IID, Sigma_iy = Sigma_iy, Sigma_iX = Sigma_iX, obj.noK=obj.noK, obj.glm.null=fit0, traitType="quantitative")
-  lmmResult = list(theta=tau, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, converged=converged, sampleID = subPheno$IID, obj.noK=obj.noK, y=y, X=X, traitType="quantitative")
 
   #LOCO: estimate fixed effect coefficients, random effects, and residuals for each chromoosme
   lmmResult$LOCO = LOCO  
@@ -538,7 +557,11 @@ glmmkin.ai_PCG_Rcpp_Quantitative = function(genofile, fit0, tau = c(0,0), fixtau
         }else{
         coef.alpha = alpha
         }
-	obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
+	if(!isCovariateOffset){
+	  obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
+	}else{
+	  obj.noK = ScoreTest_NULL_Model(mu, mu2, y, Xorig)		
+	}
         #coef.alpha<-Covariate_Transform_Back(alpha, out.transform$Param.transform)
         lmmResult$LOCOResult[[j]] = list(isLOCO = TRUE, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, obj.noK = obj.noK)
       }else{
@@ -1038,7 +1061,7 @@ fitNULLGLMM = function(plinkFile = "",
     if (isCovariateOffset) {
     	covoffset = mmat[,-1, drop=F] %*%  modwitcov$coefficients[-1]  
         print("isCovariateOffset=TRUE, so fixed effects coefficnets won't be estimated.")
-
+	formula.new.withCov = formula.new
         formula_nocov = paste0(phenoCol, "~ 1")
         formula.new = as.formula(formula_nocov)
         hasCovariate = FALSE
@@ -1097,10 +1120,18 @@ fitNULLGLMM = function(plinkFile = "",
 	print(head(data.new))
         if (!isCovariateOffset) {
             fit0 = glm(formula.new, data = data.new, family = binomial)
-        }else{
+	    Xorig = NULL
+	    
+	    }else{
+	    fit0orig = glm(formula.new.withCov, data = data.new, family = binomial)
+	    Xorig = model.matrix(fit0orig)
+	    rm(fit0orig)
+	    gc()
             fit0 = glm(formula.new, data = data.new, offset = covoffset, 
                 family = binomial)
         }
+
+
 
         cat("glm:\n")
         print(fit0)
@@ -1110,7 +1141,7 @@ fitNULLGLMM = function(plinkFile = "",
             cat("Start fitting the NULL GLMM\n")
             t_begin = proc.time()
             print(t_begin)
-            system.time(modglmm <- glmmkin.ai_PCG_Rcpp_Binary(plinkFile, 
+            system.time(modglmm <- glmmkin.ai_PCG_Rcpp_Binary(plinkFile, Xorig, isCovariateOffset, 
                 fit0, tau = c(0, 0), fixtau = c(0, 0), maxiter = maxiter, 
                 tol = tol, verbose = TRUE, nrun = 30, tolPCG = tolPCG, 
                 maxiterPCG = maxiterPCG, subPheno = dataMerge_sort, indicatorGenoSamplesWithPheno = indicatorGenoSamplesWithPheno, 
@@ -1231,9 +1262,14 @@ fitNULLGLMM = function(plinkFile = "",
 
 	if (!isCovariateOffset) {
             fit0 = glm(formula.new, data = data.new, family = gaussian(link = "identity"))
+	    Xorig = NULL
         }else{
+	    fit0orig = glm(formula.new.withCov, data = data.new, family = gaussian(link = "identity"))
+	    Xorig = model.matrix(fit0orig)
+	    rm(fit0orig)
+	    gc()
             fit0 = glm(formula.new, data = data.new, offset = covoffset,
-                family = gaussian(link = "identity"))
+            family = gaussian(link = "identity"))
         }
 
         cat("glm:\n")
@@ -1248,7 +1284,7 @@ fitNULLGLMM = function(plinkFile = "",
             print(t_begin)
             setisUseSparseSigmaforNullModelFitting(useSparseGRMtoFitNULL)
             cat("Start fitting the NULL GLMM\n")
-            system.time(modglmm <- glmmkin.ai_PCG_Rcpp_Quantitative(plinkFile, 
+            system.time(modglmm <- glmmkin.ai_PCG_Rcpp_Quantitative(plinkFile, Xorig, isCovariateOffset, 
                 fit0, tau = c(0, 0), fixtau = c(0, 0), maxiter = maxiter, 
                 tol = tol, verbose = TRUE, nrun = 30, tolPCG = tolPCG, 
                 maxiterPCG = maxiterPCG, subPheno = dataMerge_sort, indicatorGenoSamplesWithPheno = indicatorGenoSamplesWithPheno, 
@@ -1469,8 +1505,9 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
 
   Nnomissing = length(mu)
   varRatioTable = NULL
-  Sigma_iX_noLOCO = getSigma_X(W, tauVecNew, X, maxiterPCG, tolPCG)
-
+#  if(!isLOCO){
+  	#Sigma_iX_noLOCO = getSigma_X(W, tauVecNew, X, maxiterPCG, tolPCG)
+#  }
 
   ###if LOCO, calculate obj.noK for each chromosome
   #if(obj.glmm.null$LOCO){
@@ -1533,11 +1570,11 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
           }
 
 	  isLOCO = FALSE
-	  if(obj.glmm.null$LOCO){
-		if(autoMarker & obj.glmm.null$LOCOResult[[CHR]]$isLOCO){
-			isLOCO = TRUE
-		}	
-	  } 		  
+#	  if(obj.glmm.null$LOCO){
+#		if(autoMarker & obj.glmm.null$LOCOResult[[CHR]]$isLOCO){
+#			isLOCO = TRUE
+#		}	
+#	  } 		  
 
 
           #isLOCO=FALSE
@@ -1827,9 +1864,10 @@ scoreTest_SPAGMMAT_forVarianceRatio_quantitativeTrait = function(obj.glmm.null,
 
   Nnomissing = length(mu)
   varRatioTable = NULL
-
-  Sigma_iX_noLOCO = getSigma_X(W, tauVecNew, X1, maxiterPCG, tolPCG)
-
+  #LOCO=FALSE
+  #if(!LOCO){
+    Sigma_iX_noLOCO = getSigma_X(W, tauVecNew, X1, maxiterPCG, tolPCG)
+  #}
 
   for(k in 1:length(listOfMarkersForVarRatio)){
     #if(length(listOfMarkersForVarRatio[[k]]) == 0){
@@ -1880,11 +1918,12 @@ scoreTest_SPAGMMAT_forVarianceRatio_quantitativeTrait = function(obj.glmm.null,
  #     print(y[1:20])
  #     print(q)
 	  isLOCO = FALSE
-          if(obj.glmm.null$LOCO){
-                if(autoMarker & obj.glmm.null$LOCOResult[[CHR]]$isLOCO){
-                        isLOCO = TRUE
-                }
-          }	
+#          if(obj.glmm.null$LOCO){
+#                if(autoMarker & obj.glmm.null$LOCOResult[[CHR]]$isLOCO){
+#                        isLOCO = TRUE
+#                }
+#          }	
+
 
 	  if(!isLOCO){          
 	    eta = obj.glmm.null$linear.predictors
