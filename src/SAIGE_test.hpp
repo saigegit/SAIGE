@@ -113,7 +113,8 @@ class SAIGEClass
 		     bool m_flagSparseGRM,
                      arma::vec & t_P2Vec,
 		     double& t_gy,
-                     bool t_is_region);
+                     bool t_is_region,
+		     arma::uvec & t_indexForNonZero);
 
     void scoreTestFast(arma::vec & t_GVec,
                      arma::uvec & t_indexForNonZero,
@@ -129,7 +130,7 @@ class SAIGEClass
      void get_mu(arma::vec & t_mu);
 
      void getadjG(arma::vec & t_GVec, arma::vec & g);
-     void getadjGFast(arma::vec & t_GVec, arma::vec & g);
+     void getadjGFast(arma::vec & t_GVec, arma::vec & g,  arma::uvec & iIndex);
 
      void getMarkerPval(arma::vec & t_GVec,
 			        arma::uvec & iIndex,

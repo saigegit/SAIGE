@@ -1972,7 +1972,7 @@ void assign_conditionMarkers_factors(
   VarInvMat = VarMat.i();   
   double qsum = arma::accu(gyVec);
   arma::vec gsumtildeVec; 
-  ptr_gSAIGEobj->getadjG(gsumVec, gsumtildeVec);
+  ptr_gSAIGEobj->getadjG(gsumVec, gsumtildeVec, gsumVecNonzero);
   ptr_gSAIGEobj->assignConditionFactors(
 		   			P2Mat,
 					VarInvMat,
