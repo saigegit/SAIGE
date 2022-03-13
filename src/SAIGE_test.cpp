@@ -126,11 +126,12 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
     arma::vec Sm, var2m;
     double S, var2;
     getadjGFast(t_GVec, t_gtilde, t_indexForNonZero);
+    //getadjG(t_GVec, t_gtilde);
+
+
     if(t_is_region && m_traitType == "binary"){
       t_gy = dot(t_gtilde, m_y);
-    }
-
-
+     }
     S = dot(t_gtilde, m_res);
     S = S/m_tauvec[0];
 
@@ -146,6 +147,7 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
     double var1 = var2 * m_varRatioVal;
     double stat = S*S/var1;
     double t_pval;
+    
 
     //if (var1 <= std::pow(std::numeric_limits<double>::min(), 2)){
     if (var1 <= std::numeric_limits<double>::min()){
@@ -258,7 +260,12 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
 
 void SAIGEClass::getadjG(arma::vec & t_GVec, arma::vec & g){
    g = m_XV * t_GVec;
+   //t_GVec.t().print("t_GVec");
+   //std::cout << "sum(t_GVec) " << arma::accu(t_GVec) << std::endl;
+   //      m_XV.print("m_XV");
     g = t_GVec - m_XXVX_inv * g;
+    //m_XXVX_inv.print("m_XXVX_inv");
+    //g.t().print("g");
 }
 
 
@@ -266,14 +273,12 @@ void SAIGEClass::getadjGFast(arma::vec & t_GVec, arma::vec & g, arma::uvec & iIn
 {
 
   // To increase computational efficiency when lots of GVec elements are 0
-
+ std::cout << "m_p " << m_p << std::endl;
  arma::vec m_XVG(m_p, arma::fill::zeros);
   for(int i = 0; i < iIndex.n_elem; i++){
-      m_XVG += m_XV.col(i) * t_GVec(i);
+      m_XVG += m_XV.col(iIndex(i)) * t_GVec(iIndex(i));
   }
   g = t_GVec - m_XXVX_inv * m_XVG; 
-
-//g=t_GVec;
 }
 
 
@@ -342,7 +347,9 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 
   if((t_altFreq > 0.05 && t_altFreq < 0.95) || m_flagSparseGRM || is_region){
     isScoreFast = false;
-  }  
+  }
+
+  //for test
  //arma::vec timeoutput3 = getTime();
   if(!isScoreFast){
 	//std::cout << "scoreTest " << std::endl;  
@@ -517,8 +524,8 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
         //        is_gtilde = true;
         //}
 	arma::mat x(t_GVec.n_elem, 2, arma::fill::ones);	
-	//x.col(1) = t_gtilde;
-	x.col(1) = t_GVec;
+	x.col(1) = t_gtilde;
+	//x.col(1) = t_GVec;
 	arma::vec init(2, arma::fill::zeros);
 	//std::cout << "t_Beta " << t_Beta << std::endl;
 	//std::cout << "t_seBeta " << t_seBeta << std::endl;
