@@ -462,10 +462,23 @@ checkOutputFile = function(OutputFile,
   if(OutputFile == "")
     stop("Argument of 'OutputFile' is required.")
 
-  if(file.exists(OutputFile) & !isOverwriteOutput){
+if(isOverwriteOutput){
+    Check_OutputFile_Create(OutputFile)
+    Check_OutputFile_Create(OutputFileIndex) 
+    Start = TRUE;
+    End = FALSE;
+    indexChunk = 0;
+    if(AnalysisType == "Marker"){
+      indexChunk = 1;
+    }
+  }else{
+
+
+
+  if(file.exists(OutputFile)){
     if(!file.exists(OutputFileIndex)){
       stop(paste0("'OutputFile' of '", OutputFile,"' has existed.
-                  Please use another 'OutputFile' or specify --is_overwrite_output=TRUE to overwrite the OutputFile or specify --is_overwrite_output=TRUE to overwrite the OutputFile."))
+                  Please use another 'OutputFile' or specify --is_overwrite_output=TRUE to overwrite the OutputFile."))
     }else{
       outIndexData = read.table(OutputFileIndex, header = F, sep="\t")
 
@@ -490,6 +503,7 @@ checkOutputFile = function(OutputFile,
     Start = FALSE
   }else{
     Check_OutputFile_Create(OutputFile)	  
+    Check_OutputFile_Create(OutputFileIndex)	  
     Start = TRUE;
     End = FALSE;
     indexChunk = 0;
@@ -497,6 +511,8 @@ checkOutputFile = function(OutputFile,
       indexChunk = 1;
     }	    
   }
+}
+
 
   returnList = list(Start = Start, End = End, indexChunk = indexChunk)
   return(returnList)

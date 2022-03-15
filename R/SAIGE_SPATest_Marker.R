@@ -60,7 +60,7 @@ SAIGE.Marker = function(traitType,
     cat("Number of markers in each chunk:\t", nMarkersEachChunk, "\n")
     cat("Number of chunks for all markers:\t", nChunks, "\n")
     if(outIndex > nChunks){
-      stop("The analysis has been finished! Please delete ", OutputFileIndex, " if the analysis needs to be run again")
+      stop("The analysis has been finished! Please delete ", OutputFileIndex, " if the analysis needs to be run again or set --is_overwrite_output=TRUE\n")
       is_marker_test = FALSE 
     }else{
       is_marker_test = TRUE
