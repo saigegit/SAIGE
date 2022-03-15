@@ -285,38 +285,6 @@ if(is_single_in_groupTest){
 
 
 
-if(FALSE){
-if(is_single_in_groupTest){	  
-      #OutList = as.data.frame(outList$OUT_DF) 	   
-      noNAIndices = which(!is.na(outList$p.value))
-      URindices = which(OutList$MarkerID == "UR")
-      if(sum(WEIGHT) > 0){
-        AnnoWeights = c(WEIGHT, rep(1, length(URindices)))
-      }
-      if(length(noNAIndices) > 0){  	
-        if(length(URindices) > 0){
-          OutList$CHR[URindices] = "UR"
-          OutList$POS[URindices] = "UR"
-          OutList$Allele1[URindices] = "UR"
-          OutList$Allele2[URindices] = "UR"
-          for(j in 1:length(annolist)){
-            AnnoName = annolist[j]
-            for(m in 1:length(maxMAFlist)){
-              jm = (j-1)*(length(maxMAFlist)) + m
-              maxMAFName = maxMAFlist[m]
-              OutList$MarkerID[URindices][jm] = paste0(regionName,":",AnnoName,":",maxMAFName)
-		
-            }
-          }
-       }
-       #noNAIndices = which(!is.na(OutList$p.value))
-       OutList = OutList[noNAIndices, , drop=F]
-     }
-    }
-
-}#if(FALSE){
-
-
 annoMAFIndicatorMat = outList$annoMAFIndicatorMat
 
 if((sum(outList$NumUltraRare_GroupVec) + sum(outList$NumRare_GroupVec)) > 0){
@@ -388,10 +356,10 @@ if(regionTestType != "BURDEN"){
 	for(m in 1:length(maxMAFlist)){
 		jm = (j-1)*(length(maxMAFlist)) + m
 		maxMAFName = maxMAFlist[m]
-
 	    if(m <= maxMAF0){
 		tempPos = which(annoMAFIndicatorMat[,jm] == 1)
 	       if(length(tempPos) > 0){
+	       isPolyRegion = TRUE
 		annoMAFIndVec = c(annoMAFIndVec, jm)
 		Phi = wadjVarSMat[tempPos, tempPos, drop=F]
 		Score = wStatVec[tempPos]
@@ -589,11 +557,11 @@ if(mth ==  numberRegionsInChunk){
   if(regionTestType != "BURDEN"){  
       if(Start){
         if(!is.null(pval.Region.all)){
-          fwrite(pval.Region.all, OutputFile, quote = F, sep = "\t", append = F, col.names = T, row.names = F)
+          fwrite(pval.Region.all, OutputFile, quote = F, sep = "\t", append = F, col.names = T, row.names = F, na="NA")
         }
       }else{
         if(!is.null(pval.Region.all)){
-          fwrite(pval.Region.all, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+          fwrite(pval.Region.all, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F, na="NA")
         }
         #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
       }
@@ -905,7 +873,6 @@ if(nrow(RegionData) != 0){
 
 
 
-##Working
 
 mainRegionURV = function(NullModelClass = "SAIGE_NULL_Model",
                          genoType,
