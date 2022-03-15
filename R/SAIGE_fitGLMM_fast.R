@@ -1089,7 +1089,8 @@ fitNULLGLMM = function(plinkFile = "",
 		if(isCateVarianceRatio){
 			minMAC_varRatio = min(cateVarRatioMinMACVecExclude)
 			maxMAC_varRatio = min(max(cateVarRatioMaxMACVecInclude), mac_inter)
-			isVarianceRatioinGeno = TRUE	
+			isVarianceRatioinGeno = TRUE
+			cat("Categorical variance ratios will be estimated. Please make sure there are at least 200 markers in each MAC category.\n")
 		}else{
 			if(mac_inter <= 20){
 				isVarianceRatioinGeno = FALSE
@@ -1447,7 +1448,14 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
 	 MACvector_forVarRatio =  getMACVec_forVarRatio()
   	 cat("length(MACvector): ", length(MACvector), "\n")
 	 cat("length(MACvector_forVarRatio): ", length(MACvector_forVarRatio), "\n")
-  	 MACdata = data.frame(MACvector = c(MACvector, MACvector_forVarRatio), geno_ind = c(rep(0, length(MACvector)), rep(1, length(MACvector_forVarRatio))), indexInGeno = c(seq(1,length(MACvector)), seq(1,length(MACvector_forVarRatio))))
+	 if(length(MACvector_forVarRatio) > 0){
+
+  	 	MACdata = data.frame(MACvector = c(MACvector, MACvector_forVarRatio), geno_ind = c(rep(0, length(MACvector)), rep(1, length(MACvector_forVarRatio))), indexInGeno = c(seq(1,length(MACvector)), seq(1,length(MACvector_forVarRatio))))
+
+	}else{
+		stop("No markers were found for variance ratio estimation. Please make sure there are at least 200 markers in each MAC category\n")
+	}
+
   }else{
 	 MACdata = data.frame(MACvector = MACvector, geno_ind = rep(0, length(MACvector)), indexInGeno = seq(1,length(MACvector)))
   }	  
@@ -1459,7 +1467,7 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
     listOfMarkersForVarRatio[[1]] = sample(MACindex, size = length(MACindex), replace = FALSE)
     cateVarRatioIndexVec=c(1)
   }else{
-    cat("Categorical variance ratios will be estimated\n")
+    cat("Categorical variance ratios will be estimated.\n")
 
     if(is.null(cateVarRatioIndexVec)){cateVarRatioIndexVec = rep(1, length(cateVarRatioMinMACVecExclude))}
     numCate = length(cateVarRatioIndexVec)
@@ -1804,7 +1812,14 @@ scoreTest_SPAGMMAT_forVarianceRatio_quantitativeTrait = function(obj.glmm.null,
          MACvector_forVarRatio =  getMACVec_forVarRatio()
          cat("length(MACvector): ", length(MACvector), "\n")
          cat("length(MACvector_forVarRatio): ", length(MACvector_forVarRatio), "\n")
-         MACdata = data.frame(MACvector = c(MACvector, MACvector_forVarRatio), geno_ind = c(rep(0, length(MACvector)), rep(1, length(MACvector_forVarRatio))), indexInGeno = c(seq(1,length(MACvector)), seq(1,length(MACvector_forVarRatio))))
+
+
+         if(length(MACvector_forVarRatio) > 0){
+
+           MACdata = data.frame(MACvector = c(MACvector, MACvector_forVarRatio), geno_ind = c(rep(0, length(MACvector)), rep(1, length(MACvector_forVarRatio))), indexInGeno = c(seq(1,length(MACvector)), seq(1,length(MACvector_forVarRatio))))
+	}else{
+	   stop("No markers were found for variance ratio estimation. Please make sure there are at least 200 markers in each MAC category.")	
+	}
   }else{
          MACdata = data.frame(MACvector = MACvector, geno_ind = rep(0, length(MACvector)), indexInGeno = seq(1,length(MACvector)))
   }
