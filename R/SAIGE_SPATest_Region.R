@@ -126,7 +126,7 @@ SAIGE.Region = function(mu,
     out.method = SKAT:::SKAT_Check_Method(method="optimal.adj", r.corr=0)
     method=out.method$method
     r.corr=out.method$r.corr
-    cat("SKAT-O test will be performed. P-values for BUTDEN and SKAT tests will also be output\n")
+    cat("SKAT-O test will be performed. P-values for BURDEN and SKAT tests will also be output\n")
     regionTestType = "SKAT-O"
     is_single_in_groupTest = TRUE
     #cat("is_single_in_groupTest = TRUE. Single-variant assoc tests results will be output\n")

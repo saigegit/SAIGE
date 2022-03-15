@@ -340,7 +340,8 @@ SPAGMMATtest = function(bgenFile = "",
     traitType = obj.model$traitType
     mu = obj.model$mu
     rm(obj.model)
-    print(gc(v=T))
+    gc()
+    #print(gc(v=T))
     #if(file.exists(SAIGEOutputFile)) {print("ok 0 file exist")} 
 
 

@@ -275,7 +275,6 @@ SPA_ER_kernel_related_Phiadj_fast_new<-function(p.new, Score, Phi, p.value_burde
 get_newPhi_scaleFactor = function(q.sum, mu.a, g.sum, p.new, Score, Phi, regionTestType){
 	p.value_burden<-SPAtest:::Saddle_Prob(q.sum , mu=mu.a, g=g.sum, Cutoff=2,alpha=2.5*10^-6)$p.value
         re_phi= SPA_ER_kernel_related_Phiadj_fast_new(p.new, Score, Phi, p.value_burden, regionTestType)
-	#print("here2")
 	return(re_phi)
 }
 
