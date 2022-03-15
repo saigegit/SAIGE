@@ -5,12 +5,20 @@ getChromNumber = function(chrom = ""){
     chrom_v2 = as.character(chrom)
     chrom_v2 = gsub("CHR", "", chrom_v2, ignore.case = T)
     chrom_v3 = as.numeric(gsub("[^0-9.]", "",chrom_v2))
-    if(chrom_v3 > 22 | chrom_v3 < 1) {
-      stop("chromosome ", chrom, " is out of the range of null model LOCO results\n")
-    }else {
+
+   if(!is.na(chrom_v3)){
+
+   
+    if(chrom_v3 <= 22 &  chrom_v3 >= 1) {
+      #stop("chromosome ", chrom, " is out of the range of null model LOCO results\n")
+    #}else {
       cat("Leave chromosome ", chrom_v3, " out will be applied\n")
     }
+   }else{
+	chrom_v3 = NULL
+   }
   }
+  
   return(chrom_v3)
 }	
 
@@ -92,8 +100,12 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
   }	
    #obj.glmm.null$offset = obj.glmm.null$LOCOResult[[chrom_v3]]$linear.predictors -  obj.glmm.null$LOCOResult[[chrom_v3]]$coefficients[1]
    obj.glmm.null$LOCOResult[chrom_v3] = list(NULL)
+ }else{
+	chromList = c(1:22)
+	obj.glmm.null = removeLOCOResult(chromList, obj.glmm.null)
+  }
    gc() 
- }
+
   }
 
  obj.glmm.null$mu = as.vector(obj.glmm.null$fitted.values)
