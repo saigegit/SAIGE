@@ -30,7 +30,7 @@ updateChrStartEndIndexVec <- function(chrVec){
  chromosomeStartIndexVec = NULL
  chromosomeEndIndexVec = NULL
  LOCO = TRUE 
- cat("WARNING: leave-one-chromosome-out is activated! Note this option will only be applied to autosomal variants\n")
+ #cat("WARNING: leave-one-chromosome-out is activated! Note this option will only be applied to autosomal variants\n")
  cat("WARNING: Genetic variants needs to be ordered by chromosome and position in the Plink file\n")
  #bimData = data.table:::fread(paste0(plinkFile,".bim"), header = F)
  for (i in 1:22) {

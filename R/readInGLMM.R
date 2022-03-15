@@ -80,15 +80,17 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
    chromList = c(1:22)
    chromList = chromList[which(chromList != chrom_v3)]   
    obj.glmm.null = removeLOCOResult(chromList, obj.glmm.null)
+   if(!is.null(obj.glmm.null$LOCOResult[[chrom_v3]])){
    obj.glmm.null$fitted.values = obj.glmm.null$LOCOResult[[chrom_v3]]$fitted.values
    obj.glmm.null$residuals = obj.glmm.null$LOCOResult[[chrom_v3]]$residuals
-   #obj.glmm.null$offset = obj.glmm.null$LOCOResult[[chrom_v3]]$linear.predictors -  obj.glmm.null$LOCOResult[[chrom_v3]]$coefficients[1]
    obj.glmm.null$obj.noK = obj.glmm.null$LOCOResult[[chrom_v3]]$obj.noK
    if(is_Firth_beta){
      if(!is.null(obj.glmm.null$LOCOResult[[chrom_v3]]$offset)){	   
        obj.glmm.null$offset = obj.glmm.null$LOCOResult[[chrom_v3]]$offset
      }
    }
+  }	
+   #obj.glmm.null$offset = obj.glmm.null$LOCOResult[[chrom_v3]]$linear.predictors -  obj.glmm.null$LOCOResult[[chrom_v3]]$coefficients[1]
    obj.glmm.null$LOCOResult[chrom_v3] = list(NULL)
    gc() 
  }
