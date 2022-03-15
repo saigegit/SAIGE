@@ -217,6 +217,8 @@ SPAGMMATtest = function(bgenFile = "",
 
 
     obj.model = ReadModel(GMMATmodelFile, chrom, LOCO, is_Firth_beta) #readInGLMM.R
+
+
     if(!obj.model$LOCO){
 	LOCO = FALSE
         print("LOCO = FASLE and leave-one-chromosome-out is not applied")
@@ -387,6 +389,14 @@ SPAGMMATtest = function(bgenFile = "",
       }
 		    #method_to_CollapseUltraRare,
                      #DosageCutoff_for_UltraRarePresence,
+        if(r.corr == 0 & is_Firth_beta){
+		print("WARNING: Note that the Firth correction has not been implemented for Burden test effect sizes when SKAT-O test is conducted. If the corrected Burden test effect sizes is needed, please use r.corr=1 to only conduct Burden test.")
+		if(is_single_in_groupTest){
+			print("Firth correction will be used for effect sizes of single variant tests")
+
+		}
+	}	
+	
 	SAIGE.Region(mu,
 		     OutputFile,
 		     MACCutoff_to_CollapseUltraRare,
