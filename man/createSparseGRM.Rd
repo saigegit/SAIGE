@@ -13,6 +13,7 @@ createSparseGRM(
   isDiagofKinSetAsOne = FALSE,
   nThreads = 1,
   minMAFforGRM = 0.01,
+  maxMissingRateforGRM = 0.15,
   isSetGeno = TRUE,
   isWritetoFiles = TRUE
 )

@@ -19,7 +19,7 @@ fitNULLGLMM(
   maxiterPCG = 500,
   nThreads = 1,
   SPAcutoff = 2,
-  numMarkers = 30,
+  numMarkersForVarRatio = 30,
   skipModelFitting = FALSE,
   memoryChunk = 2,
   tauInit = c(0, 0),
@@ -27,38 +27,38 @@ fitNULLGLMM(
   traceCVcutoff = 0.0025,
   ratioCVcutoff = 0.001,
   outputPrefix = "",
-  outputPrefix_varRatio = NULL,
+  outputPrefix_varRatio = "",
   IsOverwriteVarianceRatioFile = FALSE,
-  IsSparseKin = FALSE,
-  sparseGRMFile = NULL,
-  sparseGRMSampleIDFile = NULL,
+  sparseGRMFile = "",
+  sparseGRMSampleIDFile = "",
   numRandomMarkerforSparseKin = 1000,
   relatednessCutoff = 0.125,
   isCateVarianceRatio = FALSE,
   cateVarRatioIndexVec = NULL,
-  cateVarRatioMinMACVecExclude = c(0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 10.5, 20.5),
-  cateVarRatioMaxMACVecInclude = c(1.5, 2.5, 3.5, 4.5, 5.5, 10.5, 20.5),
+  cateVarRatioMinMACVecExclude = c(10, 20.5),
+  cateVarRatioMaxMACVecInclude = c(20.5),
   isCovariateTransform = TRUE,
   isDiagofKinSetAsOne = FALSE,
-  useSparseSigmaConditionerforPCG = FALSE,
-  useSparseSigmaforInitTau = FALSE,
   minCovariateCount = -1,
   minMAFforGRM = 0.01,
+  maxMissingRateforGRM = 0.15,
   useSparseGRMtoFitNULL = FALSE,
+  useSparseGRMforVarRatio = FALSE,
   includeNonautoMarkersforVarRatio = FALSE,
   sexCol = "",
   FemaleCode = 1,
   FemaleOnly = FALSE,
   MaleCode = 0,
   MaleOnly = FALSE,
-  noEstFixedEff = FALSE,
+  SampleIDIncludeFile = "",
+  isCovariateOffset = FALSE,
   skipVarianceRatioEstimation = FALSE
 )
 }
 \arguments{
-\item{plinkFile}{character. Path to plink file to be used for calculating elements of the genetic relationship matrix (GRM). minMAFforGRM can be used to specify the minimum MAF of markers in he plink file to be used for constructing GRM. Genetic markers are also randomly selected from the plink file to estimate the variance ratios}
+\item{plinkFile}{character. Path to plink file to be used for calculating elements of the genetic relationship matrix (GRM). minMAFforGRM can be used to specify the minimum MAF of markers in the plink file to be used for constructing GRM. Genetic markers are also randomly selected from the plink file to estimate the variance ratios}
 
-\item{phenoFile}{character. Path to the phenotype file. The phenotype file has a header and contains at least two columns. One column is for phentoype and the other column is for sample IDs. Additional columns can be included in the phenotype file for covariates in the null GLMM. Please note that covariates to be used in the NULL GLMM need to specified using the argument covarColList.}
+\item{phenoFile}{character. Path to the phenotype file. The file can be either tab or space delimited. The phenotype file has a header and contains at least two columns. One column is for phentoype and the other column is for sample IDs. Additional columns can be included in the phenotype file for covariates in the null model. Please specify the names of the covariates using the argument covarColList and specify categorical covariates using the argument qCovarCol. All categorical covariates must also be included in covarColList.}
 
 \item{phenoCol}{character. Column name for the phenotype in phenoFile e.g. "CAD"}
 
@@ -66,13 +66,13 @@ fitNULLGLMM(
 
 \item{invNormalize}{logical. Whether to perform the inverse normalization for the phentoype or not. e.g. TRUE or FALSE. By default, FALSE}
 
-\item{covarColList}{vector of characters. Covariates to be used in the null GLM model e.g c("Sex", "Age")}
+\item{covarColList}{vector of characters. Covariates to be used in the null model. e.g c("Sex", "Age")}
 
-\item{qCovarCol}{vector of characters. Categorical covariates to be used in the glm model (NOT work yet)}
+\item{qCovarCol}{vector of characters. Categorical covariates to be used in the null model. All categorical covariates listed in qCovarCol must be also in covarColList,  e,g c("Sex").}
 
 \item{sampleIDColinphenoFile}{character. Column name for the sample IDs in the phenotype file e.g. "IID".}
 
-\item{tol}{numeric. The tolerance for fitting the null GLMMM to converge. By default, 0.02.}
+\item{tol}{numeric. The tolerance for fitting the null model to converge. By default, 0.02.}
 
 \item{maxiter}{integer. The maximum number of iterations used to fit the null GLMMM. By default, 20.}
 
@@ -84,55 +84,51 @@ fitNULLGLMM(
 
 \item{SPAcutoff}{numeric. The cutoff for the deviation of score test statistics from the mean in the unit of sd to perform SPA. By default, 2.}
 
-\item{numMarkers}{integer (>0). Minimum number of markers to be used for estimating the variance ratio. By default, 30}
+\item{numMarkersForVarRatio}{integer (>0). Minimum number of markers to be used for estimating the variance ratio. By default, 30}
 
 \item{skipModelFitting}{logical.  Whether to skip fitting the null model and only calculating the variance ratio, By default, FALSE. If TURE, the model file ".rda" is needed}
 
 \item{memoryChunk}{integer or float. The size (Gb) for each memory chunk. By default, 2}
 
-\item{tauInit}{vector of numbers. e.g. c(1,1), Unitial values for tau. For binary traits, the first element will be always be set to 1. If the tauInit is 0,0, the second element will be 0.5 for binary traits and the initial tau vector for quantitative traits is 1,0}
+\item{tauInit}{vector of numbers. e.g. c(1,1), Initial values for tau. For binary traits, the first element will be always be set to 1. If the tauInit is 0,0, the second element will be 0.5 for binary traits and the initial tau vector for quantitative traits is 1,0}
 
 \item{LOCO}{logical. Whether to apply the leave-one-chromosome-out (LOCO) option. By default, TRUE}
 
-\item{traceCVcutoff}{numeric. The threshold for coefficient of variantion (CV) for the trace estimator to increase nrun. By default, 0.0025}
+\item{traceCVcutoff}{numeric. The threshold for coefficient of variation (CV) for the trace estimator to increase nrun. By default, 0.0025}
 
-\item{ratioCVcutoff}{numeric. The threshold for coefficient of variantion (CV) for the variance ratio estimate. If ratioCV > ratioCVcutoff. numMarkers will be increased by 10. By default, 0.001}
+\item{ratioCVcutoff}{numeric. The threshold for coefficient of variation (CV) for the variance ratio estimate. If ratioCV > ratioCVcutoff. numMarkersForVarRatio will be increased by 10. By default, 0.001}
 
 \item{outputPrefix}{character. Path to the output files with prefix.}
 
-\item{outputPrefix_varRatio}{character. Path to the output variance ratio file with prefix. variace ratios will be output to outputPrefix_varRatio.varianceRatio.txt. If outputPrefix_varRatio is not specified, outputPrefix_varRatio will be the same as the outputPrefix}
+\item{outputPrefix_varRatio}{character. Path to the output variance ratio file with prefix. variace ratios will be output to outputPrefix_varRatio.varianceRatio.txt. If outputPrefix_varRatio is not specified, outputPrefix_varRatio will be the same as the outputPrefix. By default, ""}
 
 \item{IsOverwriteVarianceRatioFile}{logical. Whether to overwrite the variance ratio file if the file exists. By default, FALSE}
 
-\item{IsSparseKin}{logical. Whether to exploit the sparsity of GRM to estimate the variance ratio. By default, TRUE}
+\item{sparseGRMFile}{character. Path to the pre-calculated sparse GRM file. By default, ""}
 
-\item{sparseGRMFile}{character. Path to the pre-calculated sparse GRM file. If not specified and IsSparseKin=TRUE, sparse GRM will be computed}
-
-\item{sparseGRMSampleIDFile}{character. Path to the sample ID file for the pre-calculated sparse GRM. No header is included. The order of sample IDs is corresponding to the order of samples in the sparse GRM.}
+\item{sparseGRMSampleIDFile}{character. Path to the sample ID file for the pre-calculated sparse GRM. No header is included. The order of sample IDs is corresponding to the order of samples in the sparse GRM. By default, ""}
 
 \item{numRandomMarkerforSparseKin}{integer. number of randomly selected markers (MAF >= 0.01) to be used to identify related samples that are included in the sparse GRM. By default, 2000}
 
-\item{relatednessCutoff}{float. The threshold for coefficient of relatedness to treat two samples as unrelated if IsSparseKin is TRUE. By default, 0.125}
+\item{relatednessCutoff}{float. The threshold for coefficient of relatedness to treat two samples as unrelated in the sparse GRM.}
 
 \item{cateVarRatioIndexVec}{vector of integer 0 or 1. The length of cateVarRatioIndexVec is the number of MAC categories for variance ratio estimation. 1 indicates variance ratio in the MAC category is to be estimated, otherwise 0. By default, NULL. If NULL, variance ratios corresponding to all specified MAC categories will be estimated. This argument is only activated when isCateVarianceRatio=TRUE}
 
-\item{cateVarRatioMinMACVecExclude}{vector of float. Lower bound of MAC for MAC categories. The length equals to the number of MAC categories for variance ratio estimation. By default, c(0.5,1.5,2.5,3.5,4.5,5.5,10.5,20.5). This argument is only activated when isCateVarianceRatio=TRUE}
+\item{cateVarRatioMinMACVecExclude}{vector of float. Lower bound of MAC for MAC categories. The length equals to the number of MAC categories for variance ratio estimation. By default, c(10.5,20.5). This argument is only activated when isCateVarianceRatio=TRUE}
 
-\item{cateVarRatioMaxMACVecInclude}{vector of float. Higher bound of MAC for MAC categories. The length equals to the number of MAC categories for variance ratio estimation minus 1. By default, c(1.5,2.5,3.5,4.5,5.5,10.5,20.5). This argument is only activated when isCateVarianceRatio=TRUE}
+\item{cateVarRatioMaxMACVecInclude}{vector of float. Higher bound of MAC for MAC categories. The length equals to the number of MAC categories for variance ratio estimation minus 1. By default, c(20.5). This argument is only activated when isCateVarianceRatio=TRUE}
 
 \item{isCovariateTransform}{logical. Whether use qr transformation on non-genetic covariates. By default, TRUE}
 
 \item{isDiagofKinSetAsOne}{logical. Whether to set the diagnal elements in GRM to be 1. By default, FALSE}
 
-\item{useSparseSigmaConditionerforPCG}{logical. Whether to use sparse GRM to construct a conditoner for PCG. By default, FALSE. Current this option is deactivated.}
-
-\item{useSparseSigmaforInitTau}{logical. Whether to use sparse GRM to estimate the initial values for fitting the null GLMM. By default, FALSE}
-
 \item{minCovariateCount}{integer. If binary covariates have a count less than this, they will be excluded from the model to avoid convergence issues. By default, -1 (no covariates will be excluded)}
 
 \item{minMAFforGRM}{numeric. Minimum MAF for markers (in the Plink file) used for construcing the sparse GRM. By default, 0.01}
 
-\item{useSparseGRMtoFitNULL}{logical. Whether to use sparse GRM to fit the null GLMM. By default, FALSE}
+\item{useSparseGRMtoFitNULL}{logical. Whether to use sparse GRM to fit the null model. By default, FALSE}
+
+\item{useSparseGRMforVarRatio}{logical. Whether to use sparse GRM to estimate the variance Ratios. If TRUE, the variance ratios will be estimated using the full GRM (numerator) and the sparse GRM (denominator). By default, FALSE}
 
 \item{includeNonautoMarkersforVarRatio}{logical. Whether to allow for non-autosomal markers for variance ratio. By default, FALSE}
 
@@ -146,7 +142,7 @@ fitNULLGLMM(
 
 \item{MaleOnly}{logical. Whether to run Step 1 for males only. If TRUE, sexCol and MaleCode need to be specified. By default, FALSE}
 
-\item{noEstFixedEff}{logical. Whether to estimate fixed effect coeffciets. By default, FALSE.}
+\item{isCovariateOffset}{logical. Whether to estimate fixed effect coeffciets. By default, FALSE.}
 }
 \value{
 a file ended with .rda that contains the glmm model information, a file ended with .varianceRatio.txt that contains the variance ratio values, and a file ended with #markers.SPAOut.txt that contains the SPAGMMAT tests results for the markers used for estimating the variance ratio.
