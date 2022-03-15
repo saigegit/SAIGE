@@ -835,8 +835,8 @@ Rcpp::List mainRegionInCPP(
   unsigned int q_maf = maxMAFVec.n_elem;
   unsigned int q_anno_maf = q_anno*q_maf;
   arma::mat genoURMat(t_n, q_anno_maf, arma::fill::zeros);
-  arma::mat weightURMat(t_n, q_anno_maf, arma::fill::zeros);
-  arma::mat weightURMat_cnt(t_n, q_anno_maf, arma::fill::zeros);
+  //arma::mat weightURMat(t_n, q_anno_maf, arma::fill::zeros);
+  //arma::mat weightURMat_cnt(t_n, q_anno_maf, arma::fill::zeros);
   unsigned int q = q0 + q_anno_maf;
   arma::imat annoMAFIndicatorMat(q, q_anno_maf, arma::fill::zeros);
   arma::ivec annoMAFIndicatorVec(q_anno_maf);
@@ -1196,12 +1196,9 @@ Rcpp::List mainRegionInCPP(
 				}else{
 
                                   for(unsigned int k = 0; k < nNonZero; k++){
-					genoURMat(indexNonZeroVec_arma(k), jm) = genoURMat(indexNonZeroVec_arma(k), jm) + t_weight(i) * (GVec(indexNonZeroVec_arma(k)));
-					weightURMat_cnt(indexNonZeroVec_arma(k), jm) = weightURMat_cnt(indexNonZeroVec_arma(k), jm) + 1;
+					genoURMat(indexNonZeroVec_arma(k), jm) = std::max(genoURMat(indexNonZeroVec_arma(k), jm) , t_weight(i) * (GVec(indexNonZeroVec_arma(k))));
+					//weightURMat_cnt(indexNonZeroVec_arma(k), jm) = weightURMat_cnt(indexNonZeroVec_arma(k), jm) + 1;
 				  }
-					//genoURMat.col(jm) = genoURMat.col(jm) + t_weight(i) * GVec; 	
-					//GVec.elem(find(GVec > 0)).ones();
-				        //weightURMat_cnt.col(jm) = weightURMat_cnt.col(jm) + GVec;	
 				}	
 				NumUltraRare_GroupVec(jm) = NumUltraRare_GroupVec(jm) + 1;
 			}
@@ -1252,11 +1249,11 @@ Rcpp::List mainRegionInCPP(
 //for all UR variants
 if(i2 > 0){
   int m1new = std::max(m1, q_anno_maf);
-  if(isWeightCustomized){
-    weightURMat_cnt.replace(0, 1); 	  
-    genoURMat = genoURMat / weightURMat_cnt;
-    weightURMat.ones();    
-  }
+  //if(isWeightCustomized){
+    //weightURMat_cnt.replace(0, 1); 	  
+    //genoURMat = genoURMat / weightURMat_cnt;
+    //weightURMat.ones();    
+  //}
 
   if(t_regionTestType != "BURDEN"){
     P1Mat.resize(m1new, P1Mat.n_cols);
