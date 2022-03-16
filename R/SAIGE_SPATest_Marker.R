@@ -8,6 +8,7 @@ SAIGE.Marker = function(traitType,
                         nMarkersEachChunk, 
 			isMoreOutput,
 			isImputation,
+			isFirth,
 			LOCO,
 			chrom,
 			isCondition,
@@ -56,11 +57,17 @@ SAIGE.Marker = function(traitType,
 
     genoIndexList = splitMarker(genoIndex, genoIndex_prev, nMarkersEachChunk, CHROM);
     nChunks = length(genoIndexList)
+
+    if(nChunks == 0){
+          stop("No markers on chrom ", chrom, " are found\n")
+    }
+
+
     cat("Number of all markers to test:\t", length(genoIndex), "\n")
     cat("Number of markers in each chunk:\t", nMarkersEachChunk, "\n")
     cat("Number of chunks for all markers:\t", nChunks, "\n")
     if(outIndex > nChunks){
-      stop("The analysis has been finished! Please delete ", OutputFileIndex, " if the analysis needs to be run again or set --is_overwrite_output=TRUE\n")
+      cat("The analysis has been finished! Please delete ", OutputFileIndex, " if the analysis needs to be run again or set --is_overwrite_output=TRUE\n")
       is_marker_test = FALSE 
     }else{
       is_marker_test = TRUE
@@ -133,7 +140,7 @@ SAIGE.Marker = function(traitType,
    #resMarker = as.data.frame(mainMarkerInCPP(genoType, traitType, genoIndex_prev, genoIndex, isMoreOutput, isImputation)) 
    #resMarker = resMarker[which(!is.na(resMarker$BETA)), ]
 
-  mainMarkerInCPP(genoType, traitType, genoIndex_prev, genoIndex, isMoreOutput, isImputation)
+  mainMarkerInCPP(genoType, traitType, genoIndex_prev, genoIndex, isMoreOutput, isImputation, isFirth)
 
     #timeoutput=system.time({writeOutputFile(Output = list(resMarker),
   #if(nrow(resMarker) > 0){

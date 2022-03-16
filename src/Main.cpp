@@ -139,7 +139,8 @@ void mainMarkerInCPP(
 			   std::vector<std::string> & t_genoIndex_prev,
 			   std::vector<std::string> & t_genoIndex,
 			   bool & t_isMoreOutput,
-			   bool & t_isImputation)
+			   bool & t_isImputation,
+			   bool & t_isFirth)
 {
 
   int q = t_genoIndex.size();  // number of markers
@@ -456,6 +457,7 @@ void mainMarkerInCPP(
   writeOutfile_single(t_isMoreOutput,
       t_isImputation,
       isCondition,
+      t_isFirth,
   mFirth,
   mFirthConverge,
   t_traitType,
@@ -2223,6 +2225,7 @@ bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isapp
 void writeOutfile_single(bool t_isMoreOutput,
 			bool t_isImputation,
 			bool t_isCondition,
+			bool t_isFirth,
                          int mFirth,
                          int mFirthConverge,
                         std::string t_traitType,
@@ -2346,6 +2349,8 @@ void writeOutfile_single(bool t_isMoreOutput,
   }
   std::cout << numtest << " markers were tested." << std::endl;
   if(t_traitType == "binary"){
-    std::cout << "Firth approx was applied to " << mFirth << " markers. " << mFirthConverge << " sucessfully converged." <<std::endl;
+      if(t_isFirth){
+        std::cout << "Firth approx was applied to " << mFirth << " markers. " << mFirthConverge << " sucessfully converged." <<std::endl;
+      }
    }
 }

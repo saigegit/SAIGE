@@ -13,9 +13,11 @@ getChromNumber = function(chrom = ""){
       #stop("chromosome ", chrom, " is out of the range of null model LOCO results\n")
     #}else {
       cat("Leave chromosome ", chrom_v3, " out will be applied\n")
+    }else{
+      chrom_v3 = chrom	
     }
    }else{
-	chrom_v3 = NULL
+	chrom_v3 = chrom
    }
   }
   
@@ -84,7 +86,9 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
         }
    }
 
- if(!is.null(chrom_v3)){
+ if(is.numeric(chrom_v3)){
+  if(chrom_v3 >= 1 & chrom_v3 <= 22){
+
    chromList = c(1:22)
    chromList = chromList[which(chromList != chrom_v3)]   
    obj.glmm.null = removeLOCOResult(chromList, obj.glmm.null)
@@ -100,6 +104,10 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
   }	
    #obj.glmm.null$offset = obj.glmm.null$LOCOResult[[chrom_v3]]$linear.predictors -  obj.glmm.null$LOCOResult[[chrom_v3]]$coefficients[1]
    obj.glmm.null$LOCOResult[chrom_v3] = list(NULL)
+  }else{ #if(chrom_v3 >= 1 & chrom_v3 <= 22){
+     chromList = c(1:22)
+     obj.glmm.null = removeLOCOResult(chromList, obj.glmm.null)
+  }
  }else{
 	chromList = c(1:22)
 	obj.glmm.null = removeLOCOResult(chromList, obj.glmm.null)
