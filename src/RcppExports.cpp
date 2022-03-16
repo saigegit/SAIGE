@@ -66,8 +66,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // mainMarkerInCPP
-void mainMarkerInCPP(std::string& t_genoType, std::string& t_traitType, std::vector<std::string>& t_genoIndex_prev, std::vector<std::string>& t_genoIndex, bool& t_isMoreOutput, bool& t_isImputation);
-RcppExport SEXP _SAIGE_mainMarkerInCPP(SEXP t_genoTypeSEXP, SEXP t_traitTypeSEXP, SEXP t_genoIndex_prevSEXP, SEXP t_genoIndexSEXP, SEXP t_isMoreOutputSEXP, SEXP t_isImputationSEXP) {
+void mainMarkerInCPP(std::string& t_genoType, std::string& t_traitType, std::vector<std::string>& t_genoIndex_prev, std::vector<std::string>& t_genoIndex, bool& t_isMoreOutput, bool& t_isImputation, bool& t_isFirth);
+RcppExport SEXP _SAIGE_mainMarkerInCPP(SEXP t_genoTypeSEXP, SEXP t_traitTypeSEXP, SEXP t_genoIndex_prevSEXP, SEXP t_genoIndexSEXP, SEXP t_isMoreOutputSEXP, SEXP t_isImputationSEXP, SEXP t_isFirthSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string& >::type t_genoType(t_genoTypeSEXP);
@@ -76,7 +76,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::vector<std::string>& >::type t_genoIndex(t_genoIndexSEXP);
     Rcpp::traits::input_parameter< bool& >::type t_isMoreOutput(t_isMoreOutputSEXP);
     Rcpp::traits::input_parameter< bool& >::type t_isImputation(t_isImputationSEXP);
-    mainMarkerInCPP(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation);
+    Rcpp::traits::input_parameter< bool& >::type t_isFirth(t_isFirthSEXP);
+    mainMarkerInCPP(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth);
     return R_NilValue;
 END_RCPP
 }
@@ -2030,7 +2031,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setAssocTest_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP, 9},
     {"_SAIGE_setMarker_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setMarker_GlobalVarsInCPP, 2},
     {"_SAIGE_setRegion_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setRegion_GlobalVarsInCPP, 4},
-    {"_SAIGE_mainMarkerInCPP", (DL_FUNC) &_SAIGE_mainMarkerInCPP, 6},
+    {"_SAIGE_mainMarkerInCPP", (DL_FUNC) &_SAIGE_mainMarkerInCPP, 7},
     {"_SAIGE_setPLINKobjInCPP", (DL_FUNC) &_SAIGE_setPLINKobjInCPP, 5},
     {"_SAIGE_setBGENobjInCPP", (DL_FUNC) &_SAIGE_setBGENobjInCPP, 5},
     {"_SAIGE_setVCFobjInCPP", (DL_FUNC) &_SAIGE_setVCFobjInCPP, 4},

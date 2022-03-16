@@ -17,8 +17,8 @@ setRegion_GlobalVarsInCPP <- function(t_max_maf_region, t_max_markers_region, t_
     invisible(.Call('_SAIGE_setRegion_GlobalVarsInCPP', PACKAGE = 'SAIGE', t_max_maf_region, t_max_markers_region, t_MACCutoff_to_CollapseUltraRare, t_min_gourpmac_for_burdenonly))
 }
 
-mainMarkerInCPP <- function(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation) {
-    invisible(.Call('_SAIGE_mainMarkerInCPP', PACKAGE = 'SAIGE', t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation))
+mainMarkerInCPP <- function(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth) {
+    invisible(.Call('_SAIGE_mainMarkerInCPP', PACKAGE = 'SAIGE', t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth))
 }
 
 setPLINKobjInCPP <- function(t_bimFile, t_famFile, t_bedFile, t_SampleInModel, t_AlleleOrder) {
