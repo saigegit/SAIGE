@@ -1,4 +1,4 @@
-HERE we are maintaining an newly improved stable version of SAIGE and SAIGE-GENE. 
+HERE we are maintaining an newly improved stable version of SAIGE and SAIGE-GENE+. 
 Please find the https://saigegit.github.io/SAIGE-doc/ for documentation.
 
 
