@@ -464,7 +464,7 @@ checkOutputFile = function(OutputFile,
 
 if(isOverwriteOutput){
     Check_OutputFile_Create(OutputFile)
-    Check_OutputFile_Create(OutputFileIndex) 
+    #Check_OutputFile_Create(OutputFileIndex) 
     Start = TRUE;
     End = FALSE;
     indexChunk = 0;
@@ -503,7 +503,7 @@ if(isOverwriteOutput){
     Start = FALSE
   }else{
     Check_OutputFile_Create(OutputFile)	  
-    Check_OutputFile_Create(OutputFileIndex)	  
+    #Check_OutputFile_Create(OutputFileIndex)	  
     Start = TRUE;
     End = FALSE;
     indexChunk = 0;
