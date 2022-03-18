@@ -28,7 +28,7 @@ SAIGE.Marker = function(traitType,
     isappend = TRUE
   }  
 
-  isOpenOutFile_single = openOutfile_single(traitType, isImputation, isappend)
+  isOpenOutFile_single = openOutfile_single(traitType, isImputation, isappend, isMoreOutput)
 
   if(!isOpenOutFile_single){
     stop("Output file ", OutputFile, " can't be opened\n")
