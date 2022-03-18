@@ -313,13 +313,13 @@ void mainMarkerInCPP(
     double MAC = MAF * n * (1 - missingRate) *2;
     
     
-    /*
-    std::cout << "missingRate " << missingRate << std::endl;
+   /*
+   std::cout << "missingRate " << missingRate << std::endl;
    std::cout << "MAF " << MAF << std::endl;
    std::cout << "MAC " << MAC << std::endl;
    std::cout << "altFreq " << altFreq << std::endl;
    std::cout << "n " << n << std::endl;
-   */ 
+   */
 
 
     // Quality Control (QC) based on missing rate, MAF, and MAC
@@ -342,6 +342,7 @@ void mainMarkerInCPP(
     altCountsVec.at(i) = altCounts;         // allele frequencies of ALT allele, this is not always < 0.5.
     MAC = std::min(altCounts, 2*n-altCounts);
    //std::cout << "MAC " << MAC << std::endl; 
+   //std::cout << "altFreq after flip " << altFreq << std::endl; 
    //std::cout << "info " << info << std::endl; 
     // analysis results for single-marker
     double Beta, seBeta, pval, pval_noSPA, Tstat, varT, gy;
@@ -375,7 +376,7 @@ void mainMarkerInCPP(
                           false, // bool t_isOnlyOutputNonZero, 
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,   
 			  altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge);
-
+   
 
    if(t_traitType == "binary"){
      if(is_Firth){
@@ -2183,7 +2184,7 @@ bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, boo
 
 
 // [[Rcpp::export]]
-bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend){
+bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput){
       bool isopen;
       if(!isappend){
         OutFile_single.open(g_outputFilePrefixSingle.c_str());
@@ -2203,10 +2204,25 @@ bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isapp
 
                 if(ptr_gSAIGEobj->m_isCondition){
                         OutFile_single << "BETA_c\tSE_c\tTstat_c\tvar_c\tp.value_c\t";
+			if(t_traitType == "binary"){
+				OutFile_single << "p.value.NA_c\t";
+			}
                 }
+		
+// OUT_DF["N_case_hom"] = N_case_homVec;
+//                 OUT_DF["N_case_het"] = N_case_hetVec;
+//                                 OUT_DF["N_ctrl_hom"] = N_ctrl_homVec;
+//                                                 OUT_DF["N_ctrl_het"] = N_ctrl_hetVec;
+
 
                 if(t_traitType == "binary"){
-                        OutFile_single << "p.value.NA_c\tIs.SPA.converge\tAF_case\tAF_ctrl\tN_case\tN_ctrl\n";
+                        OutFile_single << "AF_case\tAF_ctrl\tN_case\tN_ctrl";
+
+			if(t_isMoreOutput){	
+				OutFile_single << "\tN_case_hom\tN_case_het\tN_ctrl_hom\tN_ctrl_het";
+			}
+			OutFile_single << "\n";
+
                 }else if(t_traitType == "quantitative"){
                         OutFile_single << "N\n";
 
