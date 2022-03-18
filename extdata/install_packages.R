@@ -21,5 +21,5 @@ install.packages("RSQLite", repos='http://cran.rstudio.com/')
 print(packageVersion("RSQLite"))
 
 #devtools::install_github("leeshawn/SPAtest")
-#devtools::install_github("leeshawn/MetaSKAT")
+devtools::install_github("leeshawn/MetaSKAT")
 #devtools::install_github("leeshawn/SKAT")
