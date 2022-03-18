@@ -85,8 +85,8 @@ openOutfile_singleinGroup <- function(t_traitType, t_isImputation, isappend) {
     .Call('_SAIGE_openOutfile_singleinGroup', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend)
 }
 
-openOutfile_single <- function(t_traitType, t_isImputation, isappend) {
-    .Call('_SAIGE_openOutfile_single', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend)
+openOutfile_single <- function(t_traitType, t_isImputation, isappend, t_isMoreOutput) {
+    .Call('_SAIGE_openOutfile_single', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend, t_isMoreOutput)
 }
 
 closeGenoFile_plink <- function() {

@@ -1,7 +1,6 @@
 #!/usr/bin/env Rscript
 #install required R packages, from Finnge/SAIGE-IT
 
-#req_packages <- c("R.utils", "Rcpp", "RcppParallel", "RcppArmadillo", "data.table", "RcppEigen", "Matrix", "methods", "BH", "optparse", "SPAtest", "MetaSKAT", "roxygen2", "rversions","devtools", "SKAT")
 install.packages("ellipsis", repos='http://cran.rstudio.com/')
 print(packageVersion("ellipsis"))
 install.packages("vctrs", repos='http://cran.rstudio.com/')
