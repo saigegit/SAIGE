@@ -174,7 +174,7 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
     t_pval_str = buffAsStdStr;
 
     t_Beta = S/var1;
-    t_seBeta = fabs(t_Beta) / sqrt(stat);
+    t_seBeta = fabs(t_Beta) / sqrt(fabs(stat));
     t_Tstat = S;
     t_var1 = var1;
     t_var2 = var2;
@@ -212,6 +212,7 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
       Bmu2 = dot(g1, B);
       var2 = ZtXVXZ(0,0)*m_tauvec[0] +  dot(g1,g1) - 2*Bmu2;
     }
+
     var1 = var2 * m_varRatioVal;
     S1 = dot(res1, g1_tilde);
     arma::mat res1X1_temp = (res1.t()) * X1;
@@ -250,7 +251,7 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
     std::string buffAsStdStr = pValueBuf;
     t_pval_str = buffAsStdStr;
     t_Beta = S/var1;
-    t_seBeta = fabs(t_Beta) / sqrt(stat);
+    t_seBeta = fabs(t_Beta) / sqrt(fabs(stat));
     t_Tstat = S;
     t_var1 = var1;
     t_var2 = var2;
@@ -344,7 +345,8 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   bool isScoreFast = true;
 
 
-  if((t_altFreq >= 0.3 && t_altFreq <= 0.3) || m_flagSparseGRM || is_region){
+  //if((t_altFreq >= 0.3 && t_altFreq <= 0.7) || m_flagSparseGRM || is_region){
+  if(m_flagSparseGRM || is_region){
     isScoreFast = false;
   }
 
