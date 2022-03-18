@@ -196,7 +196,7 @@ bool openOutfile(std::string t_traitType, bool isappend);
 
 bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, bool isappend);
 
-bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend);
+bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput);
 
 void writeOutfile_single(bool t_isMoreOutput,
       bool t_isImputation,
