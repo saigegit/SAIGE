@@ -142,14 +142,14 @@ setGenoInput = function(bgenFile = "",
     if(AlleleOrder == "ref-first")
       names(markerInfo) = c("CHROM", "ID", "POS", "REF", "ALT")
       #markerInfo = markerInfo[,c(1,2,3,4,5)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
-    if(chrom != ""){
-      markerInfo = markerInfo[which(markerInfo[,1] == chrom), ]
-    }
     #colnames(markerInfo) = c("CHROM", "ID", "POS", "REF", "ALT")
     #colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT")
     #markerInfo$ID = paste0(markerInfo$CHROM,":",markerInfo$POS, "_", markerInfo$REF,"/", markerInfo$ALT)
     markerInfo$genoIndex = 1:nrow(markerInfo) - 1  # -1 is to convert 'R' to 'C++' 
     markerInfo$genoIndex_prev = rep(0, length(markerInfo$genoIndex))
+    if(chrom != ""){
+      markerInfo = markerInfo[which(markerInfo[,1] == chrom), ]
+    }
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)    
     markerInfo$ID2 = paste0(markerInfo$CHROM,":",markerInfo$POS, ":", markerInfo$REF,":", markerInfo$ALT)
 #    markerInfo[,POS:=NULL]
@@ -206,16 +206,12 @@ setGenoInput = function(bgenFile = "",
     markerInfo = as.data.table(markerInfo, keep.rownames = FALSE)
     rmcol = setdiff(names(markerInfo), c("chromosome", "position", "rsid", "allele1", "allele2", 'file_start_position', 'size_in_bytes'))
     markerInfo = markerInfo[, !..rmcol]
-
     if(AlleleOrder == "alt-first")
       names(markerInfo) = c("CHROM", "POS", "ID", "ALT", "REF", "genoIndex", "size_in_bytes")
       #markerInfo = markerInfo[,c(1,2,3,6,5,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     if(AlleleOrder == "ref-first")
       names(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT", "genoIndex", "size_in_bytes")
 
-    if(chrom != ""){
-      markerInfo = markerInfo[which(markerInfo[,1] == chrom), ]
-    }  
       #markerInfo = markerInfo[,c(1,2,3,5,6,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)
     markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,":", markerInfo$REF, ":", markerInfo$ALT)
@@ -224,9 +220,12 @@ setGenoInput = function(bgenFile = "",
     markerInfo[,REF:=NULL]
     markerInfo[,ALT:=NULL]
     markerInfo[,size_in_bytes:=NULL]
+    
+    if(chrom != ""){
+      markerInfo = markerInfo[which(markerInfo[,1] == chrom), ]
+    }  
     	
     setkeyv(markerInfo, c("ID","ID2"))
-     
     #markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$ALT, "/", markerInfo$REF)
     setBGENobjInCPP(bgenFile, bgenFileIndex, t_SampleInBgen = samplesInGeno, t_SampleInModel = sampleInModel, AlleleOrder)
   }
