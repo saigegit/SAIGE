@@ -142,7 +142,9 @@ setGenoInput = function(bgenFile = "",
     if(AlleleOrder == "ref-first")
       names(markerInfo) = c("CHROM", "ID", "POS", "REF", "ALT")
       #markerInfo = markerInfo[,c(1,2,3,4,5)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
-    
+    if(chrom != ""){
+      markerInfo = markerInfo[which(markerInfo[,1] == chrom), ]
+    }
     #colnames(markerInfo) = c("CHROM", "ID", "POS", "REF", "ALT")
     #colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT")
     #markerInfo$ID = paste0(markerInfo$CHROM,":",markerInfo$POS, "_", markerInfo$REF,"/", markerInfo$ALT)
@@ -173,12 +175,29 @@ setGenoInput = function(bgenFile = "",
     if(sampleFile != "" | !checkIfSampleIDsExist(bgenFile)){
 	print("Sample IDs were not found in the bgen file.")
 	Check_File_Exist(sampleFile)
-	sampleData = data.table::fread(sampleFile, header=F, colClasses = c("character"), data.table=F)
-        samplesInGeno = as.character(sampleData[,1])
+	sf = file(sampleFile, "r")
+	first_sample_line = readLines(sf, n = 1)
+	close(sf)
+	if(first_sample_line == "ID_1 ID_2 missing sex"){
+	    cat("sample file is in the bgenix format\n")
+	    sampleData = data.table::fread(sampleFile, header=F, colClasses = rep("character", 4), data.table=F, skip=2)
+	    samplesInGeno = as.character(sampleData[,2])
+	}else{
+	    first_sample_line_list = strsplit(first_sample_line, split=c(" +", "\t"))[[1]]
+	    if(length(first_sample_line_list) == 1){
+	        cat("sample file only has one column and has no header\n")
+	        sampleData = data.table::fread(sampleFile, header=F, colClasses = c("character"), data.table=F)
+                samplesInGeno = as.character(sampleData[,1])
+	    }else{
+		stop("sample file should either has one column and no header or in the bgenix format with four columns\n")	
+	    }
+	}
     }else{
 	samplesInGeno = getSampleIDsFromBGEN(bgenFile)
  	#print(samplesInGeno[1:100])		    
-    }    
+    } 
+
+
     db_con <- RSQLite::dbConnect(RSQLite::SQLite(), bgenFileIndex)
     on.exit(RSQLite::dbDisconnect(db_con), add = TRUE)
     markerInfo = dplyr::tbl(db_con, "Variant")
@@ -192,7 +211,11 @@ setGenoInput = function(bgenFile = "",
       names(markerInfo) = c("CHROM", "POS", "ID", "ALT", "REF", "genoIndex", "size_in_bytes")
       #markerInfo = markerInfo[,c(1,2,3,6,5,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     if(AlleleOrder == "ref-first")
-      names(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT", "genoIndex", "size_in_bytes")  
+      names(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT", "genoIndex", "size_in_bytes")
+
+    if(chrom != ""){
+      markerInfo = markerInfo[which(markerInfo[,1] == chrom), ]
+    }  
       #markerInfo = markerInfo[,c(1,2,3,5,6,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)
     markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,":", markerInfo$REF, ":", markerInfo$ALT)
@@ -213,9 +236,9 @@ setGenoInput = function(bgenFile = "",
     if(idstoIncludeFile != "" & rangestoIncludeFile != ""){
       stop("We currently do not support both 'idstoIncludeFile' and 'rangestoIncludeFile' at the same time for vcf files\n")
     }
-    if(chrom==""){
-      stop("chrom needs to be specified for VCF/BCF/SAV input\n")
-    }
+    #if(chrom==""){
+    #  stop("chrom needs to be specified for VCF/BCF/SAV input\n")
+    #}
   }
 
 
