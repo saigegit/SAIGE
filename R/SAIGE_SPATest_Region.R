@@ -211,7 +211,11 @@ SAIGE.Region = function(mu,
   Output_MarkerList.all = NULL
   cth_chunk_to_output=1
 
-  for(i in (indexChunk+1):nRegions){
+  i = indexChunk+1
+  while(i <= nRegions){
+  #for(i in (indexChunk+1):nRegions){
+
+
    if(mth ==  numberRegionsInChunk){
       if(i + groups_per_chunk > nRegions){
   	      nregions_ro_read = nRegions - i + 1	      
@@ -234,15 +238,11 @@ SAIGE.Region = function(mu,
 
     annolist = region$annoVec 
     regionName = names(RegionList)[mth]
-
+    i = i + 1
     if(!is.null(region$SNP) & length(annolist) > 0){
 
       SNP = region$SNP
       if(genoType == "vcf"){
-    	#genoIndex = as.character(format(region$genoIndex, scientific = FALSE))
-      #}else{
-        
-        #SNPlist = paste(c(regionName, SNP), collapse = "\t") 
         SNPlist = paste(c(regionName, SNP), collapse = "\t") 
         set_iterator_inVcf(SNPlist, chrom1, 1, 200000000)
         isVcfEnd =  check_Vcf_end()
@@ -263,9 +263,9 @@ SAIGE.Region = function(mu,
 
       annoIndicatorMat = region$annoIndicatorMat
 
-      chrom = region$chrom
+      #chrom = region$chrom
 
-      print(paste0("Analyzing Region ", regionName, " (",i,"/",nRegions,")."))
+      print(paste0("Analyzing Region ", regionName, " (",i-1,"/",nRegions,")."))
       #tp1 = proc.time()
       #gc()
 
@@ -630,11 +630,13 @@ gc()
 
    }else{#if(!is.null(RegionList)){
      cat("The chunk is empty\n")	   
-     mth = 0
+     #mth = 0
+     mth = numberRegionsInChunk
+     i = i + numberRegionsInChunk
      pval.Region = NULL
    }
 	   
-   }
+}
 
   message = paste0("Analysis done! The results have been saved to '", OutputFile,"' and '",
                    paste0(OutputFile, ".markerInfo"),"'.")
