@@ -1396,10 +1396,8 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
   obj.noK = obj.glmm.null$obj.noK
   if(file.exists(testOut)){file.remove(testOut)}
   
-
-
-  resultHeader = c("CHR","SNPID","POS","A1","A2","p.value", "p.value.NA", "Is.converge","var1","var2", "N", "AC", "AF")
-  write(resultHeader,file = testOut, ncolumns = length(resultHeader))
+  #resultHeader = c("CHR","SNPID","POS","A1","A2","p.value", "p.value.NA", "Is.converge","var1","var2", "N", "AC", "AF")
+  #write(resultHeader,file = testOut, ncolumns = length(resultHeader))
   bimPlink = data.frame(data.table:::fread(paste0(plinkFile,".bim"), header=F))
   if(sum(sapply(bimPlink[,1], is.numeric)) != nrow(bimPlink)){
     stop("ERROR: chromosome column in plink bim file is no numeric!\n")
@@ -1422,8 +1420,6 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
   Sigma_iX_noLOCO = getSigma_X(W, tauVecNew, X, maxiterPCG, tolPCG)
   y = obj.glm.null$y
   ##randomize the marker orders to be tested
-
-
   if(useSparseGRMtoFitNULL | useSparseGRMforVarRatio){
     sparseSigma = getSparseSigma(plinkFile = plinkFile, 
 		outputPrefix=varRatioOutFile,
@@ -1439,7 +1435,6 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
   }
 
   mMarkers = gettotalMarker()
-#  listOfMarkersForVarRatio = sample(c(1:mMarkers), size = mMarkers, replace = FALSE)
   listOfMarkersForVarRatio = list()
   MACvector = getMACVec()
   isVarianceRatioinGeno = getIsVarRatioGeno()
@@ -1462,7 +1457,6 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
   
   if(!isCateVarianceRatio){
     cat("Only one variance ratio will be estimated using randomly selected markers with MAC >= 20\n")
-    #MACindex = which(MACvector >= 20)
     MACindex = 1:nrow(MACdata)		
     listOfMarkersForVarRatio[[1]] = sample(MACindex, size = length(MACindex), replace = FALSE)
     cateVarRatioIndexVec=c(1)
@@ -1474,10 +1468,10 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
     for(i in 1:(numCate-1)){
       MACindex = which(MACdata$MACvector > cateVarRatioMinMACVecExclude[i] & MACdata$MACvector <= cateVarRatioMaxMACVecInclude[i])
       listOfMarkersForVarRatio[[i]] = sample(MACindex, size = length(MACindex), replace = FALSE)
-	print(MACdata$MACvector[1:10])
+      print(MACdata$MACvector[1:10])
       cat("cateVarRatioMinMACVecExclude[i] ", cateVarRatioMinMACVecExclude[i], "\n")
-	cat("cateVarRatioMaxMACVecInclude[i] ", cateVarRatioMaxMACVecInclude[i], "\n")
-	print(length(MACindex))      
+      cat("cateVarRatioMaxMACVecInclude[i] ", cateVarRatioMaxMACVecInclude[i], "\n")
+      print(length(MACindex))      
     }
 
     if(length(cateVarRatioMaxMACVecInclude) == (numCate-1)){
@@ -1513,33 +1507,13 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
 
   Nnomissing = length(mu)
   varRatioTable = NULL
-#  if(!isLOCO){
-  	#Sigma_iX_noLOCO = getSigma_X(W, tauVecNew, X, maxiterPCG, tolPCG)
-#  }
-
-  ###if LOCO, calculate obj.noK for each chromosome
-  #if(obj.glmm.null$LOCO){
-  #  for(i in 1:length(obj.glmm.null$LOCOResult)){
-  #    if(obj.glmm.null$LOCOResult[[CHR]]$isLOCO){
-  #	if(is.null(obj.glmm.null$LOCOResult[[CHR]]$obj.noK)){      
-  #        obj.glmm.null$LOCOResult[[CHR]]$obj.noK = ScoreTest_NULL_Model_binary(obj.glmm.null$LOCOResult[[CHR]]$fitted.values, y, X) 
-  #      }  
-  #    }
-  #  }	    
-  #}
-
-
 
   for(k in 1:length(listOfMarkersForVarRatio)){
-    #if(length(listOfMarkersForVarRatio[[k]]) == 0){
-    #  cateVarRatioIndexVec[k] = 0
-    #  cat("no marker is found in the MAC category ", k, "\n")
-    #}
     if(cateVarRatioIndexVec[k] == 1){
 
       numMarkers0 = numMarkers
-      OUTtotal = NULL
-      OUT = NULL
+      varRatio_sparseGRM_vec = NULL
+      varRatio_NULL_vec = NULL
       indexInMarkerList = 1
       numTestedMarker = 0
       ratioCV = ratioCVcutoff + 0.1
@@ -1566,10 +1540,8 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
           NAset = which(G0==0)
           AC = sum(G0)
 
-         #if (CHR < 1 | CHR > 22){
          indexInMarkerList = indexInMarkerList + 1
-         #}else{
-	if((CHR >= 1 & CHR <= 22) | includeNonautoMarkersforVarRatio){
+	 if((CHR >= 1 & CHR <= 22) | includeNonautoMarkersforVarRatio){
           AF = AC/(2*Nnomissing)
 	  if(CHR >= 1 & CHR <= 22){
                autoMarker=TRUE
@@ -1578,14 +1550,6 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
           }
 
 	  isLOCO = FALSE
-#	  if(obj.glmm.null$LOCO){
-#		if(autoMarker & obj.glmm.null$LOCOResult[[CHR]]$isLOCO){
-#			isLOCO = TRUE
-#		}	
-#	  } 		  
-
-
-          #isLOCO=FALSE
           if(!isLOCO){
             G = G0  -  obj.noK$XXVX_inv %*%  (obj.noK$XV %*% G0) # G1 is X adjusted
             g = G/sqrt(AC)
@@ -1609,12 +1573,8 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
              startIndex = chromosomeStartIndexVec[CHR]
              endIndex = chromosomeEndIndexVec[CHR]
              setStartEndIndex(startIndex, endIndex, CHR-1)
-	     #Sigma_iG_time0 = proc.time()
              Sigma_iG = getSigma_G_LOCO(W, tauVecNew, G, maxiterPCG, tolPCG)
              Sigma_iX = getSigma_X_LOCO(W, tauVecNew, X, maxiterPCG, tolPCG)
-	     #Sigma_iG_time1 = proc.time()
-	     #print("Sigma_iG_time1 - Sigma_iG_time0")
-	     #print(Sigma_iG_time1 - Sigma_iG_time0)
           }
 
           var1a = t(G)%*%Sigma_iG - t(G)%*%Sigma_iX%*%(solve(t(X)%*%Sigma_iX))%*%t(X)%*%Sigma_iG
@@ -1622,48 +1582,40 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
           m1 = innerProduct(mu,g)
 
     if(useSparseGRMtoFitNULL){
-         var2 = innerProduct(mu*(1-mu), g*g)    
+          var2null = innerProduct(mu*(1-mu), g*g)
     }else{
           if(useSparseGRMforVarRatio){
-            #t1 = proc.time()
-            #cat("t1\n")
-            #cat("t1again\n")
-	    #print("pcginvSigma")
-	     #pcginvSigma = pcg(sparseSigma, g)
            pcginvSigma = solve(sparseSigma, g, sparse=T)
-            #t2 = proc.time()
-            #cat("t2-t1\n")
-            #print(t2-t1)
            var2_a = t(g) %*% pcginvSigma
-           var2 = var2_a[1,1]
+           var2sparseGRM = var2_a[1,1]
+	   varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
+	   var2null = innerProduct(mu*(1-mu), g*g)
         }else{
-           var2 = innerProduct(mu*(1-mu), g*g)
+           var2null = innerProduct(mu*(1-mu), g*g)
         }
-    }	
-      var2q = innerProduct(mu*(1-mu), g*g)
-      qtilde = (q-m1)/sqrt(var1) * sqrt(var2q) + m1
+    }
+    varRatio_NULL_vec = c(varRatio_NULL_vec, var1/var2null)
 
-      if(length(NAset)/length(G) < 0.5){
-        out1 = SPAtest:::Saddle_Prob(q=qtilde, mu = mu, g = g, Cutoff = Cutoff, alpha=5*10^-8)
-      }else {
-        out1 = SPAtest:::Saddle_Prob_fast(q=qtilde,g = g, mu = mu, gNA = g[NAset], gNB = g[-NAset], muNA = mu[NAset], muNB = mu[-NAset], Cutoff = Cutoff, alpha = 5*10^-8, output="P")
-      }
-
-
-      OUT = rbind(OUT, c(bimPlink[i,1], bimPlink[i,2], bimPlink[i,4], bimPlink[i,5], bimPlink[i,6], out1$p.value, out1$p.value.NA, out1$Is.converge, var1, var2, Nnomissing, AC, AF))	
-#        OUT = rbind(OUT, c(i, p.value, p.value.NA, var1, var2, Tv1, Nnomissing, AC, AF))
+      #var2q = innerProduct(mu*(1-mu), g*g)
+      #qtilde = (q-m1)/sqrt(var1) * sqrt(var2q) + m1
+      #if(length(NAset)/length(G) < 0.5){
+      #  out1 = SPAtest:::Saddle_Prob(q=qtilde, mu = mu, g = g, Cutoff = Cutoff, alpha=5*10^-8)
+      #}else {
+      #  out1 = SPAtest:::Saddle_Prob_fast(q=qtilde,g = g, mu = mu, gNA = g[NAset], gNB = g[-NAset], muNA = mu[NAset], muNB = mu[-NAset], Cutoff = Cutoff, alpha = 5*10^-8, output="P")
+      #}
+      #OUT = rbind(OUT, c(bimPlink[i,1], bimPlink[i,2], bimPlink[i,4], bimPlink[i,5], bimPlink[i,6], out1$p.value, out1$p.value.NA, out1$Is.converge, var1, var2, Nnomissing, AC, AF))	
 
       indexInMarkerList = indexInMarkerList + 1
       numTestedMarker = numTestedMarker + 1
 
-      if(numTestedMarker %% 10 == 0 | numTestedMarker == numMarkers | indexInMarkerList-1 == length(listOfMarkersForVarRatio[[k]]) ){
-          OUT = as.data.frame(OUT)
-          print("OK")
-          OUTtotal = rbind(OUTtotal, OUT)
-          print("OK1")
-          write.table(OUT, testOut, quote=FALSE, row.names=FALSE, col.names=FALSE, append = TRUE)
-          OUT = NULL
-        }
+      #if(numTestedMarker %% 10 == 0 | numTestedMarker == numMarkers | indexInMarkerList-1 == length(listOfMarkersForVarRatio[[k]]) ){
+          #OUT = as.data.frame(OUT)
+          #print("OK")
+       #   OUTtotal = rbind(OUTtotal, OUT)
+          #print("OK1")
+          #write.table(OUT, testOut, quote=FALSE, row.names=FALSE, col.names=FALSE, append = TRUE)
+          #OUT = NULL
+       # }
       }else{
 	indexInMarkerList = indexInMarkerList + 1
       }	
@@ -1673,14 +1625,12 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
       }
     }#end of while(numTestedMarker < numMarkers)
 
-    #print("OK2")
-    #OUTtotal = as.data.frame(OUTtotal)
-    #colnames(OUTtotal) = resultHeader
-    OUT1 = OUTtotal
-    OUT1 = as.data.frame(OUT1)
-    colnames(OUT1) = resultHeader
-    ratioVec = as.numeric(OUT1$var1)/as.numeric(OUT1$var2)
-    ratioCV = calCV(ratioVec)
+    #OUT1 = OUTtotal
+    #OUT1 = as.data.frame(OUT1)
+    #colnames(OUT1) = resultHeader
+    #ratioVec = as.numeric(OUT1$var1)/as.numeric(OUT1$var2)
+    #ratioCV = calCV(ratioVec)
+    ratioCV = calCV(varRatio_NULL_vec)
 
     if(ratioCV > ratioCVcutoff){
       cat("CV for variance ratio estimate using ", numMarkers0, " markers is ", ratioCV, " > ", ratioCVcutoff, "\n")
@@ -1700,25 +1650,32 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
 
   #OUTtotal = as.data.frame(OUTtotal)
   #colnames(OUTtotal) = resultHeader
-  OUT1 = OUTtotal
-  OUT1 = as.data.frame(OUT1)
-  colnames(OUT1) = resultHeader
-  varRatio = mean(as.numeric(OUT1$var1)/as.numeric(OUT1$var2))
-  cat("varRatio", varRatio, "\n")
-  varRatioTable = rbind(varRatioTable, c(varRatio))
+  #OUT1 = OUTtotal
+  #OUT1 = as.data.frame(OUT1)
+  #colnames(OUT1) = resultHeader
+  #varRatio = mean(as.numeric(OUT1$var1)/as.numeric(OUT1$var2))
+  varRatio_null = mean(varRatio_NULL_vec) 
+  varRatio_sparse = mean(varRatio_sparseGRM_vec)
+  cat("varRatio_null", varRatio_null, "\n")
+  cat("varRatio_sparse", varRatio_sparse, "\n")
+  #varRatioTable = rbind(varRatioTable, c(varRatio))
+  varRatioTable = rbind(varRatioTable, c(varRatio_null, "null"))
+  varRatioTable = rbind(varRatioTable, c(varRatio_sparse, "sparse"))
 #  write(varRatio, varRatioOutFile)
-  print(varRatio)
-  print(varRatioTable)
+  #print(varRatio)
+  #print(varRatioTable)
 
   }else{# if(cateVarRatioVec[k] == 1)
-    varRatioTable = rbind(varRatioTable, c(1))
+    varRatioTable = rbind(varRatioTable, c(1, "null"))
+    varRatioTable = rbind(varRatioTable, c(1, "sparse"))
+    #varRatioTable = rbind(varRatioTable, c(1))
   }
 
 } #for(k in 1:length(listOfMarkersForVarRatio)){
 
 
-  print(varRatioTable)
-  print(varRatioOutFile)
+  #print(varRatioTable)
+  #print(varRatioOutFile)
   write.table(varRatioTable, varRatioOutFile, quote=F, col.names=F, row.names=F)
   data = read.table(varRatioOutFile, header=F)
   print(data)
