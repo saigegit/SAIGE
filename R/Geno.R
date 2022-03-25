@@ -252,9 +252,12 @@ setGenoInput = function(bgenFile = "",
   RangesToInclude = NULL
   if(idstoIncludeFile != ""){
     IDsToInclude = data.table::fread(idstoIncludeFile, header = F, colClasses = c("character"), data.table=F)
-    if(ncol(IDsToInclude) != 1)
+    if(ncol(IDsToInclude) != 1){
       stop("'idstoIncludeFile' of ", idstoIncludeFile, " should only include one column.")
-    IDsToInclude = IDsToInclude[,1]
+    }else{
+      IDsToInclude = IDsToInclude[,1]
+      cat(length(IDsToInclude), " marker IDs are found in the idstoIncludeFile file\n")
+    }
 
     if(!is.null(markerInfo$ID2)){
 
@@ -264,17 +267,21 @@ setGenoInput = function(bgenFile = "",
 
     }	    
     if(length(posRows) != 0)
+      cat(length(posRows), " markers in idstoIncludeFile are found in the geno/dosage file.\n") 
       markersInclude = c(markersInclude, markerInfo$ID[posRows])
     anyInclude = TRUE
   }
 
   if(rangestoIncludeFile != ""){
     RangesToInclude = data.table::fread(rangestoIncludeFile, header = F, colClasses = c("character", "numeric", "numeric"), data.table=F)
-    if(ncol(RangesToInclude) != 3)
+    if(ncol(RangesToInclude) != 3){
       stop("rangestoIncludeFile should only include three columns.")
+    }else{
+      cat(nrow(RangesToInclude), " ranges are in rangestoIncludeFile\n")
+    }
 
     colnames(RangesToInclude) = c("CHROM", "START", "END")
-
+   if(nrow(RangesToInclude)){
     for(i in 1:nrow(RangesToInclude)){
       CHROM1 = RangesToInclude$CHROM[i]
       START = RangesToInclude$START[i]
@@ -282,7 +289,9 @@ setGenoInput = function(bgenFile = "",
       posRows = with(markerInfo, which(CHROM == CHROM1 & POS >= START & POS <= END))
       if(length(posRows) != 0)
         markersInclude = c(markersInclude, markerInfo$ID[posRows])
+	cat(length(markerInfo$ID[posRows]), " markers in the range ", i, " are found in the geno/dosage file.\n")
     }
+   } 
     anyInclude = TRUE
   }
 
