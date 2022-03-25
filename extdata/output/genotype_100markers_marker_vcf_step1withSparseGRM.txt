@@ -1,4 +1,4 @@
-CHR	POS	MarkerID	Allele1	Allele2	AC_Allele2	AF_Allele2	MissingRate	BETA	SE	Tstat	var	p.value	p.value.NA	Is.SPA	p.value.NA_c	Is.SPA.converge	AF_case	AF_ctrl	N_case	N_ctrl
+CHR	POS	MarkerID	Allele1	Allele2	AC_Allele2	AF_Allele2	MissingRate	BETA	SE	Tstat	var	p.value	p.value.NA	Is.SPA	AF_case	AF_ctrl	N_case	N_ctrl	N_case_hom	N_case_het	N_ctrl_hom	N_ctrl_het
 1	4	rs4	A	C	20	0.01	0	-0.146272	0.772716	-0.244974	1.67479	0.849861	0.849861	false	0.0102041	0.00997783	98	902	0	2	0	18
 1	12	rs12	A	C	30	0.015	0	-0.101219	0.652602	-0.237666	2.34803	0.876742	0.876742	false	0.0153061	0.0149667	98	902	0	3	0	27
 1	14	rs14	A	C	75	0.0375	0	-0.0756569	0.42585	-0.417191	5.51426	0.858989	0.858989	false	0.0306122	0.0382483	98	902	1	4	2	65
