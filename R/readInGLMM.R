@@ -164,27 +164,51 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
 }
 
 
-Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest){
+Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest, useSparseGRMforVarRatio){
 
-    ratioVec = c(1)
+    iscateVR = FALSE
     # check variance ratio
     if (!file.exists(varianceRatioFile)) {
-        #if (sparseSigmaFile == "") {
-        #    stop("ERROR! varianceRatioFile ", varianceRatioFile, " does not exsit but sparseSigmaFile also does not exist \n")
-        #}else {
         cat("varianceRatioFile is not specified so variance ratio won't be used\n")
-        #}
-        ratioVec = c(1)
-    }else {
+        ratioVec_sparse = c(1)
+	ratioVec_null = c(1)
+    }else{
         varRatioData = data.frame(data.table:::fread(varianceRatioFile, header = F, stringsAsFactors = FALSE))
-        ln = length(cateVarRatioMinMACVecExclude)
-        hn = length(cateVarRatioMaxMACVecInclude)
-	if(isGroupTest){
-        if (nrow(varRatioData) == 1) {
-            stop("ERROR! To perform gene-based tests, categorical variance ratios are required\n")
-        }else {
-            ratioVec = varRatioData[, 1]
-            nrv = length(ratioVec)
+	if(ncol(varRatioData) == 3){
+	    spindex = which(varRatioData[,2] == "sparse")
+	    if(length(spindex) > 0){
+	        ratioVec_sparse = varRatioData[which(varRatioData[,2] == "sparse"),1]
+	    }else{
+		ratioVec_sparse = c(-1)
+	    }
+	    ratioVec_null = varRatioData[which(varRatioData[,2] == "null"),1]
+	    if(length(ratioVec_null) > 1){
+		iscateVR = TRUE
+		nrv = length(ratioVec_null)
+	    }else{
+		nrv = 1
+	    }
+	}else{
+	    if(useSparseGRMforVarRatio){
+	        ratioVec_sparse = varRatioData[,1]
+		ratioVec_null = c(-1)
+	    }else{
+	        ratioVec_null = varRatioData[,1]
+		ratioVec_sparse = c(-1)
+	    }
+	    if(length(varRatioData[,1]) > 1){
+		iscateVR = TRUE
+		nrv = length(varRatioData[,1])
+	    }else{
+		nrv = 1
+	    }
+	}
+
+
+	if(iscateVR){
+            ln = length(cateVarRatioMinMACVecExclude)
+            hn = length(cateVarRatioMaxMACVecInclude)
+
             if (nrv != ln) {
                 stop("ERROR! The number of variance ratios are different from the length of cateVarRatioMinMACVecExclude\n")
             }
@@ -193,13 +217,9 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
             }
         }
 	
-	}else{
-		ratioVec = varRatioData[, 1]
-
-	 }	
         cat("variance Ratio is ", ratioVec, "\n")
     }
-    return(ratioVec)
+    return(list(ratioVec_sparse = ratioVec_sparse, ratioVec_null = ratioVec_null))
 }
 
 
