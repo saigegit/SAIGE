@@ -43,6 +43,8 @@ public:
 	float g_maxMACVarRatio;
 	bool isVarRatio = false;
 	int numberofMarkers_varRatio = 0;
+	int numberofMarkers_varRatio_common = 0;
+	arma::ivec g_randMarkerIndforVR;
 	std::vector<float>      invstdvVec0_forVarRatio;
         arma::fvec      invstdvVec_forVarRatio;
 	 std::vector<float>      alleleFreqVec0_forVarRatio;
@@ -453,8 +455,8 @@ public:
 
 	     altFreq = alleleCount/float(Nnomissing * 2);
 
-	      unsigned char geno2;
-	      passQC = false;
+	     unsigned char geno2;
+	     passQC = false;
 	     passVarRatio = false;
 	     float maf = std::min(altFreq, 1-altFreq);
 	     mac = std::min(alleleCount, int(Nnomissing) * 2 - alleleCount);
@@ -462,13 +464,34 @@ public:
 		if(maf >= minMAFtoConstructGRM && missingRate <= maxMissingRate){
 			passQC = true;
 		}
-		
 		if(isVarRatio){
-			if(mac >= g_minMACVarRatio && mac <= g_maxMACVarRatio){
+			if(g_maxMACVarRatio != -1){ //if estimating categorical variance ratios
+			   if(mac >= g_minMACVarRatio && mac < g_maxMACVarRatio){
 				passVarRatio = true;
 				genoVecofPointers_forVarRatio[SNPIdx_vr] = new vector<unsigned char>;
 				genoVecofPointers_forVarRatio[SNPIdx_vr]->reserve(numMarkersofEachArray*ceil(float(Nnomissing)/4));
+			   }
 			}
+			
+			
+			//else{			   	
+			if(mac >= g_minMACVarRatio){
+				   //randomly select 200 markers for estimating the variance ratio for the last MAC category	
+				   if(numberofMarkers_varRatio_common < 200){
+				   	passVarRatio = arma::any(g_randMarkerIndforVR == static_cast<int>(SNPIdx));
+					if(passVarRatio){
+						genoVecofPointers_forVarRatio[SNPIdx_vr] = new vector<unsigned char>;
+						genoVecofPointers_forVarRatio[SNPIdx_vr]->reserve(numMarkersofEachArray*ceil(float(Nnomissing)/4));
+				  		numberofMarkers_varRatio_common = numberofMarkers_varRatio_common + 1;
+					}
+				  } 
+			//	passVarRatio = true;	
+			}
+			//avoid the overlap between markers for GRM and markers for variance ratio estimation	   
+			if(passVarRatio){
+				passQC = false;
+			}
+		      //}
 		}
 
 		if(passQC | passVarRatio){
@@ -487,12 +510,12 @@ public:
                                         setGenotype(&geno2, u, HOM_REF);
                               }
 			      if(u == 3 || indx == (Nnomissing-1)){
-				       if(passQC){
-                                        	genoVecofPointers[SNPIdx_new/numMarkersofEachArray]->push_back(geno2); //avoid large continuous memory usage
-				       }
 				       if(passVarRatio){
 						genoVecofPointers_forVarRatio[SNPIdx_vr/numMarkersofEachArray]->push_back(geno2); //avoid large continuous memory usage
 					}
+				        if(passQC){
+						genoVecofPointers[SNPIdx_new/numMarkersofEachArray]->push_back(geno2);
+					}	
                                         geno2 = 0;
                               }
 			}
@@ -784,6 +807,11 @@ public:
 		}*/
 
 		cout << "setgeno mark1" << endl;
+
+		//randomly select common markers for variance ratio
+		if(isVarRatio){
+			 g_randMarkerIndforVR = arma::randi(1000, arma::distr_param(0,M-1));
+		}
 		//alleleFreqVec.zeros(M);
 		//invstdvVec.zeros(M);
 		//MACVec.zeros(M);
