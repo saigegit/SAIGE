@@ -1072,37 +1072,17 @@ fitNULLGLMM = function(plinkFile = "",
     }
 
     if(!skipVarianceRatioEstimation){
-	    minMACforGRM = minMAFforGRM * 2 * nrow(dataMerge_sort)
-	    #cat("mac_inter ", mac_inter, "\n") 
+	    isVarianceRatioinGeno = TRUE
 	    if(isCateVarianceRatio){
-			minMAC_varRatio = min(cateVarRatioMinMACVecExclude)
-			maxMAC_varRatio = max(cateVarRatioMaxMACVecInclude)
-			if(minMACforGRM <= (maxMAC_varRatio+10)){
-				minMACforGRM = maxMAC_varRatio + 10
-				minMAFforGRM = minMACforGRM /(2 * nrow(dataMerge_sort))
-				cat("minimum MAC for marker used for constructing GRM is not greater than the maximum MAC for markers to estimate the variance ratios. In order to avoid using the same markers for GRM and variance ratio estimation, respectively, minimum MAC for marker for constructing GRM is increased to be 30. It is corresponding to minMAFforGRM = ", minMAFforGRM, "\n")
-				maxMAC_varRatio = minMACforGRM - 1
-			}
-			#maxMAC_varRatio = max(max(cateVarRatioMaxMACVecInclude), minMACforGRM - 1)
-			isVarianceRatioinGeno = TRUE
-			cat("Categorical variance ratios will be estimated. Please make sure there are at least 200 markers in each MAC category.\n")
-		}else{
-			if(minMACforGRM <= 30){
-				minMAC_varRatio = 20
-				minMACforGRM = 30
-				maxMAC_varRatio = minMACforGRM - 1
-				minMAFforGRM = minMACforGRM /(2 * nrow(dataMerge_sort))
-				cat("minimum MAC for marker used for constructing GRM is not greater than 20. In order to avoid using the same markers for GRM and variance ratio estimation, respectively, minimum MAC for marker for constructing GRM is increased to be 30. It is corresponding to minMAFforGRM = ", minMAFforGRM, "\n")
-				isVarianceRatioinGeno = TRUE
-			}else{
-				isVarianceRatioinGeno = TRUE
-				minMAC_varRatio = 20
-				maxMAC_varRatio = minMACforGRM - 1
-			}	
-		}
-	#if(isVarianceRatioinGeno) {
-	      setminMAC_VarianceRatio(minMAC_varRatio, maxMAC_varRatio, isVarianceRatioinGeno)
-	#}	
+		minMAC_varRatio = min(cateVarRatioMinMACVecExclude)
+		maxMAC_varRatio = max(cateVarRatioMaxMACVecInclude)
+		#maxMAC_varRatio = max(max(cateVarRatioMaxMACVecInclude), minMACforGRM - 1)
+		cat("Categorical variance ratios will be estimated. Please make sure there are at least 200 markers in each MAC category.\n")
+	    }else{
+		minMAC_varRatio = 20
+	    	maxMAC_varRatio = -1 #will randomly select markers from the plink file and leave them out when constructing GRM
+	    }
+	    setminMAC_VarianceRatio(minMAC_varRatio, maxMAC_varRatio, isVarianceRatioinGeno)
 
     }
 
@@ -1487,10 +1467,6 @@ scoreTest_SPAGMMAT_forVarianceRatio_binaryTrait = function(obj.glmm.null,
     for(i in 1:(numCate-1)){
       MACindex = which(MACdata$MACvector > cateVarRatioMinMACVecExclude[i] & MACdata$MACvector <= cateVarRatioMaxMACVecInclude[i])
       listOfMarkersForVarRatio[[i]] = sample(MACindex, size = length(MACindex), replace = FALSE)
-	print(MACdata$MACvector[1:10])
-      cat("cateVarRatioMinMACVecExclude[i] ", cateVarRatioMinMACVecExclude[i], "\n")
-	cat("cateVarRatioMaxMACVecInclude[i] ", cateVarRatioMaxMACVecInclude[i], "\n")
-	print(length(MACindex))      
     }
 
     if(length(cateVarRatioMaxMACVecInclude) == (numCate-1)){
