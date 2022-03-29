@@ -215,7 +215,9 @@ SPAGMMATtest = function(bgenFile = "",
     ratioVec = Get_Variance_Ratio(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest) #readInGLMM.R
 
 
-
+    if(is_Firth_beta){
+	warning("Firth correction in the program is still under evaluation!!")
+    }	    
     obj.model = ReadModel(GMMATmodelFile, chrom, LOCO, is_Firth_beta) #readInGLMM.R
 
     
