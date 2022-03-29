@@ -236,10 +236,10 @@ SAIGE.Region = function(mu,
     pval.Region = NULL
     region = RegionList[[mth]]
 
-    annolist = region$annoVec 
+    annolistnew = region$annoVec 
     regionName = names(RegionList)[mth]
     i = i + 1
-    if(!is.null(region$SNP) & length(annolist) > 0){
+    if(!is.null(region$SNP) & length(annolistnew) > 0){
 
       SNP = region$SNP
       if(genoType == "vcf"){
@@ -270,7 +270,7 @@ SAIGE.Region = function(mu,
       #gc()
 
       #time_mainRegionInCPP = system.time({outList = mainRegionInCPP(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest)})
-      outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolist, regionName)
+      outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolistnew, regionName)
 #print("time_mainRegionInCPP")
 #print(time_mainRegionInCPP)
       rm(region)
@@ -351,8 +351,8 @@ if(regionTestType != "BURDEN"){
 
 
     annoMAFIndVec = c()
-    for(j in 1:length(annolist)){
-	AnnoName = annolist[j]
+    for(j in 1:length(annolistnew)){
+	AnnoName = annolistnew[j]
 	maxMAF0 = outList$q_maf_for_annoVec[j]
 	isPolyRegion = TRUE
 	for(m in 1:length(maxMAFlist)){
@@ -443,7 +443,7 @@ if(regionTestType != "BURDEN"){
       pval.Region$Number_ultra_rare = outList$NumUltraRare_GroupVec[annoMAFIndVec]
     }
 
-if(length(annolist) > 1 | length(maxMAFlist) > 1){
+if(length(annolistnew) > 1 | length(maxMAFlist) > 1){
 
    cctpval_Burden = get_CCT_pvalue(pval.Region$Pvalue_Burden)
    if(regionTestType != "BURDEN"){
@@ -483,8 +483,8 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
 
   Output_MarkerList = NULL
   if(is_output_markerList_in_groupTest){
-    for(j in 1:length(annolist)){
-        AnnoName = annolist[j]
+    for(j in 1:length(annolistnew)){
+        AnnoName = annolistnew[j]
         for(m in 1:length(maxMAFlist)){
                 jm = (j-1)*(length(maxMAFlist)) + m
                 maxMAFName = maxMAFlist[m]
