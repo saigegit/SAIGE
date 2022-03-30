@@ -22,7 +22,6 @@ for (pack in github_packages) {
     }
 }
 
-# devtools::install_version("Rcpp", version = "1.0.7", repos = "http://cran.us.r-project.org")
 if((!require("RcppArmadillo", character.only = TRUE)) | packageVersion("RcppArmadillo") < "0.10.7.5.0"){
     install.packages("RcppArmadillo", repos = "https://cloud.r-project.org", dependencies=TRUE)
 }
