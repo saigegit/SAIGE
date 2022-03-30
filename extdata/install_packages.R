@@ -1,7 +1,6 @@
 #!/usr/bin/env Rscript
 #install required R packages, from Finnge/SAIGE-IT
 
-#req_packages <- c("R.utils", "Rcpp", "RcppParallel", "RcppArmadillo", "data.table", "RcppEigen", "Matrix", "methods", "BH", "optparse", "SPAtest", "MetaSKAT", "roxygen2", "rversions","devtools", "SKAT")
 install.packages("ellipsis", repos='http://cran.rstudio.com/')
 print(packageVersion("ellipsis"))
 install.packages("vctrs", repos='http://cran.rstudio.com/')
@@ -19,11 +18,17 @@ for (pack in req_packages) {
 github_packages <- c("leeshawn/MetaSKAT")
 for (pack in github_packages) {
     if(!require(pack, character.only = TRUE)) {
-        devtools::install_github(pack, repos = "https://cloud.r-project.org")
+        devtools::install_github(pack)
     }
 }
 
 # devtools::install_version("Rcpp", version = "1.0.7", repos = "http://cran.us.r-project.org")
+if((!require("RcppArmadillo", character.only = TRUE)) | packageVersion("RcppArmadillo") < "0.10.7.5.0"){
+    install.packages("RcppArmadillo", repos = "https://cloud.r-project.org", dependencies=TRUE)
+}
+
+
+devtools::install_version("Rcpp", version = "1.0.7", repos = "http://cran.us.r-project.org")
 print(packageVersion("Rcpp"))
 install.packages("RSQLite", repos='http://cran.rstudio.com/')
 print(packageVersion("RSQLite"))

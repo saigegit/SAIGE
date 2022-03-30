@@ -7,6 +7,8 @@
 #include <boost/iostreams/filter/zstd.hpp>
 #include <boost/date_time.hpp>
 #include <boost/math/distributions/cauchy.hpp>
+
+#define _USE_MATH_DEFINES
 #include <math.h> 
 
 
@@ -48,23 +50,23 @@ double CCT_cpp(arma::vec & pval){
     if(issmallIndice.n_elem == 0){
 
 
-	arma::vec tantemp = arma::tan((0.5 - pval) * PI);
+	arma::vec tantemp = arma::tan((0.5 - pval) * M_PI);
 	arma::vec weighttantemp = tantemp % weights;
         cctstat = arma::sum(weighttantemp);
     }else{
        arma::vec weightsub = weights.elem(issmallIndice);
        arma::vec pvalsub = pval.elem(issmallIndice);
-       cctstat = arma::sum((weightsub/pvalsub)/PI);
+       cctstat = arma::sum((weightsub/pvalsub)/M_PI);
        arma::vec pvalsub_b = pval.elem(isNotSmallIndice);
        arma::vec weightsub_b = weights.elem(isNotSmallIndice); 
-       arma::vec tantemp_b = (0.5 - pvalsub_b) * PI;	
+       arma::vec tantemp_b = (0.5 - pvalsub_b) * M_PI;	
 	tantemp_b = arma::tan(tantemp_b);
 	arma::vec weighttantemp_b = tantemp_b % weightsub_b;
 	cctstat = cctstat + arma::sum(weighttantemp_b);
     }
 
     if(cctstat > 1e+15){
-       cauchyp = (1/cctstat)/PI;
+       cauchyp = (1/cctstat)/M_PI;
     }else{
        boost::math::cauchy cauchy_dist(0,1);
        cauchyp = boost::math::cdf(complement(cauchy_dist, cctstat));

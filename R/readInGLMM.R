@@ -44,12 +44,14 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
     stop("LOCO should be TRUE or FALSE.")
   # load GMMATmodelFile
   load(GMMATmodelFile)
-  if(!modglmm$LOCO){
-	if(LOCO){
-		LOCO=FALSE
-	}	
-  }
-	  
+  #if(!modglmm$LOCO){
+  #	if(LOCO){
+  #		stop("LOCO is TRUE but the null model was not fit with LOCO=TRUE\n")
+  #		LOCO=FALSE
+  #	}	
+  #}
+
+
   obj.glmm.null = modglmm
   obj.glmm.null$Y = NULL
   #obj.glmm.null$offset = obj.glmm.null$linear.predictors - obj.glmm.null$coefficients[1]

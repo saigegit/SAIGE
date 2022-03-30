@@ -1,0 +1,25 @@
+PLINK v2.00a2.3LM 64-bit Intel (24 Jan 2020)
+Options in effect:
+  --export bgen-1.2 bits=8 ref-first
+  --out ./genotype_100markers_2chr
+  --vcf ./genotype_100markers_2chr.vcf.gz
+
+Hostname: uger-c018.broadinstitute.org
+Working directory: /humgen/atgu1/fin/wzhou/tools/SAIGE/sourceCode_0.99.3/SAIGE_online/SAIGE/extdata/input
+Start time: Thu Mar 24 05:14:14 2022
+
+Random number seed: 1648098854
+773217 MiB RAM detected; reserving 386608 MiB for main workspace.
+Using up to 52 threads (change this with --threads).
+--vcf: 100 variants scanned.
+--vcf: ./genotype_100markers_2chr-temporary.pgen +
+./genotype_100markers_2chr-temporary.pvar +
+./genotype_100markers_2chr-temporary.psam written.
+10000 samples (0 females, 0 males, 10000 ambiguous; 10000 founders) loaded from
+./genotype_100markers_2chr-temporary.psam.
+100 variants loaded from ./genotype_100markers_2chr-temporary.pvar.
+Note: No phenotype data present.
+Writing ./genotype_100markers_2chr.bgen ... done.
+Writing ./genotype_100markers_2chr.sample ... done.
+
+End time: Thu Mar 24 05:14:15 2022
