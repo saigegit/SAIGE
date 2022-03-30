@@ -1726,15 +1726,12 @@ if(t_regionTestType == "BURDEN"){
 
  }
 
- int numofUR = 0;
+ int numofUR = q_anno_maf;
  if(t_isSingleinGroupTest){
   OutList.push_back(pvalVec, "pvalVec");
   for(unsigned int k = 0; k < pvalVec.size(); k++){ 
 
 	if(std::isfinite(pvalVec.at(k))){
-		if(chrVec.at(k) == "UR"){
-			numofUR = numofUR + 1;
-		}
 		OutFile_singleInGroup << chrVec.at(k);
 		OutFile_singleInGroup << "\t";
 		OutFile_singleInGroup << posVec.at(k);
