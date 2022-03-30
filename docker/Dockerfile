@@ -7,11 +7,11 @@ ENV LANG C.UTF-8
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    r-cran-devtools \
-    libopenblas-base \
     build-essential \
+    cmake \
+    libopenblas-base \
     python3-pip \
-    cmake
+    r-cran-devtools
 
 RUN pip3 install cget
 
