@@ -142,12 +142,14 @@ setGenoInput = function(bgenFile = "",
     if(AlleleOrder == "ref-first")
       names(markerInfo) = c("CHROM", "ID", "POS", "REF", "ALT")
       #markerInfo = markerInfo[,c(1,2,3,4,5)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
-    
     #colnames(markerInfo) = c("CHROM", "ID", "POS", "REF", "ALT")
     #colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT")
     #markerInfo$ID = paste0(markerInfo$CHROM,":",markerInfo$POS, "_", markerInfo$REF,"/", markerInfo$ALT)
     markerInfo$genoIndex = 1:nrow(markerInfo) - 1  # -1 is to convert 'R' to 'C++' 
     markerInfo$genoIndex_prev = rep(0, length(markerInfo$genoIndex))
+    if(chrom != ""){
+      markerInfo = markerInfo[which(markerInfo[,1] == chrom), ]
+    }
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)    
     markerInfo$ID2 = paste0(markerInfo$CHROM,":",markerInfo$POS, ":", markerInfo$REF,":", markerInfo$ALT)
 #    markerInfo[,POS:=NULL]
@@ -173,12 +175,29 @@ setGenoInput = function(bgenFile = "",
     if(sampleFile != "" | !checkIfSampleIDsExist(bgenFile)){
 	print("Sample IDs were not found in the bgen file.")
 	Check_File_Exist(sampleFile)
-	sampleData = data.table::fread(sampleFile, header=F, colClasses = c("character"), data.table=F)
-        samplesInGeno = as.character(sampleData[,1])
+	sf = file(sampleFile, "r")
+	first_sample_line = readLines(sf, n = 1)
+	close(sf)
+	if(first_sample_line == "ID_1 ID_2 missing sex"){
+	    cat("sample file is in the bgenix format\n")
+	    sampleData = data.table::fread(sampleFile, header=F, colClasses = rep("character", 4), data.table=F, skip=2)
+	    samplesInGeno = as.character(sampleData[,2])
+	}else{
+	    first_sample_line_list = strsplit(first_sample_line, split=c(" +", "\t"))[[1]]
+	    if(length(first_sample_line_list) == 1){
+	        cat("sample file only has one column and has no header\n")
+	        sampleData = data.table::fread(sampleFile, header=F, colClasses = c("character"), data.table=F)
+                samplesInGeno = as.character(sampleData[,1])
+	    }else{
+		stop("sample file should either has one column and no header or in the bgenix format with four columns\n")	
+	    }
+	}
     }else{
 	samplesInGeno = getSampleIDsFromBGEN(bgenFile)
  	#print(samplesInGeno[1:100])		    
-    }    
+    } 
+
+
     db_con <- RSQLite::dbConnect(RSQLite::SQLite(), bgenFileIndex)
     on.exit(RSQLite::dbDisconnect(db_con), add = TRUE)
     markerInfo = dplyr::tbl(db_con, "Variant")
@@ -187,12 +206,12 @@ setGenoInput = function(bgenFile = "",
     markerInfo = as.data.table(markerInfo, keep.rownames = FALSE)
     rmcol = setdiff(names(markerInfo), c("chromosome", "position", "rsid", "allele1", "allele2", 'file_start_position', 'size_in_bytes'))
     markerInfo = markerInfo[, !..rmcol]
-
     if(AlleleOrder == "alt-first")
       names(markerInfo) = c("CHROM", "POS", "ID", "ALT", "REF", "genoIndex", "size_in_bytes")
       #markerInfo = markerInfo[,c(1,2,3,6,5,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     if(AlleleOrder == "ref-first")
-      names(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT", "genoIndex", "size_in_bytes")  
+      names(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT", "genoIndex", "size_in_bytes")
+
       #markerInfo = markerInfo[,c(1,2,3,5,6,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)
     markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,":", markerInfo$REF, ":", markerInfo$ALT)
@@ -201,9 +220,12 @@ setGenoInput = function(bgenFile = "",
     markerInfo[,REF:=NULL]
     markerInfo[,ALT:=NULL]
     markerInfo[,size_in_bytes:=NULL]
+    
+    if(chrom != ""){
+      markerInfo = markerInfo[which(markerInfo[,1] == chrom), ]
+    }  
     	
     setkeyv(markerInfo, c("ID","ID2"))
-     
     #markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$ALT, "/", markerInfo$REF)
     setBGENobjInCPP(bgenFile, bgenFileIndex, t_SampleInBgen = samplesInGeno, t_SampleInModel = sampleInModel, AlleleOrder)
   }
@@ -213,9 +235,9 @@ setGenoInput = function(bgenFile = "",
     if(idstoIncludeFile != "" & rangestoIncludeFile != ""){
       stop("We currently do not support both 'idstoIncludeFile' and 'rangestoIncludeFile' at the same time for vcf files\n")
     }
-    if(chrom==""){
-      stop("chrom needs to be specified for VCF/BCF/SAV input\n")
-    }
+    #if(chrom==""){
+    #  stop("chrom needs to be specified for VCF/BCF/SAV input\n")
+    #}
   }
 
 
@@ -230,9 +252,12 @@ setGenoInput = function(bgenFile = "",
   RangesToInclude = NULL
   if(idstoIncludeFile != ""){
     IDsToInclude = data.table::fread(idstoIncludeFile, header = F, colClasses = c("character"), data.table=F)
-    if(ncol(IDsToInclude) != 1)
+    if(ncol(IDsToInclude) != 1){
       stop("'idstoIncludeFile' of ", idstoIncludeFile, " should only include one column.")
-    IDsToInclude = IDsToInclude[,1]
+    }else{
+      IDsToInclude = IDsToInclude[,1]
+      cat(length(IDsToInclude), " marker IDs are found in the idstoIncludeFile file\n")
+    }
 
     if(!is.null(markerInfo$ID2)){
 
@@ -242,17 +267,21 @@ setGenoInput = function(bgenFile = "",
 
     }	    
     if(length(posRows) != 0)
+      cat(length(posRows), " markers in idstoIncludeFile are found in the geno/dosage file.\n") 
       markersInclude = c(markersInclude, markerInfo$ID[posRows])
     anyInclude = TRUE
   }
 
   if(rangestoIncludeFile != ""){
     RangesToInclude = data.table::fread(rangestoIncludeFile, header = F, colClasses = c("character", "numeric", "numeric"), data.table=F)
-    if(ncol(RangesToInclude) != 3)
+    if(ncol(RangesToInclude) != 3){
       stop("rangestoIncludeFile should only include three columns.")
+    }else{
+      cat(nrow(RangesToInclude), " ranges are in rangestoIncludeFile\n")
+    }
 
     colnames(RangesToInclude) = c("CHROM", "START", "END")
-
+   if(nrow(RangesToInclude)){
     for(i in 1:nrow(RangesToInclude)){
       CHROM1 = RangesToInclude$CHROM[i]
       START = RangesToInclude$START[i]
@@ -260,7 +289,9 @@ setGenoInput = function(bgenFile = "",
       posRows = with(markerInfo, which(CHROM == CHROM1 & POS >= START & POS <= END))
       if(length(posRows) != 0)
         markersInclude = c(markersInclude, markerInfo$ID[posRows])
+	cat(length(markerInfo$ID[posRows]), " markers in the range ", i, " are found in the geno/dosage file.\n")
     }
+   } 
     anyInclude = TRUE
   }
 

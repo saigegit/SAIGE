@@ -90,7 +90,8 @@ SAIGE.Region = function(mu,
 			isOverWriteOutput,
 			is_single_in_groupTest,
 			is_no_weight_in_groupTest,
-			is_output_markerList_in_groupTest){
+			is_output_markerList_in_groupTest,
+			chrom){
   OutputFileIndex = NULL	
   if(is.null(OutputFileIndex))
     OutputFileIndex = paste0(OutputFile, ".index")
@@ -210,7 +211,11 @@ SAIGE.Region = function(mu,
   Output_MarkerList.all = NULL
   cth_chunk_to_output=1
 
-  for(i in (indexChunk+1):nRegions){
+  i = indexChunk+1
+  while(i <= nRegions){
+  #for(i in (indexChunk+1):nRegions){
+
+
    if(mth ==  numberRegionsInChunk){
       if(i + groups_per_chunk > nRegions){
   	      nregions_ro_read = nRegions - i + 1	      
@@ -219,10 +224,11 @@ SAIGE.Region = function(mu,
       }
       nlinetoread = nregions_ro_read * nline_per_gene
       marker_group_line = readLines(gf, n = nlinetoread)
-      RegionList = SAIGE.getRegionList_new(marker_group_line, nline_per_gene, annolist, markerInfo)
+      RegionList = SAIGE.getRegionList_new(marker_group_line, nline_per_gene, annolist, markerInfo, chrom)
       cat("Read in ", nregions_ro_read, " region(s) from the group file.\n")
       mth = 0
-      numberRegionsInChunk = length(RegionList)
+      #numberRegionsInChunk = length(RegionList)
+      numberRegionsInChunk = nregions_ro_read
     }
 
    mth = mth + 1
@@ -230,17 +236,13 @@ SAIGE.Region = function(mu,
     pval.Region = NULL
     region = RegionList[[mth]]
 
-    annolist = region$annoVec 
+    annolistnew = region$annoVec 
     regionName = names(RegionList)[mth]
-
-    if(!is.null(region$SNP) & length(annolist) > 0){
+    i = i + 1
+    if(!is.null(region$SNP) & length(annolistnew) > 0){
 
       SNP = region$SNP
       if(genoType == "vcf"){
-    	#genoIndex = as.character(format(region$genoIndex, scientific = FALSE))
-      #}else{
-        
-        #SNPlist = paste(c(regionName, SNP), collapse = "\t") 
         SNPlist = paste(c(regionName, SNP), collapse = "\t") 
         set_iterator_inVcf(SNPlist, chrom1, 1, 200000000)
         isVcfEnd =  check_Vcf_end()
@@ -261,14 +263,14 @@ SAIGE.Region = function(mu,
 
       annoIndicatorMat = region$annoIndicatorMat
 
-      chrom = region$chrom
+      #chrom = region$chrom
 
-      print(paste0("Analyzing Region ", regionName, " (",i,"/",nRegions,")."))
+      print(paste0("Analyzing Region ", regionName, " (",i-1,"/",nRegions,")."))
       #tp1 = proc.time()
       #gc()
 
       #time_mainRegionInCPP = system.time({outList = mainRegionInCPP(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest)})
-      outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolist, regionName)
+      outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolistnew, regionName)
 #print("time_mainRegionInCPP")
 #print(time_mainRegionInCPP)
       rm(region)
@@ -349,8 +351,8 @@ if(regionTestType != "BURDEN"){
 
 
     annoMAFIndVec = c()
-    for(j in 1:length(annolist)){
-	AnnoName = annolist[j]
+    for(j in 1:length(annolistnew)){
+	AnnoName = annolistnew[j]
 	maxMAF0 = outList$q_maf_for_annoVec[j]
 	isPolyRegion = TRUE
 	for(m in 1:length(maxMAFlist)){
@@ -441,7 +443,7 @@ if(regionTestType != "BURDEN"){
       pval.Region$Number_ultra_rare = outList$NumUltraRare_GroupVec[annoMAFIndVec]
     }
 
-if(length(annolist) > 1 | length(maxMAFlist) > 1){
+if(length(annolistnew) > 1 | length(maxMAFlist) > 1){
 
    cctpval_Burden = get_CCT_pvalue(pval.Region$Pvalue_Burden)
    if(regionTestType != "BURDEN"){
@@ -481,8 +483,8 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
 
   Output_MarkerList = NULL
   if(is_output_markerList_in_groupTest){
-    for(j in 1:length(annolist)){
-        AnnoName = annolist[j]
+    for(j in 1:length(annolistnew)){
+        AnnoName = annolistnew[j]
         for(m in 1:length(maxMAFlist)){
                 jm = (j-1)*(length(maxMAFlist)) + m
                 maxMAFName = maxMAFlist[m]
@@ -628,11 +630,13 @@ gc()
 
    }else{#if(!is.null(RegionList)){
      cat("The chunk is empty\n")	   
-     mth = 0
+     #mth = 0
+     mth = numberRegionsInChunk
+     i = i + numberRegionsInChunk
      pval.Region = NULL
    }
 	   
-   }
+}
 
   message = paste0("Analysis done! The results have been saved to '", OutputFile,"' and '",
                    paste0(OutputFile, ".markerInfo"),"'.")
@@ -656,7 +660,8 @@ gc()
 SAIGE.getRegionList_new = function(marker_group_line,
 			nline_per_gene,	   
                          annoVec, #c("lof","lof;missense"
-                         markerInfo)
+                         markerInfo, 
+			 chrom="")
 {
 
   # read group file
@@ -691,12 +696,17 @@ SAIGE.getRegionList_new = function(marker_group_line,
     }	    
     RegionData = as.data.frame(RegionData)
     setDT(RegionData)
-    
-#uRegion = unique(RegionData$REGION)    
+    uRegion0 = unique(RegionData$REGION)    
+    if(chrom != "" & is.null(markerInfo)){
+      RegionData[, c("chr") := tstrsplit(RegionData$SNP, ":")[[1]] ]
+      setkey(RegionData, "chr")
+      RegionData = RegionData[chr == as.numeric(chrom)]
+      RegionData[,chr:=NULL]
+    }
 
+if(nrow(RegionData) != 0){
 if(!is.null(markerInfo)){
   setkey(RegionData, "SNP")
-  #print(markerInfo)
   RegionData = merge(RegionData, markerInfo, by.x = "SNP", by.y = "ID", all.x = T, sort = F) 
 
   if(!is.null(markerInfo$ID2)){
@@ -727,7 +737,7 @@ if(!is.null(markerInfo)){
 		}
 	}
 	#RegionData$genoIndex2 = NULL	
-  }	  
+  }
   posNA = which(is.na(RegionData$genoIndex))
   
     if(length(posNA) != 0){
@@ -736,6 +746,9 @@ if(!is.null(markerInfo)){
     }
    setorderv(RegionData, col=c("CHROM", "POS"))
 }
+
+}
+
 
 if(nrow(RegionData) != 0){
 
@@ -755,7 +768,7 @@ if(nrow(RegionData) != 0){
   #RegionData = as.data.frame(RegionData)
 
 
-  for(r in uRegion){
+  for(r in uRegion0){
              #print(paste0("Analyzing region ",r,"...."))
     #print(RegionData$REGION)
     #print(r)
@@ -778,9 +791,9 @@ if(nrow(RegionData) != 0){
 		genoIndex_prev = as.numeric(RegionData$genoIndex_prev[posSNP])	
       }
       chrom = RegionData$CHROM[posSNP]
-      uchrom = unique(chrom)
-      if(length(uchrom) != 1)
-        stop("In region ",r,", markers are from multiple chromosomes.")
+      #uchrom = unique(chrom)
+      #if(length(uchrom) != 1)
+      #  stop("In region ",r,", markers are from multiple chromosomes.")
     }
 
     annoIndicatorMat = matrix(0, nrow=length(posSNP), ncol=length(annoVec))
@@ -867,6 +880,8 @@ if(nrow(RegionData) != 0){
 }else{#if(nrow(RegionData) == 0){
 	RegionList = NULL
 }
+
+
   return(RegionList)
 }
 

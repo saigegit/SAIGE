@@ -215,14 +215,17 @@ SPAGMMATtest = function(bgenFile = "",
     ratioVec = Get_Variance_Ratio(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest) #readInGLMM.R
 
 
-
+    if(is_Firth_beta){
+	warning("Firth correction in the program is still under evaluation!!")
+    }	    
     obj.model = ReadModel(GMMATmodelFile, chrom, LOCO, is_Firth_beta) #readInGLMM.R
 
-
-    if(!obj.model$LOCO){
-	LOCO = FALSE
+    
+    if(!LOCO){
+     #	LOCO = FALSE
         print("LOCO = FASLE and leave-one-chromosome-out is not applied")
     }	    
+
     sparseSigmaRList = list()
     isSparseGRM = TRUE
     if(sparseGRMFile != ""){ 
@@ -360,7 +363,6 @@ SPAGMMATtest = function(bgenFile = "",
     	setorderv(objGeno$markerInfo,col=c("CHROM","POS"))
     }
 
-
         SAIGE.Marker(traitType,
 		   genoType,
                    objGeno$markerInfo$genoIndex_prev,
@@ -397,7 +399,6 @@ SPAGMMATtest = function(bgenFile = "",
 
 		}
 	}	
-	
 	SAIGE.Region(mu,
 		     OutputFile,
 		     MACCutoff_to_CollapseUltraRare,
@@ -416,7 +417,8 @@ SPAGMMATtest = function(bgenFile = "",
 		     is_overwrite_output,
 		     is_single_in_groupTest,
 		     is_no_weight_in_groupTest,
-		     is_output_markerList_in_groupTest)
+		     is_output_markerList_in_groupTest,
+		     chrom)
 
 
     }	    

@@ -9,3 +9,7 @@ infile=genotype_10markers_triallelic.missing.withVarianceallMissing.vcf
 bgzip -c $infile > ${infile}.gz
 tabix -p vcf ${infile}.gz
 
+/humgen/atgu1/fin/wzhou/tools/plink2 --vcf ./genotype_100markers_2chr.vcf.gz --export bgen-1.2 bits=8 ref-first --out ./genotype_100markers_2chr
+
+/humgen/atgu1/fin/wzhou/tools/bgen.tgz/build/apps/bgenix -index -g genotype_100markers_2chr.bgen 
+

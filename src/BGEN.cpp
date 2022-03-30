@@ -281,7 +281,7 @@ double dosage_new;
   //if(m_AlleleOrder == "alt-first"){
     //        dosage_new = dosage;
     //  }else{
-            dosage_new = 2-dosage;
+           dosage_new = 2-dosage;
     //  }
 
         eij = dosage;
@@ -499,10 +499,10 @@ void BgenClass::getOneMarker(uint64_t & t_gIndex_prev,
     if(m_AlleleOrder == "alt-first"){  // added by Wenjian Bi on 03/14/2021
       t_alt = first_allele;
       t_ref = second_allele;
-      //t_altFreq = 1 - t_altFreq;
-      //t_altCounts = t_altFreq * 2 * ((double)m_N - (double)t_indexForMissing.size());
-      //for(unsigned int i = 0; i < dosages.size(); i++)
-      //  dosages.at(i) = 2 - dosages.at(i);
+      t_altFreq = 1 - t_altFreq;
+      t_altCounts = t_altFreq * 2 * ((double)m_N - (double)t_indexForMissing.size());
+      for(unsigned int i = 0; i < dosages.size(); i++)
+        dosages.at(i) = 2 - dosages.at(i);
     }
     
   }else{
