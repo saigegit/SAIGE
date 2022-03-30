@@ -349,8 +349,7 @@ if(regionTestType != "BURDEN"){
 
     #gc()
 
-
-    annoMAFIndVec = c()
+annoMAFIndVec = c()
     for(j in 1:length(annolistnew)){
 	AnnoName = annolistnew[j]
 	maxMAF0 = outList$q_maf_for_annoVec[j]
