@@ -1,6 +1,3 @@
-// [[Rcpp::depends(RcppArmadillo)]]
-#include <RcppArmadillo.h>
- 
 #include "savvy/reader.hpp"
 #include "savvy/region.hpp"
 #include "variant_group_iterator.hpp"
@@ -10,11 +7,13 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <Rcpp.h>
 #include <stdlib.h>
 #include <cstring>
 #include <limits>
 
+#include <Rcpp.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+#include <RcppArmadillo.h>
 
 #include "VCF.hpp"
 
