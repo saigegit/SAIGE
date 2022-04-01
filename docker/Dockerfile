@@ -20,8 +20,6 @@ COPY . .
 
 RUN Rscript extdata/install_packages.R
 
-# RUN Rscript -e 'devtools::install_github("leeshawn/MetaSKAT")'
-
 # Force step_2 to use 1 single thread. More threads are ineffective
 ENV OMP_NUM_THREADS=1
 
