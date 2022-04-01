@@ -2165,7 +2165,7 @@ bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, boo
                 }
 		
 	        if(t_traitType == "binary"){
-                        OutFile_singleInGroup << "p.value.NA_c\tIs.SPA.converge\tAF_case\tAF_ctrl\tN_case\tN_ctrl\n";
+                        OutFile_singleInGroup << "AF_case\tAF_ctrl\tN_case\tN_ctrl\n";
                 }else if(t_traitType == "quantitative"){
 			OutFile_singleInGroup << "N\n";	
 			
@@ -2206,11 +2206,6 @@ bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isapp
 			}
                 }
 		
-// OUT_DF["N_case_hom"] = N_case_homVec;
-//                 OUT_DF["N_case_het"] = N_case_hetVec;
-//                                 OUT_DF["N_ctrl_hom"] = N_ctrl_homVec;
-//                                                 OUT_DF["N_ctrl_het"] = N_ctrl_hetVec;
-
 
                 if(t_traitType == "binary"){
                         OutFile_single << "AF_case\tAF_ctrl\tN_case\tN_ctrl";
