@@ -1,8 +1,5 @@
 // This includes the main codes to connect C++ and R
 
-// [[Rcpp::depends(RcppArmadillo)]]
-#include <RcppArmadillo.h>
-
 #include <vector>
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
@@ -24,6 +21,8 @@
 #include "UTIL.hpp"
 #include "CCT.hpp"
 
+// [[Rcpp::depends(RcppArmadillo)]]
+#include <RcppArmadillo.h>
 #include <Rcpp.h>
 #include "getMem.hpp"
 

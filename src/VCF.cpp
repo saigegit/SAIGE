@@ -2,7 +2,6 @@
 #include "savvy/region.hpp"
 #include "variant_group_iterator.hpp"
 
-
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -11,9 +10,9 @@
 #include <cstring>
 #include <limits>
 
-#include <Rcpp.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
+#include <Rcpp.h>
 
 #include "VCF.hpp"
 
