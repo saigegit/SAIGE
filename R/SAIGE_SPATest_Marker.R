@@ -34,9 +34,6 @@ SAIGE.Marker = function(traitType,
     stop("Output file ", OutputFile, " can't be opened\n")
   }
 
-
-
-
   ## set up an object for genotype
   if(genoType != "vcf"){
       #markerInfo = objGeno$markerInfo
@@ -98,7 +95,7 @@ SAIGE.Marker = function(traitType,
   }
 
   chrom = "InitialChunk"
-
+  #set_flagSparseGRM_cur_SAIGE_org()
   while(is_marker_test){
   #for(i in outIndex:nChunks)
   #{

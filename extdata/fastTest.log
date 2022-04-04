@@ -1,0 +1,255 @@
+Loading required package: RhpcBLASctl
+R version 3.6.1 (2019-07-05)
+Platform: x86_64-conda_cos6-linux-gnu (64-bit)
+Running under: Red Hat Enterprise Linux Server 7.9 (Maipo)
+
+Matrix products: default
+BLAS/LAPACK: /stanley/genetics/users/wzhou/.conda/envs/RSAIGE/lib/R/lib/libRblas.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] data.table_1.12.2      optparse_1.6.4         RhpcBLASctl_0.21-247.1
+[4] SAIGE_1.0.2           
+
+loaded via a namespace (and not attached):
+[1] compiler_3.6.1     Matrix_1.2-17      Rcpp_1.0.7         getopt_1.20.3     
+[5] grid_3.6.1         RcppParallel_4.4.4 lattice_0.20-38   
+$vcfFile
+[1] ""
+
+$vcfFileIndex
+[1] ""
+
+$vcfField
+[1] "DS"
+
+$savFile
+[1] ""
+
+$savFileIndex
+[1] ""
+
+$bgenFile
+[1] "./input/genotype_100markers.bgen"
+
+$bgenFileIndex
+[1] "./input/genotype_100markers.bgen.bgi"
+
+$sampleFile
+[1] "./input/samplelist.txt"
+
+$bedFile
+[1] ""
+
+$bimFile
+[1] ""
+
+$famFile
+[1] ""
+
+$AlleleOrder
+[1] "ref-first"
+
+$idstoIncludeFile
+[1] ""
+
+$rangestoIncludeFile
+[1] ""
+
+$chrom
+[1] "1"
+
+$is_imputed_data
+[1] FALSE
+
+$minMAF
+[1] 0
+
+$minMAC
+[1] 0.5
+
+$minGroupMAC_in_BurdenTest
+[1] 5
+
+$minInfo
+[1] 0
+
+$maxMissing
+[1] 0.15
+
+$impute_method
+[1] "best_guess"
+
+$LOCO
+[1] TRUE
+
+$GMMATmodelFile
+[1] "./output/example_binary_fullGRM.rda"
+
+$varianceRatioFile
+[1] "./output/example_binary_cate.varianceRatio.txt"
+
+$SAIGEOutputFile
+[1] "./output/genotype_100markers_bgen_groupTest_out.txt"
+
+$markers_per_chunk
+[1] 10000
+
+$groups_per_chunk
+[1] 100
+
+$is_output_moreDetails
+[1] FALSE
+
+$is_overwrite_output
+[1] TRUE
+
+$maxMAF_in_groupTest
+[1] "0.0001,0.001,0.01"
+
+$maxMAC_in_groupTest
+[1] "0"
+
+$annotation_in_groupTest
+[1] "lof,missense:lof,missense:lof:synonymous"
+
+$groupFile
+[1] "./input/group_new_chrposa1a2.txt"
+
+$sparseGRMFile
+[1] "output/sparseGRM_relatednessCutoff_0.125_1000_randomMarkersUsed.sparseGRM.mtx"
+
+$sparseGRMSampleIDFile
+[1] "output/sparseGRM_relatednessCutoff_0.125_1000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt"
+
+$relatednessCutoff
+[1] 0
+
+$MACCutoff_to_CollapseUltraRare
+[1] 10
+
+$cateVarRatioMinMACVecExclude
+[1] "10,20.5"
+
+$cateVarRatioMaxMACVecInclude
+[1] "20.5"
+
+$weights.beta
+[1] "1,25"
+
+$r.corr
+[1] 1
+
+$markers_per_chunk_in_groupTest
+[1] 100
+
+$condition
+[1] ""
+
+$SPAcutoff
+[1] 2
+
+$dosage_zerod_cutoff
+[1] 0.2
+
+$dosage_zerod_MAC_cutoff
+[1] 10
+
+$is_single_in_groupTest
+[1] FALSE
+
+$is_no_weight_in_groupTest
+[1] FALSE
+
+$is_output_markerList_in_groupTest
+[1] TRUE
+
+$is_Firth_beta
+[1] FALSE
+
+$pCutoffforFirth
+[1] 0.01
+
+$is_fastTest
+[1] TRUE
+
+$help
+[1] FALSE
+
+[1] "opt$r.corr"
+[1] 1
+dosage_zerod_cutoff  0.2 
+Any dosages <=  0.2  for genetic variants with MAC <=  10  are set to be 0 in group tests
+group-based test will be performed
+Ultra rare variants with MAC <=  10  will be collpased for set-based tests in the 'absence or presence' way.
+Leave chromosome  1  out will be applied
+chromosome  2  model results are removed to save memory
+chromosome  3  model results are removed to save memory
+chromosome  4  model results are removed to save memory
+chromosome  5  model results are removed to save memory
+chromosome  6  model results are removed to save memory
+chromosome  7  model results are removed to save memory
+chromosome  8  model results are removed to save memory
+chromosome  9  model results are removed to save memory
+chromosome  10  model results are removed to save memory
+chromosome  11  model results are removed to save memory
+chromosome  12  model results are removed to save memory
+chromosome  13  model results are removed to save memory
+chromosome  14  model results are removed to save memory
+chromosome  15  model results are removed to save memory
+chromosome  16  model results are removed to save memory
+chromosome  17  model results are removed to save memory
+chromosome  18  model results are removed to save memory
+chromosome  19  model results are removed to save memory
+chromosome  20  model results are removed to save memory
+chromosome  21  model results are removed to save memory
+chromosome  22  model results are removed to save memory
+length(sparseGRMSampleID$IndexGRM):  1000 
+nrow(sparseGRMSampleID):  1000 
+1000  samples have been used to fit the glmm null model
+[1] 1000    3
+    IID IndexInModel IndexGRM
+1   1a1            1        1
+113 1a2            2        2
+224 1a3            3        3
+335 1a4            4        4
+446 1a5            5        5
+557 1a6            6        6
+[1] "Subsetting GRM"
+variance Ratio null is  0.944094 0.9390444 
+variance Ratio sparse is  0.999409 0.9991801 
+dosageFile type is  bgen 
+[1] "Sample IDs were not found in the bgen file."
+sample file only has one column and has no header
+t_SampleInBgen 10000
+snpBlocks (Mbgen): 100
+samples (Nbgen): 10000
+CompressedSNPBlocks: 1
+Layout: 2
+Setting position of samples in Bgen files....
+Start  TRUE 
+End  FALSE 
+BURDEN test will be performed
+isappend  FALSE 
+is_single_in_groupTest = FALSE. Single-variant assoc tests results will not be output
+Start extracting marker-level information from 'groupFile' of ./input/group_new_chrposa1a2.txt ....
+indexChunk is  0 
+indexChunk  0 
+nRegions  2 
+Read in  2  region(s) from the group file.
+[1] "Analyzing Region GENE1 (1/2)."
+Start analyzing chunk 0.....
+In chunks 0-0, 17 markers are ultra-rare and 4 markers are not ultra-rare.
+Start analyzing chunk 0.....
+In chunks 0-0, 17 markers are ultra-rare and 4 markers are not ultra-rare.
+[1] "Analyzing Region GENE2 (2/2)."
+Start analyzing chunk 0.....
+In chunks 0-0, 15 markers are ultra-rare and 3 markers are not ultra-rare.
+[1] "write to output"
+x being coerced from class: matrix to data.table
+[1] "Analysis done! The set-based tests results have been saved to './output/genotype_100markers_bgen_groupTest_out.txt'. The marker lists have been saved to './output/genotype_100markers_bgen_groupTest_out.txt.markerList.txt'."

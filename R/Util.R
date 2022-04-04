@@ -538,7 +538,7 @@ writeOutputFile = function(Output,
 
   n1 = length(Output)
   n2 = length(OutputFile)
-  print("write to output")
+  cat("write to output\n")
   #cat("n1 is ", n1, "\n")
   #cat("n2 is ", n2, "\n")
   if(n1 != n2)
@@ -589,7 +589,7 @@ writeOutputFileIndex = function(
   message4 = paste("Have completed the analysis of chunk", indexChunk)
   message5 = "Have completed the analyses of all chunks."
 
-  print("write to output")
+  cat("write to output\n")
 
   #print("write Output 2")
   if(Start)

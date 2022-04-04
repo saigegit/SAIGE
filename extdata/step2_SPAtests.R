@@ -2,8 +2,8 @@
 
 #options(stringsAsFactors=F, scipen = 999)
 options(stringsAsFactors=F)
-library(SAIGE)
-#library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/SAIGE/install_v1.0.1")
+#library(SAIGE)
+library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/SAIGE/install_v1.0.3")
 
 BLASctl_installed <- require(RhpcBLASctl)
 library(optparse)
@@ -119,11 +119,12 @@ mean, p-value based on traditional score test is returned. Default value is 2.")
     help="Whether no weights are used in group Test. If FALSE, weights will be calcuated based on MAF from the Beta distribution with paraemters weights.beta or weights will be extracted from the group File if available [default=FALSE]"),
   make_option("--is_output_markerList_in_groupTest", type="logical", default=FALSE,
     help="Whether to output the marker lists included in the set-based tests for each mask.[default=TRUE]"),
-
   make_option("--is_Firth_beta", type="logical", default=FALSE,
     help="Whether to estimate effect sizes using approx Firth, only for binary traits [default=FALSE]"),
   make_option("--pCutoffforFirth", type="numeric", default=0.01,
-    help="p-value cutoff to use approx Firth to estiamte the effect sizes. Only for binary traits. The effect sizes of markers with p-value <= pCutoffforFirth will be estimated using approx Firth [default=0.01]") 
+    help="p-value cutoff to use approx Firth to estiamte the effect sizes. Only for binary traits. The effect sizes of markers with p-value <= pCutoffforFirth will be estimated using approx Firth [default=0.01]"),
+  make_option("--is_fastTest", type="logical", default=FALSE,
+    help="Whether to use the fast mode for tests")
 )
 
 
@@ -230,7 +231,8 @@ SPAGMMATtest(vcfFile=opt$vcfFile,
 	     pCutoffforFirth = opt$pCutoffforFirth,
 	     is_single_in_groupTest = opt$is_single_in_groupTest,
              is_no_weight_in_groupTest = opt$is_no_weight_in_groupTest,
-	     is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest 
+	     is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
+	     is_fastTest = opt$is_fastTest
 )
 
 if(BLASctl_installed){

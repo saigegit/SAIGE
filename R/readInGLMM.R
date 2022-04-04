@@ -164,7 +164,7 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
 }
 
 
-Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest, useSparseGRMforVarRatio){
+Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest, isSparseGRM, useSparseGRMtoFitNULL){
 
     iscateVR = FALSE
     # check variance ratio
@@ -178,10 +178,12 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 	    spindex = which(varRatioData[,2] == "sparse")
 	    if(length(spindex) > 0){
 	        ratioVec_sparse = varRatioData[which(varRatioData[,2] == "sparse"),1]
+                cat("variance Ratio sparse is ", ratioVec_sparse, "\n")
 	    }else{
 		ratioVec_sparse = c(-1)
 	    }
 	    ratioVec_null = varRatioData[which(varRatioData[,2] == "null"),1]
+            cat("variance Ratio null is ", ratioVec_null, "\n")
 	    if(length(ratioVec_null) > 1){
 		iscateVR = TRUE
 		nrv = length(ratioVec_null)
@@ -189,11 +191,13 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 		nrv = 1
 	    }
 	}else{
-	    if(useSparseGRMforVarRatio){
+	    if(isSparseGRM){
 	        ratioVec_sparse = varRatioData[,1]
-		ratioVec_null = c(-1)
+        	cat("variance Ratio sparse is ", ratioVec_sparse, "\n")
+		ratioVec_null = rep(-1, length(varRatioData[,1]))
 	    }else{
 	        ratioVec_null = varRatioData[,1]
+                cat("variance Ratio null is ", ratioVec_null, "\n")
 		ratioVec_sparse = c(-1)
 	    }
 	    if(length(varRatioData[,1]) > 1){
@@ -217,7 +221,7 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
             }
         }
 	
-        cat("variance Ratio is ", ratioVec, "\n")
+
     }
     return(list(ratioVec_sparse = ratioVec_sparse, ratioVec_null = ratioVec_null))
 }

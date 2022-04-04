@@ -748,7 +748,7 @@ fitNULLGLMM = function(plinkFile = "",
         LOCO = FALSE
 	nThreads = 1
 	if(plinkFile != ""){
-	  cat("sparse GRM will be used to fit the NULL model\n")
+	  cat("sparse GRM will be used to fit the NULL model and nThreads is et to 1\n")
 	}
 	cat("Leave-one-chromosome-out is not applied\n")
     }
@@ -2757,6 +2757,8 @@ extractVarianceRatio = function(obj.glmm.null,
            var2sparseGRM = var2_a[1,1]
            varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
         }
+    }else{
+	  varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, 1)	
     }
 
     if(obj.glmm.null$traitType == "binary"){
@@ -2796,15 +2798,19 @@ extractVarianceRatio = function(obj.glmm.null,
 
   }#end of while(ratioCV > ratioCVcutoff)
 
+  if(length(varRatio_sparseGRM_vec) > 0){
+    varRatio_sparse = mean(varRatio_sparseGRM_vec)
+    cat("varRatio_sparse", varRatio_sparse, "\n")
+    varRatioTable = rbind(varRatioTable, c(varRatio_sparse, "sparse", k))
+  }
   varRatio_null = mean(varRatio_NULL_vec)
-  varRatio_sparse = mean(varRatio_sparseGRM_vec)
   cat("varRatio_null", varRatio_null, "\n")
-  cat("varRatio_sparse", varRatio_sparse, "\n")
-  varRatioTable = rbind(varRatioTable, c(varRatio_null, "null"))
-  varRatioTable = rbind(varRatioTable, c(varRatio_sparse, "sparse"))
+  varRatioTable = rbind(varRatioTable, c(varRatio_null, "null", k))
   }else{# if(cateVarRatioVec[k] == 1)
-    varRatioTable = rbind(varRatioTable, c(1, "null"))
-    varRatioTable = rbind(varRatioTable, c(1, "sparse"))
+    varRatioTable = rbind(varRatioTable, c(1, "null", k))
+    if(length(varRatio_sparseGRM_vec) > 0){
+      varRatioTable = rbind(varRatioTable, c(1, "sparse", k))
+    }
   }
 
 } #for(k in 1:length(listOfMarkersForVarRatio)){

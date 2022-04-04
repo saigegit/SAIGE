@@ -111,7 +111,9 @@ SPAGMMATtest = function(bgenFile = "",
 		 is_overwrite_output = TRUE,
 		 is_single_in_groupTest = TRUE,
 		 is_no_weight_in_groupTest = FALSE,
-		 is_output_markerList_in_groupTest = FALSE 
+		 is_output_markerList_in_groupTest = FALSE,
+		 is_fastTest = FALSE,
+		 pval_cutoff_for_fastTest = 0.05
 ){
    #cat("r.corr is ", r.corr, "\n")
    if(!(impute_method %in% c("best_guess", "mean","minor"))){
@@ -212,10 +214,6 @@ SPAGMMATtest = function(bgenFile = "",
 
     }
     
-    ratioVec = Get_Variance_Ratio(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest) #readInGLMM.R
-
-
-
     obj.model = ReadModel(GMMATmodelFile, chrom, LOCO, is_Firth_beta) #readInGLMM.R
 
     
@@ -230,17 +228,39 @@ SPAGMMATtest = function(bgenFile = "",
       #sparseSigmaRList = setSparseSigma(sparseSigmaFile)
       sparseSigmaRList = setSparseSigma_new(sparseGRMFile, sparseGRMSampleIDFile, relatednessCutoff, obj.model$sampleID, obj.model$theta, obj.model$mu2,  obj.model$traitType)
       isSparseGRM = TRUE
+
     }else{
       sparseSigmaRList = list(nSubj = 0, locations = matrix(0,nrow=2,ncol=2), values = rep(0,2))  
       isSparseGRM = FALSE 
     }	    
+    ratioVecList = Get_Variance_Ratio(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest, isSparseGRM) #readInGLMM.R
+
+    if(is_fastTest){
+      if(!file.exists(varianceRatioFile)){
+         is_fastTest = FALSE
+	 cat("No variance ratio file is specified, so is_fastTest is not working.\n")
+      }
+    }
+
+
+    if(is_fastTest){
+      if(isSparseGRM){
+	cat("is_fastTest is TRUE.\n")
+	if(ratioVecList$ratioVec_null[1] == -1){
+	  stop("Variance ratios estimated without GRM are not found, so the fast tests can't be performed.\n Please set is_fastTest=FALSE or re-run the variance ratio estimation in Step 1 with --skipModelFitting=TRUE using the most recent version of the program.\n")
+	}else{
+	  cat("The fast tests will be performed (when p-values >= ", pval_cutoff_for_fastTest, ").\n")	
+	}
+      }else{
+          is_fastTest = FALSE
+	  cat("No sparse GRM is specified, so is_fastTest is not working.\n")
+      }
+    }
 
     nsample = length(obj.model$y)
     cateVarRatioMaxMACVecInclude = c(cateVarRatioMaxMACVecInclude, nsample)	
-    #print(names(obj.model$obj.noK))
-
     
-     #in Geno.R
+    #in Geno.R
     objGeno = setGenoInput(bgenFile = bgenFile,
                  bgenFileIndex = bgenFileIndex,
                  vcfFile = vcfFile,   #not activate yet
@@ -258,24 +278,16 @@ SPAGMMATtest = function(bgenFile = "",
                  AlleleOrder = AlleleOrder,
                  sampleInModel = obj.model$sampleID)
 
-    #markerInfo = objGeno$markerInfo
-    #genoIndex = objGeno$markerInfo$genoIndex
-    #genoType = objGeno$dosageFileType
-    genoType = objGeno$genoType
-    #if(!is.null(objGeno$markerInfo)){
-#	if(is.null(objGeno$markerInfo$genoIndex_prev)){
-#		objGeno$markerInfo$genoIndex_prev = c("-1")
-#	}
- #   }
-   if (condition != "") {
+   genoType = objGeno$genoType
+   if(condition != ""){
         isCondition = TRUE
-        #n = length(obj.model$y) #sample size
-        #print(n)
-        #assign_conditionMarkers_factors(genoType, condition_genoIndex,  n)
-    }
-    else {
+	if(is_fastTest){
+		is_fastTest = FALSE
+		cat("is_fastTest is not working for conditional analysis.\n")
+	}
+   }else {
         isCondition = FALSE
-    }
+   }
     
     condition_genoIndex = c(-1)
     if(isCondition){
@@ -291,7 +303,8 @@ SPAGMMATtest = function(bgenFile = "",
 		     t_res=obj.model$residuals,
 		     t_mu2=obj.model$mu2,
 		     t_mu=obj.model$mu,
-		     t_varRatio = as.vector(ratioVec),
+		     t_varRatio_sparse = as.vector(ratioVecList$ratioVec_sparse),
+		     t_varRatio_null = as.vector(ratioVecList$ratioVec_null),
 		     t_cateVarRatioMinMACVecExclude = cateVarRatioMinMACVecExclude,
 		     t_cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
 		     t_SPA_Cutoff = SPAcutoff,
@@ -300,6 +313,8 @@ SPAGMMATtest = function(bgenFile = "",
 		     t_y = obj.model$y,
 		     t_impute_method = impute_method, 
 		     t_flagSparseGRM = isSparseGRM,
+		     t_isFastTest = is_fastTest,
+		     t_pval_cutoff_for_fastTest = pval_cutoff_for_fastTest,
         	     t_locationMat = as.matrix(sparseSigmaRList$locations),
         	     t_valueVec = sparseSigmaRList$values,
         	     t_dimNum = sparseSigmaRList$nSubj, 
@@ -416,7 +431,10 @@ SPAGMMATtest = function(bgenFile = "",
 		     is_single_in_groupTest,
 		     is_no_weight_in_groupTest,
 		     is_output_markerList_in_groupTest,
-		     chrom)
+		     chrom,
+		     is_fastTest,
+		     pval_cutoff_for_fastTest,
+		     is_output_moreDetails)
 
 
     }	    

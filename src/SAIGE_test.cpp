@@ -31,7 +31,8 @@ SAIGEClass::SAIGEClass(
 	arma::vec & t_res,
 	arma::vec & t_mu2,
 	arma::vec & t_mu,
-	arma::vec & t_varRatio,
+	arma::vec & t_varRatio_sparse,
+	arma::vec & t_varRatio_null,
 	arma::vec & t_cateVarRatioMinMACVecExclude,
         arma::vec & t_cateVarRatioMaxMACVecInclude,
 	double t_SPA_Cutoff,
@@ -40,6 +41,8 @@ SAIGEClass::SAIGEClass(
 	arma::vec & t_y,
 	std::string t_impute_method,
 	bool t_flagSparseGRM,
+	bool t_isFastTest,
+	double t_pval_cutoff_for_fastTest,
 	arma::umat & t_locationMat,
 	arma::vec & t_valueVec,
         int t_dimNum,
@@ -58,7 +61,8 @@ SAIGEClass::SAIGEClass(
     m_res = t_res;
     m_mu2 = t_mu2;
     m_mu = t_mu;
-    m_varRatio = t_varRatio;
+    m_varRatio_sparse = t_varRatio_sparse;
+    m_varRatio_null = t_varRatio_null;
     m_cateVarRatioMinMACVecExclude = t_cateVarRatioMinMACVecExclude;
     m_cateVarRatioMaxMACVecInclude = t_cateVarRatioMaxMACVecInclude;
     m_tauvec = t_tauvec;
@@ -94,6 +98,8 @@ SAIGEClass::SAIGEClass(
     }
     m_dimNum = t_dimNum;
     m_flagSparseGRM = t_flagSparseGRM;
+    m_isFastTest = t_isFastTest;
+    m_pval_cutoff_for_fastTest = t_pval_cutoff_for_fastTest;
     if(m_dimNum != 0){
 	m_locationMat = t_locationMat;
     	m_valueVec = t_valueVec;
@@ -118,7 +124,6 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
                      double &t_var1,
                      double &t_var2,
                      arma::vec & t_gtilde,
-		     bool m_flagSparseGRM,
 		     arma::vec & t_P2Vec,
 		     double& t_gy, 
 		     bool t_is_region,
@@ -136,7 +141,7 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
     S = S/m_tauvec[0];
 
 
-    if(!m_flagSparseGRM){
+    if(!m_flagSparseGRM_cur){
       t_P2Vec = t_gtilde % m_mu2 *m_tauvec[0];
     }else{
       arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
@@ -346,7 +351,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 
 
   //if((t_altFreq >= 0.3 && t_altFreq <= 0.7) || m_flagSparseGRM || is_region){
-  if(m_flagSparseGRM || is_region){
+  if(m_flagSparseGRM_cur){
     isScoreFast = false;
   }
 
@@ -355,7 +360,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   if(!isScoreFast){
 	//std::cout << "scoreTest " << std::endl;  
   	is_gtilde = true;
-  	scoreTest(t_GVec, t_Beta, t_seBeta, t_pval_str, t_altFreq, t_Tstat, t_var1, t_var2, t_gtilde, m_flagSparseGRM, t_P2Vec, t_gy, is_region, iIndex);
+  	scoreTest(t_GVec, t_Beta, t_seBeta, t_pval_str, t_altFreq, t_Tstat, t_var1, t_var2, t_gtilde, t_P2Vec, t_gy, is_region, iIndex);
   }else{
   	is_gtilde = false;
 	//std::cout << "scoreTestFast "  << std::endl;  
@@ -653,11 +658,39 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
     gNB.clear();
     muNA.clear();
     gNB.clear();
+
+    if(is_region && !is_gtilde){
+	getadjGFast(t_GVec, t_gtilde, iIndex);
+	is_gtilde = true; 
+    }
+
+     
+
+
+
+    if(is_region && isScoreFast){
+
+      t_gy = dot(t_gtilde, m_y);
+
+
+      if(!m_flagSparseGRM_cur){
+        t_P2Vec = t_gtilde % m_mu2 *m_tauvec[0];
+      }else{
+        arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
+        t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
+      }
+    }
 }
 
 
-bool SAIGEClass::assignVarianceRatio(double MAC){
+bool SAIGEClass::assignVarianceRatio(double MAC, bool issparseforVR){
     bool hasVarRatio = false;
+    arma::vec m_varRatio;
+    if(issparseforVR){
+	m_varRatio = m_varRatio_sparse;
+    }else{
+	m_varRatio = m_varRatio_null;
+    }
     for(unsigned int i = 0; i < m_cateVarRatioMaxMACVecInclude.n_elem; i++)
     {
         if(MAC <= m_cateVarRatioMaxMACVecInclude(i) && MAC > m_cateVarRatioMinMACVecExclude(i)){    	    
@@ -684,8 +717,14 @@ bool SAIGEClass::assignVarianceRatio(double MAC){
     return(hasVarRatio);    
 }
 
-void SAIGEClass::assignSingleVarianceRatio(){ 
-	m_varRatioVal = m_varRatio(0);
+void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR){ 
+    arma::vec m_varRatio;
+    if(issparseforVR){
+        m_varRatio = m_varRatio_sparse;
+    }else{
+        m_varRatio = m_varRatio_null;
+    }	
+    m_varRatioVal = m_varRatio(0);
 }
 
 
@@ -833,12 +872,8 @@ void SAIGEClass::fast_logistf_fit_simple(arma::mat & x,
         //return beta;
 }
 
-
-
-
-
-
-
-
+void SAIGEClass::set_flagSparseGRM_cur(bool t_flagSparseGRM_cur){
+	m_flagSparseGRM_cur = t_flagSparseGRM_cur;
+}
 
 }
