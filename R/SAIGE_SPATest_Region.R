@@ -92,7 +92,9 @@ SAIGE.Region = function(mu,
 			is_no_weight_in_groupTest,
 			is_output_markerList_in_groupTest,
 			chrom, 
-			is_fastSKAT){
+			is_fastTest,
+			pval_cutoff_for_fastTest,
+			is_output_moreDetails){
   OutputFileIndex = NULL	
   if(is.null(OutputFileIndex))
     OutputFileIndex = paste0(OutputFile, ".index")
@@ -114,7 +116,7 @@ SAIGE.Region = function(mu,
     return(message)
   }
 
- isappend=FALSE
+  isappend=FALSE
  if(!Start){ 
   isappend=TRUE
  }
@@ -122,8 +124,6 @@ SAIGE.Region = function(mu,
   n = length(mu) #sample size 
 
 
-  ## annotation in region
-  ##need to revise
   if(r.corr==0){
     out.method = SKAT:::SKAT_Check_Method(method="optimal.adj", r.corr=0)
     method=out.method$method
@@ -131,7 +131,6 @@ SAIGE.Region = function(mu,
     cat("SKAT-O test will be performed. P-values for BURDEN and SKAT tests will also be output\n")
     regionTestType = "SKAT-O"
     is_single_in_groupTest = TRUE
-    #cat("is_single_in_groupTest = TRUE. Single-variant assoc tests results will be output\n")
   }else if(r.corr == 1){	  
     method = NULL
     cat("BURDEN test will be performed\n")
@@ -143,14 +142,14 @@ SAIGE.Region = function(mu,
     if(!isOpenOutFile){
 	stop("Output file ", OutputFile, " can't be opened\n")
     }
-
   }else{
     stop("r.corr needs to be either 1 (BURDEN test) or 0 (SKAT-O test)\n")
   }	  
 
+
   if(is_single_in_groupTest){
       cat("is_single_in_groupTest = TRUE. Single-variant assoc tests results will be output\n")
-    isOpenOutFile_singleinGroup = openOutfile_singleinGroup(traitType, isImputation, isappend)
+    isOpenOutFile_singleinGroup = openOutfile_singleinGroup(traitType, isImputation, isappend, is_output_moreDetails)
     if(!isOpenOutFile_singleinGroup){
         stop("Output file ", OutputFile, ".singleAssoc.txt can't be opened\n")
     }
@@ -160,7 +159,7 @@ SAIGE.Region = function(mu,
   }
 
 
-##check group file
+  ##check group file
   region_list = checkGroupFile(groupFile)
   nRegions = region_list$nRegions
   is_weight_included = region_list$is_weight_included
@@ -237,10 +236,10 @@ SAIGE.Region = function(mu,
     pval.Region = NULL
     region = RegionList[[mth]]
 
-    annolist = region$annoVec 
+    annolistsub = region$annoVec 
     regionName = names(RegionList)[mth]
     i = i + 1
-    if(!is.null(region$SNP) & length(annolist) > 0){
+    if(!is.null(region$SNP) & length(annolistsub) > 0){
 
       SNP = region$SNP
       if(genoType == "vcf"){
@@ -270,48 +269,62 @@ SAIGE.Region = function(mu,
       #tp1 = proc.time()
       #gc()
 
-      #time_mainRegionInCPP = system.time({outList = mainRegionInCPP(genoType, genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest)})
-     if(regionTestType == "BURDEN" | is_fastSKAT){
-      outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolist, regionName, FALSE)
-     }
-    
-     if(!is_fastSKAT){
-      outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolist, regionName, TRUE)	
-     }
+      if(!is_fastTest){
+        set_flagSparseGRM_cur_SAIGE_org()
+      }else{
+        set_flagSparseGRM_cur_SAIGE(FALSE)
+      }
+
+      outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolistsub, regionName, is_fastTest, is_output_moreDetails)	
+
+        #print("outList$VarMat 1 ")
+        #print(outList$VarMat)
+
+
+
+      if(regionTestType == "BURDEN" & is_fastTest){
+	if(!is.null(outList$iswriteOutput)){
+	  if(!(outList$iswriteOutput)){	
+            set_flagSparseGRM_cur_SAIGE(TRUE)
+	    outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolistsub, regionName, is_fastTest, is_output_moreDetails)
+          }
+	}
+      }	
 
 #print("time_mainRegionInCPP")
 #print(time_mainRegionInCPP)
+     if(!is_fastTest){
       rm(region)
+     }  
       #rm(genoIndex)
       #gc()
     #tb0 = proc.time()
-if(is_single_in_groupTest){
+      if(is_single_in_groupTest){
       #OutList = as.data.frame(outList$OUT_DF)
-      noNAIndices = which(!is.na(outList$pvalVec))
-      if(sum(WEIGHT) > 0){
-        AnnoWeights = c(WEIGHT, rep(1, outList$numofUR))
+        noNAIndices = which(!is.na(outList$pvalVec))
+        if(sum(WEIGHT) > 0){
+          AnnoWeights = c(WEIGHT, rep(1, outList$numofUR))
+        }
       }
-}
 
 
 
-annoMAFIndicatorMat = outList$annoMAFIndicatorMat
+      annoMAFIndicatorMat = outList$annoMAFIndicatorMat
 
-if((sum(outList$NumUltraRare_GroupVec) + sum(outList$NumRare_GroupVec)) > 0){
+      if((sum(outList$NumUltraRare_GroupVec) + sum(outList$NumRare_GroupVec)) > 0){
 
-if(regionTestType != "BURDEN"){
-     #is_single_in_groupTest is TRUE
- 	#ta0 = proc.time()
-       if(traitType == "binary"){	     
-         outList$gyVec = outList$gyVec[noNAIndices]
-       }
+        if(regionTestType != "BURDEN"){
+ 	  #ta0 = proc.time()
+          if(traitType == "binary"){	     
+            outList$gyVec = outList$gyVec[noNAIndices]
+          }
 
-       if(isCondition){
-         outList$VarMatAdjCond = outList$VarMatAdjCond[noNAIndices,noNAIndices]
-         outList$TstatAdjCond = outList$TstatAdjCond[noNAIndices]
-         outList$G1tilde_P_G2tilde_Weighted_Mat = outList$G1tilde_P_G2tilde_Weighted_Mat[noNAIndices,,drop=F]
-         weightMat_G2_G2 = outList$G2_Weight_cond %*% t(outList$G2_Weight_cond)
-       }	  
+          if(isCondition){
+            outList$VarMatAdjCond = outList$VarMatAdjCond[noNAIndices,noNAIndices]
+            outList$TstatAdjCond = outList$TstatAdjCond[noNAIndices]
+            outList$G1tilde_P_G2tilde_Weighted_Mat = outList$G1tilde_P_G2tilde_Weighted_Mat[noNAIndices,,drop=F]
+            weightMat_G2_G2 = outList$G2_Weight_cond %*% t(outList$G2_Weight_cond)
+          }	  
         
        ### Get annotation maf indicators
 
@@ -349,6 +362,8 @@ if(regionTestType != "BURDEN"){
        wStatVec = StatVec * AnnoWeights
 
       wadjVarSMat = outList$VarMat * weightMat
+      #print("outList$VarMat")
+      #print(outList$VarMat)
 
 	if(isCondition){
 	  wStatVec_cond = wStatVec - outList$TstatAdjCond
@@ -359,8 +374,8 @@ if(regionTestType != "BURDEN"){
 
 
     annoMAFIndVec = c()
-    for(j in 1:length(annolist)){
-	AnnoName = annolist[j]
+    for(j in 1:length(annolistsub)){
+	AnnoName = annolistsub[j]
 	maxMAF0 = outList$q_maf_for_annoVec[j]
 	isPolyRegion = TRUE
 	for(m in 1:length(maxMAFlist)){
@@ -378,11 +393,11 @@ if(regionTestType != "BURDEN"){
 			g.sum = outList$genoSumMat[,jm]
 			q.sum<-sum(outList$gyVec[tempPos] * AnnoWeights[tempPos])
 			mu.a = mu
+
 			re_phi = get_newPhi_scaleFactor(q.sum, mu.a, g.sum, p.new, Score, Phi, regionTestType)
 		        Phi = re_phi$val
                 }
 		groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType)
-
 		resultDF = data.frame(Region = regionName,
                                                     Group = AnnoName,
                                                     max_MAF = maxMAFName,
@@ -452,10 +467,10 @@ gc()
       pval.Region$Number_ultra_rare = outList$NumUltraRare_GroupVec[annoMAFIndVec]
     }
 
-if(length(annolist) > 1 | length(maxMAFlist) > 1){
-
+if(length(annolistsub) > 1 | length(maxMAFlist) > 1){
    cctpval_Burden = get_CCT_pvalue(pval.Region$Pvalue_Burden)
    if(regionTestType != "BURDEN"){
+     #print(pval.Region$Pvalue)
      cctpval = get_CCT_pvalue(pval.Region$Pvalue)
      cctpval_SKAT = get_CCT_pvalue(pval.Region$Pvalue_SKAT)
      cctVec = c(regionName, "Cauchy", NA, cctpval, cctpval_Burden, cctpval_SKAT, NA, NA)
@@ -481,9 +496,9 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
    cctVec = c(cctVec, NA, NA)
 
    pval.Region = rbind(pval.Region, cctVec)
+}else{
+   cctpval = 1	
 }
-
-
 #ta1 = proc.time()
 #print("ta0 - tb0")
 #print(ta0 - tb0)
@@ -491,12 +506,17 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
 #print(ta1 - ta0)
 
 
-if(cctpval < 0.05 & is_fastSKAT){
+if(is_fastTest){
+  if(cctpval < pval_cutoff_for_fastTest){
+#if(cctpval < 0.1 & is_fastTest){
      pval.Region = NULL
-      outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolist, regionName, TRUE)	
+      set_flagSparseGRM_cur_SAIGE(TRUE)
+      outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolistsub, regionName, is_fastTest, is_output_moreDetails)
   if(is_single_in_groupTest){
       #OutList = as.data.frame(outList$OUT_DF)
       noNAIndices = which(!is.na(outList$pvalVec))
+      print(noNAIndices)
+      annoMAFIndicatorMat = outList$annoMAFIndicatorMat
       if(sum(WEIGHT) > 0){
         AnnoWeights = c(WEIGHT, rep(1, outList$numofUR))
       }
@@ -559,8 +579,8 @@ if(cctpval < 0.05 & is_fastSKAT){
 
 
     annoMAFIndVec = c()
-    for(j in 1:length(annolist)){
-	AnnoName = annolist[j]
+    for(j in 1:length(annolistsub)){
+	AnnoName = annolistsub[j]
 	maxMAF0 = outList$q_maf_for_annoVec[j]
 	isPolyRegion = TRUE
 	for(m in 1:length(maxMAFlist)){
@@ -651,7 +671,7 @@ gc()
       pval.Region$Number_ultra_rare = outList$NumUltraRare_GroupVec[annoMAFIndVec]
     }
 
-if(length(annolist) > 1 | length(maxMAFlist) > 1){
+if(length(annolistsub) > 1 | length(maxMAFlist) > 1){
 
    cctpval_Burden = get_CCT_pvalue(pval.Region$Pvalue_Burden)
    if(regionTestType != "BURDEN"){
@@ -683,15 +703,20 @@ if(length(annolist) > 1 | length(maxMAFlist) > 1){
 }
 
 
-}  #if(cctpval < 0.05 & is_fastSKAT){
+}else{ #cctpval < 0.05)
+   copy_singleInGroup()
+}
+}#if(is_fastTest){
+
+
 
 }#if(regionTestType != "BURDEN"){
 
 
   Output_MarkerList = NULL
   if(is_output_markerList_in_groupTest){
-    for(j in 1:length(annolist)){
-        AnnoName = annolist[j]
+    for(j in 1:length(annolistsub)){
+        AnnoName = annolistsub[j]
         for(m in 1:length(maxMAFlist)){
                 jm = (j-1)*(length(maxMAFlist)) + m
                 maxMAFName = maxMAFlist[m]
@@ -760,7 +785,7 @@ if(mth ==  numberRegionsInChunk){
   message5 = "Have completed the analyses of all chunks."
   #n1 = length(Output)
   #n2 = length(OutputFile)
-  print("write to output")
+  cat("write to output\n")
   #cat("n1 is ", n1, "\n")
   #cat("n2 is ", n2, "\n")
   if(regionTestType != "BURDEN"){  

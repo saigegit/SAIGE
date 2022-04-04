@@ -912,7 +912,7 @@ public:
 
 		}
                 //numMarkersofEachArray = floor((memoryChunk*pow (10.0, 9.0))/(ceil(float(Nnomissing)/4)));
-		
+	std::cout << "isVarRatio " << isVarRatio <<  std::endl;		
 	if(isVarRatio){
 		invstdvVec_forVarRatio.clear();
                 invstdvVec_forVarRatio.set_size(numberofMarkers_varRatio);
@@ -925,6 +925,8 @@ public:
 			alleleFreqVec_forVarRatio[i] =alleleFreqVec0_forVarRatio.at(i);
 			MACVec_forVarRatio[i] = MACVec0_forVarRatio.at(i);
 		}
+		std::cout << "MACVec_forVarRatio.n_elem " << MACVec_forVarRatio.n_elem << std::endl;
+		MACVec_forVarRatio.print();
 	}
 
         	test_bedfile.close();

@@ -28,7 +28,8 @@ class SAIGEClass
       arma::mat m_XV;
       int m_n, m_p; //MAIN Dimensions: sample size, number of covariates
       double m_varRatioVal;
-      arma::vec m_varRatio;
+      arma::vec m_varRatio_sparse;
+      arma::vec m_varRatio_null;
       arma::vec m_y;
 
       bool m_isOutputAFinCaseCtrl;
@@ -43,7 +44,10 @@ class SAIGEClass
       arma::uvec m_n_case;
       arma::uvec m_n_ctrl;
       arma::sp_mat m_SigmaMat_sp;
-      bool m_flagSparseGRM; 
+      bool m_flagSparseGRM;
+      bool m_flagSparseGRM_cur;
+      bool m_isFastTest;
+      double m_pval_cutoff_for_fastTest; 
       double m_SPA_Cutoff;
       arma::umat m_locationMat;
       arma::vec m_valueVec;
@@ -81,7 +85,8 @@ class SAIGEClass
         arma::vec & t_res,
         arma::vec & t_mu2,
         arma::vec & t_mu,
-        arma::vec & t_varRatio,
+        arma::vec & t_varRatio_sparse,
+        arma::vec & t_varRatio_null,
         arma::vec & t_cateVarRatioMinMACVecExclude,
         arma::vec & t_cateVarRatioMaxMACVecInclude,
         double t_SPA_Cutoff,
@@ -90,10 +95,12 @@ class SAIGEClass
         arma::vec & t_y,
         std::string t_impute_method,
         bool t_flagSparseGRM,
+	bool t_isFastTest,
+	double t_pval_cutoff_for_fastTest,
         arma::umat & t_locationMat,
         arma::vec & t_valueVec,
         int t_dimNum,
-        bool t_isCondtiion,
+        bool t_isCondition,
         std::vector<uint32_t> & t_condition_genoIndex,
 	bool t_is_Firth_beta,
         double t_pCutoffforFirth,
@@ -110,7 +117,6 @@ class SAIGEClass
                      double &t_var1,
                      double &t_var2,
                      arma::vec & t_gtilde,
-		     bool m_flagSparseGRM,
                      arma::vec & t_P2Vec,
 		     double& t_gy,
                      bool t_is_region,
@@ -125,7 +131,7 @@ class SAIGEClass
                      double &t_Tstat,
                      double &t_var1,
                      double &t_var2);
-
+     void set_flagSparseGRM_cur(bool t_flagSparseGRM_cur);
 
      void get_mu(arma::vec & t_mu);
 
@@ -168,9 +174,9 @@ class SAIGEClass
 
     arma::sp_mat gen_sp_SigmaMat();
 
-    bool assignVarianceRatio(double MAC);
+    bool assignVarianceRatio(double MAC, bool issparseforVR);
 
-    void assignSingleVarianceRatio();
+    void assignSingleVarianceRatio(bool issparseforVR);
 
 
     void assignSingleVarianceRatio_withinput(double t_varRatioVal);
