@@ -1933,8 +1933,8 @@ extractVarianceRatio = function(obj.glmm.null,
          cat("length(MACvector_forVarRatio): ", length(MACvector_forVarRatio), "\n")
          if(length(MACvector_forVarRatio) > 0){
 
-                MACdata = data.frame(MACvector = c(MACvector, MACvector_forVarRatio), geno_ind = c(rep(0, length(MACvector)), rep(1, length(MACvector_forVarRatio))), indexInGeno = c(seq(1,length(MACvector)), seq(1,length(MACvector_forVarRatio))))
-
+                #MACdata = data.frame(MACvector = c(MACvector, MACvector_forVarRatio), geno_ind = c(rep(0, length(MACvector)), rep(1, length(MACvector_forVarRatio))), indexInGeno = c(seq(1,length(MACvector)), seq(1,length(MACvector_forVarRatio))))
+		MACdata = data.frame(MACvector = MACvector_forVarRatio, geno_ind = rep(1, length(MACvector_forVarRatio)), indexInGeno = seq(1,length(MACvector_forVarRatio)))	
         }else{
                 stop("No markers were found for variance ratio estimation. Please make sure there are at least 200 markers in each MAC category\n")
         }
@@ -1956,10 +1956,6 @@ extractVarianceRatio = function(obj.glmm.null,
     for(i in 1:(numCate-1)){
       MACindex = which(MACdata$MACvector > cateVarRatioMinMACVecExclude[i] & MACdata$MACvector <= cateVarRatioMaxMACVecInclude[i])
       listOfMarkersForVarRatio[[i]] = sample(MACindex, size = length(MACindex), replace = FALSE)
-      print(MACdata$MACvector[1:10])
-      cat("cateVarRatioMinMACVecExclude[i] ", cateVarRatioMinMACVecExclude[i], "\n")
-      cat("cateVarRatioMaxMACVecInclude[i] ", cateVarRatioMaxMACVecInclude[i], "\n")
-      print(length(MACindex))
     }
 
     if(length(cateVarRatioMaxMACVecInclude) == (numCate-1)){
