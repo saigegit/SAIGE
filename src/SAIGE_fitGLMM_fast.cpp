@@ -951,7 +951,6 @@ public:
 			alleleFreqVec_forVarRatio[i] =alleleFreqVec0_forVarRatio.at(i);
 			MACVec_forVarRatio[i] = MACVec0_forVarRatio.at(i);
 		}
-		MACVec_forVarRatio.print();
 	}
 
         	test_bedfile.close();

@@ -1764,6 +1764,7 @@ if(t_regionTestType == "BURDEN"){
 
  int numofUR = q_anno_maf;
  int numofUR0;
+ int mFirth = 0;
  if(t_isSingleinGroupTest){
   OutList.push_back(pvalVec, "pvalVec");
 if(iswriteOutput){
