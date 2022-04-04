@@ -1037,7 +1037,7 @@ fitNULLGLMM = function(plinkFile = "",
     data.new$covoffset = covoffset
 
     if (useSparseGRMtoFitNULL | useSparseGRMforVarRatio) {
-        sparseGRMtest = getsubGRM(sparseGRMFile, sparseGRMSampleIDFile, 
+        sparseGRMtest = getsubGRM(sparseGRMFile, sparseGRMSampleIDFile,
             relatednessCutoff, dataMerge_sort$IID)
         m4 = gen_sp_v2(sparseGRMtest)
         cat("Setting up sparse GRM using ", sparseGRMFile, " and ", sparseGRMSampleIDFile, "\n")
@@ -1050,28 +1050,31 @@ fitNULLGLMM = function(plinkFile = "",
     }
 
     if(!skipVarianceRatioEstimation){
-	    mac_inter = minMAFforGRM * 2 * nrow(dataMerge_sort) - 1
-	    cat("mac_inter ", mac_inter, "\n") 
-		if(isCateVarianceRatio){
-			minMAC_varRatio = min(cateVarRatioMinMACVecExclude)
-			maxMAC_varRatio = min(max(cateVarRatioMaxMACVecInclude), mac_inter)
-			isVarianceRatioinGeno = TRUE
-			cat("Categorical variance ratios will be estimated. Please make sure there are at least 200 markers in each MAC category.\n")
-		}else{
-			if(mac_inter <= 20){
-				isVarianceRatioinGeno = FALSE
-			}else{
-				isVarianceRatioinGeno = TRUE
-				minMAC_varRatio = 20
-				maxMAC_varRatio = mac_inter
-			}	
-		}
-	if(isVarianceRatioinGeno) {
-		setminMAC_VarianceRatio(minMAC_varRatio, maxMAC_varRatio, isVarianceRatioinGeno)
-	}	
+            isVarianceRatioinGeno = TRUE
+            if(isCateVarianceRatio){
+                minMAC_varRatio = min(cateVarRatioMinMACVecExclude)
+                maxMAC_varRatio = max(cateVarRatioMaxMACVecInclude)
+                #maxMAC_varRatio = max(max(cateVarRatioMaxMACVecInclude), minMACforGRM - 1)
+                cat("Categorical variance ratios will be estimated. Please make sure there are at least 200 markers in each MAC category.\n")
+            }else{
+                minMAC_varRatio = 20
+                maxMAC_varRatio = -1 #will randomly select markers from the plink file and leave them out when constructing GRM
+            }
+            setminMAC_VarianceRatio(minMAC_varRatio, maxMAC_varRatio, isVarianceRatioinGeno)
 
     }
 
+    #set up parameters
+    if (minMAFforGRM > 0) {
+        cat("Markers in the Plink file with MAF < ", minMAFforGRM,
+            " will be removed before constructing GRM\n")
+    }
+    if (maxMissingRateforGRM > 0){
+        cat("Markers in the Plink file with missing rate > ", maxMissingRateforGRM, " will be removed before constructing GRM\n")
+    }
+
+    setminMAFforGRM(minMAFforGRM)
+    setmaxMissingRateforGRM(maxMissingRateforGRM)
 
 
 
