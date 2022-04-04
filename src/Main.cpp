@@ -1762,12 +1762,12 @@ if(t_regionTestType == "BURDEN"){
 }
 
 
-if(t_isSingleinGroupTest){
+ int numofUR = q_anno_maf;
+ int numofUR0;
+ if(t_isSingleinGroupTest){
   OutList.push_back(pvalVec, "pvalVec");
-  int numofUR;
-  int mFirth = 0;
 if(iswriteOutput){
-  numofUR = writeOutfile_singleInGroup(t_isMoreOutput,
+  numofUR0 = writeOutfile_singleInGroup(t_isMoreOutput,
       t_isImputation,
       isCondition,
       is_Firth,
@@ -1808,7 +1808,7 @@ if(iswriteOutput){
       OutFile_singleInGroup);
  }else{
   OutFile_singleInGroup_temp.open(g_outputFilePrefixSingleInGroup_temp.c_str(), std::ofstream::out);
-  numofUR = writeOutfile_singleInGroup(t_isMoreOutput,
+  numofUR0 = writeOutfile_singleInGroup(t_isMoreOutput,
       t_isImputation,
       isCondition,
       is_Firth,
@@ -1852,8 +1852,6 @@ if(iswriteOutput){
  }//iswriteOutput
  OutList.push_back(numofUR, "numofUR");
 }
-
-//}
 
 OutList.push_back(iswriteOutput, "iswriteOutput");
 
@@ -2219,10 +2217,13 @@ bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, boo
 
                 if(ptr_gSAIGEobj->m_isCondition){
                         OutFile_singleInGroup << "BETA_c\tSE_c\tTstat_c\tvar_c\tp.value_c\t";
+			if(t_traitType == "binary"){
+				OutFile_singleInGroup << "p.value.NA_c\t";		
+			}
                 }
 		
 	        if(t_traitType == "binary"){
-                        OutFile_singleInGroup << "p.value.NA_c\tIs.SPA.converge\tAF_case\tAF_ctrl\tN_case\tN_ctrl";
+                        OutFile_singleInGroup << "AF_case\tAF_ctrl\tN_case\tN_ctrl\n";
  			if(t_isMoreOutput){
                                 OutFile_singleInGroup << "\tN_case_hom\tN_case_het\tN_ctrl_hom\tN_ctrl_het";
                         }
@@ -2271,11 +2272,6 @@ bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isapp
 			}
                 }
 		
-// OUT_DF["N_case_hom"] = N_case_homVec;
-//                 OUT_DF["N_case_het"] = N_case_hetVec;
-//                                 OUT_DF["N_ctrl_hom"] = N_ctrl_homVec;
-//                                                 OUT_DF["N_ctrl_het"] = N_ctrl_hetVec;
-
 
                 if(t_traitType == "binary"){
                         OutFile_single << "AF_case\tAF_ctrl\tN_case\tN_ctrl";

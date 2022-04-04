@@ -671,7 +671,7 @@ gc()
       pval.Region$Number_ultra_rare = outList$NumUltraRare_GroupVec[annoMAFIndVec]
     }
 
-if(length(annolistsub) > 1 | length(maxMAFlist) > 1){
+if(length(annolistnew) > 1 | length(maxMAFlist) > 1){
 
    cctpval_Burden = get_CCT_pvalue(pval.Region$Pvalue_Burden)
    if(regionTestType != "BURDEN"){

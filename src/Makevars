@@ -2,7 +2,7 @@ PKG_CPPFLAGS = \
 -I ../thirdParty/cget/include \
 -I ../thirdParty/cget/lib \
 -I ../thirdParty/cget/lib64 \
--D SQLITE_ENABLE_COLUMN_METADATA -O3 -fpic -Wall -Wextra -pedantic  -DARMA_64BIT_WORD=1
+-D SQLITE_ENABLE_COLUMN_METADATA -O3 -fpic -Wall -Wextra -pedantic  -DARMA_64BIT_WORD=1 -D__STDC_FORMAT_MACROS
 
 CXX_STD = CXX11 
 
