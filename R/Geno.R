@@ -467,14 +467,17 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 			setnames(markerInfo_conditionDat, "genoIndex.x", "genoIndex")
 			setnames(markerInfo_conditionDat, "genoIndex.y", "genoIndex2")
 			posNA = which(is.na(markerInfo_conditionDat$genoIndex) & !is.na(markerInfo_conditionDat$genoIndex2))
-        	if(length(posNA) != 0){
-                	markerInfo_conditionDat$genoIndex[posNA] = markerInfo_conditionDat$genoIndex2[posNA]
-        	}
+        		if(length(posNA) != 0){
+                		markerInfo_conditionDat$genoIndex[posNA] = markerInfo_conditionDat$genoIndex2[posNA]
+        		}
 			markerInfo_conditionDat$genoIndex2 = NULL
 
 		}
 		markerInfo_conditionDat = markerInfo_conditionDat[which(!is.na(markerInfo_conditionDat$genoIndex)), , drop=F]
+
 		markerInfo_conditionDat = markerInfo_conditionDat[order(markerInfo_conditionDat$condIndex), ]	
+		#markerInfo_conditionDat = markerInfo_conditionDat[order(markerInfo_conditionDat$genoIndex), ]
+
 		#markerInfo_conditionDat = markerInfo_conditionDat[which()]
        		#posInd = which(markerInfo_conditionDat %in% condition_original)
 		#if(length(posInd) == length(condition_original)){

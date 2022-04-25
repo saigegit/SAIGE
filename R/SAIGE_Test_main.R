@@ -291,7 +291,7 @@ SPAGMMATtest = function(bgenFile = "",
     
     condition_genoIndex = c(-1)
     if(isCondition){
-        cat("Conducting conditional analysis.\n")
+        cat("Conducting conditional analysis. Please specify the conditioning markers in the order as they are store in the genotype/dosage file.\n")
     }	    
     #set up the SAIGE object based on the null model results
     setSAIGEobjInCPP(t_XVX=obj.model$obj.noK$XVX,
@@ -328,6 +328,9 @@ SPAGMMATtest = function(bgenFile = "",
    #process condition
     if (isCondition) {
         n = length(obj.model$y) #sample size
+
+	##re-order the conditioning markers
+	##condition_original = unlist(strsplit(condition, ","))
 	condition_genoIndex=extract_genoIndex_condition(condition, objGeno$markerInfo, genoType)
 	if(!is.null(weights_for_condition)){
                 condition_weights = unlist(strsplit(weights_for_condition, ","))
