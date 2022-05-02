@@ -244,7 +244,7 @@ SAIGE.Region = function(mu,
       SNP = region$SNP
       if(genoType == "vcf"){
         SNPlist = paste(c(regionName, SNP), collapse = "\t") 
-        set_iterator_inVcf(SNPlist, chrom1, 1, 200000000)
+        set_iterator_inVcf(SNPlist, chrom1, 1, 250000000)
         isVcfEnd =  check_Vcf_end()
     	if(!isVcfEnd){
 		region$genoIndex = rep("0", length(SNP))
