@@ -66,13 +66,6 @@ updateChrStartEndIndexVec <- function(chrVec){
 
 
 
-
-
-
-
-
-
-
 create_resultHeader<-function(traitType,
 			      isGroupTest,
 			      isCondition,

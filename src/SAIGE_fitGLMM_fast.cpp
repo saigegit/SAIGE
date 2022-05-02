@@ -105,6 +105,8 @@ public:
         
         arma::ivec startIndexVec;
         arma::ivec endIndexVec;
+        arma::ivec startIndexVec_forvr;
+        arma::ivec endIndexVec_forvr;
 
 
         int Msub_MAFge_minMAFtoConstructGRM;
@@ -478,11 +480,18 @@ public:
 			if(mac >= g_minMACVarRatio){
 				   //randomly select 200 markers for estimating the variance ratio for the last MAC category	
 				   if(numberofMarkers_varRatio_common < 200){
+				   	//if(static_cast<int>(SNPIdx) == 123){
+					//	std::cout << "123" << std::endl;
+					//	bool isIng_randMarkerIndforVR = arma::any(g_randMarkerIndforVR == static_cast<int>(SNPIdx));
+					//	std::cout << "isIng_randMarkerIndforVR " << isIng_randMarkerIndforVR << std::endl;
+					//}
 				   	passVarRatio = arma::any(g_randMarkerIndforVR == static_cast<int>(SNPIdx));
 					if(passVarRatio){
+						//std::cout << "SNPIdx " << SNPIdx << std::endl;
 						genoVecofPointers_forVarRatio[SNPIdx_vr] = new vector<unsigned char>;
 						genoVecofPointers_forVarRatio[SNPIdx_vr]->reserve(numMarkersofEachArray*ceil(float(Nnomissing)/4));
 				  		numberofMarkers_varRatio_common = numberofMarkers_varRatio_common + 1;
+						//passVarRatio = false;
 					}
 				  } 
 			//	passVarRatio = true;	
@@ -811,6 +820,9 @@ public:
 		//randomly select common markers for variance ratio
 		if(isVarRatio){
 			 g_randMarkerIndforVR = arma::randi(1000, arma::distr_param(0,M-1));
+			 //arma::ivec g_randMarkerIndforVR_sort = arma::sort(g_randMarkerIndforVR);
+			 //g_randMarkerIndforVR_sort.print("g_randMarkerIndforVR_sort");
+			 //g_randMarkerIndforVR.print("g_randMarkerIndforVR");
 		}
 		//alleleFreqVec.zeros(M);
 		//invstdvVec.zeros(M);
@@ -2754,6 +2766,13 @@ void setStartEndIndexVec( arma::ivec & startIndex_vec,  arma::ivec & endIndex_ve
   geno.endIndexVec = endIndex_vec;
   //geno.Msub = geno.M - (endIndex - startIndex + 1);
 }
+
+// // [[Rcpp::export]]
+//void setStartEndIndexVec_forvr( arma::ivec & startIndex_vec,  arma::ivec & endIndex_vec){
+//  geno.startIndexVec_forvr = startIndex_vec;
+//  geno.endIndexVec_forvr = endIndex_vec;
+  //geno.Msub = geno.M - (endIndex - startIndex + 1);
+//}
 
 
 
