@@ -75,7 +75,7 @@ SAIGE.Marker = function(traitType,
     if(chrom == ""){
       stop("chrom needs to be specified for single-variant assoc tests when using VCF as input\n")
     }else{
-      set_iterator_inVcf("", chrom, 1, 200000000)
+      set_iterator_inVcf("", chrom, 1, 250000000)
     }
     if(outIndex > 1){
 	move_forward_iterator_Vcf(outIndex*nMarkersEachChunk)    

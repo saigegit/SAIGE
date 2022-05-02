@@ -128,7 +128,7 @@ SPAGMMATtest = function(bgenFile = "",
 		     #is_rewrite_XnonPAR_forMales = is_rewrite_XnonPAR_forMales)
 	cat("dosage_zerod_cutoff ", dosage_zerod_cutoff, "\n")
    checkArgsListNumeric(start = 1,
-                     end = 20000000,
+                     end = 250000000,
 		     max_missing = max_missing,
                      min_MAC = min_MAC,
                      min_MAF = min_MAF,

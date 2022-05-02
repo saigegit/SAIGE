@@ -354,7 +354,7 @@ if(FALSE){
       SNPlist = paste(c("set1", IDsToInclude), collapse = "\t")
       in_chrom="fake_chrom"
       in_beg_pd=1
-      in_end_pd=200000000
+      in_end_pd=250000000
       set_iterator_inVcf(SNPlist, in_chrom, in_beg_pd, in_end_pd)
     }
 
@@ -493,7 +493,7 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 	        condition_group_line = paste(c("condition", condition_original), collapse = "\t")
 		#print("condition_original")
 		#print(condition_original)
-		set_iterator_inVcf(condition_group_line, "1", 1, 200000000)
+		set_iterator_inVcf(condition_group_line, "1", 1, 250000000)
       		cond_genoIndex = rep("0", length(condition_original))
 		cond_genoIndex_prev = rep("0", length(condition_original))
        }
