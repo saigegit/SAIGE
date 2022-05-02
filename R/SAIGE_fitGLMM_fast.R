@@ -330,7 +330,7 @@ glmmkin.ai_PCG_Rcpp_Quantitative = function(genofile, Xorig, isCovariateOffset, 
 
   if (LOCO){
     MsubIndVec = getQCdMarkerIndex()
-                  chrVec = data.table:::fread(paste0(genofile,".bim"), header = F)[,1]
+    chrVec = data.table:::fread(paste0(genofile,".bim"), header = F)[,1]
     chrVec = chrVec[which(MsubIndVec == TRUE)]
     updatechrList = updateChrStartEndIndexVec(chrVec)
     LOCO = updatechrList$LOCO
@@ -2017,7 +2017,7 @@ extractVarianceRatio = function(obj.glmm.null,
 
           cat("G0", G0[1:10], "\n")
           CHR = bimPlink[i,1]
-
+	  cat("CHR ", CHR, "\n")
           if(sum(G0)/(2*Nnomissing) > 0.5){
             G0 = 2-G0
           }
