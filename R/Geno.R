@@ -183,7 +183,7 @@ setGenoInput = function(bgenFile = "",
 	    sampleData = data.table::fread(sampleFile, header=F, colClasses = rep("character", 4), data.table=F, skip=2)
 	    samplesInGeno = as.character(sampleData[,2])
 	}else{
-	    first_sample_line_list = strsplit(first_sample_line, split=c(" +", "\t"))[[1]]
+	    first_sample_line_list = strsplit(first_sample_line, split="[\ \t]+")[[1]]
 	    if(length(first_sample_line_list) == 1){
 	        cat("sample file only has one column and has no header\n")
 	        sampleData = data.table::fread(sampleFile, header=F, colClasses = c("character"), data.table=F)
