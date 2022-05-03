@@ -3,7 +3,8 @@
 options(stringsAsFactors=F)
 
 ## load R libraries
-library(SAIGE)
+#library(SAIGE)
+library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/SAIGE/install_v1.0.6")
 require(optparse) #install.packages("optparse")
 
 print(sessionInfo())
@@ -12,6 +13,12 @@ print(sessionInfo())
 option_list <- list(
   make_option("--plinkFile", type="character",default="",
     help="Path to plink file for creating the genetic relationship matrix (GRM). minMAFforGRM can be used to specify the minimum MAF and maxMissingRate can be used to specify the maximum missing rates  of markers in the plink file to be used for constructing GRM. Genetic markers are also randomly selected from the plink file to estimate the variance ratios"),
+  make_option("--bedFile", type="character",default="",
+    help="Path to bed file. If plinkFile is specified, 'plinkFile'.bed will be used"),
+  make_option("--bimFile", type="character",default="",
+    help="Path to bim file. If plinkFile is specified, 'plinkFile'.bim will be used"),
+  make_option("--famFile", type="character",default="",
+    help="Path to fam file. If plinkFile is specified, 'plinkFile'.fam will be used"),
   make_option("--phenoFile", type="character", default="",
     help="Required. Path to the phenotype file. The file can be either tab or space delimited. The phenotype file has a header and contains at least two columns. One column is for phentoype and the other column is for sample IDs. Additional columns can be included in the phenotype file for covariates in the null model. Please specify the names of the covariates using the argument covarColList and specify categorical covariates using the argument qCovarColList. All categorical covariates must also be included in covarColList."),
   make_option("--phenoCol", type="character", default="",
@@ -136,6 +143,9 @@ set.seed(1)
 
 
 fitNULLGLMM(plinkFile=opt$plinkFile,
+	    bedFile=opt$bedFile,
+	    bimFile=opt$bimFile,
+	    famFile=opt$famFile,
 	    useSparseGRMtoFitNULL=opt$useSparseGRMtoFitNULL, 
             sparseGRMFile=opt$sparseGRMFile,
             sparseGRMSampleIDFile=opt$sparseGRMSampleIDFile,
