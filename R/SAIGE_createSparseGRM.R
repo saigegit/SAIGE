@@ -1,6 +1,8 @@
 #' Construct a sparse GRM for a given data set 
 #'
-#' @param plinkFile character. Path to plink file to be used for calculating the sparse GRM
+#' @param bedFile character. Path to plink file (bed) to be used for calculating the sparse GRM
+#' @param bimFile character. Path to plink file (bim) to be used for calculating the sparse GRM
+#' @param famFile character. Path to plink file (fam) to be used for calculating the sparse GRM
 #' @param outputPrefix character. Path to the output files with prefix
 #' @param numRandomMarkerforSparseKin integer. number of randomly selected markers (MAF >= 0.01) to be used to identify related samples for sparse GRM. By default, 1000
 #' @param relatednessCutoff float. The threshold to treat two samples as unrelated if IsSparseKin is TRUE. By default, 0.125
@@ -10,7 +12,9 @@
 #' @param minMAFforGRM numeric. Minimum MAF for markers (in the Plink file) used for construcing the sparse GRM. By default, 0.01
 #' @return a file ended with sampleIDs.txt that contains sample IDs for the sparse GRM and a file ended with .sparseGRM.mtx that contains the sparse GRM 
 #' @export
-createSparseGRM = function(plinkFile = "", 
+createSparseGRM = function(bedFile = "", 
+		bimFile = "",
+		famFile = "",
 		outputPrefix="",
                 numRandomMarkerforSparseKin = 1000,
                 relatednessCutoff = 0.125,
@@ -41,7 +45,7 @@ createSparseGRM = function(plinkFile = "",
   }
 
   #  
-  famFile = paste0(plinkFile, ".fam")
+  #famFile = paste0(plinkFile, ".fam")
 
   fam = data.frame(data.table:::fread(famFile, header=F, stringsAsFactors=FALSE, colClasses = c(rep("character",4), rep("numeric", 2))))
 
@@ -60,7 +64,7 @@ createSparseGRM = function(plinkFile = "",
   indicatorGenoSamplesWithPheno = rep(TRUE, nrow(fam))
 
   if(isSetGeno){
-    setgeno(plinkFile, genoSampleIndex, indicatorGenoSamplesWithPheno, memoryChunk, isDiagofKinSetAsOne)
+    setgeno(bedFile, bimFile, famFile, genoSampleIndex, indicatorGenoSamplesWithPheno, memoryChunk, isDiagofKinSetAsOne)
   }
     freqVec = getAlleleFreqVec()
     if(minMAFforGRM > 0){

@@ -40,7 +40,7 @@ updateChrStartEndIndexVec <- function(chrVec){
         if (i > 1) {
        	  if (!is.na(chromosomeStartIndexVec[i -1])) {
             if (chromosomeStartIndexVec[i] <= chromosomeStartIndexVec[i - 1] | chromosomeEndIndexVec[i] <= chromosomeEndIndexVec[i -1]) {
-                          stop(paste0("ERROR! chromosomes need to be ordered from 1 to 22 in ",plinkFile, ".bim\n"))
+                          stop(paste0("ERROR! chromosomes need to be ordered from 1 to 22 in the bim file.\n"))
             }
           }
         }

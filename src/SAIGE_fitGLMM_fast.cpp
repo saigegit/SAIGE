@@ -691,7 +691,7 @@ public:
   	//This function is used instead of using a constructor because using constructor can not take
   	//genofile as an argument from runModel.R 
         //genofile is the predix for plink bim, bed, fam, files   
-  	void setGenoObj(std::string genofile, std::vector<int> & subSampleInGeno, std::vector<bool> & indicatorGenoSamplesWithPheno, float memoryChunk, bool  isDiagofKinSetAsOne){
+  	void setGenoObj(std::string bedfile, std::string bimfile, std::string famfile, std::vector<int> & subSampleInGeno, std::vector<bool> & indicatorGenoSamplesWithPheno, float memoryChunk, bool  isDiagofKinSetAsOne){
 		//cout << "OK1\n";
 		setKinDiagtoOne = isDiagofKinSetAsOne;   
 		ptrsubSampleInGeno = subSampleInGeno;
@@ -706,9 +706,9 @@ public:
    		M=0;
   		N=0;
    	
-		std::string bedfile = genofile+".bed";
-		std::string bimfile = genofile+".bim"; 
-		std::string famfile = genofile+".fam"; 
+		//std::string bedfile = genofile+".bed";
+		//std::string bimfile = genofile+".bim"; 
+		//std::string famfile = genofile+".fam"; 
 		std::string junk;
 		//cout << "OK2\n";
 		//count the number of individuals
@@ -1946,10 +1946,10 @@ void  parallelsumTwoVec(arma::fvec &x) {
 
 
 // [[Rcpp::export]]
-void setgeno(std::string genofile, std::vector<int> & subSampleInGeno, std::vector<bool> & indicatorGenoSamplesWithPheno, float memoryChunk, bool isDiagofKinSetAsOne)
+void setgeno(std::string bedfile, std::string bimfile, std::string famfile, std::vector<int> & subSampleInGeno, std::vector<bool> & indicatorGenoSamplesWithPheno, float memoryChunk, bool isDiagofKinSetAsOne)
 {
 	int start_s=clock();
-        geno.setGenoObj(genofile, subSampleInGeno, indicatorGenoSamplesWithPheno, memoryChunk, isDiagofKinSetAsOne);
+        geno.setGenoObj(bedfile, bimfile, famfile, subSampleInGeno, indicatorGenoSamplesWithPheno, memoryChunk, isDiagofKinSetAsOne);
 	//geno.printAlleleFreqVec();
 	//geno.printGenoVec();
 	int stop_s=clock();

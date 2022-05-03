@@ -631,16 +631,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // setgeno
-void setgeno(std::string genofile, std::vector<int>& subSampleInGeno, std::vector<bool>& indicatorGenoSamplesWithPheno, float memoryChunk, bool isDiagofKinSetAsOne);
-RcppExport SEXP _SAIGE_setgeno(SEXP genofileSEXP, SEXP subSampleInGenoSEXP, SEXP indicatorGenoSamplesWithPhenoSEXP, SEXP memoryChunkSEXP, SEXP isDiagofKinSetAsOneSEXP) {
+void setgeno(std::string bedfile, std::string bimfile, std::string famfile, std::vector<int>& subSampleInGeno, std::vector<bool>& indicatorGenoSamplesWithPheno, float memoryChunk, bool isDiagofKinSetAsOne);
+RcppExport SEXP _SAIGE_setgeno(SEXP bedfileSEXP, SEXP bimfileSEXP, SEXP famfileSEXP, SEXP subSampleInGenoSEXP, SEXP indicatorGenoSamplesWithPhenoSEXP, SEXP memoryChunkSEXP, SEXP isDiagofKinSetAsOneSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type genofile(genofileSEXP);
+    Rcpp::traits::input_parameter< std::string >::type bedfile(bedfileSEXP);
+    Rcpp::traits::input_parameter< std::string >::type bimfile(bimfileSEXP);
+    Rcpp::traits::input_parameter< std::string >::type famfile(famfileSEXP);
     Rcpp::traits::input_parameter< std::vector<int>& >::type subSampleInGeno(subSampleInGenoSEXP);
     Rcpp::traits::input_parameter< std::vector<bool>& >::type indicatorGenoSamplesWithPheno(indicatorGenoSamplesWithPhenoSEXP);
     Rcpp::traits::input_parameter< float >::type memoryChunk(memoryChunkSEXP);
     Rcpp::traits::input_parameter< bool >::type isDiagofKinSetAsOne(isDiagofKinSetAsOneSEXP);
-    setgeno(genofile, subSampleInGeno, indicatorGenoSamplesWithPheno, memoryChunk, isDiagofKinSetAsOne);
+    setgeno(bedfile, bimfile, famfile, subSampleInGeno, indicatorGenoSamplesWithPheno, memoryChunk, isDiagofKinSetAsOne);
     return R_NilValue;
 END_RCPP
 }
@@ -2112,7 +2114,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_findIndiceRelatedSample", (DL_FUNC) &_SAIGE_findIndiceRelatedSample, 0},
     {"_SAIGE_parallelcalsparseGRM", (DL_FUNC) &_SAIGE_parallelcalsparseGRM, 1},
     {"_SAIGE_parallelsumTwoVec", (DL_FUNC) &_SAIGE_parallelsumTwoVec, 1},
-    {"_SAIGE_setgeno", (DL_FUNC) &_SAIGE_setgeno, 5},
+    {"_SAIGE_setgeno", (DL_FUNC) &_SAIGE_setgeno, 7},
     {"_SAIGE_Get_OneSNP_Geno", (DL_FUNC) &_SAIGE_Get_OneSNP_Geno, 1},
     {"_SAIGE_Get_OneSNP_Geno_forVarRatio", (DL_FUNC) &_SAIGE_Get_OneSNP_Geno_forVarRatio, 1},
     {"_SAIGE_Get_OneSNP_StdGeno", (DL_FUNC) &_SAIGE_Get_OneSNP_StdGeno, 1},
