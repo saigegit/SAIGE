@@ -12,7 +12,7 @@ ReadGroupFile<-function(groupFile){
     if (length(marker_group_line) == 0) {
       break
     }
-    marker_group_line_list = strsplit(marker_group_line, split=c(" +", "\t"))[[1]]
+    marker_group_line_list = strsplit(marker_group_line, split="[\ \t]+")[[1]]
     if (length(marker_group_line_list) < 3) {
       stop("Error, group file line:",line ,"Each line should have geneID GroupName  \n")
     }
@@ -85,7 +85,7 @@ checkGroupFile<-function(groupFile){
       line = line - 1
       stop("Error, group file has emply lines\n")
     }
-    marker_group_line_list = strsplit(marker_group_line, split=c(" +", "\t"))[[1]]
+    marker_group_line_list = strsplit(marker_group_line, split="[\ \t]+")[[1]]
     if (length(marker_group_line_list) < 3) {
       check_close(gf)
       stop("Error, group file line:",line ,"Each line should have a region name and a catergory (var, anno or weight) \n")
@@ -113,7 +113,7 @@ checkGroupFile<-function(groupFile){
     	break
     }else{
 	if(length(marker_group_line) < a){
-		marker_group_line_list = strsplit(marker_group_line[1], split=c(" +", "\t"))[[1]]	
+		marker_group_line_list = strsplit(marker_group_line[1], split="[\ \t]+")[[1]]	
 		if (length(marker_group_line_list) < 3) {
       			stop("Error, group file line:",line-2 ," is incomplete.\n")
     		}
@@ -123,7 +123,7 @@ checkGroupFile<-function(groupFile){
     }	    
 
 
-    marker_group_line_list = strsplit(marker_group_line[1], split=c(" +", "\t"))[[1]]
+    marker_group_line_list = strsplit(marker_group_line[1], split="[\ \t]+")[[1]]
     line = line + 1
     if (length(marker_group_line_list) < 3) {
       	stop("Error, group file line:",line ," is incomplete.\n")
@@ -137,7 +137,7 @@ checkGroupFile<-function(groupFile){
     geneID0 = geneID
     numMarkers = length(marker_group_line_list) - 2	
 
-    marker_group_line_list = strsplit(marker_group_line[2], split=c(" +", "\t"))[[1]]
+    marker_group_line_list = strsplit(marker_group_line[2], split="[\ \t]+")[[1]]
     line = line + 1
    if (length(marker_group_line_list) < 3) {
         stop("Error, group file line:",line ," is incomplete.\n")
@@ -158,7 +158,7 @@ checkGroupFile<-function(groupFile){
 
     if(is_weight_included){
 
-   	marker_group_line_list = strsplit(marker_group_line[3], split=c(" +", "\t"))[[1]]
+   	marker_group_line_list = strsplit(marker_group_line[3], split="[\ \t]+")[[1]]
         line = line + 1
 	if (length(marker_group_line_list) < 3) {
         	stop("Error, group file line:",line ," is incomplete.\n")

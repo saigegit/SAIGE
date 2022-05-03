@@ -902,13 +902,13 @@ SAIGE.getRegionList_new = function(marker_group_line,
   RegionData = NULL
   geneList = c() 
   for(i in 1:ngroup){
-	  marker_group_line_list = strsplit(marker_group_line[1+(i-1)*nline_per_gene], split=c(" +", "\t"))[[1]]
+	  marker_group_line_list = strsplit(marker_group_line[1+(i-1)*nline_per_gene], split="[\ \t]+")[[1]]
           gene=marker_group_line_list[1]
           var=marker_group_line_list[3:length(marker_group_line_list)]
-          marker_group_line_list_anno = strsplit(marker_group_line[2+(i-1)*nline_per_gene], split=c(" +", "\t"))[[1]]
+          marker_group_line_list_anno = strsplit(marker_group_line[2+(i-1)*nline_per_gene], split="[\ \t]+")[[1]]
 	  anno=marker_group_line_list_anno[3:length(marker_group_line_list_anno)]
 	  if(nline_per_gene == 3){
-              marker_group_line_list_weight = strsplit(marker_group_line[3+(i-1)*nline_per_gene], split=c(" +", "\t"))[[1]]
+              marker_group_line_list_weight = strsplit(marker_group_line[3+(i-1)*nline_per_gene], split="[\ \t]+")[[1]]
               weight=marker_group_line_list_weight[3:length(marker_group_line_list_weight)]
 	      RegionData = rbind(RegionData, cbind(rep(gene, length(var)), var, anno, weight))
           }else if(nline_per_gene == 2){
