@@ -13,6 +13,12 @@ print(sessionInfo())
 option_list <- list(
   make_option("--plinkFile", type="character",default="",
     help="path to plink file for creating the genetic relationship matrix (GRM)"),
+  make_option("--bedFile", type="character",default="",
+    help="Path to bed file. If plinkFile is specified, 'plinkFile'.bed will be used"),
+  make_option("--bimFile", type="character",default="",
+    help="Path to bim file. If plinkFile is specified, 'plinkFile'.bim will be used"),
+  make_option("--famFile", type="character",default="",
+    help="Path to fam file. If plinkFile is specified, 'plinkFile'.fam will be used"),
   make_option("--nThreads", type="integer", default=16,
     help="Number of threads (CPUs) to use"),
   make_option("--memoryChunk", type="numeric", default=2,
@@ -41,7 +47,19 @@ print(opt)
 
 set.seed(1)
 
-createSparseGRM(plinkFile = opt$plinkFile,
+if(opt$plinkFile != ""){
+        bimFile = paste0(plinkFile, ".bim")
+        bedFile = paste0(plinkFile, ".bed")
+        famFile = paste0(plinkFile, ".fam")	
+}else{
+	bimFile = opt$bimFile
+	bedFile = opt$bedFile
+	famFile = opt$famFile
+}
+
+createSparseGRM(bedFile = bedFile,
+		bimFile = bimFile,
+		famFile = famFile,
                 outputPrefix=opt$outputPrefix,
                 numRandomMarkerforSparseKin = opt$numRandomMarkerforSparseKin,
                 relatednessCutoff = opt$relatednessCutoff,
