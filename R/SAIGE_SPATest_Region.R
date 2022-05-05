@@ -225,6 +225,7 @@ SAIGE.Region = function(mu,
       nlinetoread = nregions_ro_read * nline_per_gene
       marker_group_line = readLines(gf, n = nlinetoread)
       RegionList = SAIGE.getRegionList_new(marker_group_line, nline_per_gene, annolist, markerInfo, chrom)
+      #print(RegionList)
       cat("Read in ", nregions_ro_read, " region(s) from the group file.\n")
       mth = 0
       #numberRegionsInChunk = length(RegionList)
@@ -1008,25 +1009,25 @@ if(nrow(RegionData) != 0){
    
     posSNP = which(RegionData$REGION == r)
     if(length(posSNP) > 0){
-    SNP = RegionData$SNP[posSNP]
+       SNP = RegionData$SNP[posSNP]
 
-    if(nline_per_gene == 3){	
-      WEIGHT = RegionData$WEIGHT[posSNP]
-    }
+       if(nline_per_gene == 3){	
+         WEIGHT = RegionData$WEIGHT[posSNP]
+       }
 
-    if(any(duplicated(SNP)))
-      stop("Please check RegionFile: in region ", r,": duplicated SNPs exist.")
+      if(any(duplicated(SNP)))
+        stop("Please check RegionFile: in region ", r,": duplicated SNPs exist.")
 
-    if(!is.null(markerInfo)){
-      genoIndex = as.numeric(RegionData$genoIndex[posSNP])
-      if(!is.null(RegionData$genoIndex_prev)){
+      if(!is.null(markerInfo)){
+        genoIndex = as.numeric(RegionData$genoIndex[posSNP])
+        if(!is.null(RegionData$genoIndex_prev)){
 		genoIndex_prev = as.numeric(RegionData$genoIndex_prev[posSNP])	
-      }
-      chrom = RegionData$CHROM[posSNP]
+        }
+        chrom = RegionData$CHROM[posSNP]
       #uchrom = unique(chrom)
       #if(length(uchrom) != 1)
       #  stop("In region ",r,", markers are from multiple chromosomes.")
-    }
+       }
 
     annoIndicatorMat = matrix(0, nrow=length(posSNP), ncol=length(annoVec))
     annoVecNew = c()
@@ -1096,6 +1097,15 @@ if(nrow(RegionData) != 0){
      }
 
    }else{
+    ##VCF
+    if(length(SNP) > 0){
+        orderposind = order(as.numeric(tstrsplit(SNP, ":")[[2]]))
+        SNP = SNP[orderposind]
+        annoIndicatorMat = annoIndicatorMat[orderposind,]
+        if(length(WEIGHT) == length(orderposind)){
+            WEIGHT = WEIGHT[orderposind]
+        }
+    }    
     RegionList[[r]] = list(SNP = SNP,
 			   WEIGHT=WEIGHT,
                            annoIndicatorMat = annoIndicatorMat,
