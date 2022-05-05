@@ -48,9 +48,9 @@ print(opt)
 set.seed(1)
 
 if(opt$plinkFile != ""){
-        bimFile = paste0(plinkFile, ".bim")
-        bedFile = paste0(plinkFile, ".bed")
-        famFile = paste0(plinkFile, ".fam")	
+        bimFile = paste0(opt$plinkFile, ".bim")
+        bedFile = paste0(opt$plinkFile, ".bed")
+        famFile = paste0(opt$plinkFile, ".fam")	
 }else{
 	bimFile = opt$bimFile
 	bedFile = opt$bedFile
