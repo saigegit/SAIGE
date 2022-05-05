@@ -2224,7 +2224,7 @@ bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, boo
                 }
 		
 	        if(t_traitType == "binary"){
-                        OutFile_singleInGroup << "AF_case\tAF_ctrl\tN_case\tN_ctrl\n";
+                        OutFile_singleInGroup << "AF_case\tAF_ctrl\tN_case\tN_ctrl";
  			if(t_isMoreOutput){
                                 OutFile_singleInGroup << "\tN_case_hom\tN_case_het\tN_ctrl_hom\tN_ctrl_het";
                         }
