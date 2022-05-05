@@ -34,3 +34,6 @@ RUN chmod a+x /usr/local/bin/createSparseGRM.R
 RUN createSparseGRM.R  --help
 RUN step1_fitNULLGLMM.R --help
 RUN step2_SPAtests.R --help
+
+RUN apt-get update
+RUN apt-get install time
