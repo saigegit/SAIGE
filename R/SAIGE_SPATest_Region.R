@@ -662,7 +662,7 @@ gc()
 
 #if(regionTestType != "BURDEN"){
 
-    if(length(annoMAFIndVec) > 0){
+ if(length(annoMAFIndVec) > 0){
       pval.Region$MAC = outList$MAC_GroupVec[annoMAFIndVec]
       if(traitType == "binary"){
     	pval.Region$MAC_case = outList$MACCase_GroupVec[annoMAFIndVec]
@@ -672,7 +672,7 @@ gc()
       pval.Region$Number_ultra_rare = outList$NumUltraRare_GroupVec[annoMAFIndVec]
     }
 
-if(length(annolistnew) > 1 | length(maxMAFlist) > 1){
+ if(length(annolistsub) > 1 | length(maxMAFlist) > 1){
 
    cctpval_Burden = get_CCT_pvalue(pval.Region$Pvalue_Burden)
    if(regionTestType != "BURDEN"){
