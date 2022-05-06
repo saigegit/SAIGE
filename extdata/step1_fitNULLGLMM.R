@@ -3,8 +3,8 @@
 options(stringsAsFactors=F)
 
 ## load R libraries
-#library(SAIGE)
-library(SAIGE, lib.loc="/net/hunt/zhowei/project/imbalancedCaseCtrlMixedModel/Rpackage_SPAGMMAT/SAIGE_newgit/install_1.0.6")
+library(SAIGE)
+#library(SAIGE, lib.loc="/net/hunt/zhowei/project/imbalancedCaseCtrlMixedModel/Rpackage_SPAGMMAT/SAIGE_newgit/install_1.0.6")
 #library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/SAIGE/install_v1.0.6")
 require(optparse) #install.packages("optparse")
 
