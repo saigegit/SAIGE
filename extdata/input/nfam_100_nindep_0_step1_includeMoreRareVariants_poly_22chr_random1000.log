@@ -1,0 +1,33 @@
+PLINK v2.00a3LM 64-bit Intel (20 Apr 2021)
+Options in effect:
+  --bfile ./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chr
+  --extract ./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chr.1000Markers.list
+  --make-bed
+  --out ./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chr_random1000
+
+Hostname: mendel
+Working directory: /net/hunt/zhowei/project/imbalancedCaseCtrlMixedModel/Rpackage_SPAGMMAT/SAIGE_newgit/SAIGE_1.0.6/SAIGE/extdata
+Start time: Fri May  6 12:48:45 2022
+
+Random number seed: 1651855725
+257569 MiB RAM detected; reserving 128784 MiB for main workspace.
+Allocated 54330 MiB successfully, after larger attempt(s) failed.
+Using up to 88 threads (change this with --threads).
+1000 samples (0 females, 0 males, 1000 ambiguous; 1000 founders) loaded from
+./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chr.fam.
+128868 variants loaded from
+./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chr.bim.
+Note: No phenotype data present.
+--extract: 1000 variants remaining.
+1000 variants remaining after main filters.
+Writing
+./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chr_random1000.fam
+... done.
+Writing
+./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chr_random1000.bim
+... done.
+Writing
+./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chr_random1000.bed
+... done.
+
+End time: Fri May  6 12:48:45 2022
