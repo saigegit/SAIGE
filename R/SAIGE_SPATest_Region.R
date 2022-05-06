@@ -510,13 +510,14 @@ if(length(annolistsub) > 1 | length(maxMAFlist) > 1){
 if(is_fastTest){
   if(cctpval < pval_cutoff_for_fastTest){
 #if(cctpval < 0.1 & is_fastTest){
-     pval.Region = NULL
+      pval.Region = NULL
+      cat("Non-fast test is performed\n")
       set_flagSparseGRM_cur_SAIGE(TRUE)
       outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolistsub, regionName, is_fastTest, is_output_moreDetails)
   if(is_single_in_groupTest){
       #OutList = as.data.frame(outList$OUT_DF)
       noNAIndices = which(!is.na(outList$pvalVec))
-      print(noNAIndices)
+      #print(noNAIndices)
       annoMAFIndicatorMat = outList$annoMAFIndicatorMat
       if(sum(WEIGHT) > 0){
         AnnoWeights = c(WEIGHT, rep(1, outList$numofUR))
