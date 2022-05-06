@@ -421,6 +421,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// getIndexVec_forVarRatio
+arma::ivec getIndexVec_forVarRatio();
+RcppExport SEXP _SAIGE_getIndexVec_forVarRatio() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(getIndexVec_forVarRatio());
+    return rcpp_result_gen;
+END_RCPP
+}
 // getIsVarRatioGeno
 bool getIsVarRatioGeno();
 RcppExport SEXP _SAIGE_getIsVarRatioGeno() {
@@ -2094,6 +2104,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_getAlleleFreqVec", (DL_FUNC) &_SAIGE_getAlleleFreqVec, 0},
     {"_SAIGE_getMACVec", (DL_FUNC) &_SAIGE_getMACVec, 0},
     {"_SAIGE_getMACVec_forVarRatio", (DL_FUNC) &_SAIGE_getMACVec_forVarRatio, 0},
+    {"_SAIGE_getIndexVec_forVarRatio", (DL_FUNC) &_SAIGE_getIndexVec_forVarRatio, 0},
     {"_SAIGE_getIsVarRatioGeno", (DL_FUNC) &_SAIGE_getIsVarRatioGeno, 0},
     {"_SAIGE_getSubMarkerIndex", (DL_FUNC) &_SAIGE_getSubMarkerIndex, 0},
     {"_SAIGE_getQCdMarkerIndex", (DL_FUNC) &_SAIGE_getQCdMarkerIndex, 0},

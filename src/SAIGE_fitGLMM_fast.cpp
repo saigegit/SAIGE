@@ -50,7 +50,9 @@ public:
 	 std::vector<float>      alleleFreqVec0_forVarRatio;
         arma::fvec      alleleFreqVec_forVarRatio;
 	std::vector<int>      MACVec0_forVarRatio;
+	std::vector<int>      markerIndexVec0_forVarRatio;
 	arma::ivec MACVec_forVarRatio;
+	arma::ivec markerIndexVec_forVarRatio;
 
 
 	//vector<unsigned char> genoVec; 	 
@@ -479,7 +481,7 @@ public:
 			//else{			   	
 			if(mac >= g_minMACVarRatio){
 				   //randomly select 200 markers for estimating the variance ratio for the last MAC category	
-				   if(numberofMarkers_varRatio_common < 200){
+				   //if(numberofMarkers_varRatio_common < 200){
 				   	//if(static_cast<int>(SNPIdx) == 123){
 					//	std::cout << "123" << std::endl;
 					//	bool isIng_randMarkerIndforVR = arma::any(g_randMarkerIndforVR == static_cast<int>(SNPIdx));
@@ -493,7 +495,7 @@ public:
 				  		numberofMarkers_varRatio_common = numberofMarkers_varRatio_common + 1;
 						//passVarRatio = false;
 					}
-				  } 
+				  //} 
 			//	passVarRatio = true;	
 			}
 			//avoid the overlap between markers for GRM and markers for variance ratio estimation	   
@@ -816,10 +818,11 @@ public:
 		}*/
 
 		cout << "setgeno mark1" << endl;
-
+		arma::ivec g_randMarkerIndforVR_temp;
 		//randomly select common markers for variance ratio
 		if(isVarRatio){
-			 g_randMarkerIndforVR = arma::randi(1000, arma::distr_param(0,M-1));
+			 g_randMarkerIndforVR_temp = arma::randi(1000, arma::distr_param(0,M-1));
+			 g_randMarkerIndforVR = arma::unique(g_randMarkerIndforVR_temp);
 			 //arma::ivec g_randMarkerIndforVR_sort = arma::sort(g_randMarkerIndforVR);
 			 //g_randMarkerIndforVR_sort.print("g_randMarkerIndforVR_sort");
 			 //g_randMarkerIndforVR.print("g_randMarkerIndforVR");
@@ -896,6 +899,7 @@ public:
 					invstdvVec0_forVarRatio.push_back(invStd);
 					alleleFreqVec0_forVarRatio.push_back(freq);
 					MACVec0_forVarRatio.push_back(mac);
+					markerIndexVec0_forVarRatio.push_back(i);
 					SNPIdx_vr = SNPIdx_vr + 1;
 					numberofMarkers_varRatio = numberofMarkers_varRatio + 1;
 				}
@@ -957,11 +961,14 @@ public:
 		alleleFreqVec_forVarRatio.clear();
                 alleleFreqVec_forVarRatio.set_size(numberofMarkers_varRatio);
 		MACVec_forVarRatio.clear();
-		MACVec_forVarRatio.set_size(numberofMarkers_varRatio);	
+		MACVec_forVarRatio.set_size(numberofMarkers_varRatio);
+	        markerIndexVec_forVarRatio.clear();
+	        markerIndexVec_forVarRatio.set_size(numberofMarkers_varRatio);	
 		for(int i = 0; i < numberofMarkers_varRatio; i++){
 			invstdvVec_forVarRatio[i] = invstdvVec0_forVarRatio.at(i);
 			alleleFreqVec_forVarRatio[i] =alleleFreqVec0_forVarRatio.at(i);
 			MACVec_forVarRatio[i] = MACVec0_forVarRatio.at(i);
+			markerIndexVec_forVarRatio[i] = markerIndexVec0_forVarRatio.at(i);
 		}
 	}
 
@@ -1180,6 +1187,11 @@ arma::ivec getMACVec(){
 arma::ivec getMACVec_forVarRatio(){
         return(geno.MACVec_forVarRatio);
 }
+
+// [[Rcpp::export]] 
+arma::ivec getIndexVec_forVarRatio(){
+	return(geno.markerIndexVec_forVarRatio);
+}	
 
 // [[Rcpp::export]]
 bool getIsVarRatioGeno(){
