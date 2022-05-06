@@ -116,7 +116,7 @@ glmmkin.ai_PCG_Rcpp_Binary = function(bedFile, bimFile, famFile, Xorig, isCovari
 
   if (LOCO){
     MsubIndVec = getQCdMarkerIndex()
-                    chrVec = data.table:::fread(bimFile, header = F)[,1]
+    chrVec = data.table:::fread(bimFile, header = F)[,1]
     chrVec = chrVec[which(MsubIndVec == TRUE)]
     updatechrList = updateChrStartEndIndexVec(chrVec)
     LOCO = updatechrList$LOCO
@@ -1942,6 +1942,7 @@ extractVarianceRatio = function(obj.glmm.null,
 
   if(isVarianceRatioinGeno){
          MACvector_forVarRatio =  getMACVec_forVarRatio()
+         Indexvector_forVarRatio =  getIndexVec_forVarRatio()
          cat("length(MACvector): ", length(MACvector), "\n")
          cat("length(MACvector_forVarRatio): ", length(MACvector_forVarRatio), "\n")
          if(length(MACvector_forVarRatio) > 0){
@@ -2029,7 +2030,7 @@ extractVarianceRatio = function(obj.glmm.null,
           }
 
           cat("G0", G0[1:10], "\n")
-          CHR = bimPlink[i,1]
+          CHR = bimPlink[Indexvector_forVarRatio[i]+1,1]
 	  cat("CHR ", CHR, "\n")
           if(sum(G0)/(2*Nnomissing) > 0.5){
             G0 = 2-G0

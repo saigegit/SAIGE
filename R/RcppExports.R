@@ -121,6 +121,10 @@ getMACVec_forVarRatio <- function() {
     .Call('_SAIGE_getMACVec_forVarRatio', PACKAGE = 'SAIGE')
 }
 
+getIndexVec_forVarRatio <- function() {
+    .Call('_SAIGE_getIndexVec_forVarRatio', PACKAGE = 'SAIGE')
+}
+
 getIsVarRatioGeno <- function() {
     .Call('_SAIGE_getIsVarRatioGeno', PACKAGE = 'SAIGE')
 }
