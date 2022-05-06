@@ -1,0 +1,20 @@
+PLINK v2.00a3LM 64-bit Intel (20 Apr 2021)
+Options in effect:
+  --bfile ./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chrs
+  --extract ./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chr.forCate_vr.markerid.list
+  --make-bed
+  --out ./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chrs.forCate_vr
+
+Hostname: mendel
+Working directory: /net/hunt/zhowei/project/imbalancedCaseCtrlMixedModel/Rpackage_SPAGMMAT/SAIGE_newgit/SAIGE_1.0.6/SAIGE/extdata
+Start time: Fri May  6 15:50:44 2022
+
+Random number seed: 1651866644
+257569 MiB RAM detected; reserving 128784 MiB for main workspace.
+Allocated 54330 MiB successfully, after larger attempt(s) failed.
+Using up to 88 threads (change this with --threads).
+Error: Failed to open
+./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chrs.bed : No
+such file or directory.
+
+End time: Fri May  6 15:50:44 2022

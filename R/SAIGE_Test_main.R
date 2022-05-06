@@ -215,6 +215,8 @@ SPAGMMATtest = function(bgenFile = "",
     }
     
     obj.model = ReadModel(GMMATmodelFile, chrom, LOCO, is_Firth_beta) #readInGLMM.R
+    
+
 
     
     if(!LOCO){
@@ -230,6 +232,11 @@ SPAGMMATtest = function(bgenFile = "",
       isSparseGRM = TRUE
 
     }else{
+      #if(!is.null(obj.model$useSparseGRMforVarRatio)){
+      #	if(obj.model$useSparseGRMforVarRatio == TRUE){
+      # 		stop("sparse GRM is not specified but it was used in Step 1.\n")
+      #	}	
+      #}		      
       sparseSigmaRList = list(nSubj = 0, locations = matrix(0,nrow=2,ncol=2), values = rep(0,2))  
       isSparseGRM = FALSE 
     }	    

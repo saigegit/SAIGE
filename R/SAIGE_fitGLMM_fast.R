@@ -1143,7 +1143,9 @@ fitNULLGLMM = function(plinkFile = "",
 		}else{
 			modglmm$offset = covoffset
 		}	
-	    } 		    
+	    }
+            
+            modglmm$useSparseGRMforVarRatio = useSparseGRMforVarRatio 	    
             save(modglmm, file = modelOut)
             tau = modglmm$theta
         	    
@@ -1265,7 +1267,7 @@ fitNULLGLMM = function(plinkFile = "",
             }
 
 	    modglmm$offset = covoffset
-
+	    modglmm$useSparseGRMforVarRatio = useSparseGRMforVarRatio
             save(modglmm, file = modelOut)
             t_end = proc.time()
             print(t_end)

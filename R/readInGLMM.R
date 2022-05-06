@@ -169,9 +169,18 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
     iscateVR = FALSE
     # check variance ratio
     if (!file.exists(varianceRatioFile)) {
-        cat("varianceRatioFile is not specified so variance ratio won't be used\n")
-        ratioVec_sparse = c(1)
-	ratioVec_null = c(1)
+	if(varianceRatioFile != ""){
+	    stop("varianceRatioFile is specified but the file ", varianceRatioFile, " does not exist\n")
+	}else{	
+            cat("varianceRatioFile is not specified so variance ratio won't be used\n")
+	}
+	if(isSparseGRM){
+          ratioVec_sparse = c(1)
+	  ratioVec_null = c(-1)
+	}else{
+          ratioVec_sparse = c(-1)		
+	  ratioVec_null = c(1)
+	}
     }else{
         varRatioData = data.frame(data.table:::fread(varianceRatioFile, header = F, stringsAsFactors = FALSE))
 	if(ncol(varRatioData) == 3){
@@ -179,8 +188,14 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 	    if(length(spindex) > 0){
 	        ratioVec_sparse = varRatioData[which(varRatioData[,2] == "sparse"),1]
                 cat("variance Ratio sparse is ", ratioVec_sparse, "\n")
-	    }else{
+		#if(!isSparseGRM & sum(ratioVec_sparse != 1) > 0){
+		#       	stop("sparse GRM is not specified but it was used for estimating variance ratios in Step 1. Please leave --sparseGRMFile and --sparseGRMSampleIDFile empty and re-run the script\n")
+		#}	
+	    }else{    
 		ratioVec_sparse = c(-1)
+	    	if(isSparseGRM){
+			stop("sparse GRM is specified but the variance ratio with the full and sparse GRMs are not estimated in Step 1.")
+		}	
 	    }
 	    ratioVec_null = varRatioData[which(varRatioData[,2] == "null"),1]
             cat("variance Ratio null is ", ratioVec_null, "\n")
