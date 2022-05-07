@@ -259,13 +259,12 @@ SAIGE.Region = function(mu,
       if(is_no_weight_in_groupTest){
 	WEIGHT = rep(1, length(SNP))
       }else{	      
-        WEIGHT = region$WEIGHT
+        WEIGHT = as.numeric(region$WEIGHT)
       }
 
       annoIndicatorMat = region$annoIndicatorMat
 
       #chrom = region$chrom
-
       print(paste0("Analyzing Region ", regionName, " (",i-1,"/",nRegions,")."))
       #tp1 = proc.time()
       #gc()
@@ -275,7 +274,6 @@ SAIGE.Region = function(mu,
       }else{
         set_flagSparseGRM_cur_SAIGE(FALSE)
       }
-
       outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolistsub, regionName, is_fastTest, is_output_moreDetails)	
 
         #print("outList$VarMat 1 ")
@@ -931,6 +929,7 @@ SAIGE.getRegionList_new = function(marker_group_line,
     RegionData = as.data.frame(RegionData)
     setDT(RegionData)
     uRegion0 = unique(RegionData$REGION)    
+
     if(chrom != "" & is.null(markerInfo)){
       RegionData[, c("chr") := tstrsplit(RegionData$SNP, ":")[[1]] ]
       setkey(RegionData, "chr")

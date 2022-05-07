@@ -43,7 +43,7 @@
 #' @param weights.beta vector of numeric with two elements. parameters for the beta distribution to weight genetic markers in gene-based tests. By default, "c(1,25)".
 #' @param r.corr numeric. bewteen 0 and 1. parameters for gene-based tests. If r.corr = 1, only Burden tests will be performed. If r.corr = 0, SKAT-O tests will be performed and results for Burden tests and SKAT tests will be output too.  By default, 0. 
 #' @param markers_per_chunk_in_groupTest numeric. Number of markers in each chunk when calculating the variance covariance matrix in the set/group-based tests. By default, 100.
-#' @param condition character. For conditional analysis. Variant ids are in the format chr:pos_ref/alt and seperated by by comma. e.g."chr3:101651171_C/T,chr3:101651186_G/A". 
+#' @param condition character. For conditional analysis. Variant ids are in the format chr:pos_ref/alt and seperated by by comma. e.g."chr3:101651171:C:T,chr3:101651186:G:A". 
 #' @param weights_for_condition. vector of numeric. weights for conditioning markers for gene- or region-based tests. The length equals to the number of conditioning markers, e.g. c(1,2,3). If not specified, the default weights will be generated based on beta(MAF, 1, 25). Use weights.beta to change the parameters for the Beta distribution. 
 #' @param SPAcutoff by default = 2 (SPA test would be used when p value < 0.05 under the normal approximation)
 #' @param dosage_zerod_cutoff numeric. If is_imputed_data = TRUE, For variants with MAC <= dosage_zerod_MAC_cutoff, dosages <= dosageZerodCutoff with be set to 0. By derault, 0.2
@@ -340,8 +340,11 @@ SPAGMMATtest = function(bgenFile = "",
 	##condition_original = unlist(strsplit(condition, ","))
 	condition_genoIndex=extract_genoIndex_condition(condition, objGeno$markerInfo, genoType)
 	if(!is.null(weights_for_condition)){
-                condition_weights = unlist(strsplit(weights_for_condition, ","))
-		if(length(condition_weights) != length(condition_genoIndex$condition_genoIndex)){
+		condition_weights = weights_for_condition
+		#print(condition_weights)
+		#print(condition_genoIndex$cond_genoIndex)
+                #condition_weights = as.numeric(unlist(strsplit(weights_for_condition, ",")))
+		if(length(condition_weights) != length(condition_genoIndex$cond_genoIndex)){
 			stop("The length of the provided weights for conditioning markers is not equal to the number of conditioning markers\n")
 		}	
         }else{
