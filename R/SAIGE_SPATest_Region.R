@@ -1101,7 +1101,7 @@ if(nrow(RegionData) != 0){
     if(length(SNP) > 0){
         orderposind = order(as.numeric(tstrsplit(SNP, ":")[[2]]))
         SNP = SNP[orderposind]
-        annoIndicatorMat = annoIndicatorMat[orderposind,]
+        annoIndicatorMat = annoIndicatorMat[orderposind,, drop=F]
         if(length(WEIGHT) == length(orderposind)){
             WEIGHT = WEIGHT[orderposind]
         }
