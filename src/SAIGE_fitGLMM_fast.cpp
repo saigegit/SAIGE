@@ -464,6 +464,8 @@ public:
 	     passVarRatio = false;
 	     float maf = std::min(altFreq, 1-altFreq);
 	     mac = std::min(alleleCount, int(Nnomissing) * 2 - alleleCount);
+	     std::cout << "mac " << mac << " SNPIdx " << SNPIdx << std::endl; 	
+
 
 		if(maf >= minMAFtoConstructGRM && missingRate <= maxMissingRate){
 			passQC = true;
@@ -479,7 +481,7 @@ public:
 			
 			
 			//else{			   	
-			if(mac >= g_minMACVarRatio){
+			if(mac >= g_maxMACVarRatio){
 				   //randomly select 200 markers for estimating the variance ratio for the last MAC category	
 				   //if(numberofMarkers_varRatio_common < 200){
 				   	//if(static_cast<int>(SNPIdx) == 123){
@@ -4590,8 +4592,8 @@ void setminMAC_VarianceRatio(float t_minMACVarRatio, float t_maxMACVarRatio, boo
 	geno.g_minMACVarRatio = t_minMACVarRatio;
 	geno.g_maxMACVarRatio = t_maxMACVarRatio;
 	geno.isVarRatio = t_isVarianceRatioinGeno;
-	//std::cout << "geno.g_minMACVarRatio " << geno.g_minMACVarRatio << std::endl;
-	//std::cout << "geno.g_maxMACVarRatio " << geno.g_maxMACVarRatio << std::endl;	
+	std::cout << "geno.g_minMACVarRatio " << geno.g_minMACVarRatio << std::endl;
+	std::cout << "geno.g_maxMACVarRatio " << geno.g_maxMACVarRatio << std::endl;	
 }
 
 // // [[Rcpp::export]] 

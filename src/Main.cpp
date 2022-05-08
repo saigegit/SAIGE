@@ -1010,7 +1010,7 @@ Rcpp::List mainRegionInCPP(
    //printTime(timeoutput1a, timeoutput2a, "Unified_getOneMarker");
 
    if(!isReadMarker){
-      std::cout << "Reading " <<  i << "th marker failed." << std::endl;
+      std::cout << "ERROR: Reading " <<  i << "th marker failed." << std::endl;
       break;
     }	    
     std::string pds = std::to_string(pd);
