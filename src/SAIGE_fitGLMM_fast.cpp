@@ -464,7 +464,6 @@ public:
 	     passVarRatio = false;
 	     float maf = std::min(altFreq, 1-altFreq);
 	     mac = std::min(alleleCount, int(Nnomissing) * 2 - alleleCount);
-	     std::cout << "mac " << mac << " SNPIdx " << SNPIdx << std::endl; 	
 
 
 		if(maf >= minMAFtoConstructGRM && missingRate <= maxMissingRate){
@@ -827,7 +826,6 @@ public:
 			 g_randMarkerIndforVR = arma::unique(g_randMarkerIndforVR_temp);
 			 //arma::ivec g_randMarkerIndforVR_sort = arma::sort(g_randMarkerIndforVR);
 			 //g_randMarkerIndforVR_sort.print("g_randMarkerIndforVR_sort");
-			 //g_randMarkerIndforVR.print("g_randMarkerIndforVR");
 		}
 		//alleleFreqVec.zeros(M);
 		//invstdvVec.zeros(M);
