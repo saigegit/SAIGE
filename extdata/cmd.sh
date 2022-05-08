@@ -78,7 +78,7 @@ Rscript step1_fitNULLGLMM.R     \
 
 
 
-      Rscript step2_SPAtests.R        \
+      Rscript step2_SPAtests.R        \	      
      --bgenFile=./input/genotype_100markers.bgen    \
      --bgenFileIndex=./input/genotype_100markers.bgen.bgi \
      --SAIGEOutputFile=./output/genotype_100markers_bgen_groupTest_out.txt \
@@ -92,10 +92,30 @@ Rscript step1_fitNULLGLMM.R     \
      --sparseGRMFile=output/sparseGRM_relatednessCutoff_0.125_1000_randomMarkersUsed.sparseGRM.mtx   \
      --sparseGRMSampleIDFile=output/sparseGRM_relatednessCutoff_0.125_1000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt  \
      --groupFile=./input/group_new_chrposa1a2.txt    \
-     --annotation_in_groupTest="lof,missense:lof,missense:lof:synonymous"        \
-     --maxMAF_in_groupTest=0.0001,0.001,0.01 \
+     --annotation_in_groupTest="intergenic"        \
+     --maxMAF_in_groupTest=0.5 \
      --is_output_markerList_in_groupTest=TRUE \
  --LOCO=FALSE \
-     --is_fastTest=TRUE	\
+     --is_fastTest=FALSE	\
          --cateVarRatioMinMACVecExclude="0.5,1.5,2.5,3.5,4.5,5.5,10.5,20.5" \
+    --cateVarRatioMaxMACVecInclude="1.5,2.5,3.5,4.5,5.5,10.5,20.5"
+
+
+
+       Rscript step2_SPAtests.R        \
+    --vcfFile=./input/genotype_100markers_missGT.withchr.vcf.gz    \
+    --vcfFileIndex=./input/genotype_100markers_missGT.withchr.vcf.gz.csi     \
+    --vcfField=GT   \
+    --SAIGEOutputFile=./output/genotype_100markers_vcf_groupTest_out.txt \
+    --LOCO=FALSE    \
+    --minMAF=0 \
+    --minMAC=0.5 \
+    --GMMATmodelFile=./output/example_binary_fullGRM.rda \
+    --varianceRatioFile=output/example_binary_sparseGRM.varianceRatio.col1.txt	\
+    --sparseGRMFile=output/sparseGRM_relatednessCutoff_0.125_1000_randomMarkersUsed.sparseGRM.mtx   \
+    --sparseGRMSampleIDFile=output/sparseGRM_relatednessCutoff_0.125_1000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt     \
+    --groupFile=./input/group_new_chrposa1a2_withchr.txt    \
+    --annotation_in_groupTest=intergenic        \
+    --maxMAF_in_groupTest=0.0001	\
+             --cateVarRatioMinMACVecExclude="0.5,1.5,2.5,3.5,4.5,5.5,10.5,20.5" \
     --cateVarRatioMaxMACVecInclude="1.5,2.5,3.5,4.5,5.5,10.5,20.5"
