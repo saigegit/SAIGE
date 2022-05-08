@@ -55,3 +55,47 @@ Rscript step1_fitNULLGLMM.R     \
         --annotation_in_groupTest=lof,missense:lof,missense:lof:synonymous        \
         --maxMAF_in_groupTest=0.0001,0.001,0.01	\
 	--chrom=chr1
+
+
+
+
+     Rscript step1_fitNULLGLMM.R     \
+    --sparseGRMFile=output/sparseGRM_relatednessCutoff_0.125_1000_randomMarkersUsed.sparseGRM.mtx   \
+    --sparseGRMSampleIDFile=output/sparseGRM_relatednessCutoff_0.125_1000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt     \
+    --plinkFile=./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly_22chr \
+    --useSparseGRMtoFitNULL=TRUE    \
+    --phenoFile=./input/pheno_1000samples.txt_withdosages_withBothTraitTypes.txt \
+    --phenoCol=y_binary \
+    --covarColList=x1,x2 \
+    --qCovarColList=x2  \
+    --sampleIDColinphenoFile=IID \
+    --cateVarRatioMinMACVecExclude="0.5,1.5,2.5,3.5,4.5,5.5,10.5,20.5" \
+    --cateVarRatioMaxMACVecInclude="1.5,2.5,3.5,4.5,5.5,10.5,20.5" \
+    --traitType=binary        \
+    --isCateVarianceRatio=TRUE	\
+    --outputPrefix=./output/example_binary_sparseGRM	\
+    --IsOverwriteVarianceRatioFile=TRUE
+
+
+
+      Rscript step2_SPAtests.R        \
+     --bgenFile=./input/genotype_100markers.bgen    \
+     --bgenFileIndex=./input/genotype_100markers.bgen.bgi \
+     --SAIGEOutputFile=./output/genotype_100markers_bgen_groupTest_out.txt \
+     --chrom=1 \
+     --AlleleOrder=ref-first \
+     --minMAF=0 \
+     --minMAC=0.5 \
+     --sampleFile=./input/samplelist.txt \
+     --GMMATmodelFile=./output/example_binary_sparseGRM.rda \
+     --varianceRatioFile=output/example_binary_sparseGRM.varianceRatio.col1.txt	\
+     --sparseGRMFile=output/sparseGRM_relatednessCutoff_0.125_1000_randomMarkersUsed.sparseGRM.mtx   \
+     --sparseGRMSampleIDFile=output/sparseGRM_relatednessCutoff_0.125_1000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt  \
+     --groupFile=./input/group_new_chrposa1a2.txt    \
+     --annotation_in_groupTest="lof,missense:lof,missense:lof:synonymous"        \
+     --maxMAF_in_groupTest=0.0001,0.001,0.01 \
+     --is_output_markerList_in_groupTest=TRUE \
+ --LOCO=FALSE \
+     --is_fastTest=TRUE	\
+         --cateVarRatioMinMACVecExclude="0.5,1.5,2.5,3.5,4.5,5.5,10.5,20.5" \
+    --cateVarRatioMaxMACVecInclude="1.5,2.5,3.5,4.5,5.5,10.5,20.5"
