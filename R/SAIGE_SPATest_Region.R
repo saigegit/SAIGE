@@ -895,7 +895,7 @@ SAIGE.getRegionList_new = function(marker_group_line,
                          markerInfo, 
 			 chrom="")
 {
-
+  chrom_nochr = gsub("CHR", "", chrom, ignore.case = T)
   # read group file
   ngroup<-length(marker_group_line)/nline_per_gene
   #cat("ngroup is ", ngroup, "\n")
@@ -933,7 +933,7 @@ SAIGE.getRegionList_new = function(marker_group_line,
     if(chrom != "" & is.null(markerInfo)){
       RegionData[, c("chr") := tstrsplit(RegionData$SNP, ":")[[1]] ]
       setkey(RegionData, "chr")
-      RegionData = RegionData[chr == as.numeric(chrom)]
+      RegionData = RegionData[chr == chrom | chr == chrom_nochr]
       RegionData[,chr:=NULL]
     }
 
