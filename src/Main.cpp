@@ -964,7 +964,6 @@ Rcpp::List mainRegionInCPP(
   // cycle for q0 markers
   for(unsigned int i = 0; i < q0; i++)
   {
-
     // marker-level information
     double altFreq, altCounts, missingRate, imputeInfo;
     std::vector<uint32_t> indexForMissing;
@@ -1035,9 +1034,6 @@ Rcpp::List mainRegionInCPP(
     MACVec.at(i) = MAC;
     MAFVec.at(i) = MAF;
     imputationInfoVec.at(i) = imputeInfo;
-
-
-
 
 //arma::vec timeoutput3a = getTime();
     //printTime(timeoutput2a, timeoutput3a, "Unified_getOneMarker 2");
