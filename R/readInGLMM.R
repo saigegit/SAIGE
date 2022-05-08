@@ -173,8 +173,10 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 	    stop("varianceRatioFile is specified but the file ", varianceRatioFile, " does not exist\n")
 	}else{	
             cat("varianceRatioFile is not specified so variance ratio won't be used\n")
+	    
 	}
 	if(isSparseGRM){
+          cat("WARNING: Sparse GRM is specified. Please make sure the null model was fit using the same sparse GRM in Step 1.\n")
           ratioVec_sparse = c(1)
 	  ratioVec_null = c(-1)
 	}else{
@@ -188,13 +190,13 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 	    if(length(spindex) > 0){
 	        ratioVec_sparse = varRatioData[which(varRatioData[,2] == "sparse"),1]
                 cat("variance Ratio sparse is ", ratioVec_sparse, "\n")
-		#if(!isSparseGRM & sum(ratioVec_sparse != 1) > 0){
-		#       	stop("sparse GRM is not specified but it was used for estimating variance ratios in Step 1. Please leave --sparseGRMFile and --sparseGRMSampleIDFile empty and re-run the script\n")
-		#}	
+		if(!isSparseGRM & sum(ratioVec_sparse != 1) > 0){
+		       	stop("sparse GRM is not specified but it was used for estimating variance ratios in Step 1. Please specify --sparseGRMFile and --sparseGRMSampleIDFile\n")
+		}	
 	    }else{    
 		ratioVec_sparse = c(-1)
 	    	if(isSparseGRM){
-			stop("sparse GRM is specified but the variance ratio with the full and sparse GRMs are not estimated in Step 1.")
+			stop("sparse GRM is specified but the variance ratio for sparse GRM was not estimatedin Step 1. Pleae remove --sparseGRMFile and --sparseGRMSampleIDFile\n")
 		}	
 	    }
 	    ratioVec_null = varRatioData[which(varRatioData[,2] == "null"),1]
@@ -206,13 +208,16 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 		nrv = 1
 	    }
 	}else{
+	    cat("Variance ratios were estimated with version < 1.0.6\n")	
 	    if(isSparseGRM){
 	        ratioVec_sparse = varRatioData[,1]
-        	cat("variance Ratio sparse is ", ratioVec_sparse, "\n")
+        	cat("variance Ratio is ", ratioVec_sparse, "\n")
 		ratioVec_null = rep(-1, length(varRatioData[,1]))
+		cat("WARNING: Sparse GRM is specified and the variance ratio(s) were specified. Please make sure the variance ratios were estimated using a full GRM and a sparse GRM.")
 	    }else{
 	        ratioVec_null = varRatioData[,1]
-                cat("variance Ratio null is ", ratioVec_null, "\n")
+                cat("variance Ratio is ", ratioVec_null, "\n")
+		cat("WARNING: Sparse GRM is not specified and the variance ratio(s) were specified. Please make sure that in Step 1, 1. the null model was fit using a full GRM (--useSparseGRMtoFitNULL=FALSE) and the variacne ratio was NOT estimated with the sparse GRM (useSparseGRMforVarRatio=FALSE) or 2. the null model was fit using a sparse GRM (--useSparseGRMtoFitNULL=TRUE) and the variacne ratio was estiamted with the sparse GRM and null --skipVarianceRatioEstimation=FALSE\n")
 		ratioVec_sparse = c(-1)
 	    }
 	    if(length(varRatioData[,1]) > 1){
