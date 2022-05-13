@@ -1947,6 +1947,7 @@ extractVarianceRatio = function(obj.glmm.null,
          Indexvector_forVarRatio =  getIndexVec_forVarRatio()
          cat("length(MACvector): ", length(MACvector), "\n")
          cat("length(MACvector_forVarRatio): ", length(MACvector_forVarRatio), "\n")
+
          if(length(MACvector_forVarRatio) > 0){
 
                 #MACdata = data.frame(MACvector = c(MACvector, MACvector_forVarRatio), geno_ind = c(rep(0, length(MACvector)), rep(1, length(MACvector_forVarRatio))), indexInGeno = c(seq(1,length(MACvector)), seq(1,length(MACvector_forVarRatio))))
@@ -2007,6 +2008,7 @@ extractVarianceRatio = function(obj.glmm.null,
 
   Nnomissing = length(mu)
   varRatioTable = NULL
+
 
   for(k in 1:length(listOfMarkersForVarRatio)){
     if(cateVarRatioIndexVec[k] == 1){
@@ -2082,7 +2084,7 @@ extractVarianceRatio = function(obj.glmm.null,
     }
     varRatio_NULL_vec = c(varRatio_NULL_vec, var1/var2null)
 
-    indexInMarkerList = indexInMarkerList + 1
+    #indexInMarkerList = indexInMarkerList + 1
     numTestedMarker = numTestedMarker + 1
 
       }else{

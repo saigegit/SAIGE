@@ -475,12 +475,7 @@ public:
 				passVarRatio = true;
 				genoVecofPointers_forVarRatio[SNPIdx_vr] = new vector<unsigned char>;
 				genoVecofPointers_forVarRatio[SNPIdx_vr]->reserve(numMarkersofEachArray*ceil(float(Nnomissing)/4));
-			   }
-			}
-			
-			
-			//else{			   	
-			if(mac >= g_maxMACVarRatio){
+			   }else if(mac >= g_maxMACVarRatio){
 				   //randomly select 200 markers for estimating the variance ratio for the last MAC category	
 				   //if(numberofMarkers_varRatio_common < 200){
 				   	//if(static_cast<int>(SNPIdx) == 123){
@@ -498,6 +493,29 @@ public:
 					}
 				  //} 
 			//	passVarRatio = true;	
+			}
+			}else{
+				if(mac >= g_minMACVarRatio){
+                                   //randomly select 200 markers for estimating the variance ratio for the last MAC category
+                                   //if(numberofMarkers_varRatio_common < 200){
+                                        //if(static_cast<int>(SNPIdx) == 123){
+                                        //      std::cout << "123" << std::endl;
+                                        //      bool isIng_randMarkerIndforVR = arma::any(g_randMarkerIndforVR == static_cast<int>(SNPIdx));
+                                        //      std::cout << "isIng_randMarkerIndforVR " << isIng_randMarkerIndforVR << std::endl;
+                                        //}
+                                        passVarRatio = arma::any(g_randMarkerIndforVR == static_cast<int>(SNPIdx));
+                                        if(passVarRatio){
+                                                //std::cout << "SNPIdx " << SNPIdx << std::endl;
+                                                genoVecofPointers_forVarRatio[SNPIdx_vr] = new vector<unsigned char>;
+                                                genoVecofPointers_forVarRatio[SNPIdx_vr]->reserve(numMarkersofEachArray*ceil(float(Nnomissing)/4));
+                                                numberofMarkers_varRatio_common = numberofMarkers_varRatio_common + 1;
+                                                //passVarRatio = false;
+                                        }
+                                  //}
+                        //      passVarRatio = true;
+                        }	
+			
+
 			}
 			//avoid the overlap between markers for GRM and markers for variance ratio estimation	   
 			if(passVarRatio){
