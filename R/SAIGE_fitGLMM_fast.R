@@ -2074,7 +2074,11 @@ extractVarianceRatio = function(obj.glmm.null,
            varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
         }
     }else{
-	  varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, 1)	
+	  #varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, 1)
+	  pcginvSigma = solve(sparseSigma, g, sparse=T)
+	  var2_a = t(g) %*% pcginvSigma
+	  var2sparseGRM = var2_a[1,1]
+	  varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
     }
 
     if(obj.glmm.null$traitType == "binary"){
