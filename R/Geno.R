@@ -348,8 +348,6 @@ if(FALSE){
 
   if(dosageFileType == "vcf"){
     setVCFobjInCPP(vcfFile, vcfFileIndex, vcfField, t_SampleInModel = sampleInModel)
-
-
     if(!is.null(IDsToInclude)){
       SNPlist = paste(c("set1", IDsToInclude), collapse = "\t")
       in_chrom="fake_chrom"
