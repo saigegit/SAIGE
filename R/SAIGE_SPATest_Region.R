@@ -214,8 +214,6 @@ SAIGE.Region = function(mu,
   i = indexChunk+1
   while(i <= nRegions){
   #for(i in (indexChunk+1):nRegions){
-
-
    if(mth ==  numberRegionsInChunk){
       if(i + groups_per_chunk > nRegions){
   	      nregions_ro_read = nRegions - i + 1	      
@@ -278,8 +276,6 @@ SAIGE.Region = function(mu,
 
         #print("outList$VarMat 1 ")
         #print(outList$VarMat)
-
-
 
       if(regionTestType == "BURDEN" & is_fastTest){
 	if(!is.null(outList$iswriteOutput)){
@@ -775,8 +771,24 @@ if(regionTestType != "BURDEN"){
 }
 
 
-# output
+if(is_output_markerList_in_groupTest){
+     rm(Output_MarkerList)
+ } 	   
 
+rm(outList)
+rm(pval.Region)
+if(regionTestType != "BURDEN"){
+     rm(resultDF)
+} 
+gc()
+  
+}#if(length(noNAIndices) > 0){ 
+  }else{#if(!is.null(region)){
+    cat(regionName, " is empty.\n")
+  }
+
+
+# output
 if(mth ==  numberRegionsInChunk){
   message1 = "This is the output index file for SAIGE package to record the end point in case users want to restart the analysis. Please do not modify this file."
   message2 = paste("This is a", AnalysisType, "level analysis.")
@@ -788,7 +800,7 @@ if(mth ==  numberRegionsInChunk){
   cat("write to output\n")
   #cat("n1 is ", n1, "\n")
   #cat("n2 is ", n2, "\n")
-  if(regionTestType != "BURDEN"){  
+  if(regionTestType != "BURDEN"){
       if(Start){
         if(!is.null(pval.Region.all)){
           fwrite(pval.Region.all, OutputFile, quote = F, sep = "\t", append = F, col.names = T, row.names = F, na="NA")
@@ -800,7 +812,7 @@ if(mth ==  numberRegionsInChunk){
         #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
       }
   }
-      if(is_output_markerList_in_groupTest){ 
+      if(is_output_markerList_in_groupTest){
         if(Start){
         if(!is.null(Output_MarkerList.all)){
           fwrite(Output_MarkerList.all, paste0(OutputFile, ".markerList.txt"), quote = F, sep = "\t", append = F, col.names = T, row.names = F, na="NA")
@@ -835,32 +847,8 @@ cth_chunk_to_output = cth_chunk_to_output + 1
 gc()
 }
 
-#tp2 = proc.time()
-#print("tp2 - tp1")
-#print(tp2 - tp1)
-#print("tp2 - ta2")
-#print(tp2 - ta2)
-   #if(is_single_in_groupTest){
-   #  rm(OutList)
-   # }
 
-   if(is_output_markerList_in_groupTest){
-     rm(Output_MarkerList)
-   } 	   
-
-   rm(outList)
-   rm(pval.Region)
-   if(regionTestType != "BURDEN"){
-     rm(resultDF)
-   } 
-   gc()
-  
- }#if(length(noNAIndices) > 0){ 
-  }else{#if(!is.null(region)){
-    cat(regionName, " is empty.\n")
-  }
-
-   }else{#if(!is.null(RegionList)){
+}else{#if(!is.null(RegionList)){
      cat("The chunk is empty\n")	   
      #mth = 0
      mth = numberRegionsInChunk
