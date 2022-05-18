@@ -1144,8 +1144,22 @@ fitNULLGLMM = function(plinkFile = "",
 			modglmm$offset = covoffset
 		}	
 	    }
-            
-            modglmm$useSparseGRMforVarRatio = useSparseGRMforVarRatio 	    
+           
+	    if(skipVarianceRatioEstimation & useSparseGRMtoFitNULL){
+		family = fit0$family
+		eta = modglmm$linear.predictors
+		mu = modglmm$fitted.values
+		mu.eta = family$mu.eta(eta)
+		sqrtW = mu.eta/sqrt(family$variance(mu))
+		W = sqrtW^2
+		tauVecNew = modglmm$theta
+		Sigma_iX =  getSigma_X(W, tauVecNew, modglmm$X, maxiterPCG, tolPCG)
+		Sigma_iXXSigma_iX = Sigma_iX%*%(solve(t(modglmm$X)%*%Sigma_iX))
+		modglmm$Sigma_iXXSigma_iX = Sigma_iXXSigma_iX
+	    }
+
+
+            modglmm$useSparseGRMtoFitNULL = useSparseGRMtoFitNULL 
             save(modglmm, file = modelOut)
             tau = modglmm$theta
         	    
@@ -1267,7 +1281,23 @@ fitNULLGLMM = function(plinkFile = "",
             }
 
 	    modglmm$offset = covoffset
-	    modglmm$useSparseGRMforVarRatio = useSparseGRMforVarRatio
+
+            if(skipVarianceRatioEstimation & useSparseGRMtoFitNULL){
+                family = fit0$family
+                eta = modglmm$linear.predictors
+                mu = modglmm$fitted.values
+                mu.eta = family$mu.eta(eta)
+                sqrtW = mu.eta/sqrt(family$variance(mu))
+                W = sqrtW^2
+                tauVecNew = modglmm$theta
+                Sigma_iX =  getSigma_X(W, tauVecNew, modglmm$X, maxiterPCG, tolPCG)
+                Sigma_iXXSigma_iX = Sigma_iX%*%(solve(t(modglmm$X)%*%Sigma_iX))
+                modglmm$Sigma_iXXSigma_iX = Sigma_iXXSigma_iX
+            }
+
+
+            modglmm$useSparseGRMtoFitNULL = useSparseGRMtoFitNULL
+
             save(modglmm, file = modelOut)
             t_end = proc.time()
             print(t_end)
@@ -1774,8 +1804,8 @@ getSparseSigma = function(bedFile,
   #Matrix:::writeMM(sparseGRM, sparseGRMFile)
   Nval = length(W)
   sparseSigma = sparseGRM * tauVecNew[2]
-  diag(sparseSigma) = getDiagOfSigma(W, tauVecNew)
-
+  #diag(sparseSigma) = getDiagOfSigma(W, tauVecNew)
+  diag(sparseSigma) = diag(sparseSigma) + (1/W)*tauVecNew[1]
   #sparseSigmaFile = paste0(outputPrefix, "_relatednessCutoff_",relatednessCutoff, "_", numRandomMarkerforSparseKin, "_randomMarkersUsed.sparseSigma.mtx")
   #cat("write sparse Sigma to ", sparseSigmaFile ,"\n")
   #Matrix:::writeMM(sparseSigma, sparseSigmaFile)
@@ -2078,6 +2108,8 @@ extractVarianceRatio = function(obj.glmm.null,
 	  pcginvSigma = solve(sparseSigma, g, sparse=T)
 	  var2_a = t(g) %*% pcginvSigma
 	  var2sparseGRM = var2_a[1,1]
+	  x=t(G)%*%Sigma_iG/AC
+	  cat(" x ", x, " var2 ", var2sparseGRM , "\n")
 	  varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
     }
 

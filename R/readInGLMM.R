@@ -158,8 +158,11 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
  if(is.null(obj.glmm.null$offset)){
 	 obj.glmm.null$offset = rep(0,nrow(obj.glmm.null$X))
   }
-
- #}	 
+  
+  
+ if(is.null(obj.glmm.null$Sigma_iXXSigma_iX)){
+	obj.glmm.null$Sigma_iXXSigma_iX = matrix(0, nrow=1, ncol=1)	
+ }
  return(obj.glmm.null)    
 }
 

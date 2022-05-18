@@ -26,6 +26,7 @@ SAIGEClass::SAIGEClass(
 	arma::mat  t_XXVX_inv,
 	arma::mat & t_XV,
 	arma::mat & t_XVX_inv_XV,
+	arma::mat & t_Sigma_iXXSigma_iX,
 	arma::mat & t_X,
 	arma::vec &  t_S_a,
 	arma::vec & t_res,
@@ -52,10 +53,18 @@ SAIGEClass::SAIGEClass(
         double t_pCutoffforFirth,
         arma::vec & t_offset){
 
+
     m_XVX = t_XVX;
     m_XV = t_XV;
     m_XXVX_inv = t_XXVX_inv;
     m_XVX_inv_XV = t_XVX_inv_XV;
+    m_Sigma_iXXSigma_iX = t_Sigma_iXXSigma_iX;
+    m_isVarPsadj = false;
+    if(m_Sigma_iXXSigma_iX.n_cols == 1 && m_Sigma_iXXSigma_iX.n_rows == 1){
+	m_isVarPsadj = false;
+    }else{
+	m_isVarPsadj = true;
+    }
     m_X = t_X;
     m_S_a = t_S_a;
     m_res = t_res;
@@ -142,12 +151,16 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
 
 
     if(!m_flagSparseGRM_cur){
-      t_P2Vec = t_gtilde % m_mu2 *m_tauvec[0];
+      t_P2Vec = t_gtilde % m_mu2 *m_tauvec[0];  
+      var2m = dot(t_P2Vec , t_gtilde);
     }else{
       arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
       t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
+      var2m = dot(t_P2Vec , t_gtilde);
+      if(m_isVarPsadj){
+	var2m = var2m - t_gtilde.t() * m_Sigma_iXXSigma_iX * m_X.t() * t_P2Vec;	
+      }
     }	      
-    var2m = dot(t_P2Vec , t_gtilde);
     var2 = var2m(0,0);
     double var1 = var2 * m_varRatioVal;
     double stat = S*S/var1;
@@ -349,11 +362,11 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   //arma::vec t_gtilde;
   bool isScoreFast = true;
 
-
   //if((t_altFreq >= 0.3 && t_altFreq <= 0.7) || m_flagSparseGRM || is_region){
   if(m_flagSparseGRM_cur){
     isScoreFast = false;
   }
+
 
   //for test
  //arma::vec timeoutput3 = getTime();
