@@ -14,6 +14,7 @@ class SAIGEClass
       arma::mat m_XVX;
       arma::mat m_XVX_inv_XV;
       arma::mat m_X;
+      arma::mat m_Sigma_iXXSigma_iX;
       arma::vec m_res;
       arma::vec m_mu;
       arma::vec m_mu2;
@@ -71,7 +72,7 @@ class SAIGEClass
       bool m_is_Firth_beta;
       double m_pCutoffforFirth;
      arma::vec  m_offset;	
-
+      bool m_isVarPsadj;
   ////////////////////// -------------------- functions ---------------------------------- //////////////////////
   
 
@@ -80,6 +81,7 @@ class SAIGEClass
         arma::mat  t_XXVX_inv,
         arma::mat & t_XV,
         arma::mat & t_XVX_inv_XV,
+	arma::mat & t_sigmainvX_XsignmainXtXinv,
         arma::mat & t_X,
         arma::vec &  t_S_a,
         arma::vec & t_res,

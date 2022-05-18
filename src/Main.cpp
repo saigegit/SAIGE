@@ -626,6 +626,7 @@ void Unified_getMarkerPval(
     if(t_isOnlyOutputNonZero == true)
       Rcpp::stop("When using SAIGE method to calculate marker-level p-values, 't_isOnlyOutputNonZero' should be false.");   
 
+
     ptr_gSAIGEobj->getMarkerPval(t_GVec, t_indexForNonZero_vec, t_indexForZero_vec, t_Beta, t_seBeta, t_pval, t_pval_noSPA, t_altFreq, t_Tstat, t_gy, t_varT, t_isSPAConverge, t_gtilde, is_gtilde, is_region, t_P2Vec, t_isCondition, t_Beta_c, t_seBeta_c, t_pval_c, t_pval_noSPA_c, t_Tstat_c, t_varT_c, t_G1tilde_P_G2tilde_Vec, t_isFirth, t_isFirthConverge); //SAIGE_new.cpp
     
     //t_indexForNonZero_vec.clear();
@@ -680,7 +681,9 @@ void setVCFobjInCPP(std::string t_vcfFileName,
 				t_vcfField,
 				false,
 				t_SampleInModel);
-		  
+
+bool isEnd = ptr_gVCFobj->check_iterator_end();
+
 }
 
 
@@ -692,6 +695,7 @@ void setSAIGEobjInCPP(arma::mat & t_XVX,
         arma::mat & t_XXVX_inv,
         arma::mat & t_XV,
         arma::mat & t_XVX_inv_XV,
+	arma::mat & t_Sigma_iXXSigma_iX,
         arma::mat & t_X,
         arma::vec &  t_S_a,
         arma::vec & t_res,
@@ -724,6 +728,7 @@ void setSAIGEobjInCPP(arma::mat & t_XVX,
         t_XXVX_inv,
         t_XV,
         t_XVX_inv_XV,
+	t_Sigma_iXXSigma_iX,
         t_X,
         t_S_a,
         t_res,
@@ -750,7 +755,6 @@ void setSAIGEobjInCPP(arma::mat & t_XVX,
         t_pCutoffforFirth,
 	t_offset);
   //ptr_gSAIGEobj->m_flagSparseGRM = false;
-		 	  
 }
 
 
@@ -1885,6 +1889,7 @@ void assign_conditionMarkers_factors(
 			   arma::vec & t_weight_cond
 			   )           // sample size
 {
+  ptr_gSAIGEobj->set_flagSparseGRM_cur(ptr_gSAIGEobj->m_flagSparseGRM);
   bool isImpute = false;	
   unsigned int q = t_genoIndex.size();
   arma::mat P1Mat(q, t_n);
@@ -1954,7 +1959,6 @@ void assign_conditionMarkers_factors(
 	std::remove(end_prev);
     }
 
-
     bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
@@ -1981,7 +1985,7 @@ void assign_conditionMarkers_factors(
 	//	exit(EXIT_FAILURE);
 	//}	
   }	  
-  
+ 
   flip = imputeGenoAndFlip(GVec, altFreq, altCounts, indexForMissing, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec, indexNonZeroVec);
 
 
@@ -1990,11 +1994,11 @@ void assign_conditionMarkers_factors(
        indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
 
 
-
   MAF = std::min(altFreq, 1 - altFreq);
   MAC = std::min(altCounts, 2*t_n-altCounts);
 
   arma::vec gtildeVec;
+
    Unified_getMarkerPval(
                     GVec,
                     false, // bool t_isOnlyOutputNonZero,
