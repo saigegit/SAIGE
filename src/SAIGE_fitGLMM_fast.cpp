@@ -2857,7 +2857,9 @@ Rcpp::List getCoefficients(arma::fvec& Yvec, arma::fmat& Xmat, arma::fvec& wVec,
 
   	int Nnomissing = geno.getNnomissing();
   	arma::fvec Sigma_iY;
+	wVec.print("wVec");
   	Sigma_iY = getPCG1ofSigmaAndVector(wVec, tauVec, Yvec, maxiterPCG, tolPCG);
+	std::cout << "after Sigma_iY" << std::endl;
   	int colNumX = Xmat.n_cols;
   	arma::fmat Sigma_iX(Nnomissing,colNumX);
   	arma::fvec XmatVecTemp;

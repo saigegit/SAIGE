@@ -355,14 +355,12 @@ SPAGMMATtest = function(bgenFile = "",
 	condition_genoIndex_prev_a = as.character(format(condition_genoIndex$cond_genoIndex_prev, scientific = FALSE)) 
 	assign_conditionMarkers_factors(genoType, condition_genoIndex_prev_a, condition_genoIndex_a,  n, condition_weights)
 	if(obj.model$traitType == "binary" & isGroupTest){
-		outG2cond = RegionSetUpConditional_binary_InCPP(condition_weights)
-
-
-	G2condList = get_newPhi_scaleFactor(q.sum = outG2cond$qsum_G2_cond, mu.a = obj.model$mu, g.sum = outG2cond$gsum_G2_cond, p.new = outG2cond$pval_G2_cond, Score = outG2cond$Score_G2_cond, Phi = outG2cond$VarMat_G2_cond, "SKAT-O")
+	  outG2cond = RegionSetUpConditional_binary_InCPP(condition_weights)
+	  G2condList = get_newPhi_scaleFactor(q.sum = outG2cond$qsum_G2_cond, mu.a = obj.model$mu, g.sum = outG2cond$gsum_G2_cond, p.new = outG2cond$pval_G2_cond, Score = outG2cond$Score_G2_cond, Phi = outG2cond$VarMat_G2_cond, "SKAT-O")
 	#print(G2condList)
-	scaleFactorVec = as.vector(G2condList$scaleFactor)
+	  scaleFactorVec = as.vector(G2condList$scaleFactor)
 	#print(scaleFactorVec)
-	assign_conditionMarkers_factors_binary_region(scaleFactorVec)
+	  assign_conditionMarkers_factors_binary_region(scaleFactorVec)
 	}	
     }else{
 	condition_weights = c(0)

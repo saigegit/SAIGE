@@ -18,6 +18,11 @@ setSparseSigma_new = function(sparseGRMFile, sparseGRMSampleIDFile, relatednessC
   Check_File_Exist(sparseGRMSampleIDFile, "sparseGRMSampleIDFile")
 
   sparseGRM = Matrix:::readMM(sparseGRMFile)
+  if(class(sparseGRM) == "nsTMatrix"){
+     sparseGRM = sparseGRM * 1
+  }
+
+  #print(sparseGRM[1:20,1:20])
   sparseGRMSampleID = data.frame(data.table:::fread(sparseGRMSampleIDFile, header=F, stringsAsFactors=FALSE, colClasses=c("character")))
   colnames(sparseGRMSampleID) = "sampleID"
   sparseGRMSampleID$IndexGRM = c(1:nrow(sparseGRMSampleID))
@@ -40,29 +45,33 @@ setSparseSigma_new = function(sparseGRMFile, sparseGRMSampleIDFile, relatednessC
   }else{
     print("Subsetting GRM")
   }
-  removeIndex = which(sparseGRM@x < relatednessCutoff)
+  sumSpGRM=summary(sparseGRM)
+
+  print(head(sumSpGRM))
+  
+  removeIndex = which(sumSpGRM[,3] < relatednessCutoff)
   if(length(removeIndex) > 0){
 	cat("Removing ", length(removeIndex), " elements in the sparse GRM < ", relatednessCutoff, ".\n")  
-  	sparseGRM@x = sparseGRM@x[-removeIndex]
-	sparseGRM@i = sparseGRM@i[-removeIndex]
-	sparseGRM@j = sparseGRM@j[-removeIndex]
+  	sumSpGRM = sumSpGRM[-removeIndex,,drop=F]
   }
 
-  sparseGRM@x = sparseGRM@x * tauVec[2]  
+  sumSpGRM[,3] = sumSpGRM[,3] * tauVec[2]
   #sparseSigma = sparseGRM * tauVec[2]
-  if(traitType == "binary"){
-	sparseGRM@x[which(sparseGRM@i == sparseGRM@j)] = sparseGRM@x[which(sparseGRM@i == sparseGRM@j)] + 1/W 
+  if(traitType == "binary" | traitType == "count"){
+	sumSpGRM[which(sumSpGRM[,1] == sumSpGRM[,2]), 3] = sumSpGRM[which(sumSpGRM[,1] == sumSpGRM[,2]), 3] + 1/W
+
    #diag(sparseSigma) = W + diag(sparseSigma)
   }else if(traitType == "quantitative"){
-	sparseGRM@x[which(sparseGRM@i == sparseGRM@j)] = tauVec[1] + sparseGRM@x[which(sparseGRM@i == sparseGRM@j)]
+	sumSpGRM[which(sumSpGRM[,1] == sumSpGRM[,2]), 3] = sumSpGRM[which(sumSpGRM[,1] == sumSpGRM[,2]), 3] + tauVec[1]
+
   }
    #diag(sparseSigma) = tauVec[1] + diag(sparseSigma)
-
-  locations = rbind(sparseGRM@i, sparseGRM@j)
-  values = sparseGRM@x
   nSubj = dim(sparseGRM)[1]
-  sigmaMatListR = list(locations = locations,
-                     values = values,
+
+  locations = t(sumSpGRM[,c(1,2)])
+  print(dim(locations))
+  sigmaMatListR = list(locations = t(sumSpGRM[,c(1,2)]),
+                     values = sumSpGRM[,3],
                      nSubj = nSubj)
   return(sigmaMatListR)
 }

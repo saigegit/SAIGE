@@ -27,7 +27,7 @@ void SPA(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_noadj
         if( traitType == "binary"){
           outuni1 = getroot_K1_Binom(0, mu, g, q, tol);
           outuni2 = getroot_K1_Binom(0, mu, g, qinv, tol);
-        }else if(traitType == "timeToEvent"){
+        }else if(traitType == "count"){
           outuni1 = getroot_K1_Poi(0, mu, g, q, tol);
           outuni2 = getroot_K1_Poi(0, mu, g, qinv, tol);
         }
@@ -51,7 +51,7 @@ void SPA(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_noadj
                 if( traitType == "binary"){
                   getSaddle = Get_Saddle_Prob_Binom(outuni1["root"], mu, g, q, logp);
                   getSaddle2 = Get_Saddle_Prob_Binom(outuni2["root"], mu, g, qinv, logp);
-                }else if(traitType == "timeToEvent"){
+                }else if(traitType == "count"){
                   getSaddle = Get_Saddle_Prob_Poi(outuni1["root"], mu, g, q, logp);
                   getSaddle2 = Get_Saddle_Prob_Poi(outuni2["root"], mu, g, qinv, logp);
                 }
@@ -123,7 +123,7 @@ void SPA_fast(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_
  //printTime(timeoutput2, timeoutput3, "getroot_K1_fast_Binom");
           //std::cout << "outuni1root" << outuni1["root"] << std::endl;
           //std::cout << "outuni2root" << outuni2["root"] << std::endl;
-        }else if(traitType == "timeToEvent"){
+        }else if(traitType == "count"){
           outuni1 = getroot_K1_fast_Poi(0, mu, g, q, gNA,gNB,muNA,muNB,NAmu, NAsigma, tol);
           outuni2 = getroot_K1_fast_Poi(0, mu, g, qinv, gNA,gNB,muNA,muNB,NAmu, NAsigma, tol);
         }
@@ -140,7 +140,7 @@ void SPA_fast(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_
 	//	arma::vec timeoutput6 = getTime();
 	//printTime(timeoutput4, timeoutput5, "Get_Saddle_Prob_fast_Binom");
  //printTime(timeoutput5, timeoutput6, "Get_Saddle_Prob_fast_Binom");
-          }else if(traitType == "timeToEvent"){
+          }else if(traitType == "count"){
                 getSaddle  = Get_Saddle_Prob_fast_Poi(outuni1["root"], mu, g, q, gNA,gNB,muNA,muNB,NAmu, NAsigma, logp);
                 getSaddle2 = Get_Saddle_Prob_fast_Poi(outuni2["root"], mu, g, qinv, gNA,gNB,muNA,muNB,NAmu, NAsigma, logp);
           }

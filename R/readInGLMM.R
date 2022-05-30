@@ -118,14 +118,16 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
 
   }
 
- obj.glmm.null$mu = as.vector(obj.glmm.null$fitted.values)
- tau = obj.glmm.null$theta
- N = length(obj.glmm.null$mu)
-     if(obj.glmm.null$traitType == "binary"){
-             obj.glmm.null$mu2 = (obj.glmm.null$mu) *(1-obj.glmm.null$mu)
-           }else if(obj.glmm.null$traitType == "quantitative"){
-             obj.glmm.null$mu2 = (1/tau[1])*rep(1,N)
-           }
+  obj.glmm.null$mu = as.vector(obj.glmm.null$fitted.values)
+  tau = obj.glmm.null$theta
+  N = length(obj.glmm.null$mu)
+  if(obj.glmm.null$traitType == "binary"){
+    obj.glmm.null$mu2 = (obj.glmm.null$mu) *(1-obj.glmm.null$mu)
+  }else if(obj.glmm.null$traitType == "quantitative"){
+    obj.glmm.null$mu2 = (1/tau[1])*rep(1,N)
+  }else if(obj.glmm.null$traitType == "count"){
+    obj.glmm.null$mu2 = obj.glmm.null$mu
+  }
  #if(FALSE){
 
  if(is_Firth_beta){

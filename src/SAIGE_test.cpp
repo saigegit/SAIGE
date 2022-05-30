@@ -136,7 +136,8 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
 
     if(t_is_region && m_traitType == "binary"){
       t_gy = dot(t_gtilde, m_y);
-     }
+    }
+
     S = dot(t_gtilde, m_res);
     S = S/m_tauvec[0];
 
@@ -208,7 +209,7 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
     arma::vec S_a2;
     double Bmu2;
     arma::mat  ZtXVXZ = Z.t() * m_XVX * Z;
-    if(m_traitType == "binary"){
+    if(m_traitType == "binary" || m_traitType == "count"){
       mu21  = m_mu2.elem(t_indexForNonZero);
       g1tildemu2 = dot(square(g1_tilde), mu21);
       Bmu2 = arma::dot(square(B),  mu21);
@@ -307,7 +308,9 @@ void SAIGEClass::setupSparseMat(int r, arma::umat & locationMatinR, arma::vec & 
 
 
 arma::sp_mat SAIGEClass::gen_sp_SigmaMat() {
+    std::cout << "gen_sp_SigmaMat " << std::endl;
     arma::sp_mat resultMat(m_locationMat, m_valueVec, m_dimNum, m_dimNum);
+    std::cout << "gen_sp_SigmaMat2 " << std::endl;
     return resultMat;
 }
 
@@ -480,7 +483,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 		if(p_iIndexComVecSize >= 0.5){
            		NAsigma = t_var2 - arma::sum(muNB % (1-muNB) % arma::pow(gNB,2));
 		}
-        }else if(m_traitType == "survival"){
+        }else if(m_traitType == "survival" || m_traitType == "count"){
                 q = t_Tstat/sqrt(t_var1/t_var2);
                 qinv = -q;
 		if(p_iIndexComVecSize >= 0.5){
@@ -514,7 +517,8 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
    t_pval_noSPA = pval_noadj; 
    if(m_traitType!="quantitative"){
         if(t_isSPAConverge){
-                t_pval = t_SPApval;
+                //t_pval = t_SPApval;
+                t_pval = pval_noadj;
         }else{
                 t_pval = pval_noadj;
         }
@@ -623,7 +627,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
                 }else{
                         qinv_c = std::abs(q_c-m1) + m1;
                 }
-        }else if(m_traitType == "survival"){
+        }else if(m_traitType == "count"){
                 q_c = t_Tstat_c/sqrt(t_varT_c/t_var2);
                 qinv = -q_c;
         }
