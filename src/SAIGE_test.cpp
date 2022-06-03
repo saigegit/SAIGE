@@ -411,14 +411,15 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   arma::vec gNA(iIndexComVecSize, arma::fill::none);
   arma::vec muNB(iIndexSize, arma::fill::none);
   arma::vec muNA(iIndexComVecSize, arma::fill::none);
-/*
+
+  /*
     std::cout << "iIndexComVecSize " << iIndexComVecSize << std::endl;
     std::cout << "iIndexSize " << iIndexSize << std::endl;
     std::cout << "gNA.n_elem 1 " << gNA.n_elem << std::endl;
         std::cout << "gNB.n_elem 1 " << gNB.n_elem << std::endl;
         std::cout << "muNA.n_elem 1 " << muNA.n_elem << std::endl;
         std::cout << "muNB.n_elem 1 " << muNB.n_elem << std::endl;
-*/
+  */
 
 
   double gmuNB;

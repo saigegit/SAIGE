@@ -178,12 +178,13 @@ setGenoInput = function(bgenFile = "",
 	sf = file(sampleFile, "r")
 	first_sample_line = readLines(sf, n = 1)
 	close(sf)
-	if(first_sample_line == "ID_1 ID_2 missing sex"){
+	first_sample_line_list = strsplit(first_sample_line, split="[\ \t]+")[[1]]
+        		
+	if(first_sample_line == "ID_1 ID_2 missing sex" | first_sample_line == "ID_1 ID_1 0 0" | length(first_sample_line_list) == 4){
 	    cat("sample file is in the bgenix format\n")
 	    sampleData = data.table::fread(sampleFile, header=F, colClasses = rep("character", 4), data.table=F, skip=2)
 	    samplesInGeno = as.character(sampleData[,2])
 	}else{
-	    first_sample_line_list = strsplit(first_sample_line, split="[\ \t]+")[[1]]
 	    if(length(first_sample_line_list) == 1){
 	        cat("sample file only has one column and has no header\n")
 	        sampleData = data.table::fread(sampleFile, header=F, colClasses = c("character"), data.table=F)
@@ -489,10 +490,17 @@ extract_genoIndex_condition = function(condition, markerInfo, genoType){
 		}	
        }else{
 	        condition_group_line = paste(c("condition", condition_original), collapse = "\t")
-		#print("condition_original")
-		#print(condition_original)
-		set_iterator_inVcf(condition_group_line, "1", 1, 250000000)
-      		cond_genoIndex = rep("0", length(condition_original))
+
+		if(length(condition_original) == 1){
+			fakem = strsplit(condition_original, split=":")[[1]]
+			fakemb = paste(c(fakem[1], as.numeric(fakem[2])+2, "N", "N"), collapse=":")
+			condition_group_linetemp = paste(c(condition_group_line, fakemb), collapse = "\t")
+			set_iterator_inVcf(condition_group_linetemp, "1", 1, 250000000)
+		}else{	
+
+			set_iterator_inVcf(condition_group_line, "1", 1, 250000000)
+		}
+		cond_genoIndex = rep("0", length(condition_original))
 		cond_genoIndex_prev = rep("0", length(condition_original))
        }
    }else{

@@ -690,7 +690,8 @@ fitNULLGLMM = function(plinkFile = "",
 		MaleOnly = FALSE,
 		SampleIDIncludeFile = "",
 		isCovariateOffset = FALSE,
-		skipVarianceRatioEstimation = FALSE)
+		skipVarianceRatioEstimation = FALSE, 
+		nrun = 30)
 {
 
     ##set up output files
@@ -1109,7 +1110,7 @@ fitNULLGLMM = function(plinkFile = "",
             print(t_begin)
             system.time(modglmm <- glmmkin.ai_PCG_Rcpp_Binary(bedFile, bimFile, famFile, Xorig, isCovariateOffset, 
                 fit0, tau = c(0, 0), fixtau = c(0, 0), maxiter = maxiter, 
-                tol = tol, verbose = TRUE, nrun = 30, tolPCG = tolPCG, 
+                tol = tol, verbose = TRUE, nrun = nrun, tolPCG = tolPCG, 
                 maxiterPCG = maxiterPCG, subPheno = dataMerge_sort, indicatorGenoSamplesWithPheno = indicatorGenoSamplesWithPheno, 
                 obj.noK = obj.noK, out.transform = out.transform, 
                 tauInit = tauInit, memoryChunk = memoryChunk, 
@@ -1267,7 +1268,7 @@ fitNULLGLMM = function(plinkFile = "",
             cat("Start fitting the NULL GLMM\n")
             system.time(modglmm <- glmmkin.ai_PCG_Rcpp_Quantitative(bedFile, bimFile, famFile, Xorig, isCovariateOffset, 
                 fit0, tau = c(0, 0), fixtau = c(0, 0), maxiter = maxiter, 
-                tol = tol, verbose = TRUE, nrun = 30, tolPCG = tolPCG, 
+                tol = tol, verbose = TRUE, nrun = nrun, tolPCG = tolPCG, 
                 maxiterPCG = maxiterPCG, subPheno = dataMerge_sort, indicatorGenoSamplesWithPheno = indicatorGenoSamplesWithPheno, 
                 obj.noK = obj.noK, out.transform = out.transform, 
                 tauInit = tauInit, memoryChunk = memoryChunk, 
