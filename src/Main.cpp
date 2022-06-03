@@ -2010,6 +2010,10 @@ void assign_conditionMarkers_factors(
       MAFVec(i) = MAF;
      //w0G2_cond = boost::math::pdf(beta_dist, MAF);
     //t_weight_cond.print();
+      if(MAF == 0.0){
+	std::cerr << "ERROR: Conditioning marker is monomorphic\n";
+      }	      
+
 
      if(!t_weight_cond.is_zero()){
 	 w0G2_cond = t_weight_cond(i);
@@ -2024,9 +2028,11 @@ void assign_conditionMarkers_factors(
   }
   arma::mat VarMat = P1Mat * P2Mat;
 
-  VarInvMat = VarMat.i();   
+  VarInvMat = VarMat.i();
   double qsum = arma::accu(gyVec);
-  arma::vec gsumtildeVec; 
+  arma::vec gsumtildeVec;
+
+
   ptr_gSAIGEobj->getadjG(gsumVec, gsumtildeVec);
   ptr_gSAIGEobj->assignConditionFactors(
 		   			P2Mat,

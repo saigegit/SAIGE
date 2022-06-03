@@ -4,8 +4,6 @@ options(stringsAsFactors=F)
 
 ## load R libraries
 library(SAIGE)
-#library(SAIGE, lib.loc="/net/hunt/zhowei/project/imbalancedCaseCtrlMixedModel/Rpackage_SPAGMMAT/SAIGE_newgit/install_1.0.6")
-#library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/SAIGE/install_v1.0.6")
 require(optparse) #install.packages("optparse")
 
 print(sessionInfo())
@@ -59,6 +57,8 @@ option_list <- list(
     help="Whether to apply the leave-one-chromosome-out (LOCO) approach when fitting the null model using the full GRM [default=TRUE]."),
   make_option("--traceCVcutoff", type="numeric", default=0.0025,
     help="Optional. Threshold for coefficient of variation (CV) for the trace estimator. Number of runs for trace estimation will be increased until the CV is below the threshold [default=0.0025]."),
+  make_option("--nrun", type="numeric", default=30,
+    help="Number of rums in trace estimation. [default=30]"),	       
   make_option("--ratioCVcutoff", type="numeric", default=0.001,
     help="Optional. Threshold for coefficient of variation (CV) for estimating the variance ratio. The number of randomly selected markers will be increased until the CV is below the threshold [default=0.001]"),
   make_option("--outputPrefix", type="character", default="~/",
@@ -173,6 +173,7 @@ fitNULLGLMM(plinkFile=opt$plinkFile,
             tauInit = tauInit,
             LOCO = opt$LOCO,
             traceCVcutoff = opt$traceCVcutoff,
+	    nrun = opt$nrun,
             ratioCVcutoff = opt$ratioCVcutoff,
 	    outputPrefix_varRatio = opt$outputPrefix_varRatio,
 	    IsOverwriteVarianceRatioFile = opt$IsOverwriteVarianceRatioFile,
