@@ -2398,8 +2398,10 @@ void writeOutfile_single(bool t_isMoreOutput,
                         OutFile_single << "\t";
                         OutFile_single << pval_cVec.at(k);
                         OutFile_single << "\t";
-                        OutFile_single << pvalNA_cVec.at(k);
-                        OutFile_single << "\t";
+			if(t_traitType == "binary"){	
+                        	OutFile_single << pvalNA_cVec.at(k);
+                        	OutFile_single << "\t";
+			}	
                 }
                 if(t_traitType == "binary"){
                         OutFile_single << AF_caseVec.at(k);
@@ -2646,8 +2648,10 @@ int writeOutfile_singleInGroup(bool t_isMoreOutput,
                         t_OutFile_singleInGroup << "\t";
                         t_OutFile_singleInGroup << pval_cVec.at(k);
                         t_OutFile_singleInGroup << "\t";
-                        t_OutFile_singleInGroup << pvalNA_cVec.at(k);
-                        t_OutFile_singleInGroup << "\t";
+			if(t_traitType == "binary"){
+                        	t_OutFile_singleInGroup << pvalNA_cVec.at(k);
+                        	t_OutFile_singleInGroup << "\t";
+			}
                 }
                 if(t_traitType == "binary"){
                         t_OutFile_singleInGroup << AF_caseVec.at(k);
