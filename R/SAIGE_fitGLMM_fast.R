@@ -1824,6 +1824,7 @@ getsubGRM <- function (sparseGRMFile = NULL, sparseGRMSampleIDFile = "", related
     cat("set elements in the sparse GRM <= ", relatednessCutoff,
         " to zero\n")
     sparseGRMLarge = Matrix:::drop0(sparseGRMLarge, tol = relatednessCutoff)
+        sparseGRMLarge = sparseGRMLarge * 1
     print(nnzero(sparseGRMLarge))
     if (!file.exists(sparseGRMSampleIDFile)) {
         stop("ERROR! sparseSigmaSampleIDFile ", sparseGRMSampleIDFile,
