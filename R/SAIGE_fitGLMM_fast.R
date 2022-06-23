@@ -783,19 +783,7 @@ fitNULLGLMM = function(plinkFile = "",
             MaleCode, " in the column ", sexCol, " in the phenotype file will be included\n")
     }
 
-
-    if (skipVarianceRatioEstimation & useSparseGRMtoFitNULL) {
-        print("a sparse GRM will be used to fit the null model and the variance ratio estimation will be skipped, so plink files are not required")
-        sampleListwithGenov0 = data.table:::fread(sparseGRMSampleIDFile, 
-            header = F, , colClasses = c("character"), data.table = F)
-        colnames(sampleListwithGenov0) = c("IIDgeno")
-        sampleListwithGeno = NULL
-        sampleListwithGeno$IIDgeno = sampleListwithGenov0$IIDgeno
-        sampleListwithGeno = data.frame(sampleListwithGeno)
-        sampleListwithGeno$IndexGeno = seq(1, nrow(sampleListwithGeno), 
-            by = 1)
-        cat(nrow(sampleListwithGeno), " samples are in the sparse GRM\n")
-    }else{
+    if (!useSparseGRMtoFitNULL  | !skipVarianceRatioEstimation){
         if (!file.exists(bedFile)) {
             stop("ERROR! bed file does not exsit\n")
         }
@@ -831,6 +819,7 @@ fitNULLGLMM = function(plinkFile = "",
             cat(nrow(sampleListwithGeno), " samples have genotypes\n")
         }
     }
+
 
     if (!file.exists(phenoFile)) {
         stop("ERROR! phenoFile ", phenoFile, " does not exsit\n")
@@ -940,6 +929,17 @@ fitNULLGLMM = function(plinkFile = "",
         mmat_nomissing$IndexPheno = seq(1, nrow(mmat_nomissing), 
             by = 1)
         cat(nrow(mmat_nomissing), " samples have non-missing phenotypes\n")
+
+
+	if(useSparseGRMtoFitNULL){
+		print("a sparse GRM will be used to fit the null model")
+		sampleListwithGenov0 = data.table:::fread(sparseGRMSampleIDFile,
+                header = F, , colClasses = c("character"), data.table = F)
+                colnames(sampleListwithGenov0) = c("IIDgeno")
+		mmat_nomissing = merge(mmat_nomissing, sampleListwithGenov0, by.x = "IID", by.y = "IIDgeno")
+	}
+
+
         dataMerge = merge(mmat_nomissing, sampleListwithGeno, 
             by.x = "IID", by.y = "IIDgeno")
         dataMerge_sort = dataMerge[with(dataMerge, order(IndexGeno)), 
@@ -1821,7 +1821,7 @@ getsubGRM <- function (sparseGRMFile = NULL, sparseGRMSampleIDFile = "", related
     cat("extract sparse GRM\n")
     sparseGRMLarge = Matrix:::readMM(sparseGRMFile)
     print(nnzero(sparseGRMLarge))
-    cat("set elements in the sparse GRN <= ", relatednessCutoff,
+    cat("set elements in the sparse GRM <= ", relatednessCutoff,
         " to zero\n")
     sparseGRMLarge = Matrix:::drop0(sparseGRMLarge, tol = relatednessCutoff)
     print(nnzero(sparseGRMLarge))
