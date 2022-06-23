@@ -192,8 +192,8 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 	    spindex = which(varRatioData[,2] == "sparse")
 	    if(length(spindex) > 0){
 	        ratioVec_sparse = varRatioData[which(varRatioData[,2] == "sparse"),1]
-                cat("variance Ratio sparse is ", ratioVec_sparse, "\n")
-		if(!isSparseGRM & sum(ratioVec_sparse != 1) > 0){
+		ratioVec_sparse = as.numeric(ratioVec_sparse)
+		if(!isSparseGRM & sum(ratioVec_sparse > 1.0001 | ratioVec_sparse < 0.9999) > 0){
 		       	stop("sparse GRM is not specified but it was used for estimating variance ratios in Step 1. Please specify --sparseGRMFile and --sparseGRMSampleIDFile\n")
 		}	
 	    }else{    
@@ -203,6 +203,7 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 		}	
 	    }
 	    ratioVec_null = varRatioData[which(varRatioData[,2] == "null"),1]
+	    ratioVec_null = as.numeric(ratioVec_null)
             cat("variance Ratio null is ", ratioVec_null, "\n")
 	    if(length(ratioVec_null) > 1){
 		iscateVR = TRUE
@@ -214,11 +215,13 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 	    cat("Variance ratios were estimated with version < 1.0.6\n")	
 	    if(isSparseGRM){
 	        ratioVec_sparse = varRatioData[,1]
+	        ratioVec_sparse = as.numeric(ratioVec_sparse)
         	cat("variance Ratio is ", ratioVec_sparse, "\n")
 		ratioVec_null = rep(-1, length(varRatioData[,1]))
 		cat("WARNING: Sparse GRM is specified and the variance ratio(s) were specified. Please make sure the variance ratios were estimated using a full GRM and a sparse GRM.")
 	    }else{
 	        ratioVec_null = varRatioData[,1]
+	        ratioVec_null = as.numeric(ratioVec_null)
                 cat("variance Ratio is ", ratioVec_null, "\n")
 		cat("WARNING: Sparse GRM is not specified and the variance ratio(s) were specified. Please make sure that in Step 1, 1. the null model was fit using a full GRM (--useSparseGRMtoFitNULL=FALSE) and the variacne ratio was NOT estimated with the sparse GRM (useSparseGRMforVarRatio=FALSE) or 2. the null model was fit using a sparse GRM (--useSparseGRMtoFitNULL=TRUE) and the variacne ratio was estiamted with the sparse GRM and null --skipVarianceRatioEstimation=FALSE\n")
 		ratioVec_sparse = c(-1)
