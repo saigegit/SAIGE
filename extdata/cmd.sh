@@ -13,7 +13,10 @@ Rscript step1_fitNULLGLMM.R     \
     --traitType=binary        \
     --IsOverwriteVarianceRatioFile=TRUE	\
     --isCateVarianceRatio=TRUE      \
-    --outputPrefix=./output/example_binary_sparseGRM
+    --outputPrefix=./output/example_binary_sparseGRM_temo
+
+
+
 
 #
  Rscript step2_SPAtests.R        \
