@@ -818,7 +818,17 @@ fitNULLGLMM = function(plinkFile = "",
                 by = 1)
             cat(nrow(sampleListwithGeno), " samples have genotypes\n")
         }
-    }
+    }else{
+        sampleListwithGenov0 = data.table:::fread(sparseGRMSampleIDFile, 
+        header = F, , colClasses = c("character"), data.table = F)
+        colnames(sampleListwithGenov0) = c("IIDgeno")
+        sampleListwithGeno = NULL
+        sampleListwithGeno$IIDgeno = sampleListwithGenov0$IIDgeno
+        sampleListwithGeno = data.frame(sampleListwithGeno)
+        sampleListwithGeno$IndexGeno = seq(1, nrow(sampleListwithGeno), 
+            by = 1)
+        cat(nrow(sampleListwithGeno), " samples are in the sparse GRM\n")	
+    }	    
 
 
     if (!file.exists(phenoFile)) {
@@ -931,12 +941,14 @@ fitNULLGLMM = function(plinkFile = "",
         cat(nrow(mmat_nomissing), " samples have non-missing phenotypes\n")
 
 
-	if(useSparseGRMtoFitNULL){
-		print("a sparse GRM will be used to fit the null model")
+	if((useSparseGRMtoFitNULL & !skipVarianceRatioEstimation) | useSparseGRMforVarRatio){
 		sampleListwithGenov0 = data.table:::fread(sparseGRMSampleIDFile,
                 header = F, , colClasses = c("character"), data.table = F)
                 colnames(sampleListwithGenov0) = c("IIDgeno")
-		mmat_nomissing = merge(mmat_nomissing, sampleListwithGenov0, by.x = "IID", by.y = "IIDgeno")
+		cat(length(sampleListwithGenov0$IIDgeno), " samples are in the sparse GRM\n")
+		mmat_nomissing = mmat_nomissing[which(mmat_nomissing$IID %in% sampleListwithGenov0$IIDgeno), ]
+		cat(nrow(mmat_nomissing), " samples who have non-missing phenotypes are also in the sparse GRM\n")
+
 	}
 
 
@@ -1004,7 +1016,7 @@ fitNULLGLMM = function(plinkFile = "",
         cat("colnames(data.new) is ", colnames(data.new), "\n")
         cat("out.transform$Param.transform$qrr: ", dim(out.transform$Param.transform$qrr), 
             "\n")
-    }else {
+    }else{
         formula.new = formula.null
         data.new = dataMerge_sort
         out.transform = NULL
@@ -2111,7 +2123,7 @@ extractVarianceRatio = function(obj.glmm.null,
 	  var2_a = t(g) %*% pcginvSigma
 	  var2sparseGRM = var2_a[1,1]
 	  x=t(G)%*%Sigma_iG/AC
-	  cat(" x ", x, " var2 ", var2sparseGRM , "\n")
+	  #cat(" x ", x, " var2 ", var2sparseGRM , "\n")
 	  varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
     }
 
