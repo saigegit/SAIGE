@@ -662,6 +662,7 @@ fitNULLGLMM = function(plinkFile = "",
 		memoryChunk = 2,
 		tauInit = c(0,0),
 		LOCO = TRUE,
+		outputSepbyChr = FALSE,
 		traceCVcutoff = 0.0025,
 		ratioCVcutoff = 0.001, 
                 outputPrefix = "",
@@ -1173,9 +1174,44 @@ fitNULLGLMM = function(plinkFile = "",
 
 
             modglmm$useSparseGRMtoFitNULL = useSparseGRMtoFitNULL 
-            save(modglmm, file = modelOut)
+            #save(modglmm, file = modelOut)
             tau = modglmm$theta
-        	    
+        
+          if(outputSepbyChr & LOCO){
+                save(modglmm, file = modelOut)
+                modglmmbychr = modglmm$LOCOResult
+                for(chr in 1:22){
+                        modglmm$LOCOResult[[chr]] = list(NULL)
+                }
+                gc()
+                for (chr in 1:22) {
+                        if((modglmmbychr[[chr]])$isLOCO){
+                          modglmm$LOCOResult[[chr]] = modglmmbychr[[chr]]
+                          modelOutbychr = paste(c(outputPrefix,"_chr",chr,".rda"), collapse="")
+                          save(modglmm, file = modelOutbychr)
+                          modglmm$LOCOResult[[chr]] = list(NULL)
+                          gc()
+                        }
+                }
+                rm(modglmmbychr)
+                modglmm$LOCOResult = NULL
+                modglmm$LOCO = FALSE
+                modelOut_nonauto = paste(c(outputPrefix,"_noLOCO.rda"), collapse="")
+                save(modglmm, file = modelOut_nonauto)
+                modelOut_nonauto = list(NULL)
+                gc()
+            }else{
+                save(modglmm, file = modelOut)
+                #for (chr in 1:22) {
+                #       if( modglmm$LOCOResult[[chr]]$isLOCO){
+                #               cat("chr ", chr, "\n")
+                #               print(modglmm$LOCOResult[[chr]]$fitted.values[1:10] )
+                #       }
+                #}
+            }		
+
+
+
 	    #varAll = tau[2] + (pi^2)/3
             ##tauVec_ss = c(((pi^2)/3)/varAll, (tau[2])/varAll)
 	    #tauVec_ss = c(0,1)
@@ -1311,7 +1347,36 @@ fitNULLGLMM = function(plinkFile = "",
 
             modglmm$useSparseGRMtoFitNULL = useSparseGRMtoFitNULL
 
-            save(modglmm, file = modelOut)
+
+            if(outputSepbyChr & LOCO){
+                save(modglmm, file = modelOut)
+                modglmmbychr = modglmm$LOCOResult
+                for(chr in 1:22){
+                        modglmm$LOCOResult[[chr]] = list(NULL)
+                }
+                gc()
+                for (chr in 1:22) {
+                        if(modglmmbychr[[chr]]$isLOCO){
+                          modglmm$LOCOResult[[chr]] = modglmmbychr[[chr]]
+                          modelOutbychr = paste(c(outputPrefix,"_chr",chr,".rda"), collapse="")
+                          save(modglmm, file = modelOutbychr)
+                          modglmm$LOCOResult[[chr]] = list(NULL)
+                          gc()
+                        }
+                }
+                rm(modglmmbychr)
+                modglmm$LOCOResult = NULL
+                modglmm$LOCO = FALSE
+                modelOut_nonauto = paste(c(outputPrefix,"_noLOCO.rda"), collapse="")
+                save(modglmm, file = modelOut_nonauto)
+                modelOut_nonauto = list(NULL)
+                gc()
+            }else{
+                save(modglmm, file = modelOut)
+            }		
+
+            #save(modglmm, file = modelOut)
+
             t_end = proc.time()
             print(t_end)
             cat("t_end - t_begin, fitting the NULL model took\n")
