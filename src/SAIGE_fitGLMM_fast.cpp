@@ -12,6 +12,7 @@
 #include <ctime>// include this header for calculating execution time 
 #include <cassert>
 #include <boost/date_time.hpp> // for gettimeofday and timeval
+#include "getMem.hpp"
 using namespace Rcpp;
 using namespace std;
 using namespace RcppParallel;
@@ -929,10 +930,11 @@ public:
     		}//end for(int i = 0; i < M; i++){
 
 		if( minMAFtoConstructGRM > 0 | maxMissingRate < 1){
-			cout << numberofMarkerswithMAFge_minMAFtoConstructGRM << " markers with MAF >= " << minMAFtoConstructGRM << " and missing rate <= " << maxMissingRate << " are used for GRM." << endl;
-		}else{
-			cout << M << " markers with MAF >= " << minMAFtoConstructGRM << " are used for GRM." << endl;
+			cout << numberofMarkerswithMAFge_minMAFtoConstructGRM << " markers with MAF >= " << minMAFtoConstructGRM << " and missing rate <= " << maxMissingRate  << endl;
 		}
+		//else{
+		//	cout << M << " markers with MAF >= " << minMAFtoConstructGRM << endl;
+		//}
 
 		
 		int numofGenoArray_old = numofGenoArray;
@@ -3010,7 +3012,15 @@ Rcpp::List fitglmmaiRPCG(arma::fvec& Yvec, arma::fmat& Xmat, arma::fvec &wVec,  
 arma::fvec& Sigma_iY, arma::fmat & Sigma_iX, arma::fmat & cov,
 int nrun, int maxiterPCG, float tolPCG, float tol, float traceCVcutoff){
 
+	double mem1,mem2;
+        process_mem_usage(mem1, mem2);
+   	std::cout << "VM 1: " << mem1 << "; RSS 1: " << mem2 << std::endl;
+
+
+
   	Rcpp::List re = getAIScore(Yvec, Xmat,wVec,  tauVec, Sigma_iY, Sigma_iX, cov, nrun, maxiterPCG, tolPCG, traceCVcutoff);
+        process_mem_usage(mem1, mem2);
+   	std::cout << "VM 2: " << mem1 << "; RSS 2: " << mem2 << std::endl;
   	float YPAPY = re["YPAPY"];
   	float Trace = re["Trace"];
   	float score1 = YPAPY - Trace;
@@ -3039,6 +3049,8 @@ int nrun, int maxiterPCG, float tolPCG, float tol, float traceCVcutoff){
       			tauVec(i) = 0;
     		}
   	}
+        process_mem_usage(mem1, mem2);
+   	std::cout << "VM 3: " << mem1 << "; RSS 3: " << mem2<< std::endl;
   	return List::create(Named("tau") = tauVec);
 }
 
