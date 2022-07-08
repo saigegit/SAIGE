@@ -4,7 +4,7 @@
 
 
 #include <vector>
-#include <cstdio>         // std::remove
+
 
 
 using namespace std;
@@ -15,8 +15,9 @@ class HyperGeo {
 public: 
     HyperGeo(){};
     ~HyperGeo();
-    int     HyperGeo::Run(int k, int ngroup, int ncase, std::vector<int> & group,  std::vector<double> & weight);
-    int     HyperGeo::Get_lprob(std::vector<double> & prob); 
+    
+    int     Run(int k, int ngroup, int ncase, int * group, double * weight);    
+    int     Get_lprob(double * prob);
     int     Print();
     double  lCombinations(int n, int k);
     

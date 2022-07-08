@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <cmath>
-#include "Binary_ComputeExact.h"
+#include "Binary_ComputeExact.hpp"
 #include "Binary_ComputeExactMC.h"
-#include "Binary_HyperGeo.h"
-#include "Binary_global.h"
+#include "Binary_HyperGeo.hpp"
+#include "Binary_global.hpp"
 #include "Binary_Permu_SKAT.h"
 
 #ifdef _STAND_ALONE_

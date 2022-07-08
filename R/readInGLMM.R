@@ -36,8 +36,7 @@ removeLOCOResult = function(chromList, obj.glmm.null){
 }	
 
 
-
-ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FALSE){	
+ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FALSE){
   # Check file existence
   Check_File_Exist(GMMATmodelFile, "GMMATmodelFile")
   if(!LOCO %in% c(TRUE, FALSE))
@@ -45,40 +44,38 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
   # load GMMATmodelFile
   load(GMMATmodelFile)
   #if(!modglmm$LOCO){
-  #	if(LOCO){
-  #		stop("LOCO is TRUE but the null model was not fit with LOCO=TRUE\n")
-  #		LOCO=FALSE
-  #	}	
+  #     if(LOCO){
+  #             stop("LOCO is TRUE but the null model was not fit with LOCO=TRUE\n")
+  #             LOCO=FALSE
+  #     }
   #}
 
-
-  obj.glmm.null = modglmm
-  obj.glmm.null$Y = NULL
-  #obj.glmm.null$offset = obj.glmm.null$linear.predictors - obj.glmm.null$coefficients[1]
-  obj.glmm.null$linear.predictors = NULL
-  obj.glmm.null$coefficients = NULL
-  obj.glmm.null$cov = NULL
-  rm(modglmm)
+  modglmm$Y = NULL
+  #modglmm$offset = modglmm$linear.predictors - modglmm$coefficients[1]
+  modglmm$linear.predictors = NULL
+  modglmm$coefficients = NULL
+  modglmm$cov = NULL
+  #rm(modglmm)
   gc()
-  #traitType = obj.glmm.null$traitType
-  #y = obj.glmm.null$y
-  #X = obj.glmm.null$X
+  #traitType = modglmm$traitType
+  #y = modglmm$y
+  #X = modglmm$X
   #N = length(y)
-  #tauVec = obj.glmm.null$theta
+  #tauVec = modglmm$theta
   #indChromCheck = FALSE
   chrom_v3=NULL
 
   if(!LOCO) {
     print("Leave-one-chromosome-out is not applied")
-    if(obj.glmm.null$LOCO) {
+    if(modglmm$LOCO) {
       for (chr in 1:22) {
-        obj.glmm.null$LOCOResult[chr] = list(NULL)
+        modglmm$LOCOResult[chr] = list(NULL)
         cat("chromosome ", chr, " model results are removed to save memory\n")
         gc()
       }
     }
   }else{
-    if (!obj.glmm.null$LOCO){
+    if (!modglmm$LOCO){
       stop("LOCO is TRUE but the null model file .rda does not contain LOCO results. In order to apply Leave-one-chromosome-out, please run Step 1 using LOCO. Otherwise, please set LOCO=FALSE in this step (Step 2).\n")
     }else{
         if(chrom == ""){
@@ -92,79 +89,96 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
   if(chrom_v3 >= 1 & chrom_v3 <= 22){
 
    chromList = c(1:22)
-   chromList = chromList[which(chromList != chrom_v3)]   
-   obj.glmm.null = removeLOCOResult(chromList, obj.glmm.null)
-   if(!is.null(obj.glmm.null$LOCOResult[[chrom_v3]])){
-   obj.glmm.null$fitted.values = obj.glmm.null$LOCOResult[[chrom_v3]]$fitted.values
-   obj.glmm.null$residuals = obj.glmm.null$LOCOResult[[chrom_v3]]$residuals
-   obj.glmm.null$obj.noK = obj.glmm.null$LOCOResult[[chrom_v3]]$obj.noK
+   chromList = chromList[which(chromList != chrom_v3)]
+   modglmm = removeLOCOResult(chromList, modglmm)
+   if(!is.null(modglmm$LOCOResult[[chrom_v3]])){
+   modglmm$fitted.values = modglmm$LOCOResult[[chrom_v3]]$fitted.values
+   modglmm$residuals = modglmm$LOCOResult[[chrom_v3]]$residuals
+   modglmm$obj.noK = modglmm$LOCOResult[[chrom_v3]]$obj.noK
    if(is_Firth_beta){
-     if(!is.null(obj.glmm.null$LOCOResult[[chrom_v3]]$offset)){	   
-       obj.glmm.null$offset = obj.glmm.null$LOCOResult[[chrom_v3]]$offset
+     if(!is.null(modglmm$LOCOResult[[chrom_v3]]$offset)){
+       modglmm$offset = modglmm$LOCOResult[[chrom_v3]]$offset
      }
    }
-  }	
-   #obj.glmm.null$offset = obj.glmm.null$LOCOResult[[chrom_v3]]$linear.predictors -  obj.glmm.null$LOCOResult[[chrom_v3]]$coefficients[1]
-   obj.glmm.null$LOCOResult[chrom_v3] = list(NULL)
+  }
+   #modglmm$offset = modglmm$LOCOResult[[chrom_v3]]$linear.predictors -  modglmm$LOCOResult[[chrom_v3]]$coefficients[1]
+   modglmm$LOCOResult[chrom_v3] = list(NULL)
   }else{ #if(chrom_v3 >= 1 & chrom_v3 <= 22){
      chromList = c(1:22)
-     obj.glmm.null = removeLOCOResult(chromList, obj.glmm.null)
+     modglmm = removeLOCOResult(chromList, modglmm)
   }
  }else{
-	chromList = c(1:22)
-	obj.glmm.null = removeLOCOResult(chromList, obj.glmm.null)
+        chromList = c(1:22)
+        modglmm = removeLOCOResult(chromList, modglmm)
   }
-   gc() 
+   gc()
 
   }
 
- obj.glmm.null$mu = as.vector(obj.glmm.null$fitted.values)
- tau = obj.glmm.null$theta
- N = length(obj.glmm.null$mu)
-     if(obj.glmm.null$traitType == "binary"){
-             obj.glmm.null$mu2 = (obj.glmm.null$mu) *(1-obj.glmm.null$mu)
-           }else if(obj.glmm.null$traitType == "quantitative"){
-             obj.glmm.null$mu2 = (1/tau[1])*rep(1,N)
+ modglmm$mu = as.vector(modglmm$fitted.values)
+ tau = modglmm$theta
+ N = length(modglmm$mu)
+     if(modglmm$traitType == "binary"){
+             modglmm$mu2 = (modglmm$mu) *(1-modglmm$mu)
+	     modglmm$obj_cc = SKAT::SKAT_Null_Model(modglmm$y ~ modglmm$X-1, out_type="D", Adjustment = FALSE)
+
+	     #modglmm$obj_cc = SKAT::SKATExactBin_CheckObj(obj_cc0)	
+
+
+	     modglmm$obj_cc$mu = modglmm$mu
+	     modglmm$obj_cc$res = modglmm$res
+	     modglmm$obj_cc$pi_1 = modglmm$mu2
+	     a = modglmm$obj_cc
+	     save(a, file="/net/hunt/zhowei/project/imbalancedCaseCtrlMixedModel/Rpackage_SPAGMMAT/SAIGE_newgit/SAIGE_1.1.0/SAIGE/extdata/obj_cc.rda")
+	     #if(!is.null(modglmm$obj_cc$res.out)){
+             #   modglmm$obj_cc$res.out<-cbind(modglmm$obj_cc$res, modglmm$obj_cc$res.out)
+             #} else {
+             #   modglmm$obj_cc$res.out<-modglmm$obj_cc$res
+             #}	     
+           }else if(modglmm$traitType == "quantitative"){
+             modglmm$mu2 = (1/tau[1])*rep(1,N)
            }
  #if(FALSE){
 
  if(is_Firth_beta){
-	if(obj.glmm.null$traitType == "binary"){
-		if(is.null(obj.glmm.null$offset)){
-			#if(FALSE){
-			#print("WARNING. is_Firth_beta = TRUE, but offset was not computed in Step 1. Please re-run Step 1 using the more rencet version of SAIGE/SAIGE-GENE.")
-			cat("Applying is_Firth_beta = TRUE and note the results would be more accurate withe Step 1 results using the more rencet version of SAIGE/SAIGE-GENE. \n")
+        if(modglmm$traitType == "binary"){
+                if(is.null(modglmm$offset)){
+                        #if(FALSE){
+                        #print("WARNING. is_Firth_beta = TRUE, but offset was not computed in Step 1. Please re-run Step 1 using the more rencet version of SAIGE/SAIGE-GENE.")
+                        cat("Applying is_Firth_beta = TRUE and note the results would be more accurate withe Step 1 results using the more rencet version of SAIGE/SAIGE-GENE. \n")
 
-			if(ncol(obj.glmm.null$X) == 1){
-				covoffset = rep(0,nrow(obj.glmm.null$X))
-			}else{	
-				formulastr = paste0("y ~ ", paste(colnames(obj.glmm.null$X)[-1], collapse="+"))
-				obj.glmm.null$X = cbind(obj.glmm.null$X, as.vector(obj.glmm.null$y))
-				colnames(obj.glmm.null$X)[ncol(obj.glmm.null$X)] = "y"
-				obj.glmm.null$X = as.data.frame(obj.glmm.null$X)
-				formula.new = as.formula(formulastr)
-				modwitcov = glm(formula.new, data = obj.glmm.null$X, family = binomial)
-				obj.glmm.null$X = obj.glmm.null$X[,-ncol(obj.glmm.null$X)]
-				covoffset = as.matrix(obj.glmm.null$X[,-1]) %*%  modwitcov$coefficients[-1]
-				obj.glmm.null$X = as.matrix(obj.glmm.null$X)
-			}
-			obj.glmm.null$offset = covoffset
-			#}
-		}
-	}	
+                        if(ncol(modglmm$X) == 1){
+                                covoffset = rep(0,nrow(modglmm$X))
+                        }else{
+                                formulastr = paste0("y ~ ", paste(colnames(modglmm$X)[-1], collapse="+"))
+                                modglmm$X = cbind(modglmm$X, as.vector(modglmm$y))
+                                colnames(modglmm$X)[ncol(modglmm$X)] = "y"
+                                modglmm$X = as.data.frame(modglmm$X)
+                                formula.new = as.formula(formulastr)
+                                modwitcov = glm(formula.new, data = modglmm$X, family = binomial)
+                                modglmm$X = modglmm$X[,-ncol(modglmm$X)]
+                                covoffset = as.matrix(modglmm$X[,-1]) %*%  modwitcov$coefficients[-1]
+                                modglmm$X = as.matrix(modglmm$X)
+                        }
+                        modglmm$offset = covoffset
+                        #}
+                }
+        }
   }
 
-  
- if(is.null(obj.glmm.null$offset)){
-	 obj.glmm.null$offset = rep(0,nrow(obj.glmm.null$X))
+
+ if(is.null(modglmm$offset)){
+         modglmm$offset = rep(0,nrow(modglmm$X))
   }
-  
-  
- if(is.null(obj.glmm.null$Sigma_iXXSigma_iX)){
-	obj.glmm.null$Sigma_iXXSigma_iX = matrix(0, nrow=1, ncol=1)	
+
+
+ if(is.null(modglmm$Sigma_iXXSigma_iX)){
+        modglmm$Sigma_iXXSigma_iX = matrix(0, nrow=1, ncol=1)
  }
- return(obj.glmm.null)    
+ return(modglmm)
 }
+
+
 
 
 Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest, isSparseGRM, useSparseGRMtoFitNULL){

@@ -9,8 +9,9 @@
 
 #include "SAIGE_test.hpp"
 #include "SPA.hpp"
-
+#include "ER_binary_func.hpp"
 #include "UTIL.hpp"
+#include "getMem.hpp"
 #include "getMem.hpp"
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
@@ -51,7 +52,8 @@ SAIGEClass::SAIGEClass(
         std::vector<uint32_t> & t_condition_genoIndex,
 	bool t_is_Firth_beta,
         double t_pCutoffforFirth,
-        arma::vec & t_offset){
+        arma::vec & t_offset,
+	arma::vec & t_resout){
 
 
     m_XVX = t_XVX;
@@ -68,6 +70,7 @@ SAIGEClass::SAIGEClass(
     m_X = t_X;
     m_S_a = t_S_a;
     m_res = t_res;
+    m_resout = t_resout;
     m_mu2 = t_mu2;
     m_mu = t_mu;
     m_varRatio_sparse = t_varRatio_sparse;
@@ -352,8 +355,12 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
                            	double& t_varT_c,
 			   	arma::rowvec & t_G1tilde_P_G2tilde, 
 				bool & t_isFirth,
-				bool & t_isFirthConverge)
+				bool & t_isFirthConverge, 
+				bool t_isER)
 {
+
+
+
   t_isFirth = false;
   //arma::vec adjGVec = getadjGFast(t_GVec);
   std::string t_pval_str;
@@ -397,7 +404,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
         pval_noadj = 0;
   }
 
-
+  
  //arma::vec timeoutput3_a = getTime();
   double q, qinv, m1, NAmu, NAsigma, tol1, p_iIndexComVecSize;
 
@@ -423,6 +430,10 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 
 
   double gmuNB;
+
+if(!t_isER){
+
+
   if(StdStat > m_SPA_Cutoff && m_traitType != "quantitative"){
 
        if(!is_gtilde){
@@ -536,6 +547,28 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
         t_pval = t_pval_noSPA;
    }
 
+}else{ //if(!t_isER){
+
+    t_pval_noSPA = pval_noadj; 
+    arma::mat Z_er(t_GVec.n_elem, 1);
+    Z_er.col(0) = t_GVec;
+    arma::vec res_er = m_res;
+    arma::vec pi1_er = m_mu;
+    arma::vec resout_er = m_resout;
+    t_pval =  SKATExactBin_Work(Z_er, res_er, pi1_er, m_n_case, iIndex, iIndexComVec, resout_er, 2e+6, 1e+4, 1e-6, 1);
+	
+    boost::math::normal ns;
+    double t_qval;
+    try{
+      t_qval = boost::math::quantile(ns, t_pval/2);
+      t_qval = fabs(t_qval);
+      t_seBeta = fabs(t_Beta)/t_qval;
+    }catch (const std::overflow_error&) {
+      t_qval = std::numeric_limits<double>::infinity();
+      t_seBeta = 0;
+    }
+}
+
    if(m_traitType!="quantitative" & m_is_Firth_beta & t_pval <= m_pCutoffforFirth){
 	t_isFirth = true;
 
@@ -558,6 +591,12 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
  //printTime(timeoutput3, timeoutput3_a, "Test Marker  ScoreTest");
 //printTime(timeoutput3, timeoutput4, "Test Marker 3 to 4");
 //printTime(timeoutput3_a, timeoutput4, "Test Marker SPA");
+
+
+
+
+
+
 
    //condition
    if(t_isCondition){
@@ -673,14 +712,12 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
     muNA.clear();
     gNB.clear();
 
+
+
     if(is_region && !is_gtilde){
 	getadjGFast(t_GVec, t_gtilde, iIndex);
 	is_gtilde = true; 
     }
-
-     
-
-
 
     if(is_region && isScoreFast){
 

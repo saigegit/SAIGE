@@ -11,7 +11,7 @@
 
 //https://github.com/cran/SKAT/blob/ebad53e501f67070f4858c76eb420d9e0ba28219/src/Binary_global.cpp#L118
 
-void GetProb(int k, int ngroup, int ncase, std::vector<int> & group, std::vector<double> & weight, std::vector<double> & prob){    
+void GetProb_new(int k, int ngroup, int ncase, int* group, double* weight, double* prob){    
     HyperGeo geo;
     geo.Run(k,ngroup,ncase, group, weight);
     geo.Get_lprob(prob);
@@ -19,7 +19,7 @@ void GetProb(int k, int ngroup, int ncase, std::vector<int> & group, std::vector
 }
 
 
-void SKATExactBin_ComputeProb_Group(arma::uvec & idx, arma::uvec & idxCompVec, arma::vec & pi1, uint32_t n, uint32_t ncase, int type_group, arma::vec & prob){
+void SKATExactBin_ComputeProb_Group(arma::uvec & idx, arma::uvec & idxCompVec, arma::vec & pi1, uint32_t n, uint32_t ncase, int type_group, std::vector<double> & prob){
 
 	uint32_t k = idx.n_elem;
 	int ngroup1 = 10;  //use the default value as ER will only be used for variants with MAC <= 10;
@@ -36,7 +36,7 @@ void SKATExactBin_ComputeProb_Group(arma::uvec & idx, arma::uvec & idxCompVec, a
 	}
 
 	std::vector<double> weight;
-	std::vector<uint32_t> group;
+	std::vector<int> group;
 	arma::uvec a1Vec, a2Vec, IDX;
 	double a1, a2, p1temp, p2temp, oddtemp, p2oddtemp;
 	arma::vec p1tempVec;
@@ -64,17 +64,15 @@ void SKATExactBin_ComputeProb_Group(arma::uvec & idx, arma::uvec & idxCompVec, a
 	p2temp = arma::mean(p2);
 	p2oddtemp = p2temp / (1-p2temp);
 	weight.push_back(p2oddtemp);
-	weight = weight / p2oddtemp;	
+
+	for(int i = 0; i < weight.size(); i++){	
+		weight[i] = weight[i] / p2oddtemp;
+	}
 	group.push_back(n-k);
-	std::vector<double> prob_k(k+1, 0.0);
+	//std::vector<double> prob_k(k+1, 0.0);
 	int ngroup = group.size();
 	int ncasei = int(ncase);
-
-
-	GetProb(k, ngroup, ncasei, group, weight, prob_k);
-
-	prob = arma::conv_to<vec>::from(prob_k);
-
+	GetProb_new(k, ngroup, ncasei, &group[0], &weight[0], &prob[0]);
 }
 
 
@@ -93,90 +91,88 @@ int n_choose_r(int n, int r){
 }
 
 
-Rcpp::List Get_Total_K(int k){
-	arma::ivec n_total_k(k+1);
-	n_total_k.zeros();
-
+void Get_Total_K(int k, std::vector<int> & n_total_k){
+	//std::vector<int> n_total_k(k+1, 0);
 	for(int i = 0; i <= k; i++){
-		n_total_k(i) = n_choose_r(k, i)
+		n_total_k[i] = n_choose_r(k, i);
 	}	
-	Rcpp::List re;
-	int ntotal = arma::accu(n_total_k);
-	re["ntotal"] = ntotal;
-	re["n_total_k"] = n_total_k;
-        return(re)
+	//Rcpp::List re;
+	//int ntotal = std::accumulate(n_total_k.begin(),n_total_k.end(),0);
+	//re["ntotal"] = ntotal;
+	//re["n_total_k"] = n_total_k;
+        //return(re);
 }
 
-Rcpp::List SKATExactBin_ComputProb_New(arma::uvec & idx, arma::uvec & idxCompVec, arma::vec & pi1, uint32_t n, uint32_t ncase, int NResampling, int ExactMax, int test_type, int type_group){
+void SKATExactBin_ComputProb_New(arma::uvec & idx, arma::uvec & idxCompVec, arma::vec & pi1, uint32_t n, uint32_t ncase, int NResampling, int ExactMax, int test_type, int type_group, std::vector<double> & prob, std::vector<int> & IsExactVec, std::vector<int> & n_total_k, int & n_total, bool & Is_ExactP){
 	
         uint32_t k = idx.n_elem;
-        arma::vec p1 = pi1(idx);
+        //arma::vec p1 = pi1(idx);
 
-	arma::vec prob;
+	//std::vector<double> prob(k+1, 0.0);
 	SKATExactBin_ComputeProb_Group(idx, idxCompVec, pi1, n, ncase, type_group, prob);
 
 
-	arma::ivec IsExactVec;
-	IsExactVec.ones(k+1);
-	
-	Rcpp::List obj_total = Get_Total_K(k);
-	int n_total = obj_total["ntotal"];
-	arma::ivec n_total_k = obj_total["n_total_k"];
-	bool Is_ExactP = true;
+	//std::vector<int> IsExactVec(k+1, 1);
+		
+	//Rcpp::List obj_total = Get_Total_K(k);
+	Get_Total_K(k, n_total_k);
+	n_total = std::accumulate(n_total_k.begin(),n_total_k.end(),0);
+	//std::vector<int> n_total_k = obj_total["n_total_k"];
+	Is_ExactP = true;
 	if(n_total > NResampling){
 		for(int i = 0; i <= k; i++){
-			if(n_total_k(i) > ExactMax){
-				n_total_k(i) = int(ceil(NResampling * prob(i)));
-				IsExactVec(i) = 0;
+			if(n_total_k[i] > ExactMax){
+				n_total_k[i] = int(ceil(NResampling * prob[i]));
+				IsExactVec[i] = 0;
 			}	
 		}
 		Is_ExactP = false;
 	}	
-	n_total = arma::accu(n_total_k);
+	n_total = std::accumulate(n_total_k.begin(),n_total_k.end(),0);
 
-	Rcpp::List re;
-        re["prob"] = prob;
-        re["k"] = k;
-        re["n"] = n;
-        re["ntotal"] = ntotal;
-        re["n_total_k"] = n_total_k;
-        re["IsExact"] = IsExactVec;
-        re["p1"] = p1;
-        re["Is_ExactP"] = Is_ExactP;
+	//Rcpp::List re;
+        //re["prob"] = prob;
+        //re["k"] = k;
+        //re["n"] = n;
+        //re["ntotal"] = n_total;
+        //re["n_total_k"] = n_total_k;
+        //re["IsExact"] = IsExactVec;
+        //re["p1"] = p1;
+        //re["Is_ExactP"] = Is_ExactP;
 
-	return(re);
+	//return(re);
 }	
 
 
 
-Rcpp::List Get_Res_Arrays(arma::mat & res_out, arma::uvec & idx){
-	uint32_t nres = res_out.n_cols;
-	arma::ivec nres_k;
-        nres_k.zeros(nres);
+void  Get_Res_Arrays(arma::mat & res_out, arma::uvec & idx, std::vector<int> & resarray, int & nres, std::vector<int> & nres_k){
+	//nres = res_out.n_cols;
+	//std::vector<int> nres_k(nres, 0);
 	arma::vec res_out_colvec;
-	std::vector<int> resarray;
+	//std::vector<int> resarray;
 	for(int i = 0; i < nres; i++){
 		 res_out_colvec = res_out.col(i);
 		 arma::uvec res_out_i = arma::find( res_out_colvec > 0);
 		 arma::uvec res_out_i_s = arma::sort(res_out_i);
 		 int res_out_i_s_k = res_out_i_s.n_elem;
-		 nres_k(i) = res_out_i_s.n_elem;
+		 nres_k[i] = res_out_i_s.n_elem;
 		 for(int k = 0; k < res_out_i_s_k; k++){
 			resarray.push_back(res_out_i_s(k));
 		 }	 
 	}
 
-	Rcpp::List re;
-	re["resarray"] = resarray;
-	re["nres"] = nres;
-	re["nres_k"] = nres_k;
-	return(re);
+	//Rcpp::List re;
+	//re["resarray"] = resarray;
+	//re["nres"] = nres;
+	//re["nres_k"] = nres_k;
+	//return(re);
 }
 
 
 std::vector< std::vector<double> > mat_to_std_vec(arma::mat &A) { 
 
     std::vector< std::vector<double> > V(A.n_rows);
+    typedef std::vector<double> stdvec;
     for (size_t i = 0; i < A.n_rows; ++i) {
         V[i] = arma::conv_to< stdvec >::from(A.row(i));
     };
@@ -192,43 +188,62 @@ double SKATExactBin_Work(arma::mat & Z, arma::vec & res, arma::vec & pi1, uint32
         arma::vec p1 = pi1(idx);
         arma::vec p2 = pi1(idxCompVec);
 
-	arma::mat Z1 = Z.rows(idx);
-	arma::mat Z1temp = (Z1 % (-p1)).t();
+	arma::mat Z_1 = Z.rows(idx);
+	arma::mat Z1temp = (Z_1 % (-p1)).t();
 	arma::vec Z0 = arma::vectorise(Z1temp);
 
-	arma::mat Z1temp2 = (Z1 % (1-p1)).t();
+	arma::mat Z1temp2 = (Z_1 % (1-p1)).t();
 	arma::vec Z1 =  arma::vectorise(Z1temp2);
 
-	uint32_t m = Z1.n_cols;
+	uint32_t m = Z_1.n_cols;
+	int k = idx.n_elem;
+	std::vector<int> n_total_k(k+1, 0);
 
-	Rcpp::List pr = SKATExactBin_ComputProb_New(idx, idxCompVec, pi1, n, ncase, NResampling, ExactMax, test_type, type_group = 2);
+	std::vector<double> prob(k+1, 0.0);
+	std::vector<int> IsExactVec(k+1, 1);
+
+	int n_total = 0;
+	bool Is_ExactP = false;
+	SKATExactBin_ComputProb_New(idx, idxCompVec, pi1, n, ncase, NResampling, ExactMax, test_type, 2, prob, IsExactVec, n_total_k, n_total, Is_ExactP); 
+			
 	
-	double p1mean = arma::mean(pr["p1"]);
-	arma::vec p1_adj = pr["p1"] / p1mean;
-	arma::vec odds = pr["p1"] / (1 - pr["p1"]);
+	double p1mean = arma::mean(p1);
+	arma::vec p1_adj = p1 / p1mean;
+	arma::vec odds = p1 / (1 - p1);
 	int test_type_new=1;
 
-	Rcpp::List re_arr = Get_Res_Arrays(res_out, idx);
-	uint32_t nQ = re_arr["nres"];
-	std::vector<double> pval(nQ, 0.0); 
-	std::vector<double> pval1(nQ, 0.0); 
+	if(res_out.is_empty()){
+		res_out = res(idx);
+        }else{
+		arma::vec res_out2 = arma::join_cols(res(idx), res_out(idx));
+		res_out.resize(res_out2.n_elem);
+		res_out = res_out2;
+	}	
+
+
+	std::vector<int> resarray;
+	int nres = res_out.n_cols;
+	std::vector<int> nres_k(nres, 0);
+	
+	Get_Res_Arrays(res_out, idx, resarray, nres, nres_k);
+	std::vector<double> pval(nres, 0.0); 
+	std::vector<double> pval1(nres, 0.0); 
 	double minP = 100;
 	
 	typedef std::vector<double> stdvec;
 	stdvec Z1std = arma::conv_to< stdvec >::from(Z1);
 	stdvec Z0std = arma::conv_to< stdvec >::from(Z0);
-	stdvec probstd = arma::conv_to< stdvec >::from(pr["prob"]);
-	stdvec oddsstd = arma::conv_to< stdvec >::from(pr["odds"]);
-	stdvec p1_adjstd = arma::conv_to< stdvec >::from(pr["p1_adj"]);
+	stdvec oddsstd = arma::conv_to< stdvec >::from(odds);
+	stdvec p1_adjstd = arma::conv_to< stdvec >::from(p1_adj);
 
 	typedef std::vector<int> istdvec;
-	istdvec nres_kstd = arma::conv_to< istdvec >::from(re_arr["nres_k"]);	
-	istdvec n_total_kstd = arma::conv_to< istdvec >::from(pr["n_total_k"]);
-	istdvec IsExactstd = arma::conv_to< istdvec >::from(pr["IsExact"]);
+	//istdvec nres_kstd = arma::conv_to< istdvec >::from(re_arr["nres_k"]);	
+	//istdvec n_total_kstd = arma::conv_to< istdvec >::from(pr["n_total_k"]);
+	//istdvec IsExactstd = arma::conv_to< istdvec >::from(pr["IsExact"]);
 
 
-	SKAT_Exact(int * resarray, re_arr["nres"], &nres_kstd, &Z0std, &Z1std, pr["k"], m, pr["ntotal"], &n_total_kstd, &probstd, &oddsstd, &p1_adjstd, &IsExactstd, &pval, &pval1, &minP, test_type_new, epsilon);
-	
+	SKAT_Exact(&resarray[0], nres, &nres_k[0], &Z0std[0], &Z1std[0], k, m, n_total, &n_total_k[0], &prob[0], &oddsstd[0], &p1_adjstd[0], &IsExactVec[0], &pval[0], &pval1[0], &minP, test_type_new, epsilon);
+
 	//arma::mat pval_re(pval.size(),2);
 
 	//arma::vec pval_b =  arma::conv_to< arma::vec >::from(pval);
@@ -255,7 +270,9 @@ double SKATExactBin_Work(arma::mat & Z, arma::vec & res, arma::vec & pi1, uint32
         //p.value.standard.resampling=NULL
         //Q.resampling=NULL
 
-
+	//std::cout << "pval[0] " << pval[0] << std::endl;
+	//std::cout << "pval1[0] " << pval1[0]/2 << std::endl;
 	double pvalue = pval[0] - pval1[0]/2;
+	//std::cout << "pvalue " << pvalue << std::endl;
 	return(pvalue);	
 }

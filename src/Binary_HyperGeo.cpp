@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <cmath>
-#include "Binary_HyperGeo.h"
+#include "Binary_HyperGeo.hpp"
+#include "Binary_global.hpp"
 
 #ifdef _STAND_ALONE_
     #define Rprintf printf
@@ -33,7 +34,7 @@ HyperGeo::~HyperGeo(){
 }
 
 
-int     HyperGeo::Run(int k, int ngroup, int ncase, std::vector<int> & group,  std::vector<double> & weight){
+int     HyperGeo::Run(int k, int ngroup, int ncase, int * group, double * weight){
 
     int i;
     m_ngroup = ngroup;
@@ -129,7 +130,7 @@ int     HyperGeo::Recursive(double lprob, int idx, int ncase_used){
     return 0;
 }
 
-int     HyperGeo::Get_lprob(std::vector<double> & prob){
+int     HyperGeo::Get_lprob(double * prob){
     
     double sum1=0;
     for(int i=0;i<=m_k;i++){
