@@ -113,7 +113,8 @@ SPAGMMATtest = function(bgenFile = "",
 		 is_no_weight_in_groupTest = FALSE,
 		 is_output_markerList_in_groupTest = FALSE,
 		 is_fastTest = FALSE,
-		 pval_cutoff_for_fastTest = 0.05
+		 pval_cutoff_for_fastTest = 0.05, 
+		 max_MAC_use_ER = 4
 ){
    #cat("r.corr is ", r.corr, "\n")
    if(!(impute_method %in% c("best_guess", "mean","minor"))){
@@ -138,7 +139,8 @@ SPAGMMATtest = function(bgenFile = "",
 		     dosage_zerod_MAC_cutoff = dosage_zerod_MAC_cutoff,
 		     markers_per_chunk = markers_per_chunk,
 		     groups_per_chunk = groups_per_chunk,
-		     minGroupMAC_in_BurdenTest = minGroupMAC_in_BurdenTest
+		     minGroupMAC_in_BurdenTest = minGroupMAC_in_BurdenTest,
+		     max_MAC_use_ER = max_MAC_use_ER
 		     )
 
 
@@ -161,7 +163,8 @@ SPAGMMATtest = function(bgenFile = "",
 			dosage_zerod_cutoff,
                         dosage_zerod_MAC_cutoff,
 			weights.beta, 
-			OutputFile)	
+			OutputFile,
+			max_MAC_use_ER)	
 
     if(groupFile == ""){
       isGroupTest = FALSE
@@ -214,10 +217,14 @@ SPAGMMATtest = function(bgenFile = "",
 
     }
     
-    obj.model = ReadModel(GMMATmodelFile, chrom, LOCO, is_Firth_beta) #readInGLMM.R
-    
-
-
+    obj.model = ReadModel(GMMATmodelFile, chrom, LOCO, is_Firth_beta) #readInGLMM.R8
+    if(obj.model$traitType == "binary"){
+        if(max_MAC_use_ER > 0){
+             cat("P-values of genetic variants with MAC <= ", max_MAC_use_ER, " will be calculated via effecient resampling.\n")
+        }
+    }else{
+        max_MAC_use_ER = 0
+    }
     
     if(!LOCO){
      #	LOCO = FALSE
@@ -299,7 +306,9 @@ SPAGMMATtest = function(bgenFile = "",
     condition_genoIndex = c(-1)
     if(isCondition){
         cat("Conducting conditional analysis. Please specify the conditioning markers in the order as they are store in the genotype/dosage file.\n")
-    }	    
+    }	   
+    print("obj.model$obj_cc$res.out") 
+    print(obj.model$obj_cc$res.out)
     #set up the SAIGE object based on the null model results
     setSAIGEobjInCPP(t_XVX=obj.model$obj.noK$XVX,
 		     t_XXVX_inv=obj.model$obj.noK$XXVX_inv,
@@ -330,7 +339,8 @@ SPAGMMATtest = function(bgenFile = "",
 		     t_condition_genoIndex = condition_genoIndex,
 		     t_is_Firth_beta = is_Firth_beta,
 		     t_pCutoffforFirth = pCutoffforFirth,
-		     t_offset = obj.model$offset)
+		     t_offset = obj.model$offset, 
+		     t_resout = as.integer(obj.model$obj_cc$res.out))
   rm(sparseSigmaRList)
   gc()
    #process condition

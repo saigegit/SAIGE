@@ -16,6 +16,7 @@ class SAIGEClass
       arma::mat m_X;
       arma::mat m_Sigma_iXXSigma_iX;
       arma::vec m_res;
+      arma::vec m_resout;
       arma::vec m_mu;
       arma::vec m_mu2;
       arma::vec m_tauvec;
@@ -23,6 +24,7 @@ class SAIGEClass
       std::string m_traitType; 
       std::string m_impute_method;
       std::vector<uint32_t> m_condition_genoIndex;
+      	
 
     public:
       arma::mat m_XXVX_inv;
@@ -42,8 +44,8 @@ class SAIGEClass
       arma::uvec m_case_het_indices;
       arma::uvec m_ctrl_hom_indices;
       arma::uvec m_ctrl_het_indices;
-      arma::uvec m_n_case;
-      arma::uvec m_n_ctrl;
+      int m_n_case;
+      int m_n_ctrl;
       arma::sp_mat m_SigmaMat_sp;
       bool m_flagSparseGRM;
       bool m_flagSparseGRM_cur;
@@ -106,7 +108,8 @@ class SAIGEClass
         std::vector<uint32_t> & t_condition_genoIndex,
 	bool t_is_Firth_beta,
         double t_pCutoffforFirth,
-	arma::vec & t_offset);
+	arma::vec & t_offset,
+	arma::vec & t_resout);
 
    void set_seed(unsigned int seed);
 
@@ -165,7 +168,8 @@ class SAIGEClass
                                 double& t_varT_c,
                                 arma::rowvec & t_G1tilde_P_G2tilde,
 				 bool & t_isFirth,
-                                bool & t_isFirthConverge);
+                                bool & t_isFirthConverge, 
+				bool t_isER);
 
 
     void getindices(arma::uvec & t_case_indices,

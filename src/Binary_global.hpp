@@ -15,8 +15,10 @@ void  SL_out();
 void SL_GetSample(int n, int k, int *y, int *x);
 void SL_GetPermu(int n, int *y, int *x);
 
+void SKAT_Exact(int * resarray, int nres, int * nres_k, double * Z0, double *Z1, int k, int m, int total, int * total_k, double *prob_k, double * odds, double * p1, int * IsExact, double * pval, double *pval_same, double *minP, int test_type, double epsilon);
 
-
+void SKATO_Exact(int * resarray, int nres, int * nres_k, double * Z0, double *Z1, double * r_corr, int n_r,
+                 double * param, int k, int m, int total, int * total_k, double *prob_k, double * odds, double * p1, int * IsExact, double * pval, double *pval_same, double *minP, int test_type, double epsilon);
 
 #endif 
 

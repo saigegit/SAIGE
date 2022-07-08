@@ -5,8 +5,8 @@
 #include <iostream>
 #include <float.h>
 
-#include "Binary_ComputeExact.h"
-#include "Binary_global.h"
+#include "Binary_ComputeExact.hpp"
+#include "Binary_global.hpp"
 
 #ifdef _STAND_ALONE_
 #define Rprintf printf

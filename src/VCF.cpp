@@ -119,9 +119,15 @@ namespace VCF {
      for(uint32_t i = 0; i < m_N0; i++)
        SampleInVcf(i) = m_SampleInVcf.at(i);
 
+   if(m_N != 0){
      Rcpp::CharacterVector SampleInModel(m_N);
      for(uint32_t i = 0; i < m_N; i++)
        SampleInModel(i) = t_SampleInModel.at(i);
+   }else{
+     m_N = m_N0;
+     SampleInModel = SampleInVcf;
+
+   }	   
 
      Rcpp::IntegerVector posSampleInVcf = Rcpp::match(SampleInModel, SampleInVcf);
      for(uint32_t i = 0; i < m_N; i++){
