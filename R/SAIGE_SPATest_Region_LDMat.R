@@ -67,7 +67,7 @@ generate_LDMat_forMataRegion = function(bgenFile = "",
 			   groupFile,
 			   annotation_in_groupTest,
 			markers_per_chunk_in_groupTest,
-			 genoType,
+			objGeno$genoType,
                      objGeno$markerInfo,
 		     is_imputed_data,
 		     groups_per_chunk,
@@ -124,13 +124,6 @@ SAIGE.Region.LDmat = function(
   region_list = checkGroupFile(groupFile)
   nRegions = region_list$nRegions
   is_weight_included = region_list$is_weight_included
-  if(is_no_weight_in_groupTest & is_weight_included){
-    stop("is_no_weight_in_groupTest = TRUE but weights are found in the group file.\n")
-  }
-
-  if(is_no_weight_in_groupTest){
-     cat("No weights are used in the group test\n")
-  }
 
   if(is_weight_included){
     nline_per_gene = 3
@@ -150,8 +143,6 @@ SAIGE.Region.LDmat = function(
     }
   }
 
-    P1Mat = matrix(0, markers_per_chunk_in_groupTest, n)
-    P2Mat = matrix(0, n, markers_per_chunk_in_groupTest)
 
     chrom1 = "FakeCHR";
 
@@ -188,6 +179,12 @@ SAIGE.Region.LDmat = function(
     }
 
    mth = mth + 1
+
+print("RegionList")
+
+
+
+
    if(!is.null(RegionList)){
     pval.Region = NULL
     region = RegionList[[mth]]
@@ -211,6 +208,11 @@ SAIGE.Region.LDmat = function(
         }
 
          isVcfEnd =  check_Vcf_end()
+
+
+	print("HEREHEHEREHREH")
+
+
         if(!isVcfEnd){
                 region$genoIndex = rep("0", length(SNP))
                 region$genoIndex_prev = rep("0", length(SNP))
@@ -226,6 +228,7 @@ SAIGE.Region.LDmat = function(
       print(paste0("Analyzing Region ", regionName, " (",i-1,"/",nRegions,")."))
 
       #LDmatInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolistsub, regionName, is_fastTest, is_output_moreDetails)
+     n=10000
       LDmatRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, OutputFile, n, isImputation, annolistsub, regionName)
 
     }else{#if(!is.null(region$SNP) & length(annolistsub) > 0){
@@ -276,6 +279,16 @@ SAIGE.getRegionList_forLDmat = function(marker_group_line,
                          markerInfo,
                          chrom="")
 {
+
+  print("marker_group_line")    
+  print(marker_group_line)    
+  print("annoVec")
+  print(annoVec)
+  print("markerInfo")
+  print(markerInfo)
+
+
+
   chrom_nochr = gsub("CHR", "", chrom, ignore.case = T)
   # read group file
   ngroup<-length(marker_group_line)/nline_per_gene
@@ -416,7 +429,9 @@ if(nrow(RegionData) != 0){
 
     annoIndicatorMat = matrix(0, nrow=length(posSNP), ncol=length(annoVec))
     annoVecNew = c()
-        if(length(annoVec) == 1 & annoVec[1] == "ALL"){
+
+
+    if(length(annoVec) == 1 & annoVec[1] == "ALL"){
 		annoIndicatorMat[,1] = 1
 		annoVecNew = annoVec
 	}else{	
@@ -429,6 +444,12 @@ if(nrow(RegionData) != 0){
             }
           }
 	}
+
+  print("annoVec")
+  print(annoVec)
+  print("annoVecNew")
+  print(annoVecNew)
+
   RegionAnnoHeaderListNew = list()
   if(length(annoVecNew) == 0){
         warning("No markers are found for at least one annotation, so region ", r, " is skipped\n")

@@ -16,6 +16,7 @@
 // #include <omp.h>
 // // [[Rcpp::plugins(openmp)]]]
 
+#include "LDmat.hpp"
 #include "Main.hpp"
 #include "PLINK.hpp"
 #include "BGEN.hpp"
@@ -91,7 +92,7 @@ void LDmatRegionInCPP(
   //create the output list
   //arma::vec timeoutput1 = getTime();
   unsigned int q0 = t_genoIndex.size();                 // number of markers (before QC) in one region
-
+  unsigned int q = q0;
   std::vector<std::string> markerVec(q);
   std::vector<std::string> chrVec(q);  // marker IDs
   std::vector<std::string> posVec(q);  // marker IDs
@@ -117,6 +118,9 @@ void LDmatRegionInCPP(
   unsigned int i1InChunk = 0; //i1th marker in ith chunk
   unsigned int i1 = 0;    // index of Markers (non-URV)
   unsigned int jm;
+  std::vector<uint32_t> location_m_P1Mat;
+  std::vector<uint32_t> location_n_P1Mat;
+  std::vector<double> value_P1Mat;
 
   for(unsigned int i = 0; i < q0; i++)
   {
@@ -135,9 +139,6 @@ void LDmatRegionInCPP(
     uint64_t gIndex = std::strtoull( t_genoIndex_str.c_str(), &end,10 );
     std::remove(end);
     uint64_t gIndex_prev = 0;
-    std::vector<uint32_t> location_m_P1Mat;
-    std::vector<uint32_t> location_n_P1Mat;
-    std::vector<double> value_P1Mat;
 
     if(i == 0){
         gIndex_prev = 0;
@@ -222,9 +223,10 @@ void LDmatRegionInCPP(
 	arma::umat location_P1Mat_arma (2, location_m_P1Mat_arma.n_elem);
         location_P1Mat_arma.row(0) = location_m_P1Mat_arma.t();
 	location_P1Mat_arma.row(1) = location_n_P1Mat_arma.t();
-	arma::vec value_P1Mat_arma =  arma::conv_to<arma::vec>::from(value_P1Mat);
-	arma::sp_mat P1Mat(location_P1Mat_arma, value_P1Mat_arma, i1InChunk, t_n);
-        P1Mat.save(t_outputFile + "_P1Mat_Chunk_" + std::to_string(ichunk) + ".bin");
+	arma::ivec value_P1Mat_arma =  arma::conv_to<arma::ivec>::from(value_P1Mat);
+	arma::sp_imat P1Mat(location_P1Mat_arma, value_P1Mat_arma, i1InChunk, t_n);
+
+	P1Mat.save(t_outputFile + "_P1Mat_Chunk_" + std::to_string(ichunk) + ".bin");
 	value_P1Mat.clear();
 	location_m_P1Mat.clear();
 	location_n_P1Mat.clear();
@@ -248,8 +250,9 @@ void LDmatRegionInCPP(
         arma::umat location_P1Mat_arma (2, location_m_P1Mat_arma.n_elem);
         location_P1Mat_arma.row(0) = location_m_P1Mat_arma.t();
         location_P1Mat_arma.row(1) = location_n_P1Mat_arma.t();
-        arma::vec value_P1Mat_arma =  arma::conv_to<arma::vec>::from(value_P1Mat);
-        arma::sp_mat P1Mat(location_P1Mat_arma, value_P1Mat_arma, i1InChunk, t_n);
+       
+       	arma::ivec value_P1Mat_arma =  arma::conv_to<arma::ivec>::from(value_P1Mat);
+        arma::sp_imat P1Mat(location_P1Mat_arma, value_P1Mat_arma, i1InChunk, t_n);
         P1Mat.save(t_outputFile + "_P1Mat_Chunk_" + std::to_string(ichunk) + ".bin");
         value_P1Mat.clear();
         location_m_P1Mat.clear();
@@ -267,15 +270,17 @@ void LDmatRegionInCPP(
   nchunks = mPassCVVecsize;
 
 
-  arma::mat VarMat;
+  arma::imat VarMat;
 //(i1, i1);
   VarMat.resize(i1, i1);
-  if(nchunks == 1){
-    VarMat = P1Mat * (P1Mat.t());
-  }
+  //if(nchunks == 1){
+  //  VarMat = P1Mat * (P1Mat.t());
+  //}
 
+  arma::sp_imat P1Mat; 
+  arma::sp_imat P2Mat; 
   // the region includes more markers than limitation, so P1Mat and P2Mat have been put in hard drive
-  if(nchunks > 1)
+  if(nchunks >= 1)
   {
     int first_row = 0, first_col = 0, last_row = 0, last_col = 0;
 
@@ -284,7 +289,7 @@ void LDmatRegionInCPP(
       last_row = first_row + mPassCVVec.at(index1) - 1;
 
       std::string P1MatFile = t_outputFile + "_P1Mat_Chunk_" + std::to_string(index1) + ".bin";
-
+ 
       P1Mat.load(P1MatFile);
 
        //P1Mat.print("P1Mat");
@@ -300,8 +305,9 @@ void LDmatRegionInCPP(
        //P2Mat.print("P2Mat");
 
         if(P2Mat.n_cols == 0) continue;
-        arma::mat offVarMat = P1Mat * (P2Mat.t());
-        last_col = first_col + mPassCVVec.at(index2) - 1;
+        arma::sp_imat offVarMat = P1Mat * (P2Mat.t());
+         
+	last_col = first_col + mPassCVVec.at(index2) - 1;
 
         VarMat.submat(first_row, first_col, last_row, last_col) = offVarMat;
         VarMat.submat(first_col, first_row, last_col, last_row) = offVarMat.t();
@@ -314,7 +320,7 @@ void LDmatRegionInCPP(
       //std::cout << "P2Mat.n_cols " << P2Mat.n_cols << std::endl;
       P2Mat.load(t_outputFile + "_P1Mat_Chunk_" + std::to_string(index1) + ".bin");
 
-      arma::mat diagVarMat = P1Mat * (P2Mat.t());
+      arma::sp_imat diagVarMat = P1Mat * (P2Mat.t());
 
       VarMat.submat(first_row, first_col, last_row, last_col) = diagVarMat;
 
@@ -335,6 +341,7 @@ void LDmatRegionInCPP(
 
   }
 
-  VarMat.save(t_outputFile + "_"+regionName+".mtx");
+  VarMat.print("VarMat");
+  VarMat.save(t_outputFile + "_"+regionName+".txt", arma::coord_ascii);
   VarMat.clear();
 }	

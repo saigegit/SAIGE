@@ -48,7 +48,8 @@ dosage_zerod_cutoff,
 dosage_zerod_MAC_cutoff,
 markers_per_chunk, 
 groups_per_chunk,
-minGroupMAC_in_BurdenTest){
+minGroupMAC_in_BurdenTest,
+max_MAC_use_ER){
 
 	checkArgNumeric(start, deparse(substitute(start)), 1, 250000000)
         checkArgNumeric(end, deparse(substitute(end)), 1, 250000000)

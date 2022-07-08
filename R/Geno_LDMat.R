@@ -314,7 +314,7 @@ if(FALSE){
 #  anyQueue = anyInclude | anyExclude
 
   if(dosageFileType == "vcf"){
-    sampleInModel = c("")
+    sampleInModel = as.character(NULL)
     setVCFobjInCPP(vcfFile, vcfFileIndex, vcfField, t_SampleInModel = sampleInModel)
     if(!is.null(IDsToInclude)){
       SNPlist = paste(c("set1", IDsToInclude), collapse = "\t")

@@ -113,20 +113,25 @@ namespace VCF {
   {
      std::cout << "Setting position of samples in VCF files...." << std::endl;
      m_N = t_SampleInModel.size();
+   std::cout << "m_N " << m_N << std::endl;
 
      getSampleIDlist_vcfMatrix();
      Rcpp::CharacterVector SampleInVcf(m_N0);
      for(uint32_t i = 0; i < m_N0; i++)
        SampleInVcf(i) = m_SampleInVcf.at(i);
 
+   Rcpp::CharacterVector SampleInModel = Rcpp::CharacterVector::create();
+
    if(m_N != 0){
-     Rcpp::CharacterVector SampleInModel(m_N);
+     //Rcpp::CharacterVector SampleInModel(m_N);
      for(uint32_t i = 0; i < m_N; i++)
-       SampleInModel(i) = t_SampleInModel.at(i);
+       SampleInModel.push_back(t_SampleInModel.at(i));	     
+       //SampleInModel(i) = t_SampleInModel.at(i);
    }else{
      m_N = m_N0;
-     SampleInModel = SampleInVcf;
-
+     //Rcpp::CharacterVector SampleInModel(m_N);
+     for(uint32_t i = 0; i < m_N; i++)
+        SampleInModel.push_back(SampleInVcf(i));
    }	   
 
      Rcpp::IntegerVector posSampleInVcf = Rcpp::match(SampleInModel, SampleInVcf);
