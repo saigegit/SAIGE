@@ -700,12 +700,17 @@ fitNULLGLMM = function(plinkFile = "",
 
     ##set up output files
     modelOut = paste0(outputPrefix, ".rda")
+
     if(skipModelFitting){
-	if(!file.exists(modelOut)){
-		stop("skipModelFitting=TRUE but ", modelOut, " does not exist\n")	   }	
+       if(!file.exists(modelOut)){
+          stop("skipModelFitting=TRUE but ", modelOut, " does not exist\n")
+       }
     }else{
-	file.create(modelOut, showWarnings = TRUE)
-    }	    
+       if(LOCO & isLowMemLOCO){	   
+	  modelOut = paste(c(outputPrefix,"_noLOCO.rda"), collapse="")	
+	}
+       file.create(modelOut, showWarnings = TRUE)
+    }
 
     if(plinkFile != ""){
 	bimFile = paste0(plinkFile, ".bim")
@@ -1193,7 +1198,8 @@ fitNULLGLMM = function(plinkFile = "",
 		chromosomeStartIndexVec = modglmm$chromosomeStartIndexVec
     		chromosomeEndIndexVec = modglmm$chromosomeEndIndexVec
 		modglmm$chromosomeStartIndexVec = NULL
-		modglmm$chromosomeEndIndexVec = NULL	
+		modglmm$chromosomeEndIndexVec = NULL
+		modelOut = paste(c(outputPrefix,"_noLOCO.rda"), collapse="")
                 save(modglmm, file = modelOut)
 		modglmm$LOCO = TRUE
 	        modglmm$Y = NULL
@@ -1269,6 +1275,12 @@ fitNULLGLMM = function(plinkFile = "",
             print(t_end - t_begin)
         }else{
             cat("Skip fitting the NULL GLMM\n")
+
+            
+	    if(!file.exists(modelOut)){
+		stop("skipModelFitting=TRUE but ", modelOut, " does not exist\n")
+	    }	
+
             load(modelOut)
             if (is.null(modglmm$LOCO)) {
                 modglmm$LOCO = FALSE
@@ -1413,6 +1425,7 @@ fitNULLGLMM = function(plinkFile = "",
                 chromosomeEndIndexVec = modglmm$chromosomeEndIndexVec
                 modglmm$chromosomeStartIndexVec = NULL
                 modglmm$chromosomeEndIndexVec = NULL
+		modelOut = paste(c(outputPrefix,"_noLOCO.rda"), collapse="")
                 save(modglmm, file = modelOut)
                 modglmm$LOCO = TRUE
                 modglmm$Y = NULL
@@ -1493,6 +1506,10 @@ fitNULLGLMM = function(plinkFile = "",
             print(t_end - t_begin)
         }else{
             cat("Skip fitting the NULL GLMM\n")
+            if(!file.exists(modelOut)){
+                stop("skipModelFitting=TRUE but ", modelOut, " does not exist\n")
+            }
+
             load(modelOut)
             if (is.null(modglmm$LOCO)) {
                 modglmm$LOCO = FALSE
