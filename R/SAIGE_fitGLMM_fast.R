@@ -1189,12 +1189,13 @@ fitNULLGLMM = function(plinkFile = "",
 
             if(LOCO & isLowMemLOCO){
                 modglmm$LOCOResult = NULL
-                modglmm$LOCO = TRUE
+                modglmm$LOCO = FALSE
 		chromosomeStartIndexVec = modglmm$chromosomeStartIndexVec
     		chromosomeEndIndexVec = modglmm$chromosomeEndIndexVec
 		modglmm$chromosomeStartIndexVec = NULL
 		modglmm$chromosomeEndIndexVec = NULL	
                 save(modglmm, file = modelOut)
+		modglmm$LOCO = TRUE
 	        modglmm$Y = NULL
 		eta0 = modglmm$linear.predictors
 		modglmm$linear.predictors = NULL
@@ -1407,12 +1408,13 @@ fitNULLGLMM = function(plinkFile = "",
 
             if(LOCO & isLowMemLOCO){
                 modglmm$LOCOResult = NULL
-                #modglmm$LOCO = FALSE
+                modglmm$LOCO = FALSE
 		chromosomeStartIndexVec = modglmm$chromosomeStartIndexVec
                 chromosomeEndIndexVec = modglmm$chromosomeEndIndexVec
                 modglmm$chromosomeStartIndexVec = NULL
                 modglmm$chromosomeEndIndexVec = NULL
                 save(modglmm, file = modelOut)
+                modglmm$LOCO = TRUE
                 modglmm$Y = NULL
 		eta0 = modglmm$linear.predictor
                 modglmm$linear.predictors = NULL
