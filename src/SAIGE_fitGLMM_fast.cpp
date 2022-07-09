@@ -3012,15 +3012,11 @@ Rcpp::List fitglmmaiRPCG(arma::fvec& Yvec, arma::fmat& Xmat, arma::fvec &wVec,  
 arma::fvec& Sigma_iY, arma::fmat & Sigma_iX, arma::fmat & cov,
 int nrun, int maxiterPCG, float tolPCG, float tol, float traceCVcutoff){
 
-	double mem1,mem2;
-        process_mem_usage(mem1, mem2);
-   	std::cout << "VM 1: " << mem1 << "; RSS 1: " << mem2 << std::endl;
-
-
+	//double mem1,mem2;
+        //process_mem_usage(mem1, mem2);
 
   	Rcpp::List re = getAIScore(Yvec, Xmat,wVec,  tauVec, Sigma_iY, Sigma_iX, cov, nrun, maxiterPCG, tolPCG, traceCVcutoff);
-        process_mem_usage(mem1, mem2);
-   	std::cout << "VM 2: " << mem1 << "; RSS 2: " << mem2 << std::endl;
+        //process_mem_usage(mem1, mem2);
   	float YPAPY = re["YPAPY"];
   	float Trace = re["Trace"];
   	float score1 = YPAPY - Trace;
@@ -3043,14 +3039,13 @@ int nrun, int maxiterPCG, float tolPCG, float tol, float traceCVcutoff){
 
   	}
 
-  //cout << "DEBUG4" << endl;
   	for(int i=0; i<tauVec.n_elem; ++i) {
     		if (tauVec(i) < tol){
       			tauVec(i) = 0;
     		}
   	}
-        process_mem_usage(mem1, mem2);
-   	std::cout << "VM 3: " << mem1 << "; RSS 3: " << mem2<< std::endl;
+        //process_mem_usage(mem1, mem2);
+   	//std::cout << "VM 3: " << mem1 << "; RSS 3: " << mem2<< std::endl;
   	return List::create(Named("tau") = tauVec);
 }
 

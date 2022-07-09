@@ -307,8 +307,6 @@ SPAGMMATtest = function(bgenFile = "",
     if(isCondition){
         cat("Conducting conditional analysis. Please specify the conditioning markers in the order as they are store in the genotype/dosage file.\n")
     }	   
-    print("obj.model$obj_cc$res.out") 
-    print(obj.model$obj_cc$res.out)
     #set up the SAIGE object based on the null model results
     setSAIGEobjInCPP(t_XVX=obj.model$obj.noK$XVX,
 		     t_XXVX_inv=obj.model$obj.noK$XXVX_inv,
