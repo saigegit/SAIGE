@@ -257,7 +257,7 @@ void BgenClass::Parse2(unsigned char *buf, uint bufLen, const unsigned char *zBu
      }
   }	
 */	
-double sum_eij = 0, sum_fij_minus_eij2 = 0, sum_eij_sub = 0, sum_fij_minus_eij2_sub = 0; // for INFO
+    double sum_eij = 0, sum_fij_minus_eij2 = 0, sum_eij_sub = 0, sum_fij_minus_eij2_sub = 0; // for INFO
     double p11,p10,p00,dosage,eij,fij, eijsub, fijsub;
     dosages.clear();
     //dosages.resize(m_N);
@@ -268,7 +268,7 @@ double sum_eij = 0, sum_fij_minus_eij2 = 0, sum_eij_sub = 0, sum_fij_minus_eij2_
       dosages.set_size(m_N);
     }
     std::size_t missing_cnt = 0;
-double dosage_new;
+    double dosage_new;
     for (uint i = 0; i < N; i++) {
      //if(i == 1){std::cout << "ploidyMissBytes[i] " << ploidyMissBytes[i] << std::endl;}
      if (ploidyMissBytes[i] != 130U){
@@ -285,11 +285,11 @@ double dosage_new;
     //  }
 
         eij = dosage;
+	uint ninzeroind = 0;
+        if(m_posSampleInModel[i] >= 0){
         fij = 4*p11 + p10;
         sum_eij += eij;
         sum_fij_minus_eij2 += fij - eij*eij;
-	uint ninzeroind = 0;
-        if(m_posSampleInModel[i] >= 0){
           if(!m_isSparseDosagesInBgen){
               dosages[m_posSampleInModel[i]] = dosage_new;
               if(dosage_new > 0){
@@ -337,11 +337,12 @@ double dosage_new;
   
   //std::cout << "AC: " << AC << std::endl;
   double thetaHat = sum_eij / (2* (m_N - missing_cnt));
-  //std::cout << "sum_eij " << sum_eij << std::endl;
   //std::cout << "missing_cnt " << sum_eij << std::endl;
   if(isImputation){
-  info = thetaHat==0 || thetaHat==1 ? 1 :
+    info = thetaHat==0 || thetaHat==1 ? 1 :
     1 - sum_fij_minus_eij2 / (2*(m_N - missing_cnt)*thetaHat*(1-thetaHat));
+    //std::cout << "info " << info << std::endl;
+    //std::cout << "sum_fij_minus_eij2 / (2*(m_N - missing_cnt)*thetaHat*(1-thetaHat)); " << sum_fij_minus_eij2 / (2*(m_N - missing_cnt)*thetaHat*(1-thetaHat)) << std::endl;
   }else{
 	info=1.0;
   }	  
