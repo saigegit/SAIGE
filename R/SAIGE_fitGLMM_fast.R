@@ -129,10 +129,6 @@ glmmkin.ai_PCG_Rcpp_Binary = function(bedFile, bimFile, famFile, Xorig, isCovari
   X = model.matrix(fit0)
 
 
-    print("gc check in 1")
-        print(gc(v=T))
-
-
   offset = fit0$offset
   if(is.null(offset)){
     offset = rep(0, n)
@@ -173,8 +169,6 @@ glmmkin.ai_PCG_Rcpp_Binary = function(bedFile, bimFile, famFile, Xorig, isCovari
     print(tau)
   }
 
-    print("gc check in 2")
-        print(gc(v=T))
   for (i in seq_len(maxiter)) {
 
     if(verbose) cat("\nIteration ", i, tau, ":\n")
@@ -183,19 +177,17 @@ glmmkin.ai_PCG_Rcpp_Binary = function(bedFile, bimFile, famFile, Xorig, isCovari
     cat("tau0_v1: ", tau0, "\n")
     eta0 = eta
     # use Get_Coef before getAIScore       
-    t_begin_Get_Coef = proc.time()
+   t_begin_Get_Coef = proc.time()
     re.coef = Get_Coef(y, X, tau, family, alpha0, eta0,  offset,verbose=verbose, maxiterPCG=maxiterPCG, tolPCG = tolPCG, maxiter=maxiter)
    t_end_Get_Coef =  proc.time()
-    print("gc check in 3")
-        print(gc(v=T))
-   cat("t_end_Get_Coef - t_begin_Get_Coef\n")
+   #cat("t_end_Get_Coef - t_begin_Get_Coef\n")
+   cat("Updating fix effect coeffcieints took\n")
    print(t_end_Get_Coef - t_begin_Get_Coef)
-    fit = fitglmmaiRPCG(re.coef$Y, X, re.coef$W, tau, re.coef$Sigma_iY, re.coef$Sigma_iX, re.coef$cov, nrun, maxiterPCG, tolPCG, tol = tol, traceCVcutoff = traceCVcutoff)
+   fit = fitglmmaiRPCG(re.coef$Y, X, re.coef$W, tau, re.coef$Sigma_iY, re.coef$Sigma_iX, re.coef$cov, nrun, maxiterPCG, tolPCG, tol = tol, traceCVcutoff = traceCVcutoff)
   t_end_fitglmmaiRPCG= proc.time()
-  cat("t_end_fitglmmaiRPCG - t_begin_fitglmmaiRPCG\n")
-  print(t_end_fitglmmaiRPCG - t_end_Get_Coef)
-    print("gc check in 4")
-        print(gc(v=T))
+   #cat("t_end_fitglmmaiRPCG - t_begin_fitglmmaiRPCG\n")
+   cat("Updating variance component estimate took\n")
+   print(t_end_fitglmmaiRPCG - t_end_Get_Coef)
 
     tau = as.numeric(fit$tau)
     cov = re.coef$cov
@@ -270,8 +262,9 @@ glmmkin.ai_PCG_Rcpp_Binary = function(bedFile, bimFile, famFile, Xorig, isCovari
 	t_begin_Get_Coef_LOCO = proc.time()
         re.coef_LOCO = Get_Coef_LOCO(y, X, tau, family, alpha, eta,  offset,verbose=verbose, maxiterPCG=maxiterPCG, tolPCG = tolPCG, maxiter=maxiter)
         t_end_Get_Coef_LOCO = proc.time()
-      cat("t_end_Get_Coef_LOCO - t_begin_Get_Coef_LOCO\n")
-      print(t_end_Get_Coef_LOCO - t_begin_Get_Coef_LOCO)
+      #cat("t_end_Get_Coef_LOCO - t_begin_Get_Coef_LOCO\n")
+        cat("Updating fix effect coeffcieints and model residuals took\n")
+  	print(t_end_Get_Coef_LOCO - t_begin_Get_Coef_LOCO)
         cov = re.coef_LOCO$cov
         alpha = re.coef_LOCO$alpha
         eta = re.coef_LOCO$eta
@@ -871,8 +864,6 @@ fitNULLGLMM = function(plinkFile = "",
 			sampleIDInclude = data.table:::fread( SampleIDIncludeFile, header = F,  stringsAsFactors = FALSE, colClasses = c("character"), data.table=F)
 			sampleIDInclude = as.vector(sampleIDInclude[!duplicated(sampleIDInclude), ])
 			cat(length(sampleIDInclude), " non-duplicated sample IDs were found in SampleIDIncludeFile\n")
-			print(sampleIDInclude[1:10])
-			print(as.vector(data[,which(colnames(data) == sampleIDColinphenoFile)])[1:10])
 			data = data[which(as.vector(data[,which(colnames(data) == sampleIDColinphenoFile)]) %in% sampleIDInclude),,drop=F]
 			cat(nrow(data), " samples in sampleIDInclude have non-missing phenotypes and covariates\n")
 		}	
@@ -1122,14 +1113,8 @@ fitNULLGLMM = function(plinkFile = "",
         }
 
 
-	print(gc(v=T))
         cat("glm:\n")
         print(fit0)
-
-	print(object.size(fit0))
-	print(object.size(Xorig))
-	print(object.size(dataMerge_sort))
-	print(object.size(out.transform))
 
         obj.noK = NULL
         if (!skipModelFitting) {
@@ -1200,14 +1185,11 @@ fitNULLGLMM = function(plinkFile = "",
 	    	modglmm$coefficients = coef.alpha
   	    }
 
-
-
-	print("gc check2")
-	print(gc(v=T))
+            
 
             if(LOCO & isLowMemLOCO){
                 modglmm$LOCOResult = NULL
-                modglmm$LOCO = FALSE
+                modglmm$LOCO = TRUE
 		chromosomeStartIndexVec = modglmm$chromosomeStartIndexVec
     		chromosomeEndIndexVec = modglmm$chromosomeEndIndexVec
 		modglmm$chromosomeStartIndexVec = NULL
@@ -1235,9 +1217,7 @@ fitNULLGLMM = function(plinkFile = "",
                         	cat("leave chromosome ", j, " out\n")
                                 setStartEndIndex(startIndex, endIndex, j-1)
 
-				print("OK1")
 				re.coef_LOCO = Get_Coef_LOCO(y, X=model.matrix(fit0), tau, family = fit0$family, alpha = alpha0, eta = eta0,  offset =  offset0, verbose=TRUE, maxiterPCG=maxiterPCG, tolPCG = tolPCG, maxiter=maxiter)
-				print("OK2")
       				cov = re.coef_LOCO$cov
         			alpha = re.coef_LOCO$alpha
         			eta = re.coef_LOCO$eta
@@ -1245,22 +1225,17 @@ fitNULLGLMM = function(plinkFile = "",
         			mu = re.coef_LOCO$mu
         			mu2 = mu * (1-mu)
         			res = y - mu
-				print("OK3")
 
                                 if(!is.null(out.transform) & is.null(fit0$offset)){
                                         coef.alpha<-Covariate_Transform_Back(alpha, out.transform$Param.transform)
                                 }else{
                                         coef.alpha = alpha
                                 }
-				print("OK4")
                                 if(!isCovariateOffset){
                                         obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
                                 }else{
                                         obj.noK = ScoreTest_NULL_Model(mu, mu2, y, Xorig)
                                 }
-
-				print("check here")
-
 
                                 modglmm$LOCOResult[[j]] = list(isLOCO = TRUE, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, obj.noK = obj.noK)
 				if(!isCovariateOffset & hasCovariate){
@@ -1318,8 +1293,6 @@ fitNULLGLMM = function(plinkFile = "",
                 set_Diagof_StdGeno_LOCO()
   	    }
             cat("Start estimating variance ratios\n")
-	    print("gc check4")
-	    print(gc(v=T))
 	    load(modelOut)
 	    extractVarianceRatio(obj.glmm.null = modglmm,
                 obj.glm.null = fit0, maxiterPCG = maxiterPCG,
@@ -1337,9 +1310,8 @@ fitNULLGLMM = function(plinkFile = "",
                 minMAFforGRM = minMAFforGRM, isDiagofKinSetAsOne = isDiagofKinSetAsOne,
                 includeNonautoMarkersforVarRatio = includeNonautoMarkersforVarRatio)
 
-	print("gc check3")
-	print(gc(v=T))
-
+	#print(gc(v=T))
+	gc()
         }else {
             cat("Skip estimating variance ratios\n")
         }
@@ -1435,7 +1407,7 @@ fitNULLGLMM = function(plinkFile = "",
 
             if(LOCO & isLowMemLOCO){
                 modglmm$LOCOResult = NULL
-                modglmm$LOCO = FALSE
+                #modglmm$LOCO = FALSE
 		chromosomeStartIndexVec = modglmm$chromosomeStartIndexVec
                 chromosomeEndIndexVec = modglmm$chromosomeEndIndexVec
                 modglmm$chromosomeStartIndexVec = NULL
@@ -1877,21 +1849,10 @@ refineKinPar = function(relatednessCutoff, W, tauVecNew, nblocks = 10, verbose =
         if (verbose) cat("Block", i , "\n")
         flush.console()
 	for(m in G1){
-		print(m)
- 		#print("OK2")
-		print(iMat[m,1])	
-		print(iMat[m,2])	
-		print(stdGeno[iMat[m,1]])	
-		print(stdGeno[iMat[m,2]])	
-		print(GRMvec[m])	
 		GRMvec[m] = GRMvec[m] + stdGeno[iMat[m,1]]*stdGeno[iMat[m,2]]/mMarkers
-		print(GRMvec[m])	
-		#print("OK3")	
 	}
   } 
-  print("OK4")
  }
- print("OK1")
  return(GRMvec)		
 
 }
