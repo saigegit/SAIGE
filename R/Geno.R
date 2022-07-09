@@ -378,7 +378,7 @@ if(FALSE){
  #   markerInfo[,POS:=NULL]
  # }
 
-  genoList = list(markerInfo = markerInfo, genoType = dosageFileType)
+  genoList = list(markerInfo = markerInfo, genoType = dosageFileType, ssinGeno = ssinGeno)
   return(genoList)
 }
 

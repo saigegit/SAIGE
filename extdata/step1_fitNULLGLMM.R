@@ -55,6 +55,8 @@ option_list <- list(
    help="Optional. Initial values for tau. [default=0,0]"),
   make_option("--LOCO", type="logical", default=TRUE,
     help="Whether to apply the leave-one-chromosome-out (LOCO) approach when fitting the null model using the full GRM [default=TRUE]."),
+  make_option("--isOutputSepbyChr", type="logical", default=FALSE,
+    help="Whehter to output the model file by chromosome when LOCO=TRUE [default=FALSE]"),
   make_option("--traceCVcutoff", type="numeric", default=0.0025,
     help="Optional. Threshold for coefficient of variation (CV) for the trace estimator. Number of runs for trace estimation will be increased until the CV is below the threshold [default=0.0025]."),
   make_option("--nrun", type="numeric", default=30,
@@ -141,7 +143,7 @@ cateVarRatioMaxMACVecInclude <- convertoNumeric(x=strsplit(opt$cateVarRatioMaxMA
 
 #set seed
 set.seed(1)
-
+if(packageVersion("SAIGE")<"1.1.3"){
 
 fitNULLGLMM(plinkFile=opt$plinkFile,
 	    bedFile=opt$bedFile,
@@ -193,4 +195,58 @@ fitNULLGLMM(plinkFile=opt$plinkFile,
 	    MaleCode=opt$MaleCode,
 	    MaleOnly=opt$MaleOnly,
 	    SampleIDIncludeFile=opt$SampleIDIncludeFile
-	)	
+	)
+}else{
+fitNULLGLMM(plinkFile=opt$plinkFile,
+	    bedFile=opt$bedFile,
+	    bimFile=opt$bimFile,
+	    famFile=opt$famFile,
+	    useSparseGRMtoFitNULL=opt$useSparseGRMtoFitNULL, 
+            sparseGRMFile=opt$sparseGRMFile,
+            sparseGRMSampleIDFile=opt$sparseGRMSampleIDFile,
+            phenoFile = opt$phenoFile,
+            phenoCol = opt$phenoCol,
+            sampleIDColinphenoFile = opt$sampleIDColinphenoFile,
+            traitType = opt$traitType,
+            outputPrefix = opt$outputPrefix,
+	    isCovariateOffset=opt$isCovariateOffset,
+            nThreads = opt$nThreads,
+	    useSparseGRMforVarRatio = opt$useSparseGRMforVarRatio,
+            invNormalize = opt$invNormalize,
+            covarColList = covars,
+            qCovarCol = qcovars,
+	    tol=opt$tol,
+	    maxiter=opt$maxiter,
+            tolPCG=opt$tolPCG,
+            maxiterPCG=opt$maxiterPCG,
+            SPAcutoff = opt$SPAcutoff,
+            numMarkersForVarRatio = opt$numRandomMarkerforVarianceRatio,
+            skipModelFitting = opt$skipModelFitting,
+	    skipVarianceRatioEstimation = opt$skipVarianceRatioEstimation,
+            memoryChunk = opt$memoryChunk,
+            tauInit = tauInit,
+            LOCO = opt$LOCO,
+	    outputSepbyChr = opt$isOutputSepbyChr,
+            traceCVcutoff = opt$traceCVcutoff,
+	    nrun = opt$nrun,
+            ratioCVcutoff = opt$ratioCVcutoff,
+	    outputPrefix_varRatio = opt$outputPrefix_varRatio,
+	    IsOverwriteVarianceRatioFile = opt$IsOverwriteVarianceRatioFile,
+            relatednessCutoff = opt$relatednessCutoff,
+            isCateVarianceRatio = opt$isCateVarianceRatio,
+            cateVarRatioMinMACVecExclude = cateVarRatioMinMACVecExclude,
+            cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
+            isCovariateTransform = opt$isCovariateTransform,
+            isDiagofKinSetAsOne = opt$isDiagofKinSetAsOne,
+	    minMAFforGRM = opt$minMAFforGRM,
+	    maxMissingRateforGRM = opt$maxMissingRateforGRM,
+	    minCovariateCount=opt$minCovariateCount,
+	    includeNonautoMarkersforVarRatio=opt$includeNonautoMarkersforVarRatio,
+	    sexCol=opt$sexCol,
+    	    FemaleCode=opt$FemaleCode,
+	    FemaleOnly=opt$FemaleOnly,
+	    MaleCode=opt$MaleCode,
+	    MaleOnly=opt$MaleOnly,
+	    SampleIDIncludeFile=opt$SampleIDIncludeFile
+	)
+}	

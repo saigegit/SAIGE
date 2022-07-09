@@ -36,6 +36,10 @@ static PLINK::PlinkClass* ptr_gPLINKobj = NULL;
 static BGEN::BgenClass* ptr_gBGENobj = NULL;
 static VCF::VcfClass* ptr_gVCFobj = NULL;
 
+
+std::ofstream OutFile_single_LDmat;
+std::string g_outputFilePrefixSingle_LDmat;
+
 // global variables for analysis
 std::string g_impute_method_LDmat;      // "mean", "minor", or "drop", //drop is not allowed
 double g_dosage_zerod_MAC_cutoff_LDmat;
@@ -62,7 +66,9 @@ void setGlobalVarsInCPP_LDmat(std::string t_impute_method,
                                double t_min_maf_marker,
                                double t_min_mac_marker,
                                double t_min_info_marker,
-			       unsigned int t_max_markers_region)
+			       unsigned int t_max_markers_region, 
+			       
+			       std::string t_outputFile)
 {
   g_impute_method_LDmat = t_impute_method;
   g_dosage_zerod_cutoff_LDmat = t_dosage_zerod_cutoff;
@@ -75,6 +81,9 @@ void setGlobalVarsInCPP_LDmat(std::string t_impute_method,
   g_marker_minMAC_cutoff_LDmat = t_min_mac_marker;
   g_marker_minINFO_cutoff_LDmat = t_min_info_marker;
   g_region_maxMarkers_cutoff_LDmat = t_max_markers_region;
+
+  g_outputFilePrefixSingle_LDmat = t_outputFile + ".marker_info.txt";
+
 }
 
 // [[Rcpp::export]]
@@ -191,18 +200,18 @@ void LDmatRegionInCPP(
     markerVec.at(i) = marker;             // marker IDs
     altFreqVec.at(i) = altFreq;           // allele frequencies of ALT allele, this is not always < 0.5.
     missingRateVec.at(i) = missingRate;
-    altCountsVec.at(i) = altCounts;
-    MACVec.at(i) = MAC;
     MAFVec.at(i) = MAF;
+    MACVec.at(i) = MAC;
+    N_Vec.at(i) = t_n;
     imputationInfoVec.at(i) = imputeInfo;
+    infoVec.at(i) = info;                 // marker information: CHR:POS:REF:ALT
 
    if((missingRate > g_missingRate_cutoff_LDmat) || (MAF > g_maxMAFLimit_LDmat) || (MAF < g_marker_minMAF_cutoff_LDmat) || (MAC < g_marker_minMAC_cutoff_LDmat) || (imputeInfo < g_marker_minINFO_cutoff_LDmat)){
 	       continue;
    }else{
-    infoVec.at(i) = info;                 // marker information: CHR:POS:REF:ALT
-
+    altCountsVec.at(i) = altCounts;
     indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
-    location_m_P1Mat.insert(std::end(location_m_P1Mat), indexNonZeroVec.size(), i1);
+    location_m_P1Mat.insert(std::end(location_m_P1Mat), indexNonZeroVec.size(), i1InChunk);
     location_n_P1Mat.insert(std::end(location_n_P1Mat), std::begin(indexNonZeroVec), std::end(indexNonZeroVec));
     indexNonZeroVec.clear();
     arma::vec GVecnonZero = GVec(indexNonZeroVec_arma);
@@ -220,6 +229,7 @@ void LDmatRegionInCPP(
 	int nonzeroSize = location_m_P1Mat.size();
 	arma::uvec location_m_P1Mat_arma =  arma::conv_to<arma::uvec>::from(location_m_P1Mat);
 	arma::uvec location_n_P1Mat_arma =  arma::conv_to<arma::uvec>::from(location_n_P1Mat);
+
 	arma::umat location_P1Mat_arma (2, location_m_P1Mat_arma.n_elem);
         location_P1Mat_arma.row(0) = location_m_P1Mat_arma.t();
 	location_P1Mat_arma.row(1) = location_n_P1Mat_arma.t();
@@ -341,7 +351,79 @@ void LDmatRegionInCPP(
 
   }
 
-  VarMat.print("VarMat");
+  //VarMat.print("VarMat");
   VarMat.save(t_outputFile + "_"+regionName+".txt", arma::coord_ascii);
   VarMat.clear();
-}	
+
+  writeOutfile_single_LDmat(chrVec,
+		  posVec,
+		  refVec,
+		  altVec,
+		  infoVec,
+		  altCountsVec,
+		  missingRateVec,
+		  N_Vec,
+		  regionName);
+}
+
+
+void writeOutfile_single_LDmat(
+                        std::vector<std::string> & chrVec,
+                        std::vector<std::string> & posVec,
+                        std::vector<std::string> & refVec,
+                        std::vector<std::string> & altVec,
+			std::vector<std::string> & infoVec,
+                        std::vector<double> & altCountsVec,
+                        std::vector<double> & missingRateVec,
+                        std::vector<uint32_t> & N_Vec,
+			std::string regionName
+){
+	
+  int numtest = 0;
+  for(unsigned int k = 0; k < chrVec.size(); k++){
+    if(!std::isnan(altCountsVec.at(k))){
+      OutFile_single_LDmat << chrVec.at(k);
+      OutFile_single_LDmat << "\t";
+      OutFile_single_LDmat << posVec.at(k);
+      OutFile_single_LDmat << "\t";
+      OutFile_single_LDmat << refVec.at(k);
+      OutFile_single_LDmat << "\t";
+      OutFile_single_LDmat << altVec.at(k);
+      OutFile_single_LDmat << "\t";
+      OutFile_single_LDmat << altCountsVec.at(k);
+      OutFile_single_LDmat << "\t";
+      OutFile_single_LDmat << N_Vec.at(k);
+      OutFile_single_LDmat << "\t";
+      OutFile_single_LDmat << missingRateVec.at(k);
+      OutFile_single_LDmat << "\t";
+      OutFile_single_LDmat << regionName;
+      OutFile_single_LDmat << "\t";
+      OutFile_single_LDmat << numtest;
+      OutFile_single_LDmat << "\n";
+      numtest = numtest + 1;
+    }	    
+  }
+}
+
+
+// [[Rcpp::export]]
+bool openOutfile_single_LDmat(bool isappend){
+      bool isopen;
+      if(!isappend){
+        OutFile_single_LDmat.open(g_outputFilePrefixSingle_LDmat.c_str());
+	isopen = OutFile_single_LDmat.is_open();
+	if(isopen){	    
+          OutFile_single_LDmat << "CHR\tPOS\tMajor_Allele\tMinor_Allele\tMAC\tN\tMissing_rate\tSet\tIndex\n";
+         }
+       }else{
+         OutFile_single_LDmat.open(g_outputFilePrefixSingle_LDmat.c_str(), std::ofstream::out | std::ofstream::app);
+         isopen = OutFile_single_LDmat.is_open();
+       }
+       return(isopen);
+}
+
+
+// [[Rcpp::export]]
+void closeOutfile_single_LDmat(){
+  OutFile_single_LDmat.close();
+}  

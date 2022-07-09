@@ -104,7 +104,7 @@ switch(string_to_case.at(t_impute_method)) {
  t_MAC = t_MAC + imputeG * nMissing;
 
 }
-  
+
   
   if(t_dosage_zerod_cutoff > 0){ 
     if(t_MAC <= t_dosage_zerod_MAC_cutoff){

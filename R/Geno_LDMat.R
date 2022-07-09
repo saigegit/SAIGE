@@ -74,7 +74,8 @@ setGenoInput_LDmat = function(bgenFile = "",
                  idstoIncludeFile = "",
                  rangestoIncludeFile = "",
                  chrom = "",
-                 AlleleOrder = NULL)
+                 AlleleOrder = NULL,
+		 sampleInModel = NULL)
 {
 
   dosageFileType = checkGenoInput_LDmat(bgenFile = bgenFile,
@@ -89,6 +90,7 @@ setGenoInput_LDmat = function(bgenFile = "",
                  famFile = famFile)
                  #sampleInModel = sampleInModel)
 
+  #cat("length(sampleInModel) is ", length(sampleInModel), "\n")
   ########## ----------  Plink format ---------- ##########
 
   if(dosageFileType == "plink"){
@@ -127,7 +129,12 @@ setGenoInput_LDmat = function(bgenFile = "",
     markerInfo[,ALT:=NULL]
     setkeyv(markerInfo, c("ID","ID2"))
     #markerInfo$genoIndex_prev = NULL
-    sampleInModel = data.table::fread(famFile, select = c(2), data.table=F)[,1]
+    if(is.null(sampleInModel)){
+      sampleInModel = data.table:::fread(famFile, header = F, colClasses = list(character = 1:4), select=c(2), data.table=F)[,1]	    
+      if(any(duplicated(sampleInModel))){
+        stop("ERROR: dupliated sample IDs are found in fam file.\n")
+       }	      
+    }
     #SampleIDs = updateSampleIDs(SampleIDs, samplesInGeno)
     #markerInfo$ID = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$REF, "/", markerInfo$ALT)
     setPLINKobjInCPP(bimFile, famFile, bedFile, sampleInModel, AlleleOrder)
@@ -136,6 +143,7 @@ setGenoInput_LDmat = function(bgenFile = "",
   ########## ----------  BGEN format ---------- ##########
 
   if(dosageFileType == "bgen"){
+  #cat("length(sampleInModel) b is ", length(sampleInModel), "\n")
 
 
     if(is.null(AlleleOrder)) AlleleOrder = "ref-first"
@@ -195,8 +203,18 @@ setGenoInput_LDmat = function(bgenFile = "",
     }
 
     setkeyv(markerInfo, c("ID","ID2"))
+
+
+   if(is.null(sampleInModel)){
+      sampleInModel = samplesInGeno	   
+      if(any(duplicated(sampleInModel))){
+        stop("ERROR: dupliated sample IDs are found in the bgen sample file.\n")
+       }
+    }
+  #cat("length(sampleInModel) c is ", length(sampleInModel), "\n")
+
     #markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$ALT, "/", markerInfo$REF)
-    setBGENobjInCPP(bgenFile, bgenFileIndex, t_SampleInBgen = samplesInGeno, t_SampleInModel = samplesInGeno, AlleleOrder)
+    setBGENobjInCPP(bgenFile, bgenFileIndex, t_SampleInBgen = samplesInGeno, t_SampleInModel = sampleInModel, AlleleOrder)
   }
 
 
@@ -314,7 +332,11 @@ if(FALSE){
 #  anyQueue = anyInclude | anyExclude
 
   if(dosageFileType == "vcf"){
-    sampleInModel = as.character(NULL)
+
+   if(is.null(sampleInModel)){
+      sampleInModel = as.character(NULL)
+    }
+
     setVCFobjInCPP(vcfFile, vcfFileIndex, vcfField, t_SampleInModel = sampleInModel)
     if(!is.null(IDsToInclude)){
       SNPlist = paste(c("set1", IDsToInclude), collapse = "\t")

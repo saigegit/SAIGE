@@ -157,3 +157,18 @@ Rscript step2_SPAtests.R        \
      --annotation_in_groupTest=lof,missense:lof,missense:lof:synonymous        \
      --maxMAF_in_groupTest=0.0001,0.001,0.01	\
      --condition=1:30:A:C,1:79:A:C
+
+
+Rscript step2_SPAtests.R        \
+      --vcfFile=./input/genotype_100markers.vcf.gz    \
+      --vcfFileIndex=./input/genotype_100markers.vcf.gz.csi     \
+      --vcfField=GT   \
+      --SAIGEOutputFile=./output/genotype_100markers_marker_vcf_binary_ER_test \
+      --chrom=1       \
+      --minMAF=0 \
+      --minMAC=1 \
+      --GMMATmodelFile=./output/example_binary.rda \
+      --varianceRatioFile=./output/example_binary.varianceRatio.txt   \
+      --is_output_moreDetails=TRUE
+
+
