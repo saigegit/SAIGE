@@ -617,6 +617,42 @@ bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN", "Vcf"
   return isBoolRead;
 }
 
+
+// [[Rcpp::export]]
+uint32_t Unified_getSampleSizeinGeno(std::string & t_genoType){
+    uint32_t N0;
+    if(t_genoType == "plink"){
+	N0 = ptr_gPLINKobj->getN0();
+    }
+    if(t_genoType == "bgen"){
+	N0 = ptr_gBGENobj->getN0();
+    }	    
+
+    if(t_genoType == "vcf"){
+       N0 = ptr_gVCFobj->getN0();
+    }
+    return(N0);
+}	
+
+// [[Rcpp::export]]
+uint32_t Unified_getSampleSizeinAnalysis(std::string & t_genoType){
+    uint32_t N;
+    if(t_genoType == "plink"){
+        N = ptr_gPLINKobj->getN();
+    }
+    if(t_genoType == "bgen"){
+        N = ptr_gBGENobj->getN();
+    }
+
+    if(t_genoType == "vcf"){
+       N = ptr_gVCFobj->getN();
+    }
+    return(N);
+}
+
+
+
+
 // a unified function to get marker-level p-value
 void Unified_getMarkerPval(
                            arma::vec & t_GVec,

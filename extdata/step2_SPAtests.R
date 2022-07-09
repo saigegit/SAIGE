@@ -122,7 +122,9 @@ mean, p-value based on traditional score test is returned. Default value is 2.")
   make_option("--pCutoffforFirth", type="numeric", default=0.01,
     help="p-value cutoff to use approx Firth to estiamte the effect sizes. Only for binary traits. The effect sizes of markers with p-value <= pCutoffforFirth will be estimated using approx Firth [default=0.01]"),
   make_option("--is_fastTest", type="logical", default=FALSE,
-    help="Whether to use the fast mode for tests")
+    help="Whether to use the fast mode for tests"),
+  make_option("--max_MAC_for_ER", type="numeric", default=4,
+    help="p-values of genetic variants with MAC <= max_MAC_for_ER will be calculated via efficient resampling. [default=4]")	      
 )
 
 
@@ -176,6 +178,9 @@ if (BLASctl_installed){
 
 print("opt$r.corr")
 print(opt$r.corr)
+
+if(packageVersion("SAIGE")<"1.1.3"){
+
 
 SPAGMMATtest(vcfFile=opt$vcfFile,
              vcfFileIndex=opt$vcfFileIndex,
@@ -232,7 +237,66 @@ SPAGMMATtest(vcfFile=opt$vcfFile,
 	     is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
 	     is_fastTest = opt$is_fastTest
 )
+}else{
+SPAGMMATtest(vcfFile=opt$vcfFile,
+             vcfFileIndex=opt$vcfFileIndex,
+             vcfField=opt$vcfField,
+             savFile=opt$savFile,
+             savFileIndex=opt$savFileIndex,
+             bgenFile=opt$bgenFile,
+             bgenFileIndex=opt$bgenFileIndex,
+             sampleFile=opt$sampleFile,
+             bedFile=opt$bedFile,
+             bimFile=opt$bimFile,
+             famFile=opt$famFile,
+             AlleleOrder=opt$AlleleOrder,
+             idstoIncludeFile = opt$idstoIncludeFile,
+             rangestoIncludeFile = opt$rangestoIncludeFile,
+             chrom=opt$chrom,
+             is_imputed_data=opt$is_imputed_data,
+             min_MAF = opt$minMAF,
+             min_MAC = opt$minMAC,
+             min_Info = opt$minInfo,
+             max_missing = opt$maxMissing,
+             impute_method = opt$impute_method,
+             LOCO=opt$LOCO,
+             GMMATmodelFile=opt$GMMATmodelFile,
+             varianceRatioFile=opt$varianceRatioFile,
+             SAIGEOutputFile=opt$SAIGEOutputFile,
+             markers_per_chunk=opt$markers_per_chunk,
+             groups_per_chunk=opt$groups_per_chunk,
+             markers_per_chunk_in_groupTest=opt$markers_per_chunk_in_groupTest,
+             is_output_moreDetails =opt$is_output_moreDetails,
+             is_overwrite_output = opt$is_overwrite_output,
+             maxMAF_in_groupTest = maxMAF_in_groupTest,
+             maxMAC_in_groupTest = maxMAC_in_groupTest,
+             minGroupMAC_in_BurdenTest = opt$minGroupMAC_in_BurdenTest,
+             annotation_in_groupTest = annotation_in_groupTest,
+             groupFile = opt$groupFile,
+             sparseGRMFile=opt$sparseGRMFile,
+             sparseGRMSampleIDFile=opt$sparseGRMSampleIDFile,
+             relatednessCutoff=opt$relatednessCutoff,
+             MACCutoff_to_CollapseUltraRare = opt$MACCutoff_to_CollapseUltraRare,
+             cateVarRatioMinMACVecExclude = cateVarRatioMinMACVecExclude,
+             cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
+             weights.beta = weights.beta,
+             r.corr = opt$r.corr,
+             condition = opt$condition,
+             weights_for_condition = weights_for_condition,
+             SPAcutoff = opt$SPAcutoff,
+             dosage_zerod_cutoff = opt$dosage_zerod_cutoff,
+             dosage_zerod_MAC_cutoff = opt$dosage_zerod_MAC_cutoff,
+             is_Firth_beta = opt$is_Firth_beta,
+             pCutoffforFirth = opt$pCutoffforFirth,
+             is_single_in_groupTest = opt$is_single_in_groupTest,
+             is_no_weight_in_groupTest = opt$is_no_weight_in_groupTest,
+             is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
+             is_fastTest = opt$is_fastTest,
+	     max_MAC_use_ER = opt$max_MAC_for_ER
+)
 
+
+}	
 if(BLASctl_installed){
   # Restore originally configured BLAS thread count
   blas_set_num_threads(original_num_threads)

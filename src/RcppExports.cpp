@@ -24,8 +24,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // setGlobalVarsInCPP_LDmat
-void setGlobalVarsInCPP_LDmat(std::string t_impute_method, double t_dosage_zerod_cutoff, double t_dosage_zerod_MAC_cutoff, double t_missing_cutoff, double t_maxMAFLimit, double t_min_maf_marker, double t_min_mac_marker, double t_min_info_marker, unsigned int t_max_markers_region);
-RcppExport SEXP _SAIGE_setGlobalVarsInCPP_LDmat(SEXP t_impute_methodSEXP, SEXP t_dosage_zerod_cutoffSEXP, SEXP t_dosage_zerod_MAC_cutoffSEXP, SEXP t_missing_cutoffSEXP, SEXP t_maxMAFLimitSEXP, SEXP t_min_maf_markerSEXP, SEXP t_min_mac_markerSEXP, SEXP t_min_info_markerSEXP, SEXP t_max_markers_regionSEXP) {
+void setGlobalVarsInCPP_LDmat(std::string t_impute_method, double t_dosage_zerod_cutoff, double t_dosage_zerod_MAC_cutoff, double t_missing_cutoff, double t_maxMAFLimit, double t_min_maf_marker, double t_min_mac_marker, double t_min_info_marker, unsigned int t_max_markers_region, std::string t_outputFile);
+RcppExport SEXP _SAIGE_setGlobalVarsInCPP_LDmat(SEXP t_impute_methodSEXP, SEXP t_dosage_zerod_cutoffSEXP, SEXP t_dosage_zerod_MAC_cutoffSEXP, SEXP t_missing_cutoffSEXP, SEXP t_maxMAFLimitSEXP, SEXP t_min_maf_markerSEXP, SEXP t_min_mac_markerSEXP, SEXP t_min_info_markerSEXP, SEXP t_max_markers_regionSEXP, SEXP t_outputFileSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type t_impute_method(t_impute_methodSEXP);
@@ -37,7 +37,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type t_min_mac_marker(t_min_mac_markerSEXP);
     Rcpp::traits::input_parameter< double >::type t_min_info_marker(t_min_info_markerSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type t_max_markers_region(t_max_markers_regionSEXP);
-    setGlobalVarsInCPP_LDmat(t_impute_method, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_missing_cutoff, t_maxMAFLimit, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_max_markers_region);
+    Rcpp::traits::input_parameter< std::string >::type t_outputFile(t_outputFileSEXP);
+    setGlobalVarsInCPP_LDmat(t_impute_method, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_missing_cutoff, t_maxMAFLimit, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_max_markers_region, t_outputFile);
     return R_NilValue;
 END_RCPP
 }
@@ -56,6 +57,26 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::vector<std::string>& >::type annoStringVec(annoStringVecSEXP);
     Rcpp::traits::input_parameter< std::string >::type regionName(regionNameSEXP);
     LDmatRegionInCPP(t_genoType, t_genoIndex_prev, t_genoIndex, annoIndicatorMat, t_outputFile, t_n, t_isImputation, annoStringVec, regionName);
+    return R_NilValue;
+END_RCPP
+}
+// openOutfile_single_LDmat
+bool openOutfile_single_LDmat(bool isappend);
+RcppExport SEXP _SAIGE_openOutfile_single_LDmat(SEXP isappendSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< bool >::type isappend(isappendSEXP);
+    rcpp_result_gen = Rcpp::wrap(openOutfile_single_LDmat(isappend));
+    return rcpp_result_gen;
+END_RCPP
+}
+// closeOutfile_single_LDmat
+void closeOutfile_single_LDmat();
+RcppExport SEXP _SAIGE_closeOutfile_single_LDmat() {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    closeOutfile_single_LDmat();
     return R_NilValue;
 END_RCPP
 }
@@ -116,6 +137,28 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool& >::type t_isFirth(t_isFirthSEXP);
     mainMarkerInCPP(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth);
     return R_NilValue;
+END_RCPP
+}
+// Unified_getSampleSizeinGeno
+uint32_t Unified_getSampleSizeinGeno(std::string& t_genoType);
+RcppExport SEXP _SAIGE_Unified_getSampleSizeinGeno(SEXP t_genoTypeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string& >::type t_genoType(t_genoTypeSEXP);
+    rcpp_result_gen = Rcpp::wrap(Unified_getSampleSizeinGeno(t_genoType));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Unified_getSampleSizeinAnalysis
+uint32_t Unified_getSampleSizeinAnalysis(std::string& t_genoType);
+RcppExport SEXP _SAIGE_Unified_getSampleSizeinAnalysis(SEXP t_genoTypeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string& >::type t_genoType(t_genoTypeSEXP);
+    rcpp_result_gen = Rcpp::wrap(Unified_getSampleSizeinAnalysis(t_genoType));
+    return rcpp_result_gen;
 END_RCPP
 }
 // setPLINKobjInCPP
@@ -2114,12 +2157,16 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_CCT_cpp", (DL_FUNC) &_SAIGE_CCT_cpp, 1},
-    {"_SAIGE_setGlobalVarsInCPP_LDmat", (DL_FUNC) &_SAIGE_setGlobalVarsInCPP_LDmat, 9},
+    {"_SAIGE_setGlobalVarsInCPP_LDmat", (DL_FUNC) &_SAIGE_setGlobalVarsInCPP_LDmat, 10},
     {"_SAIGE_LDmatRegionInCPP", (DL_FUNC) &_SAIGE_LDmatRegionInCPP, 9},
+    {"_SAIGE_openOutfile_single_LDmat", (DL_FUNC) &_SAIGE_openOutfile_single_LDmat, 1},
+    {"_SAIGE_closeOutfile_single_LDmat", (DL_FUNC) &_SAIGE_closeOutfile_single_LDmat, 0},
     {"_SAIGE_setAssocTest_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP, 10},
     {"_SAIGE_setMarker_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setMarker_GlobalVarsInCPP, 2},
     {"_SAIGE_setRegion_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setRegion_GlobalVarsInCPP, 4},
     {"_SAIGE_mainMarkerInCPP", (DL_FUNC) &_SAIGE_mainMarkerInCPP, 7},
+    {"_SAIGE_Unified_getSampleSizeinGeno", (DL_FUNC) &_SAIGE_Unified_getSampleSizeinGeno, 1},
+    {"_SAIGE_Unified_getSampleSizeinAnalysis", (DL_FUNC) &_SAIGE_Unified_getSampleSizeinAnalysis, 1},
     {"_SAIGE_setPLINKobjInCPP", (DL_FUNC) &_SAIGE_setPLINKobjInCPP, 5},
     {"_SAIGE_setBGENobjInCPP", (DL_FUNC) &_SAIGE_setBGENobjInCPP, 5},
     {"_SAIGE_setVCFobjInCPP", (DL_FUNC) &_SAIGE_setVCFobjInCPP, 4},

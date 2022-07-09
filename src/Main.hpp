@@ -356,5 +356,7 @@ int writeOutfile_singleInGroup(bool t_isMoreOutput,
                         std::vector<uint32_t> & N_Vec,
                         std::ofstream & t_OutFile_singleInGroup);
 
+uint32_t Unified_getSampleSizeinGeno(std::string & t_genoType);
+uint32_t Unified_getSampleSizeinAnalysis(std::string & t_genoType);
 
 #endif

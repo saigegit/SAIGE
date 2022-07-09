@@ -5,12 +5,20 @@ CCT_cpp <- function(pval) {
     .Call('_SAIGE_CCT_cpp', PACKAGE = 'SAIGE', pval)
 }
 
-setGlobalVarsInCPP_LDmat <- function(t_impute_method, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_missing_cutoff, t_maxMAFLimit, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_max_markers_region) {
-    invisible(.Call('_SAIGE_setGlobalVarsInCPP_LDmat', PACKAGE = 'SAIGE', t_impute_method, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_missing_cutoff, t_maxMAFLimit, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_max_markers_region))
+setGlobalVarsInCPP_LDmat <- function(t_impute_method, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_missing_cutoff, t_maxMAFLimit, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_max_markers_region, t_outputFile) {
+    invisible(.Call('_SAIGE_setGlobalVarsInCPP_LDmat', PACKAGE = 'SAIGE', t_impute_method, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_missing_cutoff, t_maxMAFLimit, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_max_markers_region, t_outputFile))
 }
 
 LDmatRegionInCPP <- function(t_genoType, t_genoIndex_prev, t_genoIndex, annoIndicatorMat, t_outputFile, t_n, t_isImputation, annoStringVec, regionName) {
     invisible(.Call('_SAIGE_LDmatRegionInCPP', PACKAGE = 'SAIGE', t_genoType, t_genoIndex_prev, t_genoIndex, annoIndicatorMat, t_outputFile, t_n, t_isImputation, annoStringVec, regionName))
+}
+
+openOutfile_single_LDmat <- function(isappend) {
+    .Call('_SAIGE_openOutfile_single_LDmat', PACKAGE = 'SAIGE', isappend)
+}
+
+closeOutfile_single_LDmat <- function() {
+    invisible(.Call('_SAIGE_closeOutfile_single_LDmat', PACKAGE = 'SAIGE'))
 }
 
 setAssocTest_GlobalVarsInCPP <- function(t_impute_method, t_missing_cutoff, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_weights_beta, t_outputFilePrefix, t_MACCutoffforER) {
@@ -27,6 +35,14 @@ setRegion_GlobalVarsInCPP <- function(t_max_maf_region, t_max_markers_region, t_
 
 mainMarkerInCPP <- function(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth) {
     invisible(.Call('_SAIGE_mainMarkerInCPP', PACKAGE = 'SAIGE', t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth))
+}
+
+Unified_getSampleSizeinGeno <- function(t_genoType) {
+    .Call('_SAIGE_Unified_getSampleSizeinGeno', PACKAGE = 'SAIGE', t_genoType)
+}
+
+Unified_getSampleSizeinAnalysis <- function(t_genoType) {
+    .Call('_SAIGE_Unified_getSampleSizeinAnalysis', PACKAGE = 'SAIGE', t_genoType)
 }
 
 setPLINKobjInCPP <- function(t_bimFile, t_famFile, t_bedFile, t_SampleInModel, t_AlleleOrder) {

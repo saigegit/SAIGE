@@ -35,5 +35,19 @@ void LDmatRegionInCPP(
                            std::string regionName);
 
 
+void writeOutfile_single_LDmat(
+                        std::vector<std::string> & chrVec,
+                        std::vector<std::string> & posVec,
+                        std::vector<std::string> & refVec,
+                        std::vector<std::string> & altVec,
+                        std::vector<std::string> & infoVec,
+                        std::vector<double> & altCountsVec,
+                        std::vector<double> & missingRateVec,
+                        std::vector<uint32_t> & N_Vec,
+                        std::string regionName);
 
+
+bool openOutfile_single_LDmat(bool isappend);
+
+void closeOutfile_single_LDmat();
 #endif

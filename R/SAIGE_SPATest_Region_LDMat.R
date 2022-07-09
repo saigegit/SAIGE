@@ -25,10 +25,10 @@ generate_LDMat_forMataRegion = function(bgenFile = "",
                  groupFile="",
                  dosage_zerod_cutoff = 0.2,
                  dosage_zerod_MAC_cutoff = 10,
-                 annotation_in_groupTest =c("lof","missense;lof","missense;lof;synonymous"),  #new
-                 maxMAF_in_groupTest = c(0.01),
-                 maxMAC_in_groupTest = c(0),
-                 is_overwrite_output = TRUE)
+                 annotation_in_groupTest ="missense;lof;synonymous",  #new
+                 maxMAF_in_groupTest = 0.5,
+                 is_overwrite_output = TRUE, 
+		 sampleFile_include_inLDMat = "")
 {
     OutputFile = SAIGEOutputFile
     OutputFileIndex=NULL
@@ -42,10 +42,22 @@ generate_LDMat_forMataRegion = function(bgenFile = "",
                         dosage_zerod_MAC_cutoff,
                         max_missing,
 			maxMAFLimit,
-                            min_MAF,
-                            min_MAC,
-                            min_Info,
-			markers_per_chunk_in_groupTest)
+                        min_MAF,
+                        min_MAC,
+                        min_Info,
+			markers_per_chunk_in_groupTest,
+			SAIGEOutputFile)
+
+   if(sampleFile_include_inLDMat != ""){
+     Check_File_Exist(sampleFile_include_inLDMat, "sampleFile_include_inLDMat")
+     sampleInModel = data.table:::fread(sampleFile_include_inLDMat, header = F, colClasses = list(character = 1), select=c(1), data.table=F)[,1]
+     cat(length(sampleInModel), " samples were found in sampleFile_include_inLDMat: ", sampleFile_include_inLDMat, "\n")
+
+   }else{
+     sampleInModel = NULL
+     cat("sampleFile_include_inLDMat is not specified, so all samples in the genotype/dosage file are included for LD matrices\n")
+   }	   
+
 
    objGeno = setGenoInput_LDmat(bgenFile = bgenFile,
                  bgenFileIndex = bgenFileIndex,
@@ -61,18 +73,22 @@ generate_LDMat_forMataRegion = function(bgenFile = "",
                  idstoIncludeFile = idstoIncludeFile,
                  rangestoIncludeFile = rangestoIncludeFile,
                  chrom = chrom,
-                 AlleleOrder = AlleleOrder)
+                 AlleleOrder = AlleleOrder,
+		 sampleInModel = sampleInModel)
 
 	SAIGE.Region.LDmat(OutputFile,
 			   groupFile,
 			   annotation_in_groupTest,
-			markers_per_chunk_in_groupTest,
-			objGeno$genoType,
-                     objGeno$markerInfo,
-		     is_imputed_data,
-		     groups_per_chunk,
-		     chrom,
-		     is_overwrite_output)
+			   markers_per_chunk_in_groupTest,
+			   objGeno$genoType,
+                           objGeno$markerInfo,
+		           is_imputed_data,
+		           groups_per_chunk,
+		           chrom,
+		           is_overwrite_output)
+
+        closeOutfile_single_LDmat();
+
 }
 
 
@@ -97,7 +113,7 @@ SAIGE.Region.LDmat = function(
   if(is.null(OutputFileIndex)){
     OutputFileIndex = paste0(OutputFile, ".index")
   }
-  outList = checkOutputFile(OutputFile, OutputFileIndex, "Region", 1, isOverWriteOutput) # Check 'Util.R'
+  outList = checkOutputFile(paste0(OutputFile,".marker_info.txt"), OutputFileIndex, "Region", 1, isOverWriteOutput) # Check 'Util.R'
 
   indexChunk = outList$indexChunk
   Start = outList$Start
@@ -118,6 +134,12 @@ SAIGE.Region.LDmat = function(
   if(!Start){
     isappend=TRUE
   }
+
+ cat("isappend ", isappend, "\n")
+ isOpenOutFile = openOutfile_single_LDmat(isappend)
+ if(!isOpenOutFile){
+   stop(OutputFile, ".marker_info.txt can't be opened to output marker information.\n") 
+ } 	 
 
   #n = length(mu) #sample size
   ##check group file
@@ -151,8 +173,6 @@ SAIGE.Region.LDmat = function(
   mth = 0
 
   numberRegionsInChunk = 0
-  cat("indexChunk ", indexChunk, "\n")
-  cat("nRegions ", nRegions, "\n")
   pval.Region.all = NULL
   OutList.all = NULL
   Output_MarkerList.all = NULL
@@ -179,8 +199,6 @@ SAIGE.Region.LDmat = function(
     }
 
    mth = mth + 1
-
-print("RegionList")
 
 
 
@@ -210,8 +228,6 @@ print("RegionList")
          isVcfEnd =  check_Vcf_end()
 
 
-	print("HEREHEHEREHREH")
-
 
         if(!isVcfEnd){
                 region$genoIndex = rep("0", length(SNP))
@@ -228,7 +244,7 @@ print("RegionList")
       print(paste0("Analyzing Region ", regionName, " (",i-1,"/",nRegions,")."))
 
       #LDmatInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolistsub, regionName, is_fastTest, is_output_moreDetails)
-     n=10000
+      n=Unified_getSampleSizeinAnalysis(genoType)
       LDmatRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, OutputFile, n, isImputation, annolistsub, regionName)
 
     }else{#if(!is.null(region$SNP) & length(annolistsub) > 0){
@@ -252,7 +268,7 @@ print("RegionList")
   message1 = "This is the output index file for SAIGE package to record the end point in case users want to restart the analysis. Please do not modify this file."
   message2 = paste("This is to generate LD matrices for rare-variant meta-analyses.")
   message3 = paste("nEachChunk =", nEachChunk)
-  message4 = paste("Have completed the analysis of chunk", indexChunk)
+  message4 = paste("Have completed the analysis of chunk", indexChunk-1)
   message5 = "Have completed the analyses of all chunks."
   cat("write to output\n")
   if(Start){
@@ -268,26 +284,17 @@ print("RegionList")
 }  
   }
 gc()
-
+close(gf)
 }
 
 
 
 SAIGE.getRegionList_forLDmat = function(marker_group_line,
-                        nline_per_gene,
+                         nline_per_gene,
                          annoVec, #c("lof","lof;missense"
                          markerInfo,
                          chrom="")
 {
-
-  print("marker_group_line")    
-  print(marker_group_line)    
-  print("annoVec")
-  print(annoVec)
-  print("markerInfo")
-  print(markerInfo)
-
-
 
   chrom_nochr = gsub("CHR", "", chrom, ignore.case = T)
   # read group file
@@ -385,12 +392,13 @@ if(nrow(RegionData) != 0){
   RegionAnnoHeaderList = list()
   if(length(annoVec) == 0){
         #stop("At least one annotation is required\n")
-        cat("Annotation list is not specified and all markers will be included\n")
+        cat("annotation_in_groupTest is ALL so all markers will be included\n")
         annoVec = c("ALL")
         RegionAnnoHeaderList[[1]] = "ALL" 
   }else{  
   	for(q in 1:length(annoVec)){
         	RegionAnnoHeaderList[[q]] = strsplit(annoVec[q],";")[[1]]
+		cat("Markers with annotations in ", annoVec[q], " will be included\n")
   	}
   }
 
@@ -444,11 +452,6 @@ if(nrow(RegionData) != 0){
             }
           }
 	}
-
-  print("annoVec")
-  print(annoVec)
-  print("annoVecNew")
-  print(annoVecNew)
 
   RegionAnnoHeaderListNew = list()
   if(length(annoVecNew) == 0){
