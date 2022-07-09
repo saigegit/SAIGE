@@ -121,20 +121,9 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
      if(modglmm$traitType == "binary"){
              modglmm$mu2 = (modglmm$mu) *(1-modglmm$mu)
 	     modglmm$obj_cc = SKAT::SKAT_Null_Model(modglmm$y ~ modglmm$X-1, out_type="D", Adjustment = FALSE)
-
-	     #modglmm$obj_cc = SKAT::SKATExactBin_CheckObj(obj_cc0)	
-
-
 	     modglmm$obj_cc$mu = modglmm$mu
 	     modglmm$obj_cc$res = modglmm$res
 	     modglmm$obj_cc$pi_1 = modglmm$mu2
-	     a = modglmm$obj_cc
-	     save(a, file="/net/hunt/zhowei/project/imbalancedCaseCtrlMixedModel/Rpackage_SPAGMMAT/SAIGE_newgit/SAIGE_1.1.0/SAIGE/extdata/obj_cc.rda")
-	     #if(!is.null(modglmm$obj_cc$res.out)){
-             #   modglmm$obj_cc$res.out<-cbind(modglmm$obj_cc$res, modglmm$obj_cc$res.out)
-             #} else {
-             #   modglmm$obj_cc$res.out<-modglmm$obj_cc$res
-             #}	     
            }else if(modglmm$traitType == "quantitative"){
              modglmm$mu2 = (1/tau[1])*rep(1,N)
            }
