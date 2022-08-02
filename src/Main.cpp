@@ -2117,7 +2117,8 @@ void assign_conditionMarkers_factors(
   }
   arma::mat VarMat = P1Mat * P2Mat;
 
-  VarInvMat = VarMat.i();
+  VarInvMat =  arma::pinv(VarMat);
+  //VarInvMat = VarMat.i();
   double qsum = arma::accu(gyVec);
   arma::vec gsumtildeVec;
 
