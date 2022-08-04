@@ -431,6 +431,13 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 
   double gmuNB;
 
+
+if(StdStat > m_SPA_Cutoff && m_traitType != "quantitative" && t_isER){
+	t_isER = true;
+}else{	
+	t_isER = false;
+}
+
 if(!t_isER){
 
 
@@ -559,6 +566,7 @@ if(!t_isER){
 	
     boost::math::normal ns;
     double t_qval;
+
     try{
       t_qval = boost::math::quantile(ns, t_pval/2);
       t_qval = fabs(t_qval);
