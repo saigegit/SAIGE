@@ -151,8 +151,7 @@ SPAGMMATtest = function(bgenFile = "",
     #Check_OutputFile_Create(SAIGEOutputFile)
     OutputFile = SAIGEOutputFile
     OutputFileIndex=NULL
-    if(is.null(OutputFileIndex))
-    OutputFileIndex = paste0(OutputFile, ".index") 
+    if(is.null(OutputFileIndex)){OutputFileIndex = paste0(OutputFile, ".index")} 
 
     ##check the variance ratio file and extract the variance ratio vector
     setAssocTest_GlobalVarsInCPP(impute_method,

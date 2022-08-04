@@ -246,9 +246,11 @@ glmmkin.ai_PCG_Rcpp_Binary = function(bedFile, bimFile, famFile, Xorig, isCovari
   #LOCO: estimate fixed effect coefficients, random effects, and residuals for each chromoosme  
 
   glmmResult$LOCO = LOCO
-       t_end_null = proc.time()
-      cat("t_end_null - t_begin, fitting the NULL model without LOCO took\n")
-      print(t_end_null - t_begin)
+  t_end_null = proc.time()
+  cat("t_end_null - t_begin, fitting the NULL model without LOCO took\n")
+  print(t_end_null - t_begin)
+
+ 
   if(!isLowMemLOCO & LOCO){
     set_Diagof_StdGeno_LOCO()	  
     glmmResult$LOCOResult = list()
@@ -272,19 +274,21 @@ glmmkin.ai_PCG_Rcpp_Binary = function(bedFile, bimFile, famFile, Xorig, isCovari
         mu = re.coef_LOCO$mu
 	mu2 = mu * (1-mu)
 	res = y - mu
-        if(!is.null(out.transform) & is.null(fit0$offset)){
+        
+	if(!is.null(out.transform) & is.null(fit0$offset)){
           coef.alpha<-Covariate_Transform_Back(alpha, out.transform$Param.transform)
 	}else{
 	  coef.alpha = alpha
 	}
+
 	if(!isCovariateOffset){
-  	obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
- 	 }else{
-  	obj.noK = ScoreTest_NULL_Model(mu, mu2, y, Xorig)
+  	  obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
+ 	}else{
+  	  obj.noK = ScoreTest_NULL_Model(mu, mu2, y, Xorig)
   	}
 	#obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
         #obj.noK = ScoreTest_NULL_Model_binary(mu, y, X)
-        glmmResult$LOCOResult[[j]] = list(isLOCO = TRUE, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, obj.noK = obj.noK)
+        glmmResult$LOCOResult[[j]] = list(isLOCO = TRUE, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, obj.noK = obj.noK, alpha0 = alpha)
         #glmmResult$LOCOResult[[j]] = list(isLOCO = TRUE, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov)
       }else{
         glmmResult$LOCOResult[[j]] = list(isLOCO = FALSE)
@@ -521,7 +525,7 @@ glmmkin.ai_PCG_Rcpp_Quantitative = function(bedFile, bimFile, famFile, Xorig, is
 	#if(!is.null(out.transform)){
            coef.alpha<-Covariate_Transform_Back(alpha, out.transform$Param.transform)
         }else{
-          coef.alpha = alpha
+           coef.alpha = alpha
         }
 	if(!isCovariateOffset){
 	  obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
@@ -529,7 +533,7 @@ glmmkin.ai_PCG_Rcpp_Quantitative = function(bedFile, bimFile, famFile, Xorig, is
 	  obj.noK = ScoreTest_NULL_Model(mu, mu2, y, Xorig)		
 	}
         #coef.alpha<-Covariate_Transform_Back(alpha, out.transform$Param.transform)
-        lmmResult$LOCOResult[[j]] = list(isLOCO = TRUE, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, obj.noK = obj.noK)
+        lmmResult$LOCOResult[[j]] = list(isLOCO = TRUE, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, obj.noK = obj.noK, alpha0 = alpha)
       }else{
         lmmResult$LOCOResult[[j]] = list(isLOCO = FALSE)
       }
@@ -1042,7 +1046,7 @@ fitNULLGLMM = function(plinkFile = "",
 #    }	    
 
     if (isCovariateOffset) {
-    	covoffset = mmat[,-1, drop=F] %*%  modwitcov$coefficients[-1]  
+    	covoffset = mmat[,-1, drop=F] %*%  modwitcov$coefficients[-1] 
         print("isCovariateOffset=TRUE, so fixed effects coefficnets won't be estimated.")
 	formula.new.withCov = formula.new
         formula_nocov = paste0(phenoCol, "~ 1")
@@ -1108,7 +1112,7 @@ fitNULLGLMM = function(plinkFile = "",
             fit0 = glm(formula.new, data = data.new, family = binomial)
 	    Xorig = NULL
 	    
-	    }else{
+	 }else{
 	    fit0orig = glm(formula.new.withCov, data = data.new, family = binomial)
 	    Xorig = model.matrix(fit0orig)
 	    rm(fit0orig)
@@ -1149,13 +1153,14 @@ fitNULLGLMM = function(plinkFile = "",
 	    }else{
 	    	if(hasCovariate){
 	    	    	#modglmm$offset = covoffset
-		        data.new = data.new[,-c(1,2), drop=F]
-			data.new = as.matrix(data.new[,-ncol(data.new), drop=F])
-	    		modglmm$offset = data.new%*%(as.vector(modglmm$coefficients[-1]))
+		        #data.new = data.new[,-c(1,2), drop=F]
+			#data.new = as.matrix(data.new[,-ncol(data.new), drop=F])
+			data.new.X = model.matrix(fit0)[,-1,drop=F]
+	    		modglmm$offset = data.new.X%*%(as.vector(modglmm$coefficients[-1]))
 			if(LOCO & !isLowMemLOCO){
 				for(j in 1:22){	
 					if(modglmm$LOCOResult[[j]]$isLOCO){
-						modglmm$LOCOResult[[j]]$offset = data.new %*%(as.vector(modglmm$LOCOResult[[j]]$coefficients[-1]))
+						modglmm$LOCOResult[[j]]$offset = data.new.X %*%(as.vector(modglmm$LOCOResult[[j]]$alpha0[-1]))
 					}		       
 				}
 			}
@@ -1185,8 +1190,9 @@ fitNULLGLMM = function(plinkFile = "",
             tau = modglmm$theta
       
 	    alpha0 = modglmm$coefficients
+
   	    if(!is.null(out.transform) & is.null(fit0$offset)){
-		coef.alpha<-Covariate_Transform_Back(alpha, out.transform$Param.transform)
+		coef.alpha<-Covariate_Transform_Back(alpha0, out.transform$Param.transform)
 	    	modglmm$coefficients = coef.alpha
   	    }
 
@@ -1210,9 +1216,14 @@ fitNULLGLMM = function(plinkFile = "",
 	        modglmm$fitted.values = NULL
 		modglmm$residuals = NULL
 		modglmm$obj.noK = NULL
-		offset0 = modglmm$offset
-		modglmm$offset = NULL	
 		y = fit0$y
+		offset0 = fit0$offset
+  		if(is.null(offset0)){
+    			offset0 = rep(0, length(y))
+  		}
+
+
+		modglmm$offset = NULL	
 		gc()
                 #save(modglmm, file = modelOut)
                 set_Diagof_StdGeno_LOCO()
@@ -1223,7 +1234,6 @@ fitNULLGLMM = function(plinkFile = "",
                         if(!is.na(startIndex) && !is.na(endIndex)){
                         	cat("leave chromosome ", j, " out\n")
                                 setStartEndIndex(startIndex, endIndex, j-1)
-
 				re.coef_LOCO = Get_Coef_LOCO(y, X=model.matrix(fit0), tau, family = fit0$family, alpha = alpha0, eta = eta0,  offset =  offset0, verbose=TRUE, maxiterPCG=maxiterPCG, tolPCG = tolPCG, maxiter=maxiter)
       				cov = re.coef_LOCO$cov
         			alpha = re.coef_LOCO$alpha
@@ -1238,15 +1248,19 @@ fitNULLGLMM = function(plinkFile = "",
                                 }else{
                                         coef.alpha = alpha
                                 }
+
                                 if(!isCovariateOffset){
-                                        obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
+                                        obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X=model.matrix(fit0))
                                 }else{
                                         obj.noK = ScoreTest_NULL_Model(mu, mu2, y, Xorig)
                                 }
 
                                 modglmm$LOCOResult[[j]] = list(isLOCO = TRUE, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, obj.noK = obj.noK)
+
+
 				if(!isCovariateOffset & hasCovariate){
-					 modglmm$LOCOResult[[j]]$offset = data.new %*%(as.vector(modglmm$LOCOResult[[j]]$coefficients[-1]))
+					 data.new.X = model.matrix(fit0)[,-1,drop=F]
+					 modglmm$LOCOResult[[j]]$offset = data.new.X %*%(as.vector(alpha[-1]))
 				}
                                 modelOutbychr = paste(c(outputPrefix,"_chr",j,".rda"), collapse="")
 				if(j!=22){
@@ -1375,13 +1389,14 @@ fitNULLGLMM = function(plinkFile = "",
             }else{
                 if(hasCovariate){
                         #modglmm$offset = covoffset
-                        data.new = data.new[,-c(1,2), drop=F]
-                        data.new = as.matrix(data.new[,-ncol(data.new), drop=F])
-                        modglmm$offset = data.new%*%(as.vector(modglmm$coefficients[-1]))
+                        #data.new = data.new[,-c(1,2), drop=F]
+                        #data.new = as.matrix(data.new[,-ncol(data.new), drop=F])
+			data.new.X = model.matrix(fit0)[,-1,drop=F]
+                        modglmm$offset = data.new.X%*%(as.vector(modglmm$coefficients[-1]))
                         if(LOCO & !isLowMemLOCO){
                                for(j in 1:22){
                                        if(modglmm$LOCOResult[[j]]$isLOCO){
-                                               modglmm$LOCOResult[[j]]$offset = data.new %*%(as.vector(modglmm$LOCOResult[[j]]$coefficients[-1]))
+                                               modglmm$LOCOResult[[j]]$offset = data.new.X %*%(as.vector(modglmm$LOCOResult[[j]]$alpha0[-1]))
                                        }
                                }
                         }
@@ -1414,7 +1429,7 @@ fitNULLGLMM = function(plinkFile = "",
             tau = modglmm$theta
             alpha0 = modglmm$coefficients
             if(!is.null(out.transform) & is.null(fit0$offset)){
-                coef.alpha<-Covariate_Transform_Back(alpha, out.transform$Param.transform)
+                coef.alpha<-Covariate_Transform_Back(alpha0, out.transform$Param.transform)
                 modglmm$coefficients = coef.alpha
             }
 
@@ -1467,14 +1482,15 @@ fitNULLGLMM = function(plinkFile = "",
         				coef.alpha = alpha
         			}
         			if(!isCovariateOffset){
-          				obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X)
+          				obj.noK = ScoreTest_NULL_Model(mu, mu2, y, X=model.matrix(fit0))
         			}else{
           				obj.noK = ScoreTest_NULL_Model(mu, mu2, y, Xorig)
         			}
         			modglmm$LOCOResult[[j]] = list(isLOCO = TRUE, coefficients=coef.alpha, linear.predictors=eta, fitted.values=mu, Y=Y, residuals=res, cov=cov, obj.noK = obj.noK)
 
 				if(!isCovariateOffset & hasCovariate){
-					modglmm$LOCOResult[[j]]$offset = data.new %*%(as.vector(modglmm$LOCOResult[[j]]$coefficients[-1]))
+					data.new.X = model.matrix(fit0)[,-1,drop=F]
+					modglmm$LOCOResult[[j]]$offset = data.new.X %*%(as.vector(alpha[-1]))
 				
 				}
 		
