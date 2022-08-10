@@ -1047,7 +1047,7 @@ fitNULLGLMM = function(plinkFile = "",
 
     if (isCovariateOffset) {
     	covoffset = mmat[,-1, drop=F] %*%  modwitcov$coefficients[-1] 
-        print("isCovariateOffset=TRUE, so fixed effects coefficnets won't be estimated.")
+        print("isCovariateOffset=TRUE, so fixed effects coefficients won't be estimated.")
 	formula.new.withCov = formula.new
         formula_nocov = paste0(phenoCol, "~ 1")
         formula.new = as.formula(formula_nocov)
