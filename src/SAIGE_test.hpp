@@ -75,6 +75,7 @@ class SAIGEClass
       double m_pCutoffforFirth;
      arma::vec  m_offset;	
       bool m_isVarPsadj;
+      bool m_islog10p;
   ////////////////////// -------------------- functions ---------------------------------- //////////////////////
   
 
@@ -117,6 +118,8 @@ class SAIGEClass
                      double& t_Beta,
                      double& t_seBeta,
                      std::string& t_pval_str,
+		      double& t_pval,
+                     bool& t_islogp,
                      double t_altFreq,
                      double &t_Tstat,
                      double &t_var1,
@@ -127,15 +130,20 @@ class SAIGEClass
                      bool t_is_region,
 		     arma::uvec & t_indexForNonZero);
 
-    void scoreTestFast(arma::vec & t_GVec,
+
+void scoreTestFast(arma::vec & t_GVec,
                      arma::uvec & t_indexForNonZero,
                      double& t_Beta,
                      double& t_seBeta,
                      std::string& t_pval_str,
+                     double& t_pval,
+                     bool& t_islogp,
                      double t_altFreq,
                      double &t_Tstat,
                      double &t_var1,
                      double &t_var2);
+
+
      void set_flagSparseGRM_cur(bool t_flagSparseGRM_cur);
 
      void get_mu(arma::vec & t_mu);
@@ -148,8 +156,8 @@ class SAIGEClass
                                arma::uvec & iIndexComVec,
                                double& t_Beta,
                                double& t_seBeta,
-                               double& t_pval,
-                               double& t_pval_noSPA,
+                               std::string& t_pval,
+                               std::string& t_pval_noSPA,
                                double t_altFreq,
                                double& t_Tstat,
 				double& t_gy,
@@ -162,8 +170,8 @@ class SAIGEClass
 			       bool t_isCondition,
 			    double& t_Beta_c,
                                 double& t_seBeta_c,
-                                double& t_pval_c,
-                                double& t_pval_noSPA_c,
+                                std::string& t_pval_c,
+                                std::string& t_pval_noSPA_c,
                                 double& t_Tstat_c,
                                 double& t_varT_c,
                                 arma::rowvec & t_G1tilde_P_G2tilde,

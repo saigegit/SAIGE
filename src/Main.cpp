@@ -171,19 +171,23 @@ void mainMarkerInCPP(
   std::vector<double> missingRateVec(q);  
   std::vector<double> BetaVec(q, arma::datum::nan);         // beta value for ALT allele
   std::vector<double> seBetaVec(q, arma::datum::nan);       
-  std::vector<double> pvalVec(q, arma::datum::nan);
+  //std::vector<double> pvalVec(q, arma::datum::nan);
+  std::vector<std::string> pvalVec(q, "NA");
   std::vector<double> TstatVec(q, arma::datum::nan);
   std::vector<double> varTVec(q, arma::datum::nan);
-  std::vector<double> pvalNAVec(q, arma::datum::nan);
+  //std::vector<double> pvalNAVec(q, arma::datum::nan);
+  std::vector<std::string> pvalNAVec(q, "NA");
 
   bool isCondition = ptr_gSAIGEobj->m_isCondition;
   //if(isCondition){
   std::vector<double> Beta_cVec(q, arma::datum::nan);         // beta value for ALT allele
   std::vector<double> seBeta_cVec(q, arma::datum::nan);
-  std::vector<double> pval_cVec(q, arma::datum::nan);
+  //std::vector<double> pval_cVec(q, arma::datum::nan);
+  std::vector<std::string> pval_cVec(q, "NA");
   std::vector<double> Tstat_cVec(q, arma::datum::nan);
   std::vector<double> varT_cVec(q, arma::datum::nan);
-  std::vector<double> pvalNA_cVec(q, arma::datum::nan);
+  //std::vector<double> pvalNA_cVec(q, arma::datum::nan);
+  std::vector<std::string> pvalNA_cVec(q, "NA");
   //}
   arma::rowvec G1tilde_P_G2tilde_Vec(ptr_gSAIGEobj->m_numMarker_cond);
 
@@ -366,9 +370,9 @@ void mainMarkerInCPP(
    //std::cout << "altFreq after flip " << altFreq << std::endl; 
    //std::cout << "info " << info << std::endl; 
     // analysis results for single-marker
-    double Beta, seBeta, pval, pval_noSPA, Tstat, varT, gy;
-    double Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c;
-
+    double Beta, seBeta, Tstat, varT, gy;
+    double Beta_c, seBeta_c, Tstat_c, varT_c;
+    std::string pval, pval_noSPA, pval_c, pval_noSPA_c;
     bool isSPAConverge, is_gtilde, is_Firth, is_FirthConverge;
     //arma::vec t_P2Vec;
     //arma::vec t_P2Vec;
@@ -415,8 +419,8 @@ void mainMarkerInCPP(
 			  altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true);
     }
 
-
-    if(ptr_gSAIGEobj->m_isFastTest && pval < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest)){
+    double pval_num = std::stod(pval); 
+    if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest)){
       ptr_gSAIGEobj->set_flagSparseGRM_cur(true);
 
       if(!isSingleVarianceRatio){ 
@@ -661,8 +665,8 @@ void Unified_getMarkerPval(
 			   arma::uvec & t_indexForZero_vec,
                            double& t_Beta, 
                            double& t_seBeta, 
-                           double& t_pval,
-			   double& t_pval_noSPA,
+                           std::string& t_pval,
+			   std::string& t_pval_noSPA,
                            double& t_Tstat,
 			   double& t_gy,
                            double& t_varT,
@@ -675,8 +679,8 @@ void Unified_getMarkerPval(
 			   bool t_isCondition,
                            double& t_Beta_c, 
                            double& t_seBeta_c, 
-                           double& t_pval_c,
-			   double& t_pval_noSPA_c,
+                           std::string& t_pval_c,
+			   std::string& t_pval_noSPA_c,
                            double& t_Tstat_c,
                            double& t_varT_c,
 			   arma::rowvec & t_G1tilde_P_G2tilde_Vec, 
@@ -932,10 +936,12 @@ Rcpp::List mainRegionInCPP(
   //arma::sp_mat genoSumMat_sp(t_n, q_anno_maf); //for Phi_cc for binary traits and BURDEN test
   std::vector<double> Beta_cVec(q, arma::datum::nan);         // beta value for ALT allele
   std::vector<double> seBeta_cVec(q, arma::datum::nan);
-  std::vector<double> pval_cVec(q, arma::datum::nan);
+  //std::vector<double> pval_cVec(q, arma::datum::nan);
+  std::vector<std::string> pval_cVec(q, "NA");
   std::vector<double> Tstat_cVec(q, arma::datum::nan);
   std::vector<double> varT_cVec(q, arma::datum::nan);
-  std::vector<double> pvalNA_cVec(q, arma::datum::nan);
+  //std::vector<double> pvalNA_cVec(q, arma::datum::nan);
+  std::vector<std::string> pvalNA_cVec(q, "NA");
   arma::mat G1tilde_P_G2tilde_Weighted_Mat(q, q_cond);
   //group test output
   //arma::vec MAC_GroupVec = arma::zeros<vec>(q_anno_maf);
@@ -978,12 +984,13 @@ Rcpp::List mainRegionInCPP(
   std::vector<double> missingRateVec(q, arma::datum::nan);
   std::vector<double> BetaVec(q, arma::datum::nan);         // beta value for ALT allele
   std::vector<double> seBetaVec(q, arma::datum::nan);
-  std::vector<double> pvalVec(q, arma::datum::nan);
+  std::vector<std::string> pvalVec(q, "NA");
+  std::vector<double> pvalVec_val(q, arma::datum::nan);
   std::vector<double> TstatVec(q, arma::datum::nan);
   std::vector<double> TstatVec_flip(q, arma::datum::nan);
   std::vector<double> gyVec(q, arma::datum::nan);
   std::vector<double> varTVec(q, arma::datum::nan);
-  std::vector<double> pvalNAVec(q, arma::datum::nan);  
+  std::vector<std::string> pvalNAVec(q, "NA");  
   std::vector<bool>  isSPAConvergeVec(q);
 
 
@@ -1000,8 +1007,9 @@ Rcpp::List mainRegionInCPP(
   std::vector<unsigned int> mPassCVVec;
     
   // conduct marker-level analysis
-  double Beta, seBeta, pval, pval_noSPA, Tstat, varT, gy;
-  double Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c;
+  std::string pval, pval_noSPA,  pval_c, pval_noSPA_c;
+  double Beta, seBeta, Tstat, varT, gy;
+  double Beta_c, seBeta_c, Tstat_c, varT_c;
   bool isSPAConverge, is_gtilde, is_Firth, is_FirthConverge;
   arma::vec P1Vec(t_n), P2Vec(t_n);
   arma::vec GVec(t_n);
@@ -1155,6 +1163,7 @@ Rcpp::List mainRegionInCPP(
 	BetaVec.at(i) = Beta * (1 - 2*flip);  // Beta if flip = false, -1 * Beta is flip = true       
         seBetaVec.at(i) = seBeta;       
         pvalVec.at(i) = pval;
+	pvalVec_val.at(i) = std::stod(pval);
         pvalNAVec.at(i) = pval_noSPA;
         TstatVec.at(i) = Tstat * (1 - 2*flip);
         TstatVec_flip.at(i) = Tstat;
@@ -1443,6 +1452,7 @@ if(i2 > 0){
             BetaVec.at(i) = Beta* (1 - 2*flip);
             seBetaVec.at(i) = seBeta;
             pvalVec.at(i) = pval;
+	    pvalVec_val.at(i) = std::stod(pval);
             pvalNAVec.at(i) = pval_noSPA;
             TstatVec.at(i) = Tstat * (1 - 2*flip);
             TstatVec_flip.at(i) = Tstat;
@@ -1641,10 +1651,12 @@ for(unsigned int j = 0; j < q_anno; j++){
 }
 
 //If only conduct Burden test
-arma::vec BURDEN_pval_Vec(q_anno_maf);
-BURDEN_pval_Vec.fill(-1.0);
-arma::vec BURDEN_pval_cVec(q_anno_maf);
-BURDEN_pval_cVec.fill(-1.0);
+//arma::vec BURDEN_pval_Vec(q_anno_maf);
+std::vector<std::string> BURDEN_pval_Vec(q_anno_maf, "NA");
+//BURDEN_pval_Vec.fill(-1.0);
+//arma::vec BURDEN_pval_cVec(q_anno_maf);
+std::vector<std::string> BURDEN_pval_cVec(q_anno_maf, "NA");
+//BURDEN_pval_cVec.fill(-1.0);
 std::vector<std::string> BURDEN_AnnoName_Vec(q_anno_maf);
 std::vector<std::string> BURDEN_maxMAFName_Vec(q_anno_maf);
 std::vector<double> BURDEN_Beta_Vec(q_anno_maf);
@@ -1720,7 +1732,7 @@ if(t_regionTestType == "BURDEN"){
 	  //printTime(timeoutput_getp, timeoutput_getp2, "get p  done");
 	  
 	  if(isCondition){
-	    BURDEN_pval_cVec(i) = pval_c;
+	    BURDEN_pval_cVec.at(i) = pval_c;
 	    BURDEN_Beta_cVec.at(i) = Beta_c;
 	    BURDEN_seBeta_cVec.at(i) = seBeta_c;
           }
@@ -1729,7 +1741,7 @@ if(t_regionTestType == "BURDEN"){
 	   std::string str = std::to_string(maxMAFName);
 	   str.erase ( str.find_last_not_of('0') + 1, std::string::npos );
 	   BURDEN_maxMAFName_Vec.at(i) = str;
-	   BURDEN_pval_Vec(i) = pval;
+	   BURDEN_pval_Vec.at(i) = pval;
 	   BURDEN_Beta_Vec.at(i) = Beta;
 	   BURDEN_seBeta_Vec.at(i) = seBeta;
 
@@ -1739,14 +1751,14 @@ if(t_regionTestType == "BURDEN"){
      }else{
 	if(isPolyMarker){
 	  if(isCondition){
-            BURDEN_pval_cVec(i) = pval_c;
+            BURDEN_pval_cVec.at(i) = pval_c;
             BURDEN_Beta_cVec.at(i) = Beta_c;
             BURDEN_seBeta_cVec.at(i) = seBeta_c;
           }
 
            BURDEN_AnnoName_Vec.at(i) = AnnoName;
            BURDEN_maxMAFName_Vec.at(i) = std::to_string(maxMAFName);
-           BURDEN_pval_Vec(i) = pval;
+           BURDEN_pval_Vec.at(i) = pval;
            BURDEN_Beta_Vec.at(i) = Beta;
            BURDEN_seBeta_Vec.at(i) = seBeta; 
 	 }
@@ -1754,14 +1766,27 @@ if(t_regionTestType == "BURDEN"){
 
    }
  }
+	  std::vector<double> nonMissingPvalVec_std, nonMissingPvalVec_c_std;
+	  double burden_p, burden_p_cond;
+	  for(unsigned int i = 0; i < BURDEN_pval_Vec.size(); i++){
+		if(BURDEN_pval_Vec.at(i) != "NA"){
+	  		burden_p = std::stod(BURDEN_pval_Vec.at(i));
+			nonMissingPvalVec_std.push_back(burden_p);
+			if(isCondition){
+				burden_p_cond = std::stod(BURDEN_pval_cVec.at(i));
+				nonMissingPvalVec_c_std.push_back(burden_p_cond);
+			}
+		}	
+	  } 
 
-	   arma::uvec nonMissingPvalVecInd = arma::find(BURDEN_pval_Vec >= 0);
-	   arma::vec nonMissingPvalVec = BURDEN_pval_Vec.elem(nonMissingPvalVecInd);
-
+	  arma::vec nonMissingPvalVec = arma::conv_to< arma::vec >::from(nonMissingPvalVec_std);
+	  //arma::uvec nonMissingPvalVecInd = arma::find(BURDEN_pval_Vec >= 0);
+	  //arma::vec nonMissingPvalVec = BURDEN_pval_Vec.elem(nonMissingPvalVecInd);
 	   cctpval = CCT_cpp(nonMissingPvalVec);
            if(isCondition){
-	   arma::vec nonMissingPvalVec_cond = BURDEN_pval_cVec.elem(nonMissingPvalVecInd);
-	   cctpval_cond = CCT_cpp(nonMissingPvalVec_cond);	   
+	        //arma::vec nonMissingPvalVec_cond = BURDEN_pval_cVec.elem(nonMissingPvalVecInd);
+		arma::vec nonMissingPvalVec_cond  = arma::conv_to< arma::vec >::from(nonMissingPvalVec_c_std);
+	   	cctpval_cond = CCT_cpp(nonMissingPvalVec_cond);	   
            }
 
 	
@@ -1846,8 +1871,8 @@ if(t_regionTestType == "BURDEN"){
  int numofUR = q_anno_maf;
  int numofUR0;
  int mFirth = 0;
- if(t_isSingleinGroupTest){
-  OutList.push_back(pvalVec, "pvalVec");
+if(t_isSingleinGroupTest){
+  OutList.push_back(pvalVec_val, "pvalVec");
 if(iswriteOutput){
   numofUR0 = writeOutfile_singleInGroup(t_isMoreOutput,
       t_isImputation,
@@ -1990,13 +2015,15 @@ void assign_conditionMarkers_factors(
   //boost::math::beta_distribution<> beta_dist(1, 25);
   //std::vector<double> GVec0(t_n);
   arma::vec GVec(t_n);
-  double Beta, seBeta, pval, pval_noSPA, Tstat, varT, gy, w0G2_cond;
+  std::string pval, pval_noSPA;
+  double Beta, seBeta, Tstat, varT, gy, w0G2_cond;
   bool isSPAConverge, is_gtilde, is_Firth, is_FirthConverge;
   arma::vec P2Vec(t_n);
 
   //std::vector<uint> indexZeroVec;
   //std::vector<uint> indexNonZeroVec;
-  double Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c;
+  std::string pval_c, pval_noSPA_c;
+  double Beta_c, seBeta_c, Tstat_c, varT_c;
   arma::rowvec G1tilde_P_G2tilde_Vec;
   bool isCondition = false;
   for(unsigned int i = 0; i < q; i++)
@@ -2113,7 +2140,7 @@ void assign_conditionMarkers_factors(
      gyVec(i) = gy * w0G2_cond;
      gsumVec = gsumVec + GVec * w0G2_cond;
      TstatVec(i) = Tstat;
-     pVec(i) = pval;
+     pVec(i) = std::stod(pval);
   }
   arma::mat VarMat = P1Mat * P2Mat;
 
@@ -2413,15 +2440,15 @@ void writeOutfile_single(bool t_isMoreOutput,
                         std::vector<double> & seBetaVec,
                         std::vector<double> & TstatVec,
                         std::vector<double> & varTVec,
-                        std::vector<double> & pvalVec,
-                        std::vector<double> & pvalNAVec,
+                        std::vector<std::string> & pvalVec,
+                        std::vector<std::string> & pvalNAVec,
                         std::vector<bool>  & isSPAConvergeVec,
                         std::vector<double> & Beta_cVec,
                         std::vector<double> & seBeta_cVec,
                         std::vector<double> & Tstat_cVec,
                         std::vector<double> & varT_cVec,
-                        std::vector<double> & pval_cVec,
-                        std::vector<double> & pvalNA_cVec,
+                        std::vector<std::string> & pval_cVec,
+                        std::vector<std::string> & pvalNA_cVec,
                         std::vector<double> & AF_caseVec,
                         std::vector<double> & AF_ctrlVec,
                         std::vector<uint32_t> & N_caseVec,
@@ -2435,7 +2462,7 @@ void writeOutfile_single(bool t_isMoreOutput,
 ){
   int numtest = 0;
   for(unsigned int k = 0; k < pvalVec.size(); k++){
-        if(!std::isnan(pvalVec.at(k))){
+        if(pvalVec.at(k) != "NA"){
                 numtest = numtest + 1;
                 OutFile_single << chrVec.at(k);
                 OutFile_single << "\t";
@@ -2566,10 +2593,10 @@ void set_varianceRatio(double MAC, bool isSingleVarianceRatio){
 void writeOutfile_BURDEN(std::string regionName,
 			std::vector<std::string>  & BURDEN_AnnoName_Vec,
 			std::vector<std::string> & BURDEN_maxMAFName_Vec,
-			arma::vec & BURDEN_pval_Vec,
+			std::vector<std::string> & BURDEN_pval_Vec,
 			std::vector<double> & BURDEN_Beta_Vec,
 			std::vector<double> & BURDEN_seBeta_Vec,
-			arma::vec & BURDEN_pval_cVec,
+			std::vector<std::string> & BURDEN_pval_cVec,
 			std::vector<double> & BURDEN_Beta_cVec,
 			std::vector<double> & BURDEN_seBeta_cVec,
 			arma::vec & MAC_GroupVec,
@@ -2587,21 +2614,21 @@ void writeOutfile_BURDEN(std::string regionName,
      for(unsigned int j = 0; j < q_anno; j++){
        for(unsigned int m = 0; m < q_maf; m++){
            i = j*q_maf+m;
-	   if(BURDEN_pval_Vec(i) != -1){
+	   if(BURDEN_pval_Vec.at(i) != "NA"){
            OutFile << regionName;
            OutFile << "\t";
            OutFile << BURDEN_AnnoName_Vec.at(i);
            OutFile << "\t";
            OutFile << BURDEN_maxMAFName_Vec.at(i);
            OutFile << "\t";
-           OutFile << BURDEN_pval_Vec(i);
+           OutFile << BURDEN_pval_Vec.at(i);
            OutFile << "\t";
            OutFile << BURDEN_Beta_Vec.at(i);
            OutFile << "\t";
            OutFile << BURDEN_seBeta_Vec.at(i);
            OutFile << "\t";
            if(isCondition){
-               OutFile << BURDEN_pval_cVec(i);
+               OutFile << BURDEN_pval_cVec.at(i);
                OutFile << "\t";
                OutFile << BURDEN_Beta_cVec.at(i);
                OutFile << "\t";
@@ -2661,15 +2688,15 @@ int writeOutfile_singleInGroup(bool t_isMoreOutput,
                         std::vector<double> & seBetaVec,
                         std::vector<double> & TstatVec,
                         std::vector<double> & varTVec,
-                        std::vector<double> & pvalVec,
-                        std::vector<double> & pvalNAVec,
+                        std::vector<std::string> & pvalVec,
+                        std::vector<std::string> & pvalNAVec,
                         std::vector<bool>  & isSPAConvergeVec,
                         std::vector<double> & Beta_cVec,
                         std::vector<double> & seBeta_cVec,
                         std::vector<double> & Tstat_cVec,
                         std::vector<double> & varT_cVec,
-                        std::vector<double> & pval_cVec,
-                        std::vector<double> & pvalNA_cVec,
+                        std::vector<std::string> & pval_cVec,
+                        std::vector<std::string> & pvalNA_cVec,
                         std::vector<double> & AF_caseVec,
                         std::vector<double> & AF_ctrlVec,
                         std::vector<uint32_t> & N_caseVec,
@@ -2683,7 +2710,8 @@ int writeOutfile_singleInGroup(bool t_isMoreOutput,
   int numofUR = 0;
   for(unsigned int k = 0; k < pvalVec.size(); k++){
         //if(std::isfinite(pvalVec.at(k))){
-        if(!std::isnan(pvalVec.at(k))){
+        //if(!std::isnan(pvalVec.at(k))){
+        if(pvalVec.at(k) != "NA"){
 		if(chrVec.at(k) == "UR"){
                         numofUR = numofUR + 1;
                 }
