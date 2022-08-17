@@ -113,7 +113,8 @@ SPAGMMATtest = function(bgenFile = "",
 		 is_output_markerList_in_groupTest = FALSE,
 		 is_fastTest = FALSE,
 		 pval_cutoff_for_fastTest = 0.05, 
-		 max_MAC_use_ER = 4
+		 max_MAC_use_ER = 4, 
+		 subSampleFile = ""
 ){
    #cat("r.corr is ", r.corr, "\n")
    if(!(impute_method %in% c("best_guess", "mean","minor"))){
@@ -214,8 +215,16 @@ SPAGMMATtest = function(bgenFile = "",
      #cat("dosage_zerod_MAC_cutoff is ", dosage_zerod_MAC_cutoff, "\n")
 
     }
-    
-    obj.model = ReadModel(GMMATmodelFile, chrom, LOCO, is_Firth_beta) #readInGLMM.R8
+   
+
+
+
+    if(subSampleFile == ""){
+    	obj.model = ReadModel(GMMATmodelFile, chrom, LOCO, is_Firth_beta) #readInGLMM.R
+    }else{
+    	obj.model = ReadModel_subsample(GMMATmodelFile, chrom, LOCO, is_Firth_beta, subSampleFile) #readInGLMM.R	
+    }
+
     if(obj.model$traitType == "binary"){
         if(max_MAC_use_ER > 0){
              cat("P-values of genetic variants with MAC <= ", max_MAC_use_ER, " will be calculated via effecient resampling.\n")

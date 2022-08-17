@@ -40,7 +40,6 @@ option_list <- list(
     help="Path to a file containing genome regions to be included from the dosage file. The file contains three columns for chromosome, start, and end respectively with no header. Note for vcf and sav files, only the first line in the file will be used."),
   make_option("--chrom", type="character",default="",
     help="If LOCO is specified, chrom is required. chrom is also required for VCF/BCF/SAV input. Note: the string needs to exactly match the chromosome string in the vcf/sav file. For example, 1 does not match chr1."),
-
   make_option("--is_imputed_data", type="logical",default=FALSE,
     help="Whether the dosages/genotypes imputed are imputed. If TRUE, the program will output the imputed info score [default=FALSE]."),
   make_option("--minMAF", type="numeric", default=0,
@@ -124,7 +123,10 @@ mean, p-value based on traditional score test is returned. Default value is 2.")
   make_option("--is_fastTest", type="logical", default=FALSE,
     help="Whether to use the fast mode for tests"),
   make_option("--max_MAC_for_ER", type="numeric", default=4,
-    help="p-values of genetic variants with MAC <= max_MAC_for_ER will be calculated via efficient resampling. [default=4]")	      
+    help="p-values of genetic variants with MAC <= max_MAC_for_ER will be calculated via efficient resampling. [default=4]"),
+
+ make_option("--subSampleFile", type="character",default="",
+    help="Path to the file that contains one column for IDs of samples that are included in Step 1 and will be also included in Step 2. This option is used when any sample included in Step 1 but does not have dosages/genotypes for Step 2. Please make sure it contains one column of sample IDs that will be used for subsetting samples from the Step 1 results for Step 2 jobs. Note: Thi option has not been fully evaluated. If more than 5% of the samples in Step 1 are missing in Step 2, please consider re-run Step 1. ")
 )
 
 
@@ -182,7 +184,7 @@ print(opt$r.corr)
 if(packageVersion("SAIGE")<"1.1.3"){
 
 
-SPAGMMATtest(vcfFile=opt$vcfFile,
+  SPAGMMATtest(vcfFile=opt$vcfFile,
              vcfFileIndex=opt$vcfFileIndex,
              vcfField=opt$vcfField,
              savFile=opt$savFile,
@@ -238,7 +240,9 @@ SPAGMMATtest(vcfFile=opt$vcfFile,
 	     is_fastTest = opt$is_fastTest
 )
 }else{
-SPAGMMATtest(vcfFile=opt$vcfFile,
+
+if(packageVersion("SAIGE")>"1.1.4"){	
+  SPAGMMATtest(vcfFile=opt$vcfFile,
              vcfFileIndex=opt$vcfFileIndex,
              vcfField=opt$vcfField,
              savFile=opt$savFile,
@@ -292,9 +296,71 @@ SPAGMMATtest(vcfFile=opt$vcfFile,
              is_no_weight_in_groupTest = opt$is_no_weight_in_groupTest,
              is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
              is_fastTest = opt$is_fastTest,
-	     max_MAC_use_ER = opt$max_MAC_for_ER
+	     max_MAC_use_ER = opt$max_MAC_for_ER,
+	     subSampleFile = opt$subSampleFile
+)
+  }else{
+
+	SPAGMMATtest(vcfFile=opt$vcfFile,
+             vcfFileIndex=opt$vcfFileIndex,
+             vcfField=opt$vcfField,
+             savFile=opt$savFile,
+             savFileIndex=opt$savFileIndex,
+             bgenFile=opt$bgenFile,
+             bgenFileIndex=opt$bgenFileIndex,
+             sampleFile=opt$sampleFile,
+             bedFile=opt$bedFile,
+             bimFile=opt$bimFile,
+             famFile=opt$famFile,
+             AlleleOrder=opt$AlleleOrder,
+             idstoIncludeFile = opt$idstoIncludeFile,
+             rangestoIncludeFile = opt$rangestoIncludeFile,
+             chrom=opt$chrom,
+             is_imputed_data=opt$is_imputed_data,
+             min_MAF = opt$minMAF,
+             min_MAC = opt$minMAC,
+             min_Info = opt$minInfo,
+             max_missing = opt$maxMissing,
+             impute_method = opt$impute_method,
+             LOCO=opt$LOCO,
+             GMMATmodelFile=opt$GMMATmodelFile,
+             varianceRatioFile=opt$varianceRatioFile,
+             SAIGEOutputFile=opt$SAIGEOutputFile,
+             markers_per_chunk=opt$markers_per_chunk,
+             groups_per_chunk=opt$groups_per_chunk,
+             markers_per_chunk_in_groupTest=opt$markers_per_chunk_in_groupTest,
+             is_output_moreDetails =opt$is_output_moreDetails,
+             is_overwrite_output = opt$is_overwrite_output,
+             maxMAF_in_groupTest = maxMAF_in_groupTest,
+             maxMAC_in_groupTest = maxMAC_in_groupTest,
+             minGroupMAC_in_BurdenTest = opt$minGroupMAC_in_BurdenTest,
+             annotation_in_groupTest = annotation_in_groupTest,
+             groupFile = opt$groupFile,
+             sparseGRMFile=opt$sparseGRMFile,
+             sparseGRMSampleIDFile=opt$sparseGRMSampleIDFile,
+             relatednessCutoff=opt$relatednessCutoff,
+             MACCutoff_to_CollapseUltraRare = opt$MACCutoff_to_CollapseUltraRare,
+             cateVarRatioMinMACVecExclude = cateVarRatioMinMACVecExclude,
+             cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
+             weights.beta = weights.beta,
+             r.corr = opt$r.corr,
+             condition = opt$condition,
+             weights_for_condition = weights_for_condition,
+             SPAcutoff = opt$SPAcutoff,
+             dosage_zerod_cutoff = opt$dosage_zerod_cutoff,
+             dosage_zerod_MAC_cutoff = opt$dosage_zerod_MAC_cutoff,
+             is_Firth_beta = opt$is_Firth_beta,
+             pCutoffforFirth = opt$pCutoffforFirth,
+             is_single_in_groupTest = opt$is_single_in_groupTest,
+             is_no_weight_in_groupTest = opt$is_no_weight_in_groupTest,
+             is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
+             is_fastTest = opt$is_fastTest,
+             max_MAC_use_ER = opt$max_MAC_for_ER
 )
 
+
+
+}	
 
 }	
 if(BLASctl_installed){

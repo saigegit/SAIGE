@@ -170,6 +170,191 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
 
 
 
+ReadModel_subsample = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FALSE, subSampleFile=""){
+  # Check file existence
+  Check_File_Exist(GMMATmodelFile, "GMMATmodelFile")
+  if(!LOCO %in% c(TRUE, FALSE)){
+    stop("LOCO should be TRUE or FALSE.")
+  }
+
+   if(!file.exists(subSampleFile)){
+		stop("ERROR! ", subSampleFile, " does not exist\n")
+   }else{
+		cat("subSampleFile is specified. This option is used when any sample included in Step 1 but does not have dosages/genotypes for Step 2. Please make sure it contains one column of sample IDs that will be used for subsetting samples from the Step 1 results for Step 2 jobs\n")
+	subSampleID0 = data.table::fread(subSampleFile, header = F, colClasses = c("character"), data.table=F)
+   	subSampleID0 = subSampleID0[,1]
+   }
+
+  load(GMMATmodelFile)
+  
+  includeIndex = which(modglmm$sampleID %in% subSampleID0)
+  if(length(includeIndex) == 0){
+	stop("No samples analyzed in Step 1 are included in ", subSampleFile, "\n")
+  }else{
+	cat(length(includeIndex), " samples analyzed in Step 1 will be included for Step 2\n")
+
+  	percNum = length(includeIndex) / (length(modglmm$sampleID))
+	percNum = percNum * 100
+	if(percNum < 90){
+		cat("WARNING: ", percNum, "% samples analyzed in Step 1 will be included for Step 2. This proportion is small and using subsetted Step 1 results could lead to incorrect Step 2 results. Please re-run Step 1 for the sample subset\n")
+	}	
+  }	  
+
+
+  modglmm$Y = NULL
+  #modglmm$offset = modglmm$linear.predictors - modglmm$coefficients[1]
+  modglmm$linear.predictors = NULL
+  modglmm$coefficients = NULL
+  modglmm$cov = NULL
+  modglmm$obj.glm.null = NULL
+  modglmm$fitted.values = modglmm$fitted.values[includeIndex]
+  modglmm$Y = modglmm$Y[includeIndex]
+  modglmm$residuals = modglmm$residuals[includeIndex]
+  modglmm$sampleID = modglmm$sampleID[includeIndex]
+  modglmm$y = modglmm$y[includeIndex]
+  modglmm$X = modglmm$X[includeIndex,,drop=F]
+
+
+
+
+  #rm(modglmm)
+  gc()
+  #traitType = modglmm$traitType
+  #y = modglmm$y
+  #X = modglmm$X
+  #N = length(y)
+  #tauVec = modglmm$theta
+  #indChromCheck = FALSE
+  chrom_v3=NULL
+
+  if(!LOCO) {
+    print("Leave-one-chromosome-out is not applied")
+    if(modglmm$LOCO) {
+      for (chr in 1:22) {
+        modglmm$LOCOResult[chr] = list(NULL)
+        cat("chromosome ", chr, " model results are removed to save memory\n")
+        gc()
+      }
+    }
+  }else{
+    if (!modglmm$LOCO){
+      stop("LOCO is TRUE but the null model file .rda does not contain LOCO results. In order to apply Leave-one-chromosome-out, please run Step 1 using LOCO. Otherwise, please set LOCO=FALSE in this step (Step 2).\n")
+    }else{
+        if(chrom == ""){
+          stop("chrom needs to be specified in order to apply Leave-one-chromosome-out on gene- or region-based tests")
+        }else{
+          chrom_v3 = getChromNumber(chrom)
+        }
+   }
+
+ if(is.numeric(chrom_v3)){
+  if(chrom_v3 >= 1 & chrom_v3 <= 22){
+
+   chromList = c(1:22)
+   chromList = chromList[which(chromList != chrom_v3)]
+   modglmm = removeLOCOResult(chromList, modglmm)
+   if(!is.null(modglmm$LOCOResult[[chrom_v3]])){
+   modglmm$fitted.values = modglmm$LOCOResult[[chrom_v3]]$fitted.values
+   modglmm$residuals = modglmm$LOCOResult[[chrom_v3]]$residuals
+   modglmm$residuals = modglmm$residuals[includeIndex]
+   modglmm$obj.noK = modglmm$LOCOResult[[chrom_v3]]$obj.noK
+
+
+   
+   if(is_Firth_beta){
+     if(!is.null(modglmm$LOCOResult[[chrom_v3]]$offset)){
+       modglmm$offset = modglmm$LOCOResult[[chrom_v3]]$offset
+     }
+   }
+  }
+   #modglmm$offset = modglmm$LOCOResult[[chrom_v3]]$linear.predictors -  modglmm$LOCOResult[[chrom_v3]]$coefficients[1]
+   modglmm$LOCOResult[chrom_v3] = list(NULL)
+  }else{ #if(chrom_v3 >= 1 & chrom_v3 <= 22){
+     chromList = c(1:22)
+     modglmm = removeLOCOResult(chromList, modglmm)
+  }
+ }else{
+        chromList = c(1:22)
+        modglmm = removeLOCOResult(chromList, modglmm)
+  }
+   gc()
+
+  }
+
+ modglmm$mu = as.vector(modglmm$fitted.values)
+ modglmm$mu = modglmm$mu[includeIndex]
+
+
+ tau = modglmm$theta
+ N = length(modglmm$mu)
+     if(modglmm$traitType == "binary"){
+             modglmm$mu2 = (modglmm$mu) *(1-modglmm$mu)
+             modglmm$obj_cc = SKAT::SKAT_Null_Model(modglmm$y ~ modglmm$X-1, out_type="D", Adjustment = FALSE)
+             modglmm$obj_cc$mu = modglmm$mu
+
+	     if(!is.null(modglmm$res)){
+		modglmm$res = modglmm$res[includeIndex]
+	     }	     
+             modglmm$obj_cc$res = modglmm$res
+             modglmm$obj_cc$pi_1 = modglmm$mu2
+    }else if(modglmm$traitType == "quantitative"){
+             modglmm$mu2 = (1/tau[1])*rep(1,N)
+     }
+ #if(FALSE){
+
+ if(is_Firth_beta){
+        if(modglmm$traitType == "binary"){
+                if(is.null(modglmm$offset)){
+                        #if(FALSE){
+                        #print("WARNING. is_Firth_beta = TRUE, but offset was not computed in Step 1. Please re-run Step 1 using the more rencet version of SAIGE/SAIGE-GENE.")
+                        cat("Applying is_Firth_beta = TRUE and note the results would be more accurate withe Step 1 results using the more rencet version of SAIGE/SAIGE-GENE. \n")
+
+                        if(ncol(modglmm$X) == 1){
+                                covoffset = rep(0,nrow(modglmm$X))
+                        }else{
+                                formulastr = paste0("y ~ ", paste(colnames(modglmm$X)[-1], collapse="+"))
+                                modglmm$X = cbind(modglmm$X, as.vector(modglmm$y))
+                                colnames(modglmm$X)[ncol(modglmm$X)] = "y"
+                                modglmm$X = as.data.frame(modglmm$X)
+                                formula.new = as.formula(formulastr)
+                                modwitcov = glm(formula.new, data = modglmm$X, family = binomial)
+                                modglmm$X = modglmm$X[,-ncol(modglmm$X)]
+                                covoffset = as.matrix(modglmm$X[,-1]) %*%  modwitcov$coefficients[-1]
+                                modglmm$X = as.matrix(modglmm$X)
+                        }
+                        modglmm$offset = covoffset
+                        #}
+                }
+        }
+  }
+ 
+ 
+obj.noK = ScoreTest_NULL_Model(modglmm$mu, modglmm$mu2, modglmm$y, modglmm$X)
+modglmm$obj.noK = obj.noK
+rm(obj.noK)	  
+
+
+ if(is.null(modglmm$offset)){
+         modglmm$offset = rep(0,nrow(modglmm$X))
+  }else{
+	  if(length(modglmm$offset) > N){
+	    modglmm$offset = modglmm$offset[includeIndex]
+	  }
+  }	  
+
+
+ if(is.null(modglmm$Sigma_iXXSigma_iX)){
+        modglmm$Sigma_iXXSigma_iX = matrix(0, nrow=1, ncol=1)
+ }else{
+	modglmm$Sigma_iXXSigma_iX = modglmm$Sigma_iXXSigma_iX[includeIndex,, drop=F]
+  }	 
+ return(modglmm)
+}
+
+
+
+
+
 Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest, isSparseGRM, useSparseGRMtoFitNULL){
 
     iscateVR = FALSE
