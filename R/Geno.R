@@ -22,10 +22,10 @@ checkIfSampleIDsExist = function(bgenFile)
 checkGenoInput = function(bgenFile = "",
                  bgenFileIndex = "",
                  vcfFile = "",
-                 vcfFileIndex = "",
+		 vcfFileIndex = "",
                  vcfField = "DS",
                  savFile = "",
-                 savFileIndex = "",
+		 savFileIndex = "",
                  sampleFile = "",
                  bedFile="",
                  bimFile="",
@@ -43,15 +43,44 @@ checkGenoInput = function(bgenFile = "",
     }else if (vcfFile != "") {
         Check_File_Exist(vcfFile, "vcfFile")
 
-        if (!grepl("\\.sav$", vcfFile) && !file.exists(paste(vcfFile, ".csi", sep = ""))) {
-            stop("ERROR! vcfFileIndex ", paste(vcfFile, ".csi", sep = ""), " does not exist\n")
+	vcfFileIndex_require = paste(vcfFile, ".csi", sep = "")
+        if(vcfFileIndex != ""){
+                if(vcfFileIndex != vcfFileIndex_require){
+                        stop("ERROR! vcfFileIndex is specfied. Please note it must be ", vcfFileIndex_require, "\n")
+                }else{
+			cat("Please note the argument vcfFileIndex will not be used in future versions because the vcf index file must has the name 'vcfFile'.csi\n")
+		}	
+        }else{
+                cat("vcfFileIndex is not specified. ", vcfFileIndex_require, " will be used\n")
+        }
+    	vcfFileIndex = vcfFileIndex_require
+
+        if (!file.exists(paste(vcfFile, ".csi", sep = ""))) {
+            stop("ERROR! vcfFileIndex ", vcfFileIndex, " does not exist\n")
         }
         dosageFileType = "vcf"
+
     }else if (savFile != "") {
         Check_File_Exist(savFile, "savFile")
-	Check_File_Exist(savFileIndex, "savFileIndex")
+	#Check_File_Exist(savFileIndex, "savFileIndex")
+	savFileIndex_require = paste(savFile, ".s1r", sep = "")
+	if(savFileIndex != ""){
+		if(savFileIndex != paste(savFile, ".s1r", sep = "")){
+			stop("ERROR! savFileIndex is specfied. Please note it must be ", savFileIndex_require, "\n") 
+		}else{
+			cat("Please note the argument savFileIndex will not be used in future versions because the sav index file must has the name 'savFile'.s1r\n")
+		}	
+	}else{
+		cat("savFileIndex is not specified. ", savFileIndex_require, " will be used\n")
+	}	
+	savFileIndex = savFileIndex_require
+	if (!file.exists(savFileIndex)) {
+            stop("ERROR! savFileIndex ", savFileIndex, " does not exist\n")
+        }
 	vcfFile = savFile
+	vcfFileIndex = savFileIndex
         dosageFileType = "vcf"
+
     }else if(bedFile != ""){
 	Check_File_Exist(bedFile, "bedFile")
 	if(bimFile == ""){
@@ -348,6 +377,14 @@ if(FALSE){
 #  anyQueue = anyInclude | anyExclude
 
   if(dosageFileType == "vcf"){
+
+    if(vcfFile != ""){
+	vcfFileIndex = paste(vcfFile, ".csi", sep = "") 
+    }else if(savFile != ""){	    
+	vcfFile = savFile
+        vcfFileIndex = paste(vcfFile, ".s1r", sep = "")
+    }
+	    
     setVCFobjInCPP(vcfFile, vcfFileIndex, vcfField, t_SampleInModel = sampleInModel)
     if(!is.null(IDsToInclude)){
       SNPlist = paste(c("set1", IDsToInclude), collapse = "\t")
