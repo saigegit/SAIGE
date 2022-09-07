@@ -168,18 +168,23 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
     var2 = var2m(0,0);
     double var1 = var2 * m_varRatioVal;
     double stat = S*S/var1;
-   
     if (var1 <= std::numeric_limits<double>::min()){
           t_pval = 1;
-    } else{
+    }else{
+      if(!std::isnan(stat)){
           boost::math::chi_squared chisq_dist(1);
           t_pval = boost::math::cdf(complement(chisq_dist, stat));
+      }else{
+          t_pval = 0;
+      }	      
     }
     char pValueBuf[100];
+ 
+  if(!std::isnan(stat)){
     if (t_pval != 0){
         sprintf(pValueBuf, "%.6E", t_pval);
 	t_islogp = false;
-    }else {
+    }else{	    
         double logp = R::pchisq(stat,1,false,true);
         double log10p = logp/(log(10));
         int exponent = floor(log10p);
@@ -199,6 +204,14 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
     t_Tstat = S;
     t_var1 = var1;
     t_var2 = var2;
+  }else{
+    t_pval_str = "0";
+    t_Beta = S/var1;
+    t_seBeta = 0;
+    t_Tstat = S;
+    t_var1 = var1;
+    t_var2 = var2;
+  }	  
 }
 
 
@@ -247,17 +260,21 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
 
 
     double stat = S*S/var1;
-    
     if (var1 <= std::numeric_limits<double>::min()){
           t_pval = 1;
-    } else{
+    }else{
+     if(!std::isnan(stat)){
           boost::math::chi_squared chisq_dist(1);
           t_pval = boost::math::cdf(complement(chisq_dist, stat));
+      }else{
+          t_pval = 0;
+      }
     }
     char pValueBuf[100];
+  if(!std::isnan(stat)){  
     if (t_pval != 0){
         sprintf(pValueBuf, "%.6E", t_pval);
-	    t_islogp = false;
+	t_islogp = false;
     }else {
 	double logp = R::pchisq(stat,1,false,true);
         double log10p = logp/(log(10));
@@ -278,6 +295,14 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
     t_Tstat = S;
     t_var1 = var1;
     t_var2 = var2;
+  }else{
+    t_pval_str = "0";
+    t_Beta = S/var1;
+    t_seBeta = 0;     
+    t_Tstat = S;
+    t_var1 = var1;
+    t_var2 = var2;
+  }	  
 
 }
 
@@ -391,6 +416,10 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   }
 
   double StdStat = std::abs(t_Tstat) / sqrt(t_var1);
+  //if(std::isnan(StdStat)){
+  //  StdStat = 0.0;
+  //}	  
+
   t_isSPAConverge = false;
 /*
   try {
@@ -432,17 +461,18 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 
   double gmuNB;
 
-
-if(StdStat > m_SPA_Cutoff && m_traitType != "quantitative" && t_isER){
+  
+if((StdStat > m_SPA_Cutoff || std::isnan(StdStat) ) && m_traitType != "quantitative" && t_isER){
 	t_isER = true;
 }else{	
 	t_isER = false;
 }
 
+
 if(!t_isER){
 
 
-  if(StdStat > m_SPA_Cutoff && m_traitType != "quantitative"){
+  if(!std::isnan(StdStat) && (StdStat > m_SPA_Cutoff) && m_traitType != "quantitative"){
 
        if(!is_gtilde){
           t_gtilde.resize(m_n);
@@ -594,7 +624,6 @@ if(!t_isER){
     arma::vec pi1_er = m_mu;
     arma::vec resout_er = m_resout;
     double pval_ER =  SKATExactBin_Work(Z_er, res_er, pi1_er, m_n_case, iIndex, iIndexComVec, resout_er, 2e+6, 1e+4, 1e-6, 1);
-
     char pValueBuf_ER[100];
     sprintf(pValueBuf_ER, "%.6E", pval_ER);
     std::string buffAsStdStr_ER = pValueBuf_ER;
@@ -622,7 +651,7 @@ if(!t_isER){
 	x.col(1) = t_gtilde;
 	arma::vec init(2, arma::fill::zeros);
 	fast_logistf_fit_simple(x, m_y, m_offset, true, init, 50, 15, 15, 1e-5, 1e-5, 1e-5, t_Beta ,t_seBeta, t_isFirthConverge);
-	back calculates se based on beta from firth adjustion and the p-value that accounts for case-control imbalance
+	//back calculates se based on beta from firth adjustion and the p-value that accounts for case-control imbalance
 	double pval_adjse = std::stod(t_pval);
 	boost::math::normal ns;
 	double qval_adjse = boost::math::quantile(ns, pval_adjse/2);
@@ -659,11 +688,17 @@ if(!t_isER){
         pval_noSPA_c = 1;
 	stat_c = 0;
      }else{
+       if(!std::isnan(stat_c)){	     
         boost::math::chi_squared chisq_dist(1);
         pval_noSPA_c = boost::math::cdf(complement(chisq_dist, stat_c));
+       }else{
+        pval_noSPA_c = 0;
+       }	       
      }
 
     char pValueBuf_c[100];
+ if(!std::isnan(stat_c)){
+
     if (pval_noSPA_c != 0){
         sprintf(pValueBuf_c, "%.6E", pval_noSPA_c);
         ispvallog = false;
@@ -685,6 +720,12 @@ if(!t_isER){
     t_Beta_c = S_c/t_varT_c;
     t_seBeta_c = fabs(t_Beta_c) / sqrt(stat_c);
     t_Tstat_c = S_c;
+  }else{
+    t_pval_noSPA_c = "0";
+    t_Beta_c = S_c/t_varT_c;
+    t_seBeta_c = 0;
+    t_Tstat_c = S_c;    
+  }	  
 
 /*  try {
         pval_noSPA_c = std::stod(t_pval_noSPA_str_c);
@@ -701,7 +742,7 @@ if(!t_isER){
 */
 
     bool t_isSPAConverge_c;
-    if(m_traitType != "quantitative" && stat_c > std::pow(m_SPA_Cutoff,2)){
+    if(m_traitType != "quantitative" && !std::isnan(stat_c) && stat_c > std::pow(m_SPA_Cutoff,2)){
 	double q_c, qinv_c, pval_noadj_c, SPApval_c;    
 	if(m_traitType == "binary"){
                 q_c = t_Tstat_c/sqrt(t_varT_c/t_var2) + m1;
