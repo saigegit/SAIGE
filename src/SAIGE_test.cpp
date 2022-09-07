@@ -621,7 +621,13 @@ if(!t_isER){
 	arma::mat x(t_GVec.n_elem, 2, arma::fill::ones);	
 	x.col(1) = t_gtilde;
 	arma::vec init(2, arma::fill::zeros);
-	fast_logistf_fit_simple(x, m_y, m_offset, true, init, 50, 15, 15, 1e-5, 1e-5, 1e-5, t_Beta ,t_seBeta, t_isFirthConverge);	
+	fast_logistf_fit_simple(x, m_y, m_offset, true, init, 50, 15, 15, 1e-5, 1e-5, 1e-5, t_Beta ,t_seBeta, t_isFirthConverge);
+	back calculates se based on beta from firth adjustion and the p-value that accounts for case-control imbalance
+	double pval_adjse = std::stod(t_pval);
+	boost::math::normal ns;
+	double qval_adjse = boost::math::quantile(ns, pval_adjse/2);
+	qval_adjse = fabs(qval_adjse);	
+	t_seBeta = fabs(t_Beta)/qval_adjse;
    }
    
  //arma::vec timeoutput4 = getTime();
