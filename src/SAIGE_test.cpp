@@ -535,6 +535,9 @@ if(!t_isER){
     	boost::math::normal ns;
 	//double pval_SPA = t_SPApval;
     	double t_qval;
+
+    if(t_isSPAConverge){
+
         try {
 	  if(!ispvallog){	
            t_qval = boost::math::quantile(ns, t_SPApval/2);
@@ -549,6 +552,7 @@ if(!t_isER){
           //t_seBeta = 0;
 	  t_isSPAConverge = false;
         }
+    }
 
 	if((!ispvallog && t_SPApval == 0) || (ispvallog && exp(t_SPApval) ==0)){
                 t_isSPAConverge = false;
@@ -722,6 +726,7 @@ if(!t_isER){
         boost::math::normal ns;
         //double pval_SPA = t_SPApval;
         double t_qval_c;
+     if(t_isSPAConverge_c){	
         try {
           if(!ispvallog){
            t_qval_c = boost::math::quantile(ns, SPApval_c/2);
@@ -736,6 +741,7 @@ if(!t_isER){
           //t_seBeta_c = 0;
 	  t_isSPAConverge_c = false;
         }
+      }
 
 	if((!ispvallog && SPApval_c == 0) || (ispvallog && exp(SPApval_c) ==0)){
 		t_isSPAConverge_c = false;	
