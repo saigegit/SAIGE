@@ -59,7 +59,7 @@ void SPA(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_noadj
                 if(getSaddle["isSaddle"]){
                         p1 = getSaddle["pval"];
                 }else{
-
+			Isconverge = false;
                         if(logp){
                                 p1 = pval_noadj-std::log(2);
                         }else{
@@ -69,6 +69,7 @@ void SPA(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_noadj
                 if(getSaddle2["isSaddle"]){
                         p2 = getSaddle2["pval"];
                 }else{
+			Isconverge = false;
                         if(logp){
                                 p2 = pval_noadj-std::log(2);
                         }else{
@@ -83,7 +84,7 @@ void SPA(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_noadj
                 } else {
                         pval = std::abs(p1)+std::abs(p2);
                 }
-                Isconverge=true;
+                //Isconverge=true;
         }else {
                         //std::cout << "Error_Converge" << std::endl;
                         pval = pval_noadj;
@@ -147,6 +148,7 @@ void SPA_fast(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_
                 if(getSaddle["isSaddle"]){
                         p1 = getSaddle["pval"];
                 }else{
+			Isconverge = false;
 
                         if(logp){
                                 p1 = pval_noadj-std::log(2);
@@ -159,6 +161,7 @@ void SPA_fast(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_
                         p2 = getSaddle2["pval"];
 
                 }else{
+			Isconverge = false;
                         if(logp){
                                 p2 = pval_noadj-std::log(2);
                         }else{
@@ -172,7 +175,7 @@ void SPA_fast(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_
                         pval = std::abs(p1)+std::abs(p2);
                         //std::cout << "p1 " << p1 << "p2 " << p2 << std::endl;
                 }
-                Isconverge=true;
+                //Isconverge=true;
         }else {
                         //std::cout << "Error_Converge" << std::endl;
                         pval = pval_noadj;
