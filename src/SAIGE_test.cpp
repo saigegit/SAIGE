@@ -546,8 +546,15 @@ if(!t_isER){
            t_seBeta = fabs(t_Beta)/t_qval;
         }catch (const std::overflow_error&) {
           t_qval = std::numeric_limits<double>::infinity();
-          t_seBeta = 0;
-        } 
+          //t_seBeta = 0;
+	  t_isSPAConverge = false;
+        }
+
+	if((!ispvallog && t_SPApval == 0) || (ispvallog && exp(t_SPApval) ==0)){
+                t_isSPAConverge = false;
+        }
+
+
   }
    //t_pval_noSPA = pval_noadj; 
    char pValueBuf_SPA[100];
@@ -708,7 +715,7 @@ if(!t_isER){
                 SPA_fast(m_mu, t_gtilde, q_c, qinv_c, pval_noSPA_c, ispvallog, gNA, gNB, muNA, muNB, NAmu, NAsigma, tol1, m_traitType, SPApval_c, t_isSPAConverge_c);
         }else{
 		//std::cout << "SPA " << std::endl;
-                SPA(m_mu, t_gtilde, q_c, qinv_c, pval_noSPA_c, tol1, ispvallog , m_traitType, SPApval_c, t_isSPAConverge_c);
+                SPA(m_mu, t_gtilde, q_c, qinv_c, pval_noSPA_c, tol1, ispvallog, m_traitType, SPApval_c, t_isSPAConverge_c);
         }
 
 	
@@ -726,8 +733,14 @@ if(!t_isER){
            t_seBeta_c = fabs(t_Beta_c)/t_qval_c;
         }catch (const std::overflow_error&) {
           t_qval_c = std::numeric_limits<double>::infinity();
-          t_seBeta_c = 0;
+          //t_seBeta_c = 0;
+	  t_isSPAConverge_c = false;
         }
+
+	if((!ispvallog && SPApval_c == 0) || (ispvallog && exp(SPApval_c) ==0)){
+		t_isSPAConverge_c = false;	
+	}
+
 
       char pValueBuf_SPA_c[100];
       //if(m_traitType!="quantitative"){
@@ -748,6 +761,7 @@ if(!t_isER){
                 t_pval_c = buffAsStdStr_SPA_c;
         }else{
                 t_pval_c = t_pval_noSPA_c;
+		t_seBeta_c = t_seBeta;
         }
 
     }else{
