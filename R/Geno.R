@@ -268,6 +268,7 @@ setGenoInput = function(bgenFile = "",
     #if(chrom==""){
     #  stop("chrom needs to be specified for VCF/BCF/SAV input\n")
     #}
+    #markerInfo = NULL
   }
 
 
@@ -289,6 +290,7 @@ setGenoInput = function(bgenFile = "",
       cat(length(IDsToInclude), " marker IDs are found in the idstoIncludeFile file\n")
     }
 
+  if(dosageFileType != "vcf"){
     if(!is.null(markerInfo$ID2)){
 
     	posRows = which((markerInfo$ID %in% IDsToInclude) | (markerInfo$ID2 %in% IDsToInclude))
@@ -296,9 +298,13 @@ setGenoInput = function(bgenFile = "",
 	posRows = which((markerInfo$ID %in% IDsToInclude))
 
     }	    
-    if(length(posRows) != 0)
+    if(length(posRows) != 0){
       cat(length(posRows), " markers in idstoIncludeFile are found in the geno/dosage file.\n") 
       markersInclude = c(markersInclude, markerInfo$ID[posRows])
+    }  
+ 
+  }
+
     anyInclude = TRUE
   }
 
@@ -311,7 +317,8 @@ setGenoInput = function(bgenFile = "",
     }
 
     colnames(RangesToInclude) = c("CHROM", "START", "END")
-   if(nrow(RangesToInclude)){
+ if(dosageFileType != "vcf"){ 
+   if(nrow(RangesToInclude) > 0){
     for(i in 1:nrow(RangesToInclude)){
       CHROM1 = RangesToInclude$CHROM[i]
       START = RangesToInclude$START[i]
@@ -321,7 +328,8 @@ setGenoInput = function(bgenFile = "",
         markersInclude = c(markersInclude, markerInfo$ID[posRows])
 	cat(length(markerInfo$ID[posRows]), " markers in the range ", i, " are found in the geno/dosage file.\n")
     }
-   } 
+   }
+  } 
     anyInclude = TRUE
   }
 
@@ -368,9 +376,11 @@ if(FALSE){
   # return genotype
   #cat("Based on the 'GenoFile' and 'GenoFileIndex',", genoType, "format is used for genotype data.\n")
 
-  if(anyInclude)
+  if(anyInclude){
+   if(dosageFileType != "vcf"){	  
     markerInfo = subset(markerInfo, ID %in% markersInclude)
-
+   }
+  }
 #  if(anyExclude)
 #    markerInfo = subset(markerInfo, !ID %in% markersExclude)
 
@@ -392,17 +402,23 @@ if(FALSE){
       in_beg_pd=1
       in_end_pd=250000000
       set_iterator_inVcf(SNPlist, in_chrom, in_beg_pd, in_end_pd)
+      anyInclude = TRUE
     }
 
     if(!is.null(RangesToInclude)){
+      CHROM1 = RangesToInclude$CHROM
+      START = RangesToInclude$START
+      END = RangesToInclude$END
       if(length(CHROM1) > 1){
         stop("We do not support query with multiple regions for vcf file. Please only include one region in the ", rangestoIncludeFile, "\n")
       }else{
 	inSNPlist=""
         in_chrom=CHROM1[1]
   	in_beg_pd=START[1]
-	in_end_pd=END[1]	
+	in_end_pd=END[1]
+	cat("Tests will be performed for chromosome: ",in_chrom, ", start: ", in_beg_pd," end: ", in_end_pd,"\n")	
         set_iterator_inVcf(inSNPlist, in_chrom, in_beg_pd, in_end_pd)
+	anyInclude = TRUE
       }
     } 
     #markerInfo = data.table(CHROM=NULL, POS=NULL, genoIndex_prev=NULL, genoIndex=NULL)
@@ -415,7 +431,7 @@ if(FALSE){
  #   markerInfo[,POS:=NULL]
  # }
 
-  genoList = list(markerInfo = markerInfo, genoType = dosageFileType)
+  genoList = list(markerInfo = markerInfo, genoType = dosageFileType, anyInclude = anyInclude)
   return(genoList)
 }
 

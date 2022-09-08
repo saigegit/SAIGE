@@ -419,7 +419,8 @@ SPAGMMATtest = function(bgenFile = "",
                    LOCO,
                    chrom,
 		   isCondition,
-		   is_overwrite_output)
+		   is_overwrite_output,
+		   objGeno$anyInclude)
     }else{
       maxMACbinind = which(maxMAC_in_groupTest > 0)	
       if(length(maxMACbinind) > 0){ 

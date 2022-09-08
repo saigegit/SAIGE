@@ -12,7 +12,8 @@ SAIGE.Marker = function(traitType,
 			LOCO,
 			chrom,
 			isCondition,
-			isOverWriteOutput)
+			isOverWriteOutput, 
+			isAnyInclude)
 {
 
   if(is.null(OutputFileIndex))
@@ -72,11 +73,13 @@ SAIGE.Marker = function(traitType,
     }
     
   }else{
+   if(!isAnyInclude){	  
     if(chrom == ""){
       stop("chrom needs to be specified for single-variant assoc tests when using VCF as input\n")
     }else{
       set_iterator_inVcf("", chrom, 1, 250000000)
     }
+   }
     if(outIndex > 1){
 	move_forward_iterator_Vcf(outIndex*nMarkersEachChunk)    
     }
