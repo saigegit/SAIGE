@@ -66,7 +66,7 @@ class SAIGEClass
       arma::vec m_MAF_cond;
       double  m_qsum_cond;
       arma::vec m_gsum_cond;
-      arma::vec m_p_cond;
+      std::vector<std::string> m_p_cond;
       arma::vec m_scalefactor_G2_cond;
       arma::mat m_VarInvMat_cond_scaled_weighted;
       //arma::mat m_VarInvMat_cond_region_binary;
@@ -175,7 +175,7 @@ void scoreTestFast(arma::vec & t_GVec,
                                 double& t_Tstat_c,
                                 double& t_varT_c,
                                 arma::rowvec & t_G1tilde_P_G2tilde,
-				 bool & t_isFirth,
+				bool & t_isFirth,
                                 bool & t_isFirthConverge, 
 				bool t_isER);
 
@@ -199,13 +199,13 @@ void scoreTestFast(arma::vec & t_GVec,
     void assignConditionFactors(
       arma::mat & t_P2Mat_cond,
       arma::mat & t_VarInvMat_cond,
-            arma::mat & t_VarMat_cond,
+      arma::mat & t_VarMat_cond,
       arma::vec & t_Tstat_cond,
-       arma::vec & t_G2_Weight_cond,
+      arma::vec & t_G2_Weight_cond,
       arma::vec & t_MAF_cond,
       double t_qsum_cond,
       arma::vec & t_gsum_cond,
-      arma::vec & t_p_cond);
+      std::vector<std::string> & t_p_cond);
 
      void assignConditionFactors_scalefactor(
         arma::vec & t_scalefactor_G2_cond);	
