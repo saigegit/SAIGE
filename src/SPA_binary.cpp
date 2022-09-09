@@ -181,29 +181,30 @@ Rcpp::List Get_Saddle_Prob_Binom(double zeta,  arma::vec & mu, arma::vec & g, do
 		//std::cout << "Ztest: " << Ztest << std::endl;
 		//std::cout << "w: " << w << std::endl;
 		//std::cout << "v: " << v << std::endl;
+   		//boost::math::normal norm_dist(0,1);
 
-   		boost::math::normal norm_dist(0,1);
 		double pval0;
-		
+	        if(Ztest > 0){
+                        //pval0 = boost::math::cdf(complement(norm_dist,Ztest));
+                        pval0 = R::pnorm(Ztest,0,1,false,logp);
+                        pval = pval0;
+                        //if(logp){
+                        //      pval = std::log(pval);
+                        //}
+                }else {
+                        //pval0 = boost::math::cdf(norm_dist,Ztest);
+                        pval0 = R::pnorm(Ztest,0,1,true,logp);
+                        pval = -pval0;
 
-		if(Ztest > 0){
-			pval0 = boost::math::cdf(complement(norm_dist,Ztest));
-			pval= pval0;
-			//if(logp){
-			//	pval = std::log(pval);
-			//}	
-		} else {
-			pval0 = boost::math::cdf(norm_dist,Ztest);
-			pval= -1*pval0;
-			
-			//	-Rcpp::pnorm( Ztest, mean = 0.0, sd = 1.0, lower = true, log = logp );
-		}
+                        //      -Rcpp::pnorm( Ztest, mean = 0.0, sd = 1.0, lower = true, log = logp );
+                }	
+
 		isSaddle = true;
 	} else {
 			if(logp)
 			{
 				pval =  negative_infinity;
-			}else {
+			}else{
 				pval= 0;
 			}
 	}
@@ -260,7 +261,6 @@ Rcpp::List SPA_binary(arma::vec & mu, arma::vec & g, double q, double qinv, doub
                                 p2 = pval_noadj/2;
                         }
 		}
-		//std::cout << "p1_nofast " << p1 << "p2 " << p2 << std::endl;
 		
 		if(logp)
 		{
@@ -270,7 +270,6 @@ Rcpp::List SPA_binary(arma::vec & mu, arma::vec & g, double q, double qinv, doub
 		}
 		Isconverge=true;
 	}else {
- 			//std::cout << "Error_Converge" << std::endl;
 			pval = pval_noadj;
 			Isconverge=false;	
 		}		
@@ -430,35 +429,35 @@ Rcpp::List Get_Saddle_Prob_fast_Binom(double zeta,  arma::vec & mu, arma::vec & 
 		//v = zeta *  std::sqrt(k2);
 		Ztest = w + (1/w) * std::log(v/w);
 	
-		           boost::math::normal norm_dist(0,1);
+		boost::math::normal norm_dist(0,1);
                 double pval0;
 
 
 
 		if(Ztest > 0){
-			pval0 = boost::math::cdf(complement(norm_dist,Ztest));
-
+			//pval0 = boost::math::cdf(complement(norm_dist,Ztest));
+			pval0 = R::pnorm(Ztest,0,1,false,logp);
 			pval=pval0;
 			//if(logp){
 			//	pval = std::log(pval);
 			//}	
-		} else {
-			pval0 = boost::math::cdf(norm_dist,Ztest);
-
+		}else {
+			//pval0 = boost::math::cdf(norm_dist,Ztest);
+			pval0 = R::pnorm(Ztest,0,1,true,logp);
 			pval= -pval0;
 			
 			//	-Rcpp::pnorm( Ztest, mean = 0.0, sd = 1.0, lower = true, log = logp );
 		}
 		isSaddle = true;
-		} else {
-			if(logp)
-			{
-				pval =  negative_infinity;
-			}else {
-				pval=0;
-			}
+	}else{
+		if(logp)
+		{
+			pval =  negative_infinity;
+		}else {
+			pval=0;
 		}
-	  result["pval"] = pval;
+	}
+	result["pval"] = pval;
         result["isSaddle"] = isSaddle;
         return(result);
 
@@ -508,6 +507,8 @@ Rcpp::List SPA_binary_fast(arma::vec & mu, arma::vec & g, double q, double qinv,
 			}	
 		}
 
+		std::cout << "p1  first " << p1 << "p2 " << p2 << std::endl;
+		std::cout << "HEREHERE " << std::endl;
 		if(logp){
 			pval = add_logp(p1,p2);
 		} else {
