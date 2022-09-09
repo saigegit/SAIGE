@@ -200,17 +200,17 @@ SPA_ER_kernel_related_Phiadj_fast_new<-function(p.new, Score, Phi, p.value_burde
 	
 
 	idx_0<-which(VarS_org >0)
-        idx_p0<-which(p.new >0)
-        idx_p1<-which(p.new <0)
-
-
+        #idx_p0<-which(p.new >0)
+        idx_p0<-which(!is.na(p.new))
+        #idx_p1<-which(p.new <0)
 	#if(length(idx_0) > 0){
  	#	zscore.all_1[idx_0]= qnorm(p.new[idx_0]/2, mean = 0, sd =sqrt(VarS_org[idx_0]),lower.tail = FALSE, log.p = FALSE)*sign(Score)
         #}
 	VarS = zscore.all_0^2/500
 
 	if(length(idx_p0) > 0){
-                VarS[idx_p0]= zscore.all_0[idx_p0]^2/qchisq(p.new[idx_p0], 1, ncp = 0, lower.tail = FALSE, log.p = FALSE)
+                #VarS[idx_p0]= zscore.all_0[idx_p0]^2/qchisq(p.new[idx_p0], 1, ncp = 0, lower.tail = FALSE, log.p = FALSE)
+                VarS[idx_p0]= zscore.all_0[idx_p0]^2/qchisq(p.new[idx_p0], df = 1, ncp = 0, lower.tail = FALSE, log.p = TRUE)
         }
 	vars_inf=which(VarS==Inf)
 	if(regionTestType != "BURDEN"){
@@ -247,7 +247,8 @@ SPA_ER_kernel_related_Phiadj_fast_new<-function(p.new, Score, Phi, p.value_burde
 	}
         	VarQ = sum(G2_adj_n)
         	Q_b=sum(zscore.all_1)^2
-        	VarQ_2=Q_b/qchisq(p.value_burden, df=1, ncp = 0, lower.tail = FALSE, log.p = FALSE)
+
+        	VarQ_2=Q_b/qchisq(p.value_burden, df=1, ncp = 0, lower.tail = FALSE, log.p = TRUE)
         	if (VarQ_2== 0) {
                 	r=1
         	}else{
@@ -273,7 +274,7 @@ SPA_ER_kernel_related_Phiadj_fast_new<-function(p.new, Score, Phi, p.value_burde
 
 
 get_newPhi_scaleFactor = function(q.sum, mu.a, g.sum, p.new, Score, Phi, regionTestType){
-	p.value_burden<-SPAtest:::Saddle_Prob(q.sum , mu=mu.a, g=g.sum, Cutoff=2,alpha=2.5*10^-6)$p.value
+	p.value_burden<-SPAtest:::Saddle_Prob(q.sum, mu=mu.a, g=g.sum, Cutoff=2,alpha=2.5*10^-6, log.p =TRUE)$p.value
         re_phi= SPA_ER_kernel_related_Phiadj_fast_new(p.new, Score, Phi, p.value_burden, regionTestType)
 	return(re_phi)
 }

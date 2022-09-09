@@ -593,3 +593,14 @@ writeOutputFileIndex = function(
   if(End)
     write.table(message5, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
 }
+
+
+convert_str_to_log = function(a){
+	if(a != "NA"){
+		b = as.numeric(unlist(strsplit(a, split="E")))
+		b1 = b[2]+log10(b[1])
+		d = b1 * log(10)
+	}else{
+		d = NA	
+	}	
+}	
