@@ -409,7 +409,7 @@ void mainMarkerInCPP(
       Unified_getMarkerPval( 
 		    t_GVec, 
                           false, // bool t_isOnlyOutputNonZero, 
-                          indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,   
+                          indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA,  Tstat, gy, varT,   
 			  altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false);
     }else{
       Unified_getMarkerPval( 
@@ -419,7 +419,18 @@ void mainMarkerInCPP(
 			  altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true);
     }
 
-    double pval_num = std::stod(pval); 
+    double pval_num;
+  
+    try {
+        pval_num = std::stod(pval);
+    } catch (const std::invalid_argument&) {
+        std::cerr << "Argument is invalid\n";
+	pval_num = 0;
+    } catch (const std::out_of_range&) {
+        std::cerr << "Argument is out of range for a double\n";
+	pval_num = 0;
+    }
+
     if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest)){
       ptr_gSAIGEobj->set_flagSparseGRM_cur(true);
 
@@ -686,7 +697,7 @@ void Unified_getMarkerPval(
 			   arma::rowvec & t_G1tilde_P_G2tilde_Vec, 
 			   bool & t_isFirth,
 			   bool & t_isFirthConverge, 
-			   bool t_isER)
+			   bool t_isER) 
 {
     if(t_isOnlyOutputNonZero == true)
       Rcpp::stop("When using SAIGE method to calculate marker-level p-values, 't_isOnlyOutputNonZero' should be false.");   
@@ -985,7 +996,7 @@ Rcpp::List mainRegionInCPP(
   std::vector<double> BetaVec(q, arma::datum::nan);         // beta value for ALT allele
   std::vector<double> seBetaVec(q, arma::datum::nan);
   std::vector<std::string> pvalVec(q, "NA");
-  std::vector<double> pvalVec_val(q, arma::datum::nan);
+  //std::vector<double> pvalVec_val(q, arma::datum::nan);
   std::vector<double> TstatVec(q, arma::datum::nan);
   std::vector<double> TstatVec_flip(q, arma::datum::nan);
   std::vector<double> gyVec(q, arma::datum::nan);
@@ -1163,7 +1174,7 @@ Rcpp::List mainRegionInCPP(
 	BetaVec.at(i) = Beta * (1 - 2*flip);  // Beta if flip = false, -1 * Beta is flip = true       
         seBetaVec.at(i) = seBeta;       
         pvalVec.at(i) = pval;
-	pvalVec_val.at(i) = std::stod(pval);
+	//pvalVec_val.at(i) = std::stod(pval);
         pvalNAVec.at(i) = pval_noSPA;
         TstatVec.at(i) = Tstat * (1 - 2*flip);
         TstatVec_flip.at(i) = Tstat;
@@ -1452,7 +1463,7 @@ if(i2 > 0){
             BetaVec.at(i) = Beta* (1 - 2*flip);
             seBetaVec.at(i) = seBeta;
             pvalVec.at(i) = pval;
-	    pvalVec_val.at(i) = std::stod(pval);
+	    //pvalVec_val.at(i) = std::stod(pval);
             pvalNAVec.at(i) = pval_noSPA;
             TstatVec.at(i) = Tstat * (1 - 2*flip);
             TstatVec_flip.at(i) = Tstat;
@@ -1872,7 +1883,8 @@ if(t_regionTestType == "BURDEN"){
  int numofUR0;
  int mFirth = 0;
 if(t_isSingleinGroupTest){
-  OutList.push_back(pvalVec_val, "pvalVec");
+ // OutList.push_back(pvalVec_val, "pvalVec");
+ OutList.push_back(pvalVec, "pvalVec");
 if(iswriteOutput){
   numofUR0 = writeOutfile_singleInGroup(t_isMoreOutput,
       t_isImputation,
@@ -2002,7 +2014,8 @@ void assign_conditionMarkers_factors(
   arma::mat P2Mat(t_n, q);
   arma::mat VarInvMat(q, q);
   arma::vec TstatVec(q);
-  arma::vec pVec(q);
+  //arma::vec pVec(q);
+    std::vector<std::string> pVec(q, "NA");
   arma::vec MAFVec(q);
   arma::vec gyVec(q);
   arma::vec w0G2_cond_Vec(q);
@@ -2111,12 +2124,12 @@ void assign_conditionMarkers_factors(
      Unified_getMarkerPval(
                     GVec,
                     false, // bool t_isOnlyOutputNonZero,
-                    indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false);
+                    indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA,  Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false);
   }else{
      Unified_getMarkerPval(
                     GVec,
                     false, // bool t_isOnlyOutputNonZero,
-                    indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true);
+                    indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA,  Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true);
 
   }
       P1Mat.row(i) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*gtildeVec.t();
@@ -2140,7 +2153,8 @@ void assign_conditionMarkers_factors(
      gyVec(i) = gy * w0G2_cond;
      gsumVec = gsumVec + GVec * w0G2_cond;
      TstatVec(i) = Tstat;
-     pVec(i) = std::stod(pval);
+     //pVec(i) = std::stod(pval);
+     pVec.at(i) = pval;
   }
   arma::mat VarMat = P1Mat * P2Mat;
 

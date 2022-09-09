@@ -303,9 +303,13 @@ SAIGE.Region = function(mu,
       #rm(genoIndex)
       #gc()
     #tb0 = proc.time()
+
       if(is_single_in_groupTest){
-      #OutList = as.data.frame(outList$OUT_DF)
-        noNAIndices = which(!is.na(outList$pvalVec))
+	#convert string p-value to log(p)      
+	pvalVec_new = unlist(lapply(outList$pvalVec,convert_str_to_log))
+        outList$pvalVec = pvalVec_new  ##log of p-values
+	noNAIndices = which(!is.na(outList$pvalVec))
+
         if(sum(WEIGHT) > 0){
           AnnoWeights = c(WEIGHT, rep(1, outList$numofUR))
         }
@@ -339,7 +343,7 @@ SAIGE.Region = function(mu,
        StatVec = outList$TstatVec_flip[noNAIndices]
        VarSVec = diag(outList$VarMat)
        VarSVec = VarSVec[!is.na(VarSVec)]
-       adjPVec = outList$pvalVec[!is.na(outList$pvalVec)]
+       adjPVec = outList$pvalVec[!is.na(outList$pvalVec)]  ##adjPVec contains log(p)
 		
        #varTestedIndices = which(apply(annoMAFIndicatorMat, 1, isContainValue, val=1))
        #print("varTestedIndices")
@@ -426,6 +430,7 @@ SAIGE.Region = function(mu,
 		}
 
 		groupOutList_cond = get_SKAT_pvalue(Score_cond, Phi_cond, r.corr, regionTestType)
+
 
 		resultDF$Pvalue_cond = groupOutList_cond$Pvalue_SKATO
 		resultDF$Pvalue_Burden_cond = groupOutList_cond$Pvalue_Burden
@@ -519,6 +524,12 @@ if(is_fastTest){
       outList = mainRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolistsub, regionName, is_fastTest, is_output_moreDetails)
   if(is_single_in_groupTest){
       #OutList = as.data.frame(outList$OUT_DF)
+
+      #        #convert string p-value to log(p)	  
+      pvalVec_new = unlist(lapply(outList$pvalVec,convert_str_to_log))
+      outList$pvalVec = pvalVec_new  ##log of p-values
+
+
       noNAIndices = which(!is.na(outList$pvalVec))
       #print(noNAIndices)
       annoMAFIndicatorMat = outList$annoMAFIndicatorMat
