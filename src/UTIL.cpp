@@ -189,8 +189,8 @@ double sum_arma1(arma::vec& X) {
 double add_logp(double p1, double p2)
 {
         using namespace Rcpp;
-        p1 = std::abs(p1);
-        p2 = std::abs(p2);
+        p1 = -std::abs(p1);
+        p2 = -std::abs(p2);
         double maxp = std::max(p1,p2);
         double  minp = std::min(p1,p2);
         double result = maxp+std::log(1+std::exp(minp-maxp));
