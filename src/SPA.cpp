@@ -47,7 +47,6 @@ void SPA(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_noadj
         Rcpp::List getSaddle2;
         if(outuni1["Isconverge"]  && outuni2["Isconverge"])
         {
-                //std::cout << "q is " << q << " 3 qinv is " << qinv << std::endl;
                 if( traitType == "binary"){
                   getSaddle = Get_Saddle_Prob_Binom(outuni1["root"], mu, g, q, logp);
                   getSaddle2 = Get_Saddle_Prob_Binom(outuni2["root"], mu, g, qinv, logp);
@@ -76,7 +75,6 @@ void SPA(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_noadj
                                 p2 = pval_noadj/2;
                         }
                 }
-                //std::cout << "p1_nofast " << p1 << "p2 " << p2 << std::endl;
 
                 if(logp)
                 {
@@ -173,14 +171,13 @@ void SPA_fast(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_
                         pval = add_logp(p1,p2);
                 }else {
                         pval = std::abs(p1)+std::abs(p2);
-                        //std::cout << "p1 " << p1 << "p2 " << p2 << std::endl;
                 }
                 //Isconverge=true;
         }else {
                         //std::cout << "Error_Converge" << std::endl;
                         pval = pval_noadj;
                         Isconverge=false;
-                }
+        }
 	isSPAConverge = Isconverge;
         //result["pvalue"] = pval;
         //result["Isconverge"] = Isconverge;
