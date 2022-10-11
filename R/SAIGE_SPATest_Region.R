@@ -995,7 +995,6 @@ SAIGE.Region = function(mu,
           #Start = (i==1)
           Start = (cth_chunk_to_output == 1)
           End = (i == nRegions)
-          AnalysisType = "Region"
           nEachChunk = 1
           
           if (regionTestType != "BURDEN") {
@@ -1024,7 +1023,7 @@ SAIGE.Region = function(mu,
       # output
       if (mth ==  numberRegionsInChunk) {
         message1 = "This is the output index file for SAIGE package to record the end point in case users want to restart the analysis. Please do not modify this file."
-        message2 = paste("This is a", AnalysisType, "level analysis.")
+        message2 = "This is a Region level analysis."
         message3 = paste("nEachChunk =", nEachChunk)
         message4 = paste("Have completed the analysis of chunk", indexChunk)
         message5 = "Have completed the analyses of all chunks."
