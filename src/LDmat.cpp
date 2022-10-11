@@ -360,7 +360,7 @@ void LDmatRegionInCPP(
 		  refVec,
 		  altVec,
 		  infoVec,
-		  altCountsVec,
+		  MACVec,
 		  missingRateVec,
 		  N_Vec,
 		  regionName);
