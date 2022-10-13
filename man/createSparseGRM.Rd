@@ -5,7 +5,9 @@
 \title{Construct a sparse GRM for a given data set}
 \usage{
 createSparseGRM(
-  plinkFile = "",
+  bedFile = "",
+  bimFile = "",
+  famFile = "",
   outputPrefix = "",
   numRandomMarkerforSparseKin = 1000,
   relatednessCutoff = 0.125,
@@ -19,7 +21,11 @@ createSparseGRM(
 )
 }
 \arguments{
-\item{plinkFile}{character. Path to plink file to be used for calculating the sparse GRM}
+\item{bedFile}{character. Path to plink file (bed) to be used for calculating the sparse GRM}
+
+\item{bimFile}{character. Path to plink file (bim) to be used for calculating the sparse GRM}
+
+\item{famFile}{character. Path to plink file (fam) to be used for calculating the sparse GRM}
 
 \item{outputPrefix}{character. Path to the output files with prefix}
 

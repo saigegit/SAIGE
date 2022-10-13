@@ -6,6 +6,9 @@
 \usage{
 fitNULLGLMM(
   plinkFile = "",
+  bedFile = "",
+  bimFile = "",
+  famFile = "",
   phenoFile = "",
   phenoCol = "",
   traitType = "binary",
@@ -24,6 +27,7 @@ fitNULLGLMM(
   memoryChunk = 2,
   tauInit = c(0, 0),
   LOCO = TRUE,
+  isLowMemLOCO = FALSE,
   traceCVcutoff = 0.0025,
   ratioCVcutoff = 0.001,
   outputPrefix = "",
@@ -35,7 +39,7 @@ fitNULLGLMM(
   relatednessCutoff = 0.125,
   isCateVarianceRatio = FALSE,
   cateVarRatioIndexVec = NULL,
-  cateVarRatioMinMACVecExclude = c(10, 20.5),
+  cateVarRatioMinMACVecExclude = c(10.5, 20.5),
   cateVarRatioMaxMACVecInclude = c(20.5),
   isCovariateTransform = TRUE,
   isDiagofKinSetAsOne = FALSE,
@@ -52,7 +56,8 @@ fitNULLGLMM(
   MaleOnly = FALSE,
   SampleIDIncludeFile = "",
   isCovariateOffset = FALSE,
-  skipVarianceRatioEstimation = FALSE
+  skipVarianceRatioEstimation = FALSE,
+  nrun = 30
 )
 }
 \arguments{

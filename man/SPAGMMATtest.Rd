@@ -47,7 +47,7 @@ SPAGMMATtest(
   dosage_zerod_cutoff = 0.2,
   dosage_zerod_MAC_cutoff = 10,
   is_output_moreDetails = FALSE,
-  MACCutoff_to_CollapseUltraRare = 10,
+  MACCutoff_to_CollapseUltraRare = 10.5,
   annotation_in_groupTest = c("lof", "missense;lof", "missense;lof;synonymous"),
   maxMAF_in_groupTest = c(0.01),
   maxMAC_in_groupTest = c(0),
@@ -57,7 +57,11 @@ SPAGMMATtest(
   is_overwrite_output = TRUE,
   is_single_in_groupTest = TRUE,
   is_no_weight_in_groupTest = FALSE,
-  is_output_markerList_in_groupTest = FALSE
+  is_output_markerList_in_groupTest = FALSE,
+  is_fastTest = FALSE,
+  pval_cutoff_for_fastTest = 0.05,
+  max_MAC_use_ER = 4,
+  subSampleFile = ""
 )
 }
 \arguments{
@@ -115,7 +119,7 @@ SPAGMMATtest(
 
 \item{markers_per_chunk_in_groupTest}{numeric. Number of markers in each chunk when calculating the variance covariance matrix in the set/group-based tests. By default, 100.}
 
-\item{condition}{character. For conditional analysis. Variant ids are in the format chr:pos_ref/alt and seperated by by comma. e.g."chr3:101651171_C/T,chr3:101651186_G/A".}
+\item{condition}{character. For conditional analysis. Variant ids are in the format chr:pos_ref/alt and seperated by by comma. e.g."chr3:101651171:C:T,chr3:101651186:G:A".}
 
 \item{sparseGRMFile}{character. Path to the pre-calculated sparse GRM file that was used in Step 1}
 
@@ -123,21 +127,21 @@ SPAGMMATtest(
 
 \item{relatednessCutoff}{float. The threshold for coefficient of relatedness to treat two samples as unrelated in the sparse GRM. By default, 0}
 
-\item{groupFile}{character. Path to the file containing the group information for gene-based tests. Each gene/set has 2 or 3 lines in the group file. The first element is the gene/set name. The second element in the first line is to indicate whether this line contains variant IDs (var), annotations (anno), or weights (weight). The line for weights is optional. If not specified, the default weights will be generated based on beta(MAF, 1, 25). Use weights.beta to change the parameters for the Beta distribution. The variant ids must be in the format chr:pos_ref/alt. Elements are seperated by tab or space.}
+\item{groupFile}{character. Path to the file containing the group information for gene-based tests. Each gene/set has 2 or 3 lines in the group file. The first element is the gene/set name. The second element in the first line is to indicate whether this line contains variant IDs (var), annotations (anno), or weights (weight). The line for weights is optional. If not specified, the default weights will be generated based on beta(MAF, 1, 25). Use weights.beta to change the parameters for the Beta distribution. The variant ids must be in the format chr:pos_ref/alt. Elements are separated by tab or space.}
 
 \item{weights.beta}{vector of numeric with two elements. parameters for the beta distribution to weight genetic markers in gene-based tests. By default, "c(1,25)".}
 
 \item{r.corr}{numeric. bewteen 0 and 1. parameters for gene-based tests. If r.corr = 1, only Burden tests will be performed. If r.corr = 0, SKAT-O tests will be performed and results for Burden tests and SKAT tests will be output too.  By default, 0.}
 
-\item{dosage_zerod_cutoff}{numeric. If is_imputed_data = TRUE, For variants with MAC <= dosage_zerod_MAC_cutoff, dosages <= dosageZerodCutoff with be set to 0. By derault, 0.2}
+\item{dosage_zerod_cutoff}{numeric. If is_imputed_data = TRUE, For variants with MAC <= dosage_zerod_MAC_cutoff, dosages <= dosageZerodCutoff with be set to 0. By default, 0.2}
 
-\item{dosage_zerod_MAC_cutoff}{numeric. If is_imputed_data = TRUE, For variants with MAC <= dosage_zerod_MAC_cutoff, dosages <= dosageZerodCutoff with be set to 0. By derault, 10}
+\item{dosage_zerod_MAC_cutoff}{numeric. If is_imputed_data = TRUE, For variants with MAC <= dosage_zerod_MAC_cutoff, dosages <= dosageZerodCutoff with be set to 0. By default, 10}
 
 \item{is_output_moreDetails}{logical. Whether to output heterozygous and homozygous counts in cases and controls. By default, FALSE. If True, the columns homN_Allele2_cases, hetN_Allelelogical2_cases, homN_Allele2_ctrls, hetN_Allele2_ctrls will be output. By default, FALSE}
 
-\item{MACCutoff_to_CollapseUltraRare}{numeric. MAC cutoff to collpase the ultra rare variants (<= MACCutoff_to_CollapseUltraRare) in the set-based association tests. By default, 10.}
+\item{MACCutoff_to_CollapseUltraRare}{numeric. MAC cutoff to collpase the ultra rare variants (<= MACCutoff_to_CollapseUltraRare) in the set-based association tests. By default, 10.5}
 
-\item{minGroupMAC_in_BurdenTest}{numeric. Only applied when only Burden tests are performed (r.corr=1). Minimum minor allele count in the Burden test for the psueodo marker. By default, 5}
+\item{minGroupMAC_in_BurdenTest}{numeric. Only applied when only Burden tests are performed (r.corr=1). Minimum minor allele count in the Burden test for the pseudo-marker. By default, 5}
 
 \item{is_Firth_beta}{logical. Whether to estimate effect sizes using approx Firth, only for binary traits. By default, FALSE}
 
@@ -159,15 +163,13 @@ SPAGMMATtest(
 
 \item{maxMissing}{numeric. Maximum missing rate for markers to be tested. By default, 0.15}
 
-\item{maxMAF_in_groupTest.}{vector of numeric. Max MAF for markers tested in group test seperated by comma. e.g. c(0.0001,0.001,0.01). By default, c(0.01)}
+\item{maxMAF_in_groupTest.}{vector of numeric. Max MAF for markers tested in group test separated by comma. e.g. c(0.0001,0.001,0.01). By default, c(0.01)}
 
-\item{maxMAC_in_groupTest.}{vector of numeric. Max MAC for markers tested in group test seperated by comma. This vector will be combined with maxMAF_in_groupTest. e.g. c(1) to only test singletons. By default, c(0) and no Max MAC cutoffs are applied.}
+\item{maxMAC_in_groupTest.}{vector of numeric. Max MAC for markers tested in group test separated by comma. This vector will be combined with maxMAF_in_groupTest. e.g. c(1) to only test singletons. By default, c(0) and no Max MAC cutoffs are applied.}
 
 \item{annotation_in_groupTest.}{vector of character. annotations of markers to be tested in the set-based tests. using ; to combine multiple annotations in the same test. e.g. c("lof","missense;lof","missense;lof;synonymous")  will test lof variants only, missense+lof variants, and missense+lof+synonymous variants. By default:  c("lof","missense;lof","missense;lof;synonymous")}
 
 \item{weights_for_condition.}{vector of numeric. weights for conditioning markers for gene- or region-based tests. The length equals to the number of conditioning markers, e.g. c(1,2,3). If not specified, the default weights will be generated based on beta(MAF, 1, 25). Use weights.beta to change the parameters for the Beta distribution.}
-
-\item{IsOutputlogPforSingle}{logical. Whether to output log(Pvalue) for single-variant assoc tests. By default, FALSE. If TRUE, the log(Pvalue) instead of original P values will be output (Not activated)}
 
 \item{X_PARregion}{character. ranges of (pseudoautosomal) PAR region on chromosome X, which are seperated by comma and in the format start:end. By default: '60001-2699520,154931044-155260560' in the UCSC build hg19. For males, there are two X alleles in the PAR region, so PAR regions are treated the same as autosomes. In the NON-PAR regions (outside the specified PAR regions on chromosome X), for males, there is only one X allele. If is_rewrite_XnonPAR_forMales=TRUE, genotypes/dosages of all variants in the NON-PAR regions on chromosome X will be multiplied by 2 (Not activated).}
 
