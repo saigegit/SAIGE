@@ -201,7 +201,6 @@ void LDmatRegionInCPP(
     altFreqVec.at(i) = altFreq;           // allele frequencies of ALT allele, this is not always < 0.5.
     missingRateVec.at(i) = missingRate;
     MAFVec.at(i) = MAF;
-    MACVec.at(i) = MAC;
     N_Vec.at(i) = t_n;
     imputationInfoVec.at(i) = imputeInfo;
     infoVec.at(i) = info;                 // marker information: CHR:POS:REF:ALT
@@ -209,6 +208,7 @@ void LDmatRegionInCPP(
    if((missingRate > g_missingRate_cutoff_LDmat) || (MAF > g_maxMAFLimit_LDmat) || (MAF < g_marker_minMAF_cutoff_LDmat) || (MAC < g_marker_minMAC_cutoff_LDmat) || (imputeInfo < g_marker_minINFO_cutoff_LDmat)){
 	       continue;
    }else{
+    MACVec.at(i) = MAC;
     altCountsVec.at(i) = altCounts;
     indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
     location_m_P1Mat.insert(std::end(location_m_P1Mat), indexNonZeroVec.size(), i1InChunk);
