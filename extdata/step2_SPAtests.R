@@ -73,7 +73,7 @@ option_list <- list(
   make_option("--is_overwrite_output", type="logical",default=TRUE,
     help="Whether to overwrite the output file if it exists. If FALSE, the program will continue the unfinished analysis instead of starting over from the beginining [default=TRUE]"),				
   make_option("--maxMAF_in_groupTest", type="character",default="0.0001,0.001,0.01",
-    help="Max MAF for markers tested in group test seperated by comma. e.g. 0.0001,0.001,0.01, [default=0.01]"),
+    help="Max MAF for markers tested in group test seperated by comma. e.g. 0.0001,0.001,0.01, [default=0.0001,0.001,0.01]"),
   make_option("--maxMAC_in_groupTest", type="character",default="0",
     help="Max MAC for markers tested in group test seperated by comma.The list will be combined with maxMAF_in_groupTest. e.g. 1,2 . By default, 0 and no maxMAC cutoff are applied. [default=0]"),
   make_option("--annotation_in_groupTest", type="character",default="lof,missense;lof,missense;lof;synonymous",
