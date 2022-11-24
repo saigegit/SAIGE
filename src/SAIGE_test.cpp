@@ -815,7 +815,7 @@ bool SAIGEClass::assignVarianceRatio(double MAC, bool issparseforVR){
     }
 
     if(!hasVarRatio){	
-	if(MAC < m_cateVarRatioMinMACVecExclude(0)){
+	if(MAC <= m_cateVarRatioMinMACVecExclude(0)){
 		m_varRatioVal = m_varRatio(0);
 		hasVarRatio = true;
 	}	
