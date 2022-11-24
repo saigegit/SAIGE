@@ -1,0 +1,1 @@
+Rscript createSparseGRM.R --bimFile=input/plinkforGRM_1000samples_10kMarkers.bim --bedFile=input/plinkforGRM_1000samples_10kMarkers.bed --famFile=input/plinkforGRM_1000samples_10kMarkers.fam  --nThreads=72 --outputPrefix=./test_sparseGRM --numRandomMarkerforSparseKin=5000 --relatednessCutoff=0.05 &> createGRM.log
