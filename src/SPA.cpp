@@ -89,6 +89,7 @@ void SPA(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_noadj
                         Isconverge=false;
                 }
         isSPAConverge = Isconverge;
+	std::cout << "pval " << pval << std::endl;
 	//result["pvalue"] = pval;
         //result["Isconverge"] = Isconverge;
         //return(result);
@@ -183,3 +184,89 @@ void SPA_fast(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_
         //result["Isconverge"] = Isconverge;
         //return(result);
 }
+
+
+
+
+// [[Rcpp::export]]
+double SPA_pval(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_noadj, double tol, bool logp, std::string traitType, bool & isSPAConverge){
+       double pval;
+        using namespace Rcpp;
+        List result;
+        double p1, p2;
+        bool Isconverge = true;
+        Rcpp::List outuni1;
+        Rcpp::List outuni2;
+        if( traitType == "binary"){
+          outuni1 = getroot_K1_Binom(0, mu, g, q, tol);
+          outuni2 = getroot_K1_Binom(0, mu, g, qinv, tol);
+        }else if(traitType == "timeToEvent"){
+          outuni1 = getroot_K1_Poi(0, mu, g, q, tol);
+          outuni2 = getroot_K1_Poi(0, mu, g, qinv, tol);
+        }
+
+/*
+        double outuni1root = outuni1["root"];
+        double outuni2root = outuni2["root"];
+        bool Isconverge1 = outuni1["Isconverge"];
+        bool Isconverge2 = outuni2["Isconverge"];
+
+        std::cout << "outuni1root" << outuni1root << std::endl;
+        std::cout << "outuni2root" << outuni2root << std::endl;
+        std::cout << "Isconverge1" << Isconverge1 << std::endl;
+        std::cout << "Isconverge2" << Isconverge2 << std::endl;
+*/
+
+        Rcpp::List getSaddle;
+        Rcpp::List getSaddle2;
+        if(outuni1["Isconverge"]  && outuni2["Isconverge"])
+        {
+                if( traitType == "binary"){
+                  getSaddle = Get_Saddle_Prob_Binom(outuni1["root"], mu, g, q, logp);
+                  getSaddle2 = Get_Saddle_Prob_Binom(outuni2["root"], mu, g, qinv, logp);
+                }else if(traitType == "timeToEvent"){
+                  getSaddle = Get_Saddle_Prob_Poi(outuni1["root"], mu, g, q, logp);
+                  getSaddle2 = Get_Saddle_Prob_Poi(outuni2["root"], mu, g, qinv, logp);
+                }
+
+                if(getSaddle["isSaddle"]){
+                        p1 = getSaddle["pval"];
+                }else{
+                        Isconverge = false;
+                        if(logp){
+                                p1 = pval_noadj-std::log(2);
+                        }else{
+                                p1 = pval_noadj/2;
+                        }
+                }
+                if(getSaddle2["isSaddle"]){
+                        p2 = getSaddle2["pval"];
+                }else{
+                        Isconverge = false;
+                        if(logp){
+                                p2 = pval_noadj-std::log(2);
+                        }else{
+                                p2 = pval_noadj/2;
+                        }
+                }
+
+                if(logp)
+                {
+                        pval = add_logp(p1,p2);
+                } else {
+                        pval = std::abs(p1)+std::abs(p2);
+                }
+                //Isconverge=true;
+        }else {
+                        //std::cout << "Error_Converge" << std::endl;
+                        pval = pval_noadj;
+                        Isconverge=false;
+                }
+        isSPAConverge = Isconverge;
+
+	return(pval);
+        //result["pvalue"] = pval;
+        //result["Isconverge"] = Isconverge;
+        //return(result);
+}
+

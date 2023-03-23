@@ -1649,7 +1649,6 @@ if(t_regionTestType != "BURDEN"){
   }
 }  //if(t_regionTestType != "BURDEN"){
 
-
 //read and test single markers done
 //arma::vec timeoutput2 = getTime();
 //printTime(timeoutput1, timeoutput2, "read and test single markers done");
