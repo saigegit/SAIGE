@@ -1660,6 +1660,25 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// SPA_pval
+double SPA_pval(arma::vec& mu, arma::vec& g, double q, double qinv, double pval_noadj, double tol, bool logp, std::string traitType, bool& isSPAConverge);
+RcppExport SEXP _SAIGE_SPA_pval(SEXP muSEXP, SEXP gSEXP, SEXP qSEXP, SEXP qinvSEXP, SEXP pval_noadjSEXP, SEXP tolSEXP, SEXP logpSEXP, SEXP traitTypeSEXP, SEXP isSPAConvergeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type g(gSEXP);
+    Rcpp::traits::input_parameter< double >::type q(qSEXP);
+    Rcpp::traits::input_parameter< double >::type qinv(qinvSEXP);
+    Rcpp::traits::input_parameter< double >::type pval_noadj(pval_noadjSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< bool >::type logp(logpSEXP);
+    Rcpp::traits::input_parameter< std::string >::type traitType(traitTypeSEXP);
+    Rcpp::traits::input_parameter< bool& >::type isSPAConverge(isSPAConvergeSEXP);
+    rcpp_result_gen = Rcpp::wrap(SPA_pval(mu, g, q, qinv, pval_noadj, tol, logp, traitType, isSPAConverge));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Korg_Binom
 double Korg_Binom(double t1, arma::vec& mu, arma::vec& g);
 RcppExport SEXP _SAIGE_Korg_Binom(SEXP t1SEXP, SEXP muSEXP, SEXP gSEXP) {
@@ -2284,6 +2303,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setminMAC_VarianceRatio", (DL_FUNC) &_SAIGE_setminMAC_VarianceRatio, 3},
     {"_SAIGE_SPA", (DL_FUNC) &_SAIGE_SPA, 10},
     {"_SAIGE_SPA_fast", (DL_FUNC) &_SAIGE_SPA_fast, 16},
+    {"_SAIGE_SPA_pval", (DL_FUNC) &_SAIGE_SPA_pval, 9},
     {"_SAIGE_Korg_Binom", (DL_FUNC) &_SAIGE_Korg_Binom, 3},
     {"_SAIGE_K1_adj_Binom", (DL_FUNC) &_SAIGE_K1_adj_Binom, 4},
     {"_SAIGE_K2_Binom", (DL_FUNC) &_SAIGE_K2_Binom, 3},

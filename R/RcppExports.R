@@ -513,6 +513,10 @@ SPA_fast <- function(mu, g, q, qinv, pval_noadj, logp, gNA, gNB, muNA, muNB, NAm
     invisible(.Call('_SAIGE_SPA_fast', PACKAGE = 'SAIGE', mu, g, q, qinv, pval_noadj, logp, gNA, gNB, muNA, muNB, NAmu, NAsigma, tol, traitType, pval, isSPAConverge))
 }
 
+SPA_pval <- function(mu, g, q, qinv, pval_noadj, tol, logp, traitType, isSPAConverge) {
+    .Call('_SAIGE_SPA_pval', PACKAGE = 'SAIGE', mu, g, q, qinv, pval_noadj, tol, logp, traitType, isSPAConverge)
+}
+
 Korg_Binom <- function(t1, mu, g) {
     .Call('_SAIGE_Korg_Binom', PACKAGE = 'SAIGE', t1, mu, g)
 }
