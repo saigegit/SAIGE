@@ -14,7 +14,7 @@ public:
     ComputeExact();
     ~ComputeExact();
     
-    int     Init(int * resarray, int nres, int * nres_k, double * Z0, double *Z1, int k, int m, int total
+    int     Init(std::vector<int> resarray, int nres, int * nres_k, double * Z0, double *Z1, int k, int m, int total
              , int * total_k, double *prob_k, double * odds, double * p1, int * IsExact, double epsilon, bool IsSmallmemory=0);
 
     
@@ -27,24 +27,24 @@ protected:
     virtual double     CalTestStat(int k, int * array, bool is_save=true, bool is_minIdx = false, int * minIdx = NULL);
     virtual double     CalTestStat_INV(int k, int * array, bool is_save=true, bool is_minIdx = false, int * minIdx = NULL);
     
-    int     CalFisherProb(int k, int * array);
-    int     SKAT_Exact_Recurse(int k, int * array, int cell, int start, int end);
-    int     SKAT_Resampling(int k, int * array);
-    int     SKAT_Resampling_Random(int k, int * array);    
+    int     CalFisherProb(int k, vector<int> array);
+    int     SKAT_Exact_Recurse(int k, vector<int> & array, int cell, int start, int end);
+    int     SKAT_Resampling(int k, vector<int> & array);
+    int     SKAT_Resampling_Random(int k, vector<int> & array);
 
-    int     CalFisherProb_INV(int k, int * array);
-    int     SKAT_Exact_Recurse_INV(int k, int * array, int cell, int start, int end);
+    int     CalFisherProb_INV(int k, vector<int> & array);
+    int     SKAT_Exact_Recurse_INV(int k, vector<int> & array, int cell, int start, int end);
     
 protected:
 
-    double * m_fprob ;	/* fisher hg probability */
-    double * m_teststat;	/* test statistic */
-    double * m_Z0;		/* Z0 and Z1 matrix */
-    double * m_Z1;
+    vector<double> m_fprob ;	/* fisher hg probability */
+    vector<double> m_teststat;	/* test statistic */
+    vector<double> m_Z0;		/* Z0 and Z1 matrix */
+    vector<double> m_Z1;
 
-    double * 	m_teststat_one;
-    double * 	m_teststat_Z0;
-    double *    m_teststat_Z1;
+    vector<double> 	m_teststat_one;
+    vector<double> 	m_teststat_Z0;
+    vector<double>    m_teststat_Z1;
 
     int m_k;				/* # of samples to have at least one minor allele */
     int m_m;				/* # of markers */
@@ -62,8 +62,8 @@ protected:
     vector<double> m_logOdds;
     
     int m_idx;
-    int * m_temp_x;
-    int * m_temp_x1;
+    vector<int> m_temp_x;
+    vector<int> m_temp_x1;
     
     // OUTput
     vector<double>  m_pval;

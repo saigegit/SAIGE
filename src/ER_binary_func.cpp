@@ -242,7 +242,7 @@ double SKATExactBin_Work(arma::mat & Z, arma::vec & res, arma::vec & pi1, uint32
 	//istdvec IsExactstd = arma::conv_to< istdvec >::from(pr["IsExact"]);
 
 
-	SKAT_Exact(&resarray[0], nres, &nres_k[0], &Z0std[0], &Z1std[0], k, m, n_total, &n_total_k[0], &prob[0], &oddsstd[0], &p1_adjstd[0], &IsExactVec[0], &pval[0], &pval1[0], &minP, test_type_new, epsilon);
+	SKAT_Exact(resarray, nres, &nres_k[0], &Z0std[0], &Z1std[0], k, m, n_total, &n_total_k[0], &prob[0], &oddsstd[0], &p1_adjstd[0], &IsExactVec[0], &pval[0], &pval1[0], &minP, test_type_new, epsilon);
 
 	//arma::mat pval_re(pval.size(),2);
 

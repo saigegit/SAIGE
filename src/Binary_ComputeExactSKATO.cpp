@@ -62,7 +62,7 @@ double ComputeExactSKATO::CalTestStat
     double test_C  = m_teststat_Z0_C;
     double test_skat = 0;
     double teststat;
-    memcpy(m_teststat_one, m_teststat_Z0, sizeof(double) *m_m);
+    memcpy(m_teststat_one.data(), m_teststat_Z0.data(), sizeof(double) *m_m);
     
 	
     for(i=0;i< k;i++){
@@ -131,7 +131,8 @@ double      ComputeExactSKATO::CalTestStat_INV(int k, int * array, bool is_save,
     double test_C  = m_teststat_Z1_C;
     double test_skat = 0;
     double teststat;
-    memcpy(m_teststat_one, m_teststat_Z1, sizeof(double) *m_m);
+    // There are easier ways to copy vectors
+    memcpy(m_teststat_one.data(), m_teststat_Z1.data(), sizeof(double) *m_m);
     
     for(i=0;i< k;i++){
         l = array[i];
@@ -196,19 +197,8 @@ double      ComputeExactSKATO::CalTestStat_INV(int k, int * array, bool is_save,
 
 
 ComputeExactSKATO::ComputeExactSKATO(){
-  
-    
-    m_fprob=NULL;
-    m_teststat=NULL;    
-    m_Z0=NULL;
-    m_Z1=NULL;
-    
-    m_teststat_one=NULL;
-    m_teststat_Z0=NULL;
-    m_teststat_Z1=NULL;
     
     m_pprod=1;
-
 
 }
 /*
