@@ -28,7 +28,7 @@ double     ComputeExact::CalTestStat(int k, int * array, bool is_save,bool is_mi
 
 	int i, j, l, temp;
     double stat = 0;
-    memcpy(m_teststat_one, m_teststat_Z0, sizeof(double) *m_m);
+    memcpy(m_teststat_one.data(), m_teststat_Z0.data(), sizeof(double) *m_m);
 	
     for(i=0;i< k;i++){
         l = array[i];
@@ -55,7 +55,7 @@ double     ComputeExact::CalTestStat_INV(int k, int * array, bool is_save, bool 
     
 	int i, j, l, temp;
     double stat = 0;
-    memcpy(m_teststat_one, m_teststat_Z1, sizeof(double) *m_m);
+    memcpy(m_teststat_one.data(), m_teststat_Z1.data(), sizeof(double) *m_m);
 	
     for(i=0;i< k;i++){
         l = array[i];
@@ -78,7 +78,7 @@ double     ComputeExact::CalTestStat_INV(int k, int * array, bool is_save, bool 
 }
 
 
-int     ComputeExact::CalFisherProb(int k, int * array){
+int     ComputeExact::CalFisherProb(int k, vector<int> array){
 
 	int i,l;
 	double temp = 1;
@@ -94,7 +94,7 @@ int     ComputeExact::CalFisherProb(int k, int * array){
 }
 
 
-int     ComputeExact::CalFisherProb_INV(int k, int * array){
+int     ComputeExact::CalFisherProb_INV(int k, vector<int> & array){
     
 	int i,l, k1;
     k1 = m_k - k;
@@ -111,13 +111,13 @@ int     ComputeExact::CalFisherProb_INV(int k, int * array){
 }
 
 
-int     ComputeExact::SKAT_Exact_Recurse(int k, int * array, int cell, int start, int end){
+int     ComputeExact::SKAT_Exact_Recurse(int k, vector<int> & array, int cell, int start, int end){
 
 	int i;
 	
 	/* node */
 	if(k == cell){
-		CalTestStat(k, array);
+		CalTestStat(k, array.data());
 		CalFisherProb(k, array);
 		m_idx++;
 	} else {
@@ -131,13 +131,13 @@ int     ComputeExact::SKAT_Exact_Recurse(int k, int * array, int cell, int start
 }
 
 
-int     ComputeExact::SKAT_Exact_Recurse_INV(int k, int * array, int cell, int start, int end){
+int     ComputeExact::SKAT_Exact_Recurse_INV(int k, vector<int> & array, int cell, int start, int end){
     
 	int i;
 
 	/* node */
 	if(k == cell){
-		CalTestStat_INV(k, array);
+		CalTestStat_INV(k, array.data());
 		CalFisherProb_INV(k, array);
 		m_idx++;
 	} else {
@@ -151,13 +151,13 @@ int     ComputeExact::SKAT_Exact_Recurse_INV(int k, int * array, int cell, int s
 }
 
 
-int     ComputeExact::SKAT_Resampling(int k, int * array){
+int     ComputeExact::SKAT_Resampling(int k, vector<int> & array){
     
     int k1 = m_k-k;
     if(k <= m_k/2 +1){
         for(int i=0;i< m_total_k[k];i++){
             SL_Sample(k, m_k, m_temp_x, array);
-            CalTestStat(k, m_temp_x);
+            CalTestStat(k, m_temp_x.data());
             CalFisherProb(k, m_temp_x);
             m_idx++;
         }
@@ -165,7 +165,7 @@ int     ComputeExact::SKAT_Resampling(int k, int * array){
         
         for(int i=0;i< m_total_k[k];i++){
             SL_Sample(k1, m_k, m_temp_x, array);
-            CalTestStat_INV(k1, m_temp_x);
+            CalTestStat_INV(k1, m_temp_x.data());
             CalFisherProb_INV(k1, m_temp_x);
             m_idx++;
         }
@@ -176,13 +176,13 @@ int     ComputeExact::SKAT_Resampling(int k, int * array){
 }
 
 
-int     ComputeExact::SKAT_Resampling_Random(int k, int * array){
+int     ComputeExact::SKAT_Resampling_Random(int k, std::vector<int> & array){
     
     int err;
     int k1 = m_k-k;
     if(k <= m_k/2 +1){
         for(int i=0;i< m_total_k[k];i++){
-            SL_Binary_Boot1(m_k, k, m_p1.data(), array, m_temp_x1, m_temp_x, &err);
+            SL_Binary_Boot1(m_k, k, m_p1, array, m_temp_x1, m_temp_x, &err);
             CalFisherProb(k, m_temp_x);
             
             m_fprob[m_idx] = 1;
@@ -194,7 +194,7 @@ int     ComputeExact::SKAT_Resampling_Random(int k, int * array){
         
         for(int i=0;i< m_total_k[k];i++){
             
-            SL_Binary_Boot1(m_k, k1, m_p1_inv.data(), array, m_temp_x1, m_temp_x, &err);
+            SL_Binary_Boot1(m_k, k1, m_p1_inv, array, m_temp_x1, m_temp_x, &err);
             CalFisherProb_INV(k1, m_temp_x);
             
             m_fprob[m_idx] = 1;
@@ -217,47 +217,9 @@ int     ComputeExact::SKAT_Resampling_Random(int k, int * array){
 
 
 ComputeExact::ComputeExact(){
-  
-    m_fprob=NULL;
-    m_teststat=NULL;    
-    m_Z0=NULL;
-    m_Z1=NULL;
-    
-    m_teststat_one=NULL;
-    m_teststat_Z0=NULL;
-    m_teststat_Z1=NULL;
-    
-    m_pprod=1;
-    
-    m_temp_x=NULL;
-    m_temp_x1=NULL;
-}
 
-ComputeExact::~ComputeExact(){
-    
-    
-	SL_free(m_fprob);
-	SL_free(m_teststat);
-	SL_free(m_teststat_one);
-    
-	SL_free(m_Z0);
-	SL_free(m_Z1);
-	SL_free(m_teststat_Z0);
-    SL_free(m_teststat_Z1);
-    SL_free(m_temp_x);  
-    SL_free(m_temp_x1);
-    
-    m_fprob = NULL;
-    m_teststat=NULL;
-    m_teststat_one=NULL;
-    
-    m_Z0=NULL;
-    m_Z1=NULL;
-    m_teststat_Z0=NULL;
-    m_teststat_Z1=NULL;
-    m_temp_x=NULL;
-    m_temp_x1=NULL;
-    
+    m_pprod=1;
+
 }
 
 /************************************************
@@ -278,7 +240,7 @@ ComputeExact::~ComputeExact(){
 *
 ******************************************************/
 
-int     ComputeExact::Init(int * resarray, int nres, int * nres_k, double * Z0, double *Z1, int k, int m, int total, int * total_k, double *prob_k, double * odds, double * p1, int * IsExact, double epsilon, bool IsSmallmemory){
+int     ComputeExact::Init(vector<int> resarray, int nres, int * nres_k, double * Z0, double *Z1, int k, int m, int total, int * total_k, double *prob_k, double * odds, double * p1, int * IsExact, double epsilon, bool IsSmallmemory){
 
 
     int i, idx, k1;
@@ -290,7 +252,7 @@ int     ComputeExact::Init(int * resarray, int nres, int * nres_k, double * Z0, 
     idx = 0;
     for(i=0;i<nres;i++){
     
-        array = (resarray + idx) ;
+        array = (resarray.data() + idx) ;
         k1 = nres_k[i];
         idx += k1;
         
@@ -337,16 +299,18 @@ int     ComputeExact::SaveParam(double * Z0, double *Z1, int k, int m, int total
  
 
 	
-	m_Z0 = (double *) SL_calloc(m_k * m_m, sizeof(double));
-	m_Z1 = (double *) SL_calloc(m_k * m_m, sizeof(double));	
-	m_teststat_Z0 = (double *) SL_calloc(m_m, sizeof(double));
-    m_teststat_Z1 = (double *) SL_calloc(m_m, sizeof(double));
+	m_Z0.reserve(m_k * m_m);
+	m_Z1.reserve(m_k * m_m);
+	m_teststat_Z0.reserve(m_m);
+    m_teststat_Z1.reserve(m_m);
 	
-	memcpy(m_Z0, Z0, sizeof(double) * m_k * m_m);
-	memcpy(m_Z1, Z1, sizeof(double) * m_k * m_m);
-    
-    memset(m_teststat_Z0,0, sizeof(double)*m_m);
-    memset(m_teststat_Z1,0, sizeof(double)*m_m);
+	memcpy(m_Z0.data(), Z0, sizeof(double) * m_k * m_m);
+	memcpy(m_Z1.data(), Z1, sizeof(double) * m_k * m_m);
+
+    // Instead of this we could just resize the vector?
+    // We shouldn't need to manually zero it out anyway.
+    memset(m_teststat_Z0.data(),0, sizeof(double)*m_m);
+    memset(m_teststat_Z1.data(),0, sizeof(double)*m_m);
 	/* generate prob matrix */
 	for(i=0;i< m_k;i++){
 		int idx = i*m_m;
@@ -360,19 +324,19 @@ int     ComputeExact::SaveParam(double * Z0, double *Z1, int k, int m, int total
 	}
 	
     if(!m_IsSmallmemory){
-        m_fprob = (double *) SL_calloc(m_total, sizeof(double));
-        m_teststat = (double *) SL_calloc(m_total, sizeof(double));
+        m_fprob.reserve(m_total);
+        m_teststat.reserve(m_total);
     } else {
         
-        m_fprob = NULL;
-        m_teststat = NULL;
+        m_fprob.clear();
+        m_teststat.clear();
         
     }
     
-	m_teststat_one = (double *) SL_calloc(m_m, sizeof(double));	
-	memset(m_teststat, 0, m_total * sizeof(double));
-    m_temp_x = (int *) SL_calloc(m_k, sizeof(int));
-    m_temp_x1 = (int *) SL_calloc(m_k, sizeof(int));
+	m_teststat_one.reserve(m_m);
+	memset(m_teststat.data(), 0, m_total * sizeof(double));
+    m_temp_x.reserve(m_k);
+    m_temp_x1.reserve(m_k);
     
     return 1;
 }
@@ -388,13 +352,12 @@ int     ComputeExact::SaveParam(double * Z0, double *Z1, int k, int m, int total
 int     ComputeExact::Run(int test_type){
    
     int i, j, idx, l;
-    int * array = (int *) SL_calloc(m_k, sizeof(int));
+    vector<int> array(m_k);
     //SL_setseed(time(NULL));
 	SL_setseed(1);
   
 	for(i=0;i < m_k+1;i++){
         
-        memset(array, 0, sizeof(int)* m_k);
         if(m_IsExact[i] == 1){
             if(i <= m_k/2 +1){
                 SKAT_Exact_Recurse(i, array, 0, 0, m_k);
@@ -413,8 +376,6 @@ int     ComputeExact::Run(int test_type){
         }
 	}
 
-    SL_free(array);
-    
 	//Rprintf("2, m_idx[%d], total[%d]\n", m_idx, m_total);
 	
    
