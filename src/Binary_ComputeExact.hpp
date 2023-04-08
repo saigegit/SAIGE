@@ -12,8 +12,7 @@ class ComputeExact {
  
 public: 
     ComputeExact();
-    ~ComputeExact();
-    
+
     int     Init(std::vector<int> resarray, int nres, int * nres_k, double * Z0, double *Z1, int k, int m, int total
              , int * total_k, double *prob_k, double * odds, double * p1, int * IsExact, double epsilon, bool IsSmallmemory=0);
 
@@ -27,7 +26,7 @@ protected:
     virtual double     CalTestStat(int k, int * array, bool is_save=true, bool is_minIdx = false, int * minIdx = NULL);
     virtual double     CalTestStat_INV(int k, int * array, bool is_save=true, bool is_minIdx = false, int * minIdx = NULL);
     
-    int     CalFisherProb(int k, vector<int> array);
+    int     CalFisherProb(int k, vector<int> & array);
     int     SKAT_Exact_Recurse(int k, vector<int> & array, int cell, int start, int end);
     int     SKAT_Resampling(int k, vector<int> & array);
     int     SKAT_Resampling_Random(int k, vector<int> & array);
@@ -89,8 +88,7 @@ class ComputeExactSKATO : public ComputeExact {
 
 public: 
     ComputeExactSKATO() ;
-    ~ComputeExactSKATO(){};
-    
+
     int     Init(int * resarray, int nres, int * nres_k, double * Z0, double *Z1, double * r_corr, int n_r, double * param, int k, int m, int total, int * total_k, double *prob_k, double * odds, double * p1, int * IsExact, double epsilon, bool IsSmallmemory=0);
 
 protected:
@@ -103,8 +101,8 @@ protected:
 protected:
     /* for SKAT-O */
     vector<double>  m_rcorr;
-    double * m_Z0_C;		
-    double * m_Z1_C;    
+    vector<double> m_Z0_C;
+    vector<double> m_Z1_C;
     double 	m_teststat_Z0_C;
     double  m_teststat_Z1_C;
     

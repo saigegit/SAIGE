@@ -163,7 +163,7 @@ int Binary_Permu_SKAT::Get_TestStat(int idx, bool is_org){
         
         
     } else {
-        SL_GetPermu(m_nSample, m_Y.data(), m_buf.data());
+        SL_GetPermu(m_nSample, m_Y, m_buf);
         pY = (int *) m_Y.data();
         
     }
