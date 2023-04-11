@@ -195,6 +195,11 @@ double SKATExactBin_Work(arma::mat & Z, arma::vec & res, arma::vec & pi1, uint32
 	arma::mat Z1temp2 = (Z_1 % (1-p1)).t();
 	arma::vec Z1 =  arma::vectorise(Z1temp2);
 
+    // We cannot take the mean of an empty vector
+    if (p1.size() == 0) {
+        return 0.0;
+    }
+
 	uint32_t m = Z_1.n_cols;
 	int k = idx.n_elem;
 	std::vector<int> n_total_k(k+1, 0);
