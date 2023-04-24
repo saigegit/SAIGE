@@ -228,6 +228,9 @@ SPAGMMATtest = function(bgenFile = "",
     if(obj.model$traitType == "binary"){
         if(max_MAC_use_ER > 0){
              cat("P-values of genetic variants with MAC <= ", max_MAC_use_ER, " will be calculated via effecient resampling.\n")
+             if(max_MAC_use_ER > 4){
+               cat("WARNING: Efficient resampling may not work well for MAC > 4!")
+             }
         }
     }else{
         max_MAC_use_ER = 0
