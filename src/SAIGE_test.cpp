@@ -514,7 +514,7 @@ if(!t_isER){
     	//bool logp=false;
 	double tol0 = std::numeric_limits<double>::epsilon();
 	tol1 = std::pow(tol0, 0.25);
-	if(p_iIndexComVecSize >= 0.5){
+	if(p_iIndexComVecSize >= 0.5 && !m_flagSparseGRM_cur){
 		//std::cout << "SPA_fast" << std::endl;
         	SPA_fast(m_mu, t_gtilde, q, qinv, pval_noadj, ispvallog, gNA, gNB, muNA, muNB, NAmu, NAsigma, tol1, m_traitType, t_SPApval, t_isSPAConverge);
 	}else{
@@ -713,7 +713,7 @@ if(!t_isER){
         }
 
 
-        if(p_iIndexComVecSize >= 0.5){
+        if(p_iIndexComVecSize >= 0.5 && !m_flagSparseGRM_cur){
 		//std::cout << "SPA_fast " << std::endl;
                 SPA_fast(m_mu, t_gtilde, q_c, qinv_c, pval_noSPA_c, ispvallog, gNA, gNB, muNA, muNB, NAmu, NAsigma, tol1, m_traitType, SPApval_c, t_isSPAConverge_c);
         }else{
