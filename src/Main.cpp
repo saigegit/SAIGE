@@ -338,11 +338,12 @@ void mainMarkerInCPP(
     double MAC = MAF * n * (1 - missingRate) *2;
     
     
-   /*
+  /*
    std::cout << "missingRate " << missingRate << std::endl;
    std::cout << "MAF " << MAF << std::endl;
    std::cout << "MAC " << MAC << std::endl;
    std::cout << "altFreq " << altFreq << std::endl;
+   std::cout << "altCounts " << altCounts << std::endl;
    std::cout << "n " << n << std::endl;
    */
 
@@ -360,12 +361,16 @@ void mainMarkerInCPP(
 
 
     flip = imputeGenoAndFlip(t_GVec, altFreq, altCounts,indexForMissing, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec, indexNonZeroVec);
-   
+    MAC = std::min(altCounts, 2*n-altCounts);
+    MAF = std::min(altFreq, 1 - altFreq);
+
+   if((MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff)){
+	continue;
+   }else{
 //arma::vec timeoutput4 = getTime();
 //printTime(timeoutput3, timeoutput4, "imputeGenoAndFlip");
     altFreqVec.at(i) = altFreq;         // allele frequencies of ALT allele, this is not always < 0.5.
     altCountsVec.at(i) = altCounts;         // allele frequencies of ALT allele, this is not always < 0.5.
-    MAC = std::min(altCounts, 2*n-altCounts);
    //std::cout << "MAC " << MAC << std::endl; 
    //std::cout << "altFreq after flip " << altFreq << std::endl; 
    //std::cout << "info " << info << std::endl; 
@@ -380,6 +385,7 @@ void mainMarkerInCPP(
     arma::uvec indexZeroVec_arma, indexNonZeroVec_arma;
     indexZeroVec_arma = arma::conv_to<arma::uvec>::from(indexZeroVec);
     indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
+
     indexZeroVec.clear();
     indexNonZeroVec.clear();
     t_P2Vec.clear();
@@ -528,10 +534,11 @@ void mainMarkerInCPP(
 
     }
 
+   }// if((MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff)){
     
    } //    if((missingRate > g_missingRate_cutoff) || (MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff || imputeInfo < g_marker_minINFO_cutoff)){
  
-  
+   
   
     //t_GVec.clear();
   }
