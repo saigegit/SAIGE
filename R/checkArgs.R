@@ -60,7 +60,7 @@ max_MAC_use_ER){
 	checkArgNumeric(SPAcutoff, deparse(substitute(SPAcutoff)), 0.5, 4)
 	checkArgNumeric(dosage_zerod_cutoff, deparse(substitute(dosage_zerod_cutoff)), 0, 0.5)
 	checkArgNumeric(dosage_zerod_MAC_cutoff, deparse(substitute(dosage_zerod_MAC_cutoff)), dosage_zerod_cutoff, 100)
-        cat("Any dosages <= ", dosage_zerod_cutoff, " for genetic variants with MAC <= ", dosage_zerod_MAC_cutoff, " are set to be 0 in group tests\n")
+        cat("Any dosages <= ", dosage_zerod_cutoff, " for genetic variants with MAC <= ", dosage_zerod_MAC_cutoff, " are set to be 0.\n")
 	checkArgNumeric(markers_per_chunk, deparse(substitute(markers_per_chunk)), minVal=1000)
 	checkArgNumeric(groups_per_chunk, deparse(substitute(groups_per_chunk)), minVal=1)
 	checkArgNumeric(max_MAC_use_ER, deparse(substitute(max_MAC_use_ER)), minVal=0)

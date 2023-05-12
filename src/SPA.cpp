@@ -89,7 +89,7 @@ void SPA(arma::vec & mu, arma::vec & g, double q, double qinv, double pval_noadj
                         Isconverge=false;
                 }
         isSPAConverge = Isconverge;
-	std::cout << "pval " << pval << std::endl;
+	//std::cout << "pval " << pval << std::endl;
 	//result["pvalue"] = pval;
         //result["Isconverge"] = Isconverge;
         //return(result);
