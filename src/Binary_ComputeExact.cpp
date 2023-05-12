@@ -28,23 +28,23 @@ double     ComputeExact::CalTestStat(int k, int * array, bool is_save,bool is_mi
 
 	int i, j, l, temp;
     double stat = 0;
-    memcpy(m_teststat_one, m_teststat_Z0, sizeof(double) *m_m);
-	
+    m_teststat_one = m_teststat_Z0;
+
     for(i=0;i< k;i++){
         l = array[i];
         temp = l*m_m;
         for(j=0;j< m_m;j++){
-            m_teststat_one[j]+=m_Z1[temp+j] - m_Z0[temp+j] ;
+            m_teststat_one.at(j) += m_Z1.at(temp +j) - m_Z0.at(temp + j);
         }
     }
 
 	for(j=0;j< m_m;j++){
-        stat +=m_teststat_one[j] * m_teststat_one[j];
+        stat +=m_teststat_one.at(j)* m_teststat_one.at(j);
 	}
     
     //stat=log(stat);
     if(is_save){
-        m_teststat[m_idx]=stat ;
+        m_teststat.at(m_idx) = stat ;
     }
     return stat;
 
@@ -55,74 +55,74 @@ double     ComputeExact::CalTestStat_INV(int k, int * array, bool is_save, bool 
     
 	int i, j, l, temp;
     double stat = 0;
-    memcpy(m_teststat_one, m_teststat_Z1, sizeof(double) *m_m);
+    m_teststat_one = m_teststat_Z1;
 	
     for(i=0;i< k;i++){
         l = array[i];
         temp = l*m_m;
         for(j=0;j< m_m;j++){
-            m_teststat_one[j]+=m_Z0[temp+j] - m_Z1[temp+j] ;
+            m_teststat_one.at(j) += m_Z0.at(temp+j) - m_Z1.at(temp+j);
         }
     }
     
 	for(j=0;j< m_m;j++){
-		stat+=m_teststat_one[j] * m_teststat_one[j];
+		stat+=m_teststat_one.at(j) * m_teststat_one.at(j);
 	}
     
     //stat=log(stat);
     if(is_save){
-        m_teststat[m_idx]=stat ;
+        m_teststat.at(m_idx)=stat ;
     }
     return stat;
     
 }
 
 
-int     ComputeExact::CalFisherProb(int k, int * array){
+int     ComputeExact::CalFisherProb(int k, vector<int> & array){
 
 	int i,l;
 	double temp = 1;
 	for(i=0;i< k;i++){
-		l = array[i];
-		temp = temp * m_odds[l];
+		l = array.at(i);
+		temp = temp * m_odds.at(l);
 	}
-	m_fprob[m_idx] = temp;
-    m_denomi[k] = m_denomi[k]+temp;
+	m_fprob.at(m_idx) = temp;
+    m_denomi.at(k) = m_denomi.at(k) + temp;
 	
     return 0;
-		
+
 }
 
 
-int     ComputeExact::CalFisherProb_INV(int k, int * array){
+int     ComputeExact::CalFisherProb_INV(int k, vector<int> & array){
     
 	int i,l, k1;
     k1 = m_k - k;
 	double temp = m_pprod;
 	for(i=0;i< k;i++){
-		l = array[i];
-		temp = temp / m_odds[l];
+        l = array.at(i);
+		temp = temp / m_odds.at(l);
 	}
-	m_fprob[m_idx] = temp;
-    m_denomi[k1] = m_denomi[k1]+temp;
+	m_fprob.at(m_idx) = temp;
+    m_denomi.at(k1) = m_denomi.at(k1)+temp;
 	
     return 0;
     
 }
 
 
-int     ComputeExact::SKAT_Exact_Recurse(int k, int * array, int cell, int start, int end){
+int     ComputeExact::SKAT_Exact_Recurse(int k, vector<int> & array, int cell, int start, int end){
 
 	int i;
 	
 	/* node */
 	if(k == cell){
-		CalTestStat(k, array);
+		CalTestStat(k, array.data());
 		CalFisherProb(k, array);
 		m_idx++;
 	} else {
 		 for(i=start; i<end; i++) {
-            array[cell] = i;
+            array.at(cell) = i;
             SKAT_Exact_Recurse(k, array, cell+1, i+1, end);
         }
 	
@@ -131,18 +131,18 @@ int     ComputeExact::SKAT_Exact_Recurse(int k, int * array, int cell, int start
 }
 
 
-int     ComputeExact::SKAT_Exact_Recurse_INV(int k, int * array, int cell, int start, int end){
+int     ComputeExact::SKAT_Exact_Recurse_INV(int k, vector<int> & array, int cell, int start, int end){
     
 	int i;
 
 	/* node */
 	if(k == cell){
-		CalTestStat_INV(k, array);
+		CalTestStat_INV(k, array.data());
 		CalFisherProb_INV(k, array);
 		m_idx++;
 	} else {
         for(i=start; i<end; i++) {
-            array[cell] = i;
+            array.at(cell) = i;
             SKAT_Exact_Recurse_INV(k, array, cell+1, i+1, end);
         }
         
@@ -151,21 +151,21 @@ int     ComputeExact::SKAT_Exact_Recurse_INV(int k, int * array, int cell, int s
 }
 
 
-int     ComputeExact::SKAT_Resampling(int k, int * array){
+int     ComputeExact::SKAT_Resampling(int k, vector<int> & array){
     
     int k1 = m_k-k;
     if(k <= m_k/2 +1){
-        for(int i=0;i< m_total_k[k];i++){
+        for(int i=0;i< m_total_k.at(k);i++){
             SL_Sample(k, m_k, m_temp_x, array);
-            CalTestStat(k, m_temp_x);
+            CalTestStat(k, m_temp_x.data());
             CalFisherProb(k, m_temp_x);
             m_idx++;
         }
     } else {
         
-        for(int i=0;i< m_total_k[k];i++){
+        for(int i=0;i< m_total_k.at(k);i++){
             SL_Sample(k1, m_k, m_temp_x, array);
-            CalTestStat_INV(k1, m_temp_x);
+            CalTestStat_INV(k1, m_temp_x.data());
             CalFisherProb_INV(k1, m_temp_x);
             m_idx++;
         }
@@ -176,29 +176,29 @@ int     ComputeExact::SKAT_Resampling(int k, int * array){
 }
 
 
-int     ComputeExact::SKAT_Resampling_Random(int k, int * array){
+int     ComputeExact::SKAT_Resampling_Random(int k, std::vector<int> & array){
     
     int err;
     int k1 = m_k-k;
     if(k <= m_k/2 +1){
-        for(int i=0;i< m_total_k[k];i++){
-            SL_Binary_Boot1(m_k, k, m_p1.data(), array, m_temp_x1, m_temp_x, &err);
+        for(int i=0;i< m_total_k.at(k);i++){
+            SL_Binary_Boot1(m_k, k, m_p1, array, m_temp_x1, m_temp_x, &err);
             CalFisherProb(k, m_temp_x);
-            
-            m_fprob[m_idx] = 1;
-            m_denomi[k] = m_denomi[k]+1;
-            
+
+            m_fprob.at(m_idx) = 1;
+            m_denomi.at(k) = m_denomi.at(k)+1;
+
             m_idx++;
         }
     } else {
-        
-        for(int i=0;i< m_total_k[k];i++){
-            
-            SL_Binary_Boot1(m_k, k1, m_p1_inv.data(), array, m_temp_x1, m_temp_x, &err);
+
+        for(int i=0;i< m_total_k.at(k);i++){
+
+            SL_Binary_Boot1(m_k, k1, m_p1_inv, array, m_temp_x1, m_temp_x, &err);
             CalFisherProb_INV(k1, m_temp_x);
-            
-            m_fprob[m_idx] = 1;
-            m_denomi[k] = m_denomi[k]+1;
+
+            m_fprob.at(m_idx) = 1;
+            m_denomi.at(k) = m_denomi.at(k)+1;
             
             m_idx++;
         }
@@ -217,47 +217,9 @@ int     ComputeExact::SKAT_Resampling_Random(int k, int * array){
 
 
 ComputeExact::ComputeExact(){
-  
-    m_fprob=NULL;
-    m_teststat=NULL;    
-    m_Z0=NULL;
-    m_Z1=NULL;
-    
-    m_teststat_one=NULL;
-    m_teststat_Z0=NULL;
-    m_teststat_Z1=NULL;
-    
-    m_pprod=1;
-    
-    m_temp_x=NULL;
-    m_temp_x1=NULL;
-}
 
-ComputeExact::~ComputeExact(){
-    
-    
-	SL_free(m_fprob);
-	SL_free(m_teststat);
-	SL_free(m_teststat_one);
-    
-	SL_free(m_Z0);
-	SL_free(m_Z1);
-	SL_free(m_teststat_Z0);
-    SL_free(m_teststat_Z1);
-    SL_free(m_temp_x);  
-    SL_free(m_temp_x1);
-    
-    m_fprob = NULL;
-    m_teststat=NULL;
-    m_teststat_one=NULL;
-    
-    m_Z0=NULL;
-    m_Z1=NULL;
-    m_teststat_Z0=NULL;
-    m_teststat_Z1=NULL;
-    m_temp_x=NULL;
-    m_temp_x1=NULL;
-    
+    m_pprod=1;
+
 }
 
 /************************************************
@@ -278,7 +240,7 @@ ComputeExact::~ComputeExact(){
 *
 ******************************************************/
 
-int     ComputeExact::Init(int * resarray, int nres, int * nres_k, double * Z0, double *Z1, int k, int m, int total, int * total_k, double *prob_k, double * odds, double * p1, int * IsExact, double epsilon, bool IsSmallmemory){
+int     ComputeExact::Init(vector<int> resarray, int nres, int * nres_k, double * Z0, double *Z1, int k, int m, int total, int * total_k, double *prob_k, double * odds, double * p1, int * IsExact, double epsilon, bool IsSmallmemory){
 
 
     int i, idx, k1;
@@ -289,8 +251,9 @@ int     ComputeExact::Init(int * resarray, int nres, int * nres_k, double * Z0, 
     
     idx = 0;
     for(i=0;i<nres;i++){
-    
-        array = (resarray + idx) ;
+
+        // Can this pointer go stale? Does resarray get appended to / reallocated past here?
+        array = (resarray.data() + idx) ;
         k1 = nres_k[i];
         idx += k1;
         
@@ -337,22 +300,20 @@ int     ComputeExact::SaveParam(double * Z0, double *Z1, int k, int m, int total
  
 
 	
-	m_Z0 = (double *) SL_calloc(m_k * m_m, sizeof(double));
-	m_Z1 = (double *) SL_calloc(m_k * m_m, sizeof(double));	
-	m_teststat_Z0 = (double *) SL_calloc(m_m, sizeof(double));
-    m_teststat_Z1 = (double *) SL_calloc(m_m, sizeof(double));
-	
-	memcpy(m_Z0, Z0, sizeof(double) * m_k * m_m);
-	memcpy(m_Z1, Z1, sizeof(double) * m_k * m_m);
-    
-    memset(m_teststat_Z0,0, sizeof(double)*m_m);
-    memset(m_teststat_Z1,0, sizeof(double)*m_m);
+	m_Z0.resize(m_k * m_m);
+	m_Z1.resize(m_k * m_m);
+	m_teststat_Z0.resize(m_m);
+    m_teststat_Z1.resize(m_m);
+
+    memcpy(m_Z0.data(), Z0, sizeof(double) * m_k * m_m);
+    memcpy(m_Z1.data(), Z1, sizeof(double) * m_k * m_m);
+
 	/* generate prob matrix */
 	for(i=0;i< m_k;i++){
 		int idx = i*m_m;
 		for(j=0;j< m_m;j++){
-			m_teststat_Z0[j]+=m_Z0[idx+j];
-            m_teststat_Z1[j]+=m_Z1[idx+j];
+			m_teststat_Z0.at(j)+=m_Z0.at(idx+j);
+            m_teststat_Z1.at(j)+=m_Z1.at(idx+j);
 		}
         
         // debug
@@ -360,19 +321,18 @@ int     ComputeExact::SaveParam(double * Z0, double *Z1, int k, int m, int total
 	}
 	
     if(!m_IsSmallmemory){
-        m_fprob = (double *) SL_calloc(m_total, sizeof(double));
-        m_teststat = (double *) SL_calloc(m_total, sizeof(double));
+        m_fprob.resize(m_total);
+        m_teststat.resize(m_total);
     } else {
         
-        m_fprob = NULL;
-        m_teststat = NULL;
+        m_fprob.clear();
+        m_teststat.clear();
         
     }
     
-	m_teststat_one = (double *) SL_calloc(m_m, sizeof(double));	
-	memset(m_teststat, 0, m_total * sizeof(double));
-    m_temp_x = (int *) SL_calloc(m_k, sizeof(int));
-    m_temp_x1 = (int *) SL_calloc(m_k, sizeof(int));
+	m_teststat_one.resize(m_m);
+    m_temp_x.resize(m_k);
+    m_temp_x1.resize(m_k);
     
     return 1;
 }
@@ -388,20 +348,19 @@ int     ComputeExact::SaveParam(double * Z0, double *Z1, int k, int m, int total
 int     ComputeExact::Run(int test_type){
    
     int i, j, idx, l;
-    int * array = (int *) SL_calloc(m_k, sizeof(int));
+    vector<int> array(m_k);
     //SL_setseed(time(NULL));
 	SL_setseed(1);
   
 	for(i=0;i < m_k+1;i++){
         
-        memset(array, 0, sizeof(int)* m_k);
-        if(m_IsExact[i] == 1){
+        if(m_IsExact.at(i) == 1){
             if(i <= m_k/2 +1){
                 SKAT_Exact_Recurse(i, array, 0, 0, m_k);
             } else {
                 SKAT_Exact_Recurse_INV(m_k - i, array, 0, 0, m_k);
             }
-        } else if( m_total_k[i] < MIN_SIM1 && test_type == 3) {
+        } else if( m_total_k.at(i) < MIN_SIM1 && test_type == 3) {
             
             SKAT_Resampling_Random(i, array);
 
@@ -413,8 +372,6 @@ int     ComputeExact::Run(int test_type){
         }
 	}
 
-    SL_free(array);
-    
 	//Rprintf("2, m_idx[%d], total[%d]\n", m_idx, m_total);
 	
    
@@ -423,22 +380,22 @@ int     ComputeExact::Run(int test_type){
     double total_prob_sum = 0;
 	for(i=0;i < m_k+1;i++){
 
-		for(j=idx;j< idx + m_total_k[i];j++){
+		for(j=idx;j< idx + m_total_k.at(i);j++){
             
-            m_fprob[j] = m_fprob[j] / m_denomi[i] * m_prob_k[i];
-            total_prob_sum += m_fprob[j];
+            m_fprob.at(j) = m_fprob.at(j) / m_denomi.at(i) * m_prob_k.at(i);
+            total_prob_sum += m_fprob.at(j);
 		}	
-		idx = idx + m_total_k[i];
+		idx = idx + m_total_k.at(i);
 	}
     idx=0;
 	for(i=0;i < m_k+1;i++){
-        m_prob_k[i] = 0;
-		for(j=idx;j< idx + m_total_k[i];j++){
-            m_fprob[j] = m_fprob[j] / total_prob_sum;
-            m_prob_k[i] += m_fprob[j]; // for debugging
+        m_prob_k.at(i) = 0;
+		for(j=idx;j< idx + m_total_k.at(i);j++){
+            m_fprob.at(j) = m_fprob.at(j) / total_prob_sum;
+            m_prob_k.at(i) += m_fprob.at(j); // for debugging
 		}	
-        //Rprintf("[%d:%e]", i, m_prob_k[i]);
-		idx = idx + m_total_k[i];
+        //Rprintf(".at(%d:%e)", i, m_prob_k.at(i));
+		idx = idx + m_total_k.at(i);
 	}
 
     
@@ -454,7 +411,7 @@ int     ComputeExact::Run(int test_type){
 		for(i=0;i<m_total ; i++){
             
                         
-            temp1 = m_Q[l] - m_teststat[i];
+            temp1 = m_Q.at(l) - m_teststat.at(i);
             //Rprintf("[%e][%e][%e][%e]\n", m_Q[l],m_teststat[i], temp1);
             
             if(fabs(temp1) <= m_epsilon){
@@ -462,10 +419,10 @@ int     ComputeExact::Run(int test_type){
             }
             //Rprintf("[%e][%e][%e]\n",  temp1, fabs(temp1), m_epsilon);
             if(temp1 <= 0){
-				n_num += m_fprob[i] ;
+				n_num += m_fprob.at(i) ;
 				//Rprintf("C\n");
 				if( temp1 == 0 ){
-					n_same += m_fprob[i] ;
+					n_same += m_fprob.at(i) ;
 					//Rprintf("D\n");
 				}
 			}  
@@ -478,20 +435,20 @@ int     ComputeExact::Run(int test_type){
 		//Rprintf("[%e][%e][%d]\n", m_pval[l], m_pval_same[l], l);
 	}
 
-    m_LargestQ=m_teststat[0];
+    m_LargestQ=m_teststat.at(0);
     m_minP= 0;
     for(i=0;i<m_total ; i++){
         
-        temp1 = m_LargestQ - m_teststat[i];
+        temp1 = m_LargestQ - m_teststat.at(i);
         if(fabs(temp1) <= m_epsilon){
             temp1=  0;
         }
 
         if(temp1 < 0){
-            m_LargestQ = m_teststat[i];
-            m_minP = m_fprob[i] ;
+            m_LargestQ = m_teststat.at(i);
+            m_minP = m_fprob.at(i) ;
         } else if( temp1 == 0 ){
-            m_minP += m_fprob[i] ;
+            m_minP += m_fprob.at(i) ;
            
         }
     }
