@@ -43,7 +43,7 @@ void SL_free(void * ptr){
     
 }
 
-void SL_Sample(int k, int n, int *y, int *x){
+void SL_Sample(int k, int n, vector<int> & y, std::vector<int> & x){
     
     int i, j;
     
@@ -66,7 +66,7 @@ void SL_Sample(int k, int n, int *y, int *x){
     Interface
  *********************************************************/
 
-void SKAT_Exact(int * resarray, int nres, int * nres_k, double * Z0, double *Z1, int k, int m, int total, int * total_k, double *prob_k, double * odds, double * p1, int * IsExact, double * pval, double *pval_same, double *minP, int test_type, double epsilon)
+void SKAT_Exact(std::vector<int> & resarray, int nres, int * nres_k, double * Z0, double *Z1, int k, int m, int total, int * total_k, double *prob_k, double * odds, double * p1, int * IsExact, double * pval, double *pval_same, double *minP, int test_type, double epsilon)
 {
     
     class ComputeExact exact;

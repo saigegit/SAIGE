@@ -25,10 +25,10 @@ double     ComputeExactSKATO::Cal_Pvalue_Rcorr(double test_skat, double test_C, 
     
     double pval=0;
     double Qnorm= 0;
-    double rho = m_rcorr[idx];
-    double muQ = m_muQ[idx];
-    double varQ = m_varQ[idx];
-    double df = m_df[idx];
+    double rho = m_rcorr.at(idx);
+    double muQ = m_muQ.at(idx);
+    double varQ = m_varQ.at(idx);
+    double df = m_df.at(idx);
     
     double Q = (1-rho) * test_skat + rho * test_C ;
     //Rprintf("Param: %d-[%f][%f][%f]\n",idx, Q, test_skat,test_C );
@@ -62,20 +62,19 @@ double ComputeExactSKATO::CalTestStat
     double test_C  = m_teststat_Z0_C;
     double test_skat = 0;
     double teststat;
-    memcpy(m_teststat_one, m_teststat_Z0, sizeof(double) *m_m);
-    
+    m_teststat_one = m_teststat_Z0;
 	
     for(i=0;i< k;i++){
         l = array[i];
         temp = l*m_m;
         for(j=0;j< m_m;j++){
-            m_teststat_one[j]+=m_Z1[temp+j] - m_Z0[temp+j] ;
+            m_teststat_one.at(j)+=m_Z1.at(temp+j) - m_Z0.at(temp+j) ;
         }
-        test_C += m_Z1_C[l] - m_Z0_C[l] ;
+        test_C += m_Z1_C.at(l) - m_Z0_C.at(l) ;
     }
     
 	for(j=0;j< m_m;j++){
-		test_skat+=m_teststat_one[j] * m_teststat_one[j];
+		test_skat+=m_teststat_one.at(j) * m_teststat_one.at(j);
 	}
     test_C = test_C * test_C;
     
@@ -103,7 +102,7 @@ double ComputeExactSKATO::CalTestStat
     
     /* since larger Q has a smaller p-value, it should be -teststat, not teststat */
     if(is_save){
-        m_teststat[m_idx] = -teststat;  
+        m_teststat.at(m_idx) = -teststat;  
         
     }
 /*    
@@ -131,20 +130,20 @@ double      ComputeExactSKATO::CalTestStat_INV(int k, int * array, bool is_save,
     double test_C  = m_teststat_Z1_C;
     double test_skat = 0;
     double teststat;
-    memcpy(m_teststat_one, m_teststat_Z1, sizeof(double) *m_m);
+    m_teststat_one = m_teststat_Z1;
     
     for(i=0;i< k;i++){
         l = array[i];
         temp = l*m_m;
         for(j=0;j< m_m;j++){
-            m_teststat_one[j]+=m_Z0[temp+j] - m_Z1[temp+j] ;
+            m_teststat_one.at(j)+=m_Z0.at(temp+j) - m_Z1.at(temp+j) ;
         }
-        test_C += m_Z0_C[l] - m_Z1_C[l] ;
+        test_C += m_Z0_C.at(l) - m_Z1_C.at(l) ;
     }
     test_C = test_C * test_C;
     
 	for(j=0;j< m_m;j++){
-		test_skat+=m_teststat_one[j] * m_teststat_one[j];
+		test_skat+=m_teststat_one.at(j) * m_teststat_one.at(j);
 	}
     
     for(i=0; i<m_rcorr.size(); i++){
@@ -196,28 +195,11 @@ double      ComputeExactSKATO::CalTestStat_INV(int k, int * array, bool is_save,
 
 
 ComputeExactSKATO::ComputeExactSKATO(){
-  
-    
-    m_fprob=NULL;
-    m_teststat=NULL;    
-    m_Z0=NULL;
-    m_Z1=NULL;
-    
-    m_teststat_one=NULL;
-    m_teststat_Z0=NULL;
-    m_teststat_Z1=NULL;
     
     m_pprod=1;
 
-
 }
-/*
-ComputeExactSKATO::~ComputeExactSKATO(){
-    
-    
 
-}
-*/
 /************************************************
 *
 *	Init function
@@ -249,22 +231,20 @@ int     ComputeExactSKATO::Init(int * resarray, int nres, int * nres_k, double *
         m_teststat_Z0_C = 0;
         m_teststat_Z1_C = 0;
         
-        m_Z0_C = (double *) SL_calloc(m_k * 1, sizeof(double));
-        m_Z1_C = (double *) SL_calloc(m_k * 1, sizeof(double));	
-        memset(m_Z0_C,0, sizeof(double)*m_k);
-        memset(m_Z1_C,0, sizeof(double)*m_k);
+        m_Z0_C.resize(m_k * 1);
+        m_Z1_C.resize(m_k * 1);
         
         for(i=0;i<m_k;i++){
             int idx = i*m_m;
             for(j=0;j<m_m;j++){
-                m_Z0_C[i]+=m_Z0[idx+j];
-                m_Z1_C[i]+=m_Z1[idx+j];
+                m_Z0_C.at(i)+=m_Z0.at(idx+j);
+                m_Z1_C.at(i)+=m_Z1.at(idx+j);
             }
             
         }
         for(i=0;i<m_k;i++){
-            m_teststat_Z0_C += m_Z0_C[i];
-            m_teststat_Z1_C += m_Z1_C[i];
+            m_teststat_Z0_C += m_Z0_C.at(i);
+            m_teststat_Z1_C += m_Z1_C.at(i);
         }
         
     }
