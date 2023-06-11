@@ -180,12 +180,13 @@ setGenoInput = function(bgenFile = "",
       markerInfo = markerInfo[which(markerInfo[,1] == chrom), ]
     }
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)    
-    markerInfo$ID2 = paste0(markerInfo$CHROM,":",markerInfo$POS, ":", markerInfo$REF,":", markerInfo$ALT)
+    #markerInfo$ID2 = paste0(markerInfo$CHROM,":",markerInfo$POS, ":", markerInfo$REF,":", markerInfo$ALT)
 #    markerInfo[,POS:=NULL]
     #print(is.data.table(markerInfo))
     markerInfo[,REF:=NULL]
     markerInfo[,ALT:=NULL]
-    setkeyv(markerInfo, c("ID","ID2"))
+    #setkeyv(markerInfo, c("ID","ID2"))
+    setkeyv(markerInfo, c("ID"))
     #markerInfo$genoIndex_prev = NULL
     #sampleInfo = data.table::fread(famFile, select = c(2), data.table=F)
     #samplesInGeno = sampleInfo[,1]
