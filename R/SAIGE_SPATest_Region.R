@@ -252,8 +252,9 @@ SAIGE.Region = function(mu,
   OutList.all = NULL
   Output_MarkerList.all = NULL
   cth_chunk_to_output = 1
-  
+  iswriteMarkerList = FALSE 
   i = indexChunk + 1
+  nEachChunk = numberRegionsInChunk
   while (i <= nRegions) {
     #for(i in (indexChunk+1):nRegions){
     if (mth ==  numberRegionsInChunk) {
@@ -999,7 +1000,7 @@ SAIGE.Region = function(mu,
           #Start = (i==1)
           Start = (cth_chunk_to_output == 1)
           End = (i == nRegions)
-          nEachChunk = 1
+          #nEachChunk = 1
           
           if (regionTestType != "BURDEN") {
             pval.Region.all = rbind(pval.Region.all, pval.Region)
@@ -1079,9 +1080,13 @@ SAIGE.Region = function(mu,
                 row.names = F,
                 na = "NA"
               )
+	      iswriteMarkerList = TRUE
+	      Output_MarkerList.all = NULL
             }
           } else {
             if (!is.null(Output_MarkerList.all)) {
+	    if(iswriteMarkerList){	
+
               fwrite(
                 Output_MarkerList.all,
                 paste0(OutputFile, ".markerList.txt"),
@@ -1092,6 +1097,22 @@ SAIGE.Region = function(mu,
                 row.names = F,
                 na = "NA"
               )
+	     }else{
+              fwrite(
+                Output_MarkerList.all,
+                paste0(OutputFile, ".markerList.txt"),
+                quote = F,
+                sep = "\t",
+                append = F,
+                col.names = T,
+                row.names = F,
+                na = "NA"
+              )
+
+
+	     }
+	      iswriteMarkerList = TRUE
+	      Output_MarkerList.all = NULL
             }
             #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
           }
