@@ -526,9 +526,11 @@ if(!t_isER){
     boost::math::normal ns;
     double t_qval;
 
+
+
     if(t_isSPAConverge){
         try {
-          t_qval = R::qnorm(t_SPApval, 0, 1, false, ispvallog);		
+          t_qval = R::qnorm(t_SPApval/2, 0, 1, false, ispvallog);		
           t_qval = fabs(t_qval);
           t_seBeta = fabs(t_Beta)/t_qval;
         }catch (const std::overflow_error&) {
@@ -572,13 +574,13 @@ if(!t_isER){
 	if(!ispvallog){
 		if(m_is_Firth_beta && pval <= m_pCutoffforFirth){
 			t_isFirth = true;
-			t_qval_Firth = R::qnorm(pval, 0, 1, false, false);
+			t_qval_Firth = R::qnorm(pval/2, 0, 1, false, false);
 		}
 
 	}else{
 		if(m_is_Firth_beta && pval <= std::log(m_pCutoffforFirth)){
 			t_isFirth = true;
-			t_qval_Firth = R::qnorm(pval, 0, 1, false, true);
+			t_qval_Firth = R::qnorm(pval/2, 0, 1, false, true);
 		}
 	}
 
@@ -730,7 +732,7 @@ if(!t_isER){
           if(!ispvallog){
            t_qval_c = boost::math::quantile(ns, SPApval_c/2);
           }else{
-	   t_qval_c = R::qnorm(SPApval_c, 0, 1, false, true);
+	   t_qval_c = R::qnorm(SPApval_c/2, 0, 1, false, true);
           }
            t_qval_c = fabs(t_qval_c);
            t_seBeta_c = fabs(t_Beta_c)/t_qval_c;
