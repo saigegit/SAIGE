@@ -99,6 +99,26 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// setAssocTest_GlobalVarsInCPP_indexInModel_male
+void setAssocTest_GlobalVarsInCPP_indexInModel_male(arma::uvec& t_indexInModel_male);
+RcppExport SEXP _SAIGE_setAssocTest_GlobalVarsInCPP_indexInModel_male(SEXP t_indexInModel_maleSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::uvec& >::type t_indexInModel_male(t_indexInModel_maleSEXP);
+    setAssocTest_GlobalVarsInCPP_indexInModel_male(t_indexInModel_male);
+    return R_NilValue;
+END_RCPP
+}
+// setAssocTest_GlobalVarsInCPP_X_PARregion_mat
+void setAssocTest_GlobalVarsInCPP_X_PARregion_mat(arma::umat& t_X_PARregion_mat);
+RcppExport SEXP _SAIGE_setAssocTest_GlobalVarsInCPP_X_PARregion_mat(SEXP t_X_PARregion_matSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::umat& >::type t_X_PARregion_mat(t_X_PARregion_matSEXP);
+    setAssocTest_GlobalVarsInCPP_X_PARregion_mat(t_X_PARregion_mat);
+    return R_NilValue;
+END_RCPP
+}
 // setMarker_GlobalVarsInCPP
 void setMarker_GlobalVarsInCPP(bool t_isOutputMoreDetails, int t_marker_chunksize);
 RcppExport SEXP _SAIGE_setMarker_GlobalVarsInCPP(SEXP t_isOutputMoreDetailsSEXP, SEXP t_marker_chunksizeSEXP) {
@@ -136,6 +156,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool& >::type t_isImputation(t_isImputationSEXP);
     Rcpp::traits::input_parameter< bool& >::type t_isFirth(t_isFirthSEXP);
     mainMarkerInCPP(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth);
+    return R_NilValue;
+END_RCPP
+}
+// processMale_XnonPAR
+void processMale_XnonPAR(arma::vec& t_GVec, uint32_t& t_pd, arma::umat& t_XPARregion);
+RcppExport SEXP _SAIGE_processMale_XnonPAR(SEXP t_GVecSEXP, SEXP t_pdSEXP, SEXP t_XPARregionSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type t_GVec(t_GVecSEXP);
+    Rcpp::traits::input_parameter< uint32_t& >::type t_pd(t_pdSEXP);
+    Rcpp::traits::input_parameter< arma::umat& >::type t_XPARregion(t_XPARregionSEXP);
+    processMale_XnonPAR(t_GVec, t_pd, t_XPARregion);
     return R_NilValue;
 END_RCPP
 }
@@ -2181,9 +2213,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_openOutfile_single_LDmat", (DL_FUNC) &_SAIGE_openOutfile_single_LDmat, 1},
     {"_SAIGE_closeOutfile_single_LDmat", (DL_FUNC) &_SAIGE_closeOutfile_single_LDmat, 0},
     {"_SAIGE_setAssocTest_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP, 10},
+    {"_SAIGE_setAssocTest_GlobalVarsInCPP_indexInModel_male", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP_indexInModel_male, 1},
+    {"_SAIGE_setAssocTest_GlobalVarsInCPP_X_PARregion_mat", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP_X_PARregion_mat, 1},
     {"_SAIGE_setMarker_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setMarker_GlobalVarsInCPP, 2},
     {"_SAIGE_setRegion_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setRegion_GlobalVarsInCPP, 4},
     {"_SAIGE_mainMarkerInCPP", (DL_FUNC) &_SAIGE_mainMarkerInCPP, 7},
+    {"_SAIGE_processMale_XnonPAR", (DL_FUNC) &_SAIGE_processMale_XnonPAR, 3},
     {"_SAIGE_Unified_getSampleSizeinGeno", (DL_FUNC) &_SAIGE_Unified_getSampleSizeinGeno, 1},
     {"_SAIGE_Unified_getSampleSizeinAnalysis", (DL_FUNC) &_SAIGE_Unified_getSampleSizeinAnalysis, 1},
     {"_SAIGE_setPLINKobjInCPP", (DL_FUNC) &_SAIGE_setPLINKobjInCPP, 5},

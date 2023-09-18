@@ -100,6 +100,9 @@ SPAGMMATtest = function(bgenFile = "",
                  dosage_zerod_cutoff = 0.2,
                  dosage_zerod_MAC_cutoff = 10,
                  is_output_moreDetails = FALSE, #new
+                 X_PARregion="60001-2699520,154931044-155270560",
+                 is_rewrite_XnonPAR_forMales=FALSE,
+                 sampleFile_male="",
                  MACCutoff_to_CollapseUltraRare = 10,
                  annotation_in_groupTest =c("lof","missense;lof","missense;lof;synonymous"),  #new
 		 maxMAF_in_groupTest = c(0.01),
@@ -224,6 +227,55 @@ SPAGMMATtest = function(bgenFile = "",
     }else{
     	obj.model = ReadModel_subsample(GMMATmodelFile, chrom, LOCO, is_Firth_beta, subSampleFile) #readInGLMM.R	
     }
+
+
+      if (is_rewrite_XnonPAR_forMales) {
+        cat("is_rewrite_XnonPAR_forMales is TRUE, so genotypes/dosages in the non-PAR regions of X chromosome for males will be multiplied by 2\n")
+        if (!file.exists(sampleFile_male)) {
+            stop("ERROR! The sample file for male IDs ", sampleFile_male,
+                " does not exist\n")
+        }else {
+            sampleList_male = data.frame(data.table:::fread(sampleFile_male,
+                header = F, stringsAsFactors = FALSE, colClasses = c("character"),
+                data.table = F))
+            colnames(sampleList_male) = c("sampleID_male")
+            cat(nrow(sampleList_male), " sample IDs are found in ",
+                sampleFile_male, "\n")
+            indexInModel_male = which(obj.model$sampleID %in% (sampleList_male$sampleID_male))
+            cat(length(indexInModel_male), " males are found in the test\n")
+            if (length(indexInModel_male) == 0) {
+                is_rewrite_XnonPAR_forMales = FALSE
+                if (nrow(sampleList_male) > 0) {
+                  cat("WARNING: no male IDs specified in the ",
+                    sampleFile_male, " are found sample IDs used to fit in the null model in Step 1\n")
+                }
+            }else {
+                cat("is_rewrite_XnonPAR_forMales=TRUE and minInfo and minMAF won't be applied to all X chromosome variants\n")
+                minInfo = 0
+                minMAF = 1/(2 * length(obj.model$sampleID))
+
+		setAssocTest_GlobalVarsInCPP_indexInModel_male(indexInModel_male)
+
+            }
+        }
+        X_PARregion_list = unlist(strsplit(X_PARregion, split = ","))
+        X_PARregion_mat = NULL
+        if (length(X_PARregion_list) > 0) {
+            for (lxp in 1:length(X_PARregion_list)) {
+                X_PARregion_list_sub = as.numeric(unlist(strsplit(X_PARregion_list[lxp],
+                  split = "-")))
+                X_PARregion_mat = rbind(X_PARregion_mat, X_PARregion_list_sub)
+            }
+	    setAssocTest_GlobalVarsInCPP_X_PARregion_mat(X_PARregion_mat)
+
+        }else {
+            cat("PAR region on X chromosome is not specified\n")
+        }
+    } 
+
+
+
+
 
     if(obj.model$traitType == "binary"){
         if(max_MAC_use_ER > 0){

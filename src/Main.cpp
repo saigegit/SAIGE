@@ -66,6 +66,12 @@ arma::vec g_weights_beta(2);
 bool  g_is_Firth_beta;
 double g_pCutoffforFirth;
 double g_MACCutoffforER;
+bool g_is_rewrite_XnonPAR_forMales = false;
+
+
+arma::uvec g_indexInModel_male;
+
+arma::umat g_X_PARregion_mat;
 
 
 std::ofstream OutFile;
@@ -109,6 +115,20 @@ void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
   g_outputFilePrefixSingle = t_outputFilePrefix;
   g_MACCutoffforER = t_MACCutoffforER;
 }
+
+// [[Rcpp::export]]
+void setAssocTest_GlobalVarsInCPP_indexInModel_male(arma::uvec & t_indexInModel_male){
+  g_indexInModel_male = t_indexInModel_male;
+  g_is_rewrite_XnonPAR_forMales = true;
+}
+
+// [[Rcpp::export]]
+void setAssocTest_GlobalVarsInCPP_X_PARregion_mat(arma::umat & t_X_PARregion_mat){
+  g_X_PARregion_mat = t_X_PARregion_mat;
+}
+
+
+
 // [[Rcpp::export]]
 void setMarker_GlobalVarsInCPP(
 			       bool t_isOutputMoreDetails,
@@ -635,8 +655,28 @@ bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN", "Vcf"
                                       t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero, isBoolRead, t_GVec, t_isImputation);
     ptr_gVCFobj->move_forward_iterator(1);
   }	  
-  
+ 
+  if(g_is_rewrite_XnonPAR_forMales){
+  	processMale_XnonPAR(t_GVec, t_pd, g_X_PARregion_mat);
+	t_altCounts = arma::sum(t_GVec);
+	t_altFreq = arma::mean(t_altCounts)/2.0;	
+  }
+
   return isBoolRead;
+}
+
+
+// [[Rcpp::export]]
+void processMale_XnonPAR(arma::vec & t_GVec,  uint32_t& t_pd , arma::umat & t_XPARregion){
+	bool isPAR = false;
+	for(unsigned int j = 0; j < t_XPARregion.n_rows; j++){
+		if(t_pd <= t_XPARregion[j,1] && t_pd >= t_XPARregion[j,0]){	
+			isPAR = true;
+		}
+	}
+	if(!isPAR){
+		t_GVec.elem(g_indexInModel_male) = t_GVec.elem(g_indexInModel_male) * 2;
+	}
 }
 
 
