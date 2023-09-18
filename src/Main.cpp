@@ -659,7 +659,7 @@ bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN", "Vcf"
   if(g_is_rewrite_XnonPAR_forMales){
   	processMale_XnonPAR(t_GVec, t_pd, g_X_PARregion_mat);
 	t_altCounts = arma::sum(t_GVec);
-	t_altFreq = arma::mean(t_altCounts)/2.0;	
+	t_altFreq = arma::mean(t_GVec)/2.0;	
   }
 
   return isBoolRead;
@@ -670,7 +670,7 @@ bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN", "Vcf"
 void processMale_XnonPAR(arma::vec & t_GVec,  uint32_t& t_pd , arma::umat & t_XPARregion){
 	bool isPAR = false;
 	for(unsigned int j = 0; j < t_XPARregion.n_rows; j++){
-		if(t_pd <= t_XPARregion[j,1] && t_pd >= t_XPARregion[j,0]){	
+		if(t_pd <= t_XPARregion(j,1) && t_pd >= t_XPARregion(j,0)){	
 			isPAR = true;
 		}
 	}
