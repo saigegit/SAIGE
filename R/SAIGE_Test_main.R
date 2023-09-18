@@ -254,7 +254,7 @@ SPAGMMATtest = function(bgenFile = "",
                 minInfo = 0
                 minMAF = 1/(2 * length(obj.model$sampleID))
 
-		setAssocTest_GlobalVarsInCPP_indexInModel_male(indexInModel_male)
+		setAssocTest_GlobalVarsInCPP_indexInModel_male(indexInModel_male-1)
 
             }
         }
