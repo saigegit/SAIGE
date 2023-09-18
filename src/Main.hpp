@@ -15,6 +15,14 @@ void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
                                arma::vec & t_weights_beta,
 			       std::string t_outputFilePrefix);
 
+
+void setAssocTest_GlobalVarsInCPP_indexInModel_male(arma::uvec & t_indexInModel_male);
+
+void setAssocTest_GlobalVarsInCPP_X_PARregion_mat(arma::umat & t_X_PARregion_mat);
+
+void processMale_XnonPAR(arma::vec & t_GVec,  uint32_t& t_pd , arma::umat & t_XPARregion);
+
+
 void setMarker_GlobalVarsInCPP(
                                bool t_isOutputMoreDetails,
                                int t_marker_chunksize

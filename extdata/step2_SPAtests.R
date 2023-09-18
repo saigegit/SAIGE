@@ -3,6 +3,7 @@
 #options(stringsAsFactors=F, scipen = 999)
 options(stringsAsFactors=F)
 library(SAIGE)
+#library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/SAIGE/install_v1.3.1/")
 BLASctl_installed <- require(RhpcBLASctl)
 library(optparse)
 library(data.table)
@@ -85,7 +86,13 @@ option_list <- list(
   make_option("--sparseGRMSampleIDFile", type="character", default="",
    help="Path to the sample ID file for the pre-calculated sparse GRM. No header is included. The order of sample IDs is corresponding to sample IDs in the sparse GRM"),
   make_option("--relatednessCutoff", type="numeric", default=0,
-   help="Optional. Threshold (minimum realtedness coefficient) to treat two samples as unrelated when the sparse GRM is used [default=0]"), 
+   help="Optional. Threshold (minimum realtedness coefficient) to treat two samples as unrelated when the sparse GRM is used [default=0]"),
+  make_option("--sampleFile_male", type="character",default="",
+    help="Path to the file containing one column for IDs of MALE samples in the bgen or vcf file with NO header.Order does not matter"),
+  make_option("--X_PARregion", type="character",default="",
+    help="ranges of (pseudoautosomal) PAR region on chromosome X, which are seperated by comma and in the format start:end. By default: '60001-2699520,154931044-155260560' in the UCSC build hg19. For males, there are two X alleles in the PAR region, so PAR regions are treated the same as autosomes. In the NON-PAR regions (outside the specified PAR regions on chromosome X), for males, there is only one X allele. If is_rewrite_XnonPAR_forMales=TRUE, genotypes/dosages of all variants in the NON-PAR regions on chromosome X will be mutliplied by 2."),
+  make_option("--is_rewrite_XnonPAR_forMales", type="logical",default=FALSE,
+    help="Whether to rewrite gentoypes or dosages of variants in the NON-PAR regions on chromosome X for males (multiply by 2). By default, FALSE. Note, only use is_rewrite_XnonPAR_forMales=TRUE when the specified VCF or Bgen file only has variants on chromosome X. When is_rewrite_XnonPAR_forMales=TRUE, the program does not check the chromosome value by assuming all variants are on chromosome X"),
   make_option("--MACCutoff_to_CollapseUltraRare", type="numeric", default=10,
     help="MAC cutoff to collpase the ultra rare variants (<= MACCutoff_to_CollapseUltraRare) in the set-based association tests. By default, 10."),
   make_option("--cateVarRatioMinMACVecExclude",type="character", default="10,20.5",
@@ -280,6 +287,9 @@ if(packageVersion("SAIGE")>"1.1.4"){
              sparseGRMFile=opt$sparseGRMFile,
              sparseGRMSampleIDFile=opt$sparseGRMSampleIDFile,
              relatednessCutoff=opt$relatednessCutoff,
+             sampleFile_male=opt$sampleFile_male,
+             is_rewrite_XnonPAR_forMales=opt$is_rewrite_XnonPAR_forMales,
+             X_PARregion=opt$X_PARregion,
              MACCutoff_to_CollapseUltraRare = opt$MACCutoff_to_CollapseUltraRare,
              cateVarRatioMinMACVecExclude = cateVarRatioMinMACVecExclude,
              cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
