@@ -38,7 +38,7 @@ RUN apt-get update && \
     r-cran-roxygen2 \
     r-cran-rversions
 
-# pick up remaining bioconductor dependencies not packaged w/ ubuntu    
+# pick up remaining bioconductor dependencies not packaged w/ ubuntu 
 RUN Rscript -e 'BiocManager::install("SPAtest")'
 RUN Rscript -e 'BiocManager::install("RhpcBLASctl")'
 RUN Rscript -e 'BiocManager::install("SKAT")'
