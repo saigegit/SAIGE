@@ -23,4 +23,7 @@ SAIGE-GENE (now known as SAIGE-GENE+) are new method extension in the R package 
 The package takes genotype file input in the following formats
 - PLINK (bed, bim, fam), BGEN, VCF, BCF, SAV
 
+To build SAIGE using Docker - clone the repo, revert to desired version (x.x.x) if needed & run the following command from the root directory (prune to remove intermediate containers from build) :
+- ```docker build -t saige:x.x.x --build-arg BASE_IMAGE=ubuntu:xx.xx . && docker image prune```
+- The `--build-arg` flag is optional : `BASE_IMAGE` will default to ubuntu:24.04 LTS. For short term builds, specify the latest intermediate release for updated packages.
 
