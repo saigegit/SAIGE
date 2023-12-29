@@ -39,7 +39,7 @@ Rscript step3_LDmat.R   \
 
 #generate LD for all markers in bgen for each set in group file --annotation_in_groupTest=ALL
 #use a subset of samples specified in --sample_include_inLDMat_File=./input/sample.subset.txt (one column with sample IDs, no header)
-Rscript step3_LDmat.R   \
+/bin/time -o LDmat.runinfo.txt -v Rscript step3_LDmat.R   \
      --bgenFile=./input/genotype_100markers.bgen    \
      --bgenFileIndex=./input/genotype_100markers.bgen.bgi \
      --SAIGEOutputFile=./output/LDmat \
