@@ -48,7 +48,7 @@ option_list <- list(
   make_option("--skipModelFitting", type="logical", default=FALSE,
     help="Optional. Whether to skip model fitting and only to estimate the variance ratio. If TRUE, the file outputPrefix.rda is required [default='FALSE']"),
   make_option("--skipVarianceRatioEstimation", type="logical", default=FALSE,
-    help="Optional. Whether to skip model fitting and only to estimate the variance ratio. If TRUE, the file outputPrefix.rda is required [default='FALSE']"),
+    help="Optional. Whether to skip the variance ratio estimation. [default='FALSE']"),
   make_option("--memoryChunk", type="numeric", default=2,
    help="Optional. Size (Gb) for each memory chunk [default=2]"),
   make_option("--tauInit", type="character", default="0,0",
