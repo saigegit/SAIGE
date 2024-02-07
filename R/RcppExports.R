@@ -53,6 +53,10 @@ mainMarkerInCPP <- function(t_genoType, t_traitType, t_genoIndex_prev, t_genoInd
     invisible(.Call('_SAIGE_mainMarkerInCPP', PACKAGE = 'SAIGE', t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth))
 }
 
+Unified_getOneMarker <- function(t_genoType, t_gIndex_prev, t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero, t_GVec, t_isImputation) {
+    .Call('_SAIGE_Unified_getOneMarker', PACKAGE = 'SAIGE', t_genoType, t_gIndex_prev, t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero, t_GVec, t_isImputation)
+}
+
 processMale_XnonPAR <- function(t_GVec, t_pd, t_XPARregion) {
     invisible(.Call('_SAIGE_processMale_XnonPAR', PACKAGE = 'SAIGE', t_GVec, t_pd, t_XPARregion))
 }
