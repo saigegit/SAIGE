@@ -607,8 +607,10 @@ void mainMarkerInCPP(
 
 
 
-
 // a unified function to get single marker from genotype file
+
+
+// [[Rcpp::export]]
 bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN", "Vcf"
                                uint64_t & t_gIndex_prev,        // different meanings for different genoType
                                uint64_t & t_gIndex,        // different meanings for different genoType

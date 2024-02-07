@@ -7,11 +7,6 @@
 
 using namespace Rcpp;
 
-#ifdef RCPP_USE_GLOBAL_ROSTREAM
-Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
-Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
-#endif
-
 // CCT_cpp
 double CCT_cpp(arma::vec& pval);
 RcppExport SEXP _SAIGE_CCT_cpp(SEXP pvalSEXP) {
@@ -179,6 +174,34 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool& >::type t_isFirth(t_isFirthSEXP);
     mainMarkerInCPP(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth);
     return R_NilValue;
+END_RCPP
+}
+// Unified_getOneMarker
+bool Unified_getOneMarker(std::string& t_genoType, uint64_t& t_gIndex_prev, uint64_t& t_gIndex, std::string& t_ref, std::string& t_alt, std::string& t_marker, uint32_t& t_pd, std::string& t_chr, double& t_altFreq, double& t_altCounts, double& t_missingRate, double& t_imputeInfo, bool& t_isOutputIndexForMissing, std::vector<uint>& t_indexForMissing, bool& t_isOnlyOutputNonZero, std::vector<uint>& t_indexForNonZero, arma::vec& t_GVec, bool t_isImputation);
+RcppExport SEXP _SAIGE_Unified_getOneMarker(SEXP t_genoTypeSEXP, SEXP t_gIndex_prevSEXP, SEXP t_gIndexSEXP, SEXP t_refSEXP, SEXP t_altSEXP, SEXP t_markerSEXP, SEXP t_pdSEXP, SEXP t_chrSEXP, SEXP t_altFreqSEXP, SEXP t_altCountsSEXP, SEXP t_missingRateSEXP, SEXP t_imputeInfoSEXP, SEXP t_isOutputIndexForMissingSEXP, SEXP t_indexForMissingSEXP, SEXP t_isOnlyOutputNonZeroSEXP, SEXP t_indexForNonZeroSEXP, SEXP t_GVecSEXP, SEXP t_isImputationSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string& >::type t_genoType(t_genoTypeSEXP);
+    Rcpp::traits::input_parameter< uint64_t& >::type t_gIndex_prev(t_gIndex_prevSEXP);
+    Rcpp::traits::input_parameter< uint64_t& >::type t_gIndex(t_gIndexSEXP);
+    Rcpp::traits::input_parameter< std::string& >::type t_ref(t_refSEXP);
+    Rcpp::traits::input_parameter< std::string& >::type t_alt(t_altSEXP);
+    Rcpp::traits::input_parameter< std::string& >::type t_marker(t_markerSEXP);
+    Rcpp::traits::input_parameter< uint32_t& >::type t_pd(t_pdSEXP);
+    Rcpp::traits::input_parameter< std::string& >::type t_chr(t_chrSEXP);
+    Rcpp::traits::input_parameter< double& >::type t_altFreq(t_altFreqSEXP);
+    Rcpp::traits::input_parameter< double& >::type t_altCounts(t_altCountsSEXP);
+    Rcpp::traits::input_parameter< double& >::type t_missingRate(t_missingRateSEXP);
+    Rcpp::traits::input_parameter< double& >::type t_imputeInfo(t_imputeInfoSEXP);
+    Rcpp::traits::input_parameter< bool& >::type t_isOutputIndexForMissing(t_isOutputIndexForMissingSEXP);
+    Rcpp::traits::input_parameter< std::vector<uint>& >::type t_indexForMissing(t_indexForMissingSEXP);
+    Rcpp::traits::input_parameter< bool& >::type t_isOnlyOutputNonZero(t_isOnlyOutputNonZeroSEXP);
+    Rcpp::traits::input_parameter< std::vector<uint>& >::type t_indexForNonZero(t_indexForNonZeroSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type t_GVec(t_GVecSEXP);
+    Rcpp::traits::input_parameter< bool >::type t_isImputation(t_isImputationSEXP);
+    rcpp_result_gen = Rcpp::wrap(Unified_getOneMarker(t_genoType, t_gIndex_prev, t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero, t_GVec, t_isImputation));
+    return rcpp_result_gen;
 END_RCPP
 }
 // processMale_XnonPAR
@@ -2242,6 +2265,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setMarker_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setMarker_GlobalVarsInCPP, 2},
     {"_SAIGE_setRegion_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setRegion_GlobalVarsInCPP, 4},
     {"_SAIGE_mainMarkerInCPP", (DL_FUNC) &_SAIGE_mainMarkerInCPP, 7},
+    {"_SAIGE_Unified_getOneMarker", (DL_FUNC) &_SAIGE_Unified_getOneMarker, 18},
     {"_SAIGE_processMale_XnonPAR", (DL_FUNC) &_SAIGE_processMale_XnonPAR, 3},
     {"_SAIGE_Unified_getSampleSizeinGeno", (DL_FUNC) &_SAIGE_Unified_getSampleSizeinGeno, 1},
     {"_SAIGE_Unified_getSampleSizeinAnalysis", (DL_FUNC) &_SAIGE_Unified_getSampleSizeinAnalysis, 1},
