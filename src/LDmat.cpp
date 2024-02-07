@@ -39,6 +39,8 @@ static VCF::VcfClass* ptr_gVCFobj = NULL;
 
 std::ofstream OutFile_single_LDmat;
 std::string g_outputFilePrefixSingle_LDmat;
+std::ofstream OutFile_index_LDmat;
+std::string g_outputFilePrefixIndex_LDmat;
 std::ofstream OutFile_LDmat;
 std::string g_outputFilePrefix_LDmat;
 
@@ -55,6 +57,8 @@ double g_marker_minMAC_cutoff_LDmat;
 double g_marker_minINFO_cutoff_LDmat;
 
 unsigned int g_region_maxMarkers_cutoff_LDmat;   // maximal number of markers in one chunk, only used for region-based analysis to reduce memory usage
+unsigned int g_startpos;
+unsigned int g_endpos;
 
 
 // [[Rcpp::export]]
@@ -85,7 +89,10 @@ void setGlobalVarsInCPP_LDmat(std::string t_impute_method,
   g_region_maxMarkers_cutoff_LDmat = t_max_markers_region;
 
   g_outputFilePrefixSingle_LDmat = t_outputFile + ".marker_info.txt";
-
+  g_outputFilePrefixIndex_LDmat = t_outputFile + ".index.txt";
+  g_outputFilePrefix_LDmat = t_outputFile + ".LDmat.txt";
+  g_startpos=-1;
+  g_endpos=-1;
 }
 
 
@@ -426,8 +433,8 @@ void LDmatRegionInCPP(
   file.write(reinterpret_cast<const char*>(values_VarMat_vec.data()), size3 * sizeof(int));
 */
 
-g_outputFilePrefix_LDmat = t_outputFile + "_"+regionName+".txt";
-OutFile_LDmat.open(g_outputFilePrefix_LDmat.c_str());
+//g_outputFilePrefix_LDmat = t_outputFile + "_"+regionName+".txt";
+//OutFile_LDmat.open(g_outputFilePrefix_LDmat.c_str());
 
   //std::ofstream file(t_outputFile + "_"+regionName+".txt");
   if (OutFile_LDmat.is_open()) {
@@ -441,10 +448,25 @@ OutFile_LDmat.open(g_outputFilePrefix_LDmat.c_str());
   }
  
  // Close the file
-  OutFile_LDmat.close();
+  //OutFile_LDmat.close();
 }else{
   std::cout << g_outputFilePrefix_LDmat << " is not opened" << std::endl;
 }
+
+  if (OutFile_index_LDmat.is_open()) {
+        g_startpos = g_endpos+1;
+	g_endpos = g_startpos + rowIndices_VarMat_vec.size() - 1;
+	OutFile_index_LDmat << g_startpos;
+	OutFile_index_LDmat << " ";
+	OutFile_index_LDmat << g_endpos;
+	OutFile_index_LDmat << " ";
+	OutFile_index_LDmat << regionName;
+	OutFile_index_LDmat << "\n";
+  }else{
+    std::cout << g_outputFilePrefixIndex_LDmat << " is not opened" << std::endl;
+  }
+
+
 /*
         arma::uvec location_row_VarMat_arma =  arma::conv_to<arma::uvec>::from(rowIndices_VarMat_vec);
         arma::uvec location_col_VarMat_arma =  arma::conv_to<arma::uvec>::from(colIndices_VarMat_vec);
@@ -526,6 +548,31 @@ bool openOutfile_single_LDmat(bool isappend){
        return(isopen);
 }
 
+// [[Rcpp::export]]
+bool openOutfile_LDmat(bool isappend){
+      bool isopen;
+      if(!isappend){
+        OutFile_LDmat.open(g_outputFilePrefix_LDmat.c_str());
+        isopen = OutFile_LDmat.is_open();
+       }else{
+         OutFile_LDmat.open(g_outputFilePrefix_LDmat.c_str(), std::ofstream::out | std::ofstream::app);
+         isopen = OutFile_LDmat.is_open();
+       }
+       return(isopen);
+}
+
+// [[Rcpp::export]]
+bool openOutfile_index_LDmat(bool isappend){
+      bool isopen;
+      if(!isappend){
+        OutFile_index_LDmat.open(g_outputFilePrefixIndex_LDmat.c_str());
+        isopen = OutFile_index_LDmat.is_open();
+       }else{
+         OutFile_index_LDmat.open(g_outputFilePrefixIndex_LDmat.c_str(), std::ofstream::out | std::ofstream::app);
+         isopen = OutFile_index_LDmat.is_open();
+       }
+       return(isopen);
+}
 
 // [[Rcpp::export]]
 void closeOutfile_single_LDmat(){

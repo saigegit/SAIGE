@@ -17,6 +17,14 @@ openOutfile_single_LDmat <- function(isappend) {
     .Call('_SAIGE_openOutfile_single_LDmat', PACKAGE = 'SAIGE', isappend)
 }
 
+openOutfile_LDmat <- function(isappend) {
+    .Call('_SAIGE_openOutfile_LDmat', PACKAGE = 'SAIGE', isappend)
+}
+
+openOutfile_index_LDmat <- function(isappend) {
+    .Call('_SAIGE_openOutfile_index_LDmat', PACKAGE = 'SAIGE', isappend)
+}
+
 closeOutfile_single_LDmat <- function() {
     invisible(.Call('_SAIGE_closeOutfile_single_LDmat', PACKAGE = 'SAIGE'))
 }
