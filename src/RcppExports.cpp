@@ -71,6 +71,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// openOutfile_LDmat
+bool openOutfile_LDmat(bool isappend);
+RcppExport SEXP _SAIGE_openOutfile_LDmat(SEXP isappendSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< bool >::type isappend(isappendSEXP);
+    rcpp_result_gen = Rcpp::wrap(openOutfile_LDmat(isappend));
+    return rcpp_result_gen;
+END_RCPP
+}
+// openOutfile_index_LDmat
+bool openOutfile_index_LDmat(bool isappend);
+RcppExport SEXP _SAIGE_openOutfile_index_LDmat(SEXP isappendSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< bool >::type isappend(isappendSEXP);
+    rcpp_result_gen = Rcpp::wrap(openOutfile_index_LDmat(isappend));
+    return rcpp_result_gen;
+END_RCPP
+}
 // closeOutfile_single_LDmat
 void closeOutfile_single_LDmat();
 RcppExport SEXP _SAIGE_closeOutfile_single_LDmat() {
@@ -2211,6 +2233,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setGlobalVarsInCPP_LDmat", (DL_FUNC) &_SAIGE_setGlobalVarsInCPP_LDmat, 10},
     {"_SAIGE_LDmatRegionInCPP", (DL_FUNC) &_SAIGE_LDmatRegionInCPP, 9},
     {"_SAIGE_openOutfile_single_LDmat", (DL_FUNC) &_SAIGE_openOutfile_single_LDmat, 1},
+    {"_SAIGE_openOutfile_LDmat", (DL_FUNC) &_SAIGE_openOutfile_LDmat, 1},
+    {"_SAIGE_openOutfile_index_LDmat", (DL_FUNC) &_SAIGE_openOutfile_index_LDmat, 1},
     {"_SAIGE_closeOutfile_single_LDmat", (DL_FUNC) &_SAIGE_closeOutfile_single_LDmat, 0},
     {"_SAIGE_setAssocTest_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP, 10},
     {"_SAIGE_setAssocTest_GlobalVarsInCPP_indexInModel_male", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP_indexInModel_male, 1},
