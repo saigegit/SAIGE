@@ -1,22 +1,9 @@
 # RareEffect.R
 
-
-if (!require(optparse)) install.packages(optparse)
-if (!require(data.table)) install.packages(data.table)
-if (!require(tibble)) install.packages(tibble)
-if (!require(dplyr)) install.packages(dplyr)
-if (!require(Matrix)) install.packages(Matrix)
-if (!require(sparsesvd)) install.packages(sparsesvd)
-if (!require(stringr)) install.packages(stringr)
-
 library(SAIGE)
+if (!require(optparse)) install.packages(optparse)
+
 library(optparse, quietly = TRUE)
-library(data.table, quietly = TRUE)
-library(tibble, quietly = TRUE)
-library(dplyr, quietly = TRUE)
-library(Matrix, quietly = TRUE)
-library(sparsesvd, quietly = TRUE)
-library(stringr, quietly = TRUE)
 
 option_list <- list(
     make_option(c("--rdaFile"), type="character", default="",
@@ -70,8 +57,8 @@ sigma_sq <- var(modglmm$residuals)
 
 
 # Set PLINK object
-bim <- fread(bimFile)
-fam <- fread(famFile)
+bim <- data.table::fread(bimFile)
+fam <- data.table::fread(famFile)
 sampleID <- as.character(fam$V2)
 n_samples <- length(sampleID)
 
@@ -327,7 +314,7 @@ system.time({
     if (lof_ncol == 1) {
         sgn <- sign(post_beta[1])
     } else {
-        MAC <- colSums(G_reordered[,c(1:(lof_ncol - 1)), drop = F])
+        MAC <- Matrix::colSums(G_reordered[,c(1:(lof_ncol - 1)), drop = F])
         sgn <- sign(sum(MAC * post_beta[c(1:(lof_ncol - 1))]))
     }
 
