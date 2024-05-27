@@ -446,11 +446,11 @@ glmmkin.ai_PCG_Rcpp_Quantitative = function(bedFile, bimFile, famFile, Xorig, is
     #Y = eta - offset + (y - mu)/mu.eta
     #sqrtW = mu.eta/sqrt(family$variance(mu))
 
-    if(tau[1]<=0){
-      stop("ERROR! The first variance component parameter estimate is 0\n")
-    }
+    #if(tau[1]<=0){
+    #  stop("ERROR! The first variance component parameter estimate is 0\n")
+    #}
 
-    if(tau[2] <= 0) break	
+    if(tau[1]<=0 | tau[2] <= 0) break	
 
 
     if(max(abs(tau - tau0)/(abs(tau) + abs(tau0) + tol)) < tol) break
