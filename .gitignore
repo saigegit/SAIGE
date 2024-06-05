@@ -8,3 +8,4 @@ src/*.o
 src/*.so
 src/backup/*
 extdata/input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly.raw
+*.swp
