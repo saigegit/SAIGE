@@ -3,4 +3,4 @@
 all: docker
 
 docker:
-	@docker build -f docker/Dockerfile .
+	@docker build -t saige .
