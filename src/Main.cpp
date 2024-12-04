@@ -516,7 +516,7 @@ void mainMarkerInCPP(
     	varT_cVec.at(i) = varT_c;
     }
 	
-    if(t_traitType == "binary"){ 
+    if(t_traitType == "binary" || t_traitType == "survival"){ 
 	    arma::vec dosage_case = t_GVec.elem(ptr_gSAIGEobj->m_case_indices);
 	    arma::vec dosage_ctrl = t_GVec.elem(ptr_gSAIGEobj->m_ctrl_indices);
       AF_case = arma::mean(dosage_case) /2;
@@ -1253,7 +1253,7 @@ Rcpp::List mainRegionInCPP(
      //arma::vec timeoutput3aa = getTime();
      //printTime(timeoutput3a, timeoutput3aa, "Unified_getOneMarker 3a");
      arma::vec dosage_case, dosage_ctrl;
-     if(t_traitType == "binary"){
+     if(t_traitType == "binary" || t_traitType == "survival"){
         dosage_case = GVec.elem(ptr_gSAIGEobj->m_case_indices);
         dosage_ctrl = GVec.elem(ptr_gSAIGEobj->m_ctrl_indices);
         MACcasegroup = arma::accu(dosage_case);
@@ -1275,7 +1275,7 @@ Rcpp::List mainRegionInCPP(
 				annoMAFIndicatorVec(jm) = 1;
 				MAC_GroupVec(jm) = MAC_GroupVec(jm) + MAC;
 
-				if(t_traitType == "binary"){
+				if(t_traitType == "binary" || t_traitType == "survival"){
 					MACCase_GroupVec(jm) = MACCase_GroupVec(jm) + MACcasegroup;
 					MACControl_GroupVec(jm) = MACControl_GroupVec(jm) + MACcontrolgroup;
 					//genoSumMat.col(jm) = genoSumMat.col(jm) + w0*GVec;
@@ -1298,7 +1298,7 @@ Rcpp::List mainRegionInCPP(
    //    printTime(timeoutput3ab, timeoutput3ac, "Unified_getOneMarker 3c");
      annoMAFIndicatorMat.row(i) = annoMAFIndicatorVec.t();
      if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){
-      if(t_traitType == "binary"){
+      if(t_traitType == "binary" || t_traitType == "survival"){
         AF_case = arma::mean(dosage_case) /2;
         AF_ctrl = arma::mean(dosage_ctrl) /2;
         if(flip){
@@ -1540,7 +1540,7 @@ if(i2 > 0){
     	    markerVec.at(i) = regionName + ":" + annoStringVec.at(j) + ":" + str ;
             arma::vec dosage_case, dosage_ctrl;
             MAC_GroupVec(jm) = MAC_GroupVec(jm) + MAC;
-            if(t_traitType == "binary"){
+            if(t_traitType == "binary" || t_traitType == "survival"){
                         dosage_case = genoURVec.elem(ptr_gSAIGEobj->m_case_indices);
                         dosage_ctrl = genoURVec.elem(ptr_gSAIGEobj->m_ctrl_indices);
                         MACcasegroup = arma::accu(dosage_case);
@@ -1549,7 +1549,7 @@ if(i2 > 0){
                         MACControl_GroupVec(jm) = MACControl_GroupVec(jm) + MACcontrolgroup;
             }
 
-          if(t_traitType == "binary"){
+          if(t_traitType == "binary" || t_traitType == "survival"){
             AF_case = arma::mean(dosage_case) /2;
             AF_ctrl = arma::mean(dosage_ctrl) /2;
             if(flip){
@@ -1590,7 +1590,7 @@ if(i2 > 0){
     }else{//if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){	
             MAC_GroupVec(jm) = MAC_GroupVec(jm) + MAC;
 	                arma::vec dosage_case, dosage_ctrl;
-            if(t_traitType == "binary"){
+            if(t_traitType == "binary" || t_traitType == "survival"){
                         dosage_case = genoURVec.elem(ptr_gSAIGEobj->m_case_indices);
                         dosage_ctrl = genoURVec.elem(ptr_gSAIGEobj->m_ctrl_indices);
                         MACcasegroup = arma::accu(dosage_case);
@@ -1892,7 +1892,7 @@ if(t_regionTestType == "BURDEN"){
   q_maf_for_anno = q_maf_for_anno + 1;
   OutList.push_back(MAC_GroupVec, "MAC_GroupVec");
   OutList.push_back(q_maf_for_anno, "q_maf_for_annoVec");
-  if(t_traitType == "binary"){
+  if(t_traitType == "binary" || t_traitType == "survival"){
     OutList.push_back(MACCase_GroupVec, "MACCase_GroupVec");
     OutList.push_back(MACControl_GroupVec, "MACCtrl_GroupVec");
     OutList.push_back(genoSumMat, "genoSumMat");
@@ -2373,6 +2373,10 @@ bool openOutfile(std::string t_traitType, bool isappend){
 		if(t_traitType == "binary"){	
 			OutFile << "MAC_case\tMAC_control\t";
 		}
+
+		if(t_traitType == "survival"){
+			OutFile << "MAC_event\tMAC_censor\t";
+		}
 		OutFile << "Number_rare\tNumber_ultra_rare\n";
 	}
      }else{
@@ -2397,13 +2401,13 @@ bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, boo
 			OutFile_singleInGroup << "MissingRate\t";
 		}
 		OutFile_singleInGroup << "BETA\tSE\tTstat\tvar\tp.value\t";
-	        if(t_traitType == "binary"){
+	        if(t_traitType == "binary" || t_traitType == "survival"){
                         OutFile_singleInGroup << "p.value.NA\tIs.SPA\t";
                 }	
 
                 if(ptr_gSAIGEobj->m_isCondition){
                         OutFile_singleInGroup << "BETA_c\tSE_c\tTstat_c\tvar_c\tp.value_c\t";
-			if(t_traitType == "binary"){
+			if(t_traitType == "binary" || t_traitType == "survival"){
 				OutFile_singleInGroup << "p.value.NA_c\t";		
 			}
                 }
@@ -2417,7 +2421,13 @@ bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, boo
                 }else if(t_traitType == "quantitative"){
 			OutFile_singleInGroup << "N\n";	
 			
-		}	
+		}else if(t_traitType == "survival"){
+                        OutFile_singleInGroup << "AF_event\tAF_censor\tN_event\tN_censor";
+ 			if(t_isMoreOutput){
+                                OutFile_singleInGroup << "\tN_event_hom\tN_event_het\tN_censor_hom\tN_censor_het";
+                        }
+			OutFile_singleInGroup << "\n";
+		}
 
         }
     }else{
@@ -2456,6 +2466,13 @@ bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isapp
 			if(t_traitType == "binary"){
 				OutFile_single << "p.value.NA_c\t";
 			}
+
+			if(t_traitType == "survival"){
+				OutFile_single << "p.value.NA_c\t";
+			}
+
+
+
                 }
 		
 
@@ -2470,7 +2487,14 @@ bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isapp
                 }else if(t_traitType == "quantitative"){
                         OutFile_single << "N\n";
 
-                }
+                }else if(t_traitType == "survival"){
+                        OutFile_single << "AF_event\tAF_censor\tN_event\tN_censor";
+
+			if(t_isMoreOutput){	
+				OutFile_single << "\tN_event_hom\tN_event_het\tN_censor_hom\tN_censor_het";
+			}
+			OutFile_single << "\n";
+		}
 
         }
      }else{
@@ -2560,7 +2584,7 @@ void writeOutfile_single(bool t_isMoreOutput,
                 OutFile_single << pvalVec.at(k);
                 OutFile_single << "\t";
 
-                if(t_traitType == "binary"){
+                if(t_traitType == "binary" || t_traitType == "survival"){
                         OutFile_single << pvalNAVec.at(k);
                         OutFile_single << "\t";
                         OutFile_single << std::boolalpha << isSPAConvergeVec.at(k);
@@ -2577,12 +2601,12 @@ void writeOutfile_single(bool t_isMoreOutput,
                         OutFile_single << "\t";
                         OutFile_single << pval_cVec.at(k);
                         OutFile_single << "\t";
-			if(t_traitType == "binary"){	
+			if(t_traitType == "binary" || t_traitType == "survival"){	
                         	OutFile_single << pvalNA_cVec.at(k);
                         	OutFile_single << "\t";
 			}	
                 }
-                if(t_traitType == "binary"){
+                if(t_traitType == "binary" || t_traitType == "survival"){
                         OutFile_single << AF_caseVec.at(k);
                         OutFile_single << "\t";
                         OutFile_single << AF_ctrlVec.at(k);
@@ -2699,7 +2723,7 @@ void writeOutfile_BURDEN(std::string regionName,
 	   }
 	   OutFile << MAC_GroupVec(i);
            OutFile << "\t";
-           if(t_traitType == "binary"){
+           if(t_traitType == "binary" || t_traitType == "survival"){
                OutFile << MACCase_GroupVec(i);
                OutFile << "\t";
                OutFile << MACControl_GroupVec(i);
@@ -2721,7 +2745,7 @@ void writeOutfile_BURDEN(std::string regionName,
 	OutFile << "\tNA\tNA\t";
      }
      OutFile << "NA\t";
-     if(t_traitType == "binary"){
+     if(t_traitType == "binary" || t_traitType == "survival"){
         OutFile << "NA\t";
         OutFile << "NA\t";
      }
@@ -2811,7 +2835,7 @@ int writeOutfile_singleInGroup(bool t_isMoreOutput,
                 t_OutFile_singleInGroup << pvalVec.at(k);
                 t_OutFile_singleInGroup << "\t";
 
-                if(t_traitType == "binary"){
+                if(t_traitType == "binary" || t_traitType == "survival"){
                         t_OutFile_singleInGroup << pvalNAVec.at(k);
                         t_OutFile_singleInGroup << "\t";
                         t_OutFile_singleInGroup << std::boolalpha << isSPAConvergeVec.at(k);
@@ -2828,12 +2852,12 @@ int writeOutfile_singleInGroup(bool t_isMoreOutput,
                         t_OutFile_singleInGroup << "\t";
                         t_OutFile_singleInGroup << pval_cVec.at(k);
                         t_OutFile_singleInGroup << "\t";
-			if(t_traitType == "binary"){
+			if(t_traitType == "binary" || t_traitType == "survival"){
                         	t_OutFile_singleInGroup << pvalNA_cVec.at(k);
                         	t_OutFile_singleInGroup << "\t";
 			}
                 }
-                if(t_traitType == "binary"){
+                if(t_traitType == "binary" || t_traitType == "survival"){
                         t_OutFile_singleInGroup << AF_caseVec.at(k);
                         t_OutFile_singleInGroup << "\t";
                         t_OutFile_singleInGroup << AF_ctrlVec.at(k);
