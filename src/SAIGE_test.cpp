@@ -151,12 +151,15 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
       t_gy = dot(t_gtilde, m_y);
      }
     S = dot(t_gtilde, m_res);
+    std::cout << "S " << S << std::endl;
     S = S/m_tauvec[0];
 
+    std::cout << "S b " << S << std::endl;
 
     if(!m_flagSparseGRM_cur){
       t_P2Vec = t_gtilde % m_mu2 *m_tauvec[0];  
       var2m = dot(t_P2Vec , t_gtilde);
+       std::cout << "!m_flagSparseGRM_cur" << std::endl;
     }else{
       arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
       t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
@@ -164,6 +167,7 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
       if(m_isVarPsadj){
 	var2m = var2m - t_gtilde.t() * m_Sigma_iXXSigma_iX * m_X.t() * t_P2Vec;	
       }
+             std::cout << "m_flagSparseGRM_cur" << std::endl;
     }	      
     var2 = var2m(0,0);
     double var1 = var2 * m_varRatioVal;
@@ -233,7 +237,7 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
     arma::vec S_a2;
     double Bmu2;
     arma::mat  ZtXVXZ = Z.t() * m_XVX * Z;
-    if(m_traitType == "binary"){
+    if(m_traitType == "binary" || m_traitType == "survival"){
       mu21  = m_mu2.elem(t_indexForNonZero);
       g1tildemu2 = dot(square(g1_tilde), mu21);
       Bmu2 = arma::dot(square(B),  mu21);
@@ -422,13 +426,16 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 
   double gmuNB;
 
-  
+//std::cout << "ok1" << std::endl;
+
+
 if((StdStat > m_SPA_Cutoff || std::isnan(StdStat)) && m_traitType != "quantitative" && t_isER){
 	t_isER = true;
 }else{	
 	t_isER = false;
 }
 
+//std::cout << "ok2" << std::endl;
 
 if(!t_isER){
 
@@ -465,14 +472,17 @@ if(!t_isER){
 			}	
 		}
 		*/
-//	std::cout << "gNB.n_elem " <<  gNB.n_elem << std::endl;	
-//	std::cout << "gNA.n_elem " <<  gNA.n_elem << std::endl;	
+
+/*
+	std::cout << "gNB.n_elem " <<  gNB.n_elem << std::endl;	
+	std::cout << "gNA.n_elem " <<  gNA.n_elem << std::endl;	
+*/
 	gNB = t_gtilde(iIndex);
 	gNA = t_gtilde(iIndexComVec);
    	muNB = m_mu(iIndex);
    	muNA = m_mu(iIndexComVec);
 
-	/*
+/*	
 	    std::cout << "gNA.n_elem 2 " << gNA.n_elem << std::endl;
         std::cout << "gNB.n_elem 2 " << gNB.n_elem << std::endl;
         std::cout << "muNA.n_elem 2 " << muNA.n_elem << std::endl;
@@ -482,7 +492,8 @@ if(!t_isER){
 
   	gmuNB = dot(gNB,muNB);	 
    	NAmu= m1-gmuNB;
-	}
+
+   }
 	/*else{
 		gNA.clear();
 		gNB.clear();
@@ -507,16 +518,22 @@ if(!t_isER){
         }else if(m_traitType == "survival"){
                 q = t_Tstat/sqrt(t_var1/t_var2);
                 qinv = -q;
-		if(p_iIndexComVecSize >= 0.5){
+  		if(p_iIndexComVecSize >= 0.5){
            		NAsigma = t_var2 - arma::sum(muNB % arma::pow(gNB,2));
 		}
-        }
+/*		std::cout << "NAsigma is " << NAsigma << std::endl;
+		std::cout << "t_var2 is " << t_var2 << std::endl;
+		muNB.print("muNB");
+		gNB.print("gNB");
+  */
+  }
     	//bool logp=false;
 	double tol0 = std::numeric_limits<double>::epsilon();
 	tol1 = std::pow(tol0, 0.25);
 	if(p_iIndexComVecSize >= 0.5 && !m_flagSparseGRM_cur){
 		//std::cout << "SPA_fast" << std::endl;
         	SPA_fast(m_mu, t_gtilde, q, qinv, pval_noadj, ispvallog, gNA, gNB, muNA, muNB, NAmu, NAsigma, tol1, m_traitType, t_SPApval, t_isSPAConverge);
+	
 	}else{
 		//std::cout << "SPA" << std::endl;
 		SPA(m_mu, t_gtilde, q, qinv, pval_noadj, tol1, ispvallog, m_traitType, t_SPApval, t_isSPAConverge);	
@@ -781,6 +798,7 @@ if(!t_isER){
     gNB.clear();
 
 
+//std::cout << "ok3" << std::endl;
 
     if(is_region && !is_gtilde){
 	getadjGFast(t_GVec, t_gtilde, iIndex);

@@ -308,7 +308,9 @@ SPAGMMATtest = function(bgenFile = "",
       #}		      
       sparseSigmaRList = list(nSubj = 0, locations = matrix(0,nrow=2,ncol=2), values = rep(0,2))  
       isSparseGRM = FALSE 
-    }	    
+    }
+
+    cat("isSparseGRM is ", isSparseGRM, "\n")
     ratioVecList = Get_Variance_Ratio(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest, isSparseGRM) #readInGLMM.R
 
     if(is_fastTest){

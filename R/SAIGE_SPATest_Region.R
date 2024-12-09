@@ -78,9 +78,8 @@ setSparseSigma_new = function(sparseGRMFile,
   
   sparseGRM@x = sparseGRM@x * tauVec[2]
   #sparseSigma = sparseGRM * tauVec[2]
-  if (traitType == "binary") {
-    sparseGRM@x[which(sparseGRM@i == sparseGRM@j)] = sparseGRM@x[which(sparseGRM@i == sparseGRM@j)] + 1 /
-      W
+  if (traitType == "binary" | traitType == "survival") {
+    sparseGRM@x[which(sparseGRM@i == sparseGRM@j)] = sparseGRM@x[which(sparseGRM@i == sparseGRM@j)] + 1 / W
     #diag(sparseSigma) = W + diag(sparseSigma)
   } else if (traitType == "quantitative") {
     sparseGRM@x[which(sparseGRM@i == sparseGRM@j)] = tauVec[1] + sparseGRM@x[which(sparseGRM@i == sparseGRM@j)]

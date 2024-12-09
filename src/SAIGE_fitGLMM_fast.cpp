@@ -5373,13 +5373,19 @@ arma::fvec& Sigma_iY, arma::fmat & Sigma_iX, arma::fmat & cov,
 int nrun, int maxiterPCG, float tolPCG, float traceCVcutoff){
 
 	arma::fmat Sigma_iXt = Sigma_iX.t();
-
   	arma::fvec PY1 = Sigma_iY - Sigma_iX * (cov * (Sigma_iXt * Yvec));
+	//PY1.print("PY1");
   	arma::fvec APY = getCrossprodMatAndKin(PY1);
+	//APY.print("APY");
   	float YPAPY = dot(PY1, APY);
-
+	
   	float Trace = GetTrace(Sigma_iX, Xmat, wVec, tauVec, cov, nrun, maxiterPCG, tolPCG, traceCVcutoff);
+	//std::cout << "Trace " << Trace << std::endl;
   	arma::fvec PAPY_1 = getPCG1ofSigmaAndVector(wVec, tauVec, APY, maxiterPCG, tolPCG);
+	//wVec.print("wVec");
+	//tauVec.print("tauVec");
+	//PAPY_1.print("PAPY_1");
+
   	arma::fvec PAPY = PAPY_1 - Sigma_iX * (cov * (Sigma_iXt * PAPY_1));
   	float AI = dot(APY, PAPY);
 
@@ -5397,8 +5403,11 @@ int nrun, int maxiterPCG, float tolPCG, float tol, float traceCVcutoff){
 
 	//double mem1,mem2;
         //process_mem_usage(mem1, mem2);
+        //std::cout << "fitglmmaiRPCG starts" << std::endl;
 
+	//std::cout << "fitglmmaiRPCG starts 2" << std::endl;
   	Rcpp::List re = getAIScore(Yvec, Xmat,wVec,  tauVec, Sigma_iY, Sigma_iX, cov, nrun, maxiterPCG, tolPCG, traceCVcutoff);
+
         //process_mem_usage(mem1, mem2);
   	float YPAPY = re["YPAPY"];
   	float Trace = re["Trace"];
@@ -5407,6 +5416,10 @@ int nrun, int maxiterPCG, float tolPCG, float tol, float traceCVcutoff){
   	float Dtau = score1/AI1;
   	arma::fvec tau0 = tauVec;
   	tauVec(1) = tau0(1) + Dtau;
+        //std::cout << "fitglmmaiRPCG ends" << std::endl;
+        //std::cout << "AI1: " << AI1 << std::endl;
+        //std::cout << "score1: " << score1 << std::endl;
+        //std::cout << "Dtau: " << Dtau << std::endl;
 
   	for(int i=0; i<tauVec.n_elem; ++i) {
     		if (tauVec(i) < tol){

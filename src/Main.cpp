@@ -2457,17 +2457,13 @@ bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isapp
                         OutFile_single << "MissingRate\t";
                 }
                 OutFile_single << "BETA\tSE\tTstat\tvar\tp.value\t";
-                if(t_traitType == "binary"){
+                if(t_traitType == "binary" || t_traitType == "survival"){
                         OutFile_single << "p.value.NA\tIs.SPA\t";
                 }
 
                 if(ptr_gSAIGEobj->m_isCondition){
                         OutFile_single << "BETA_c\tSE_c\tTstat_c\tvar_c\tp.value_c\t";
-			if(t_traitType == "binary"){
-				OutFile_single << "p.value.NA_c\t";
-			}
-
-			if(t_traitType == "survival"){
+			if(t_traitType == "binary" || t_traitType == "survival"){
 				OutFile_single << "p.value.NA_c\t";
 			}
 
