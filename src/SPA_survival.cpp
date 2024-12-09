@@ -49,7 +49,7 @@ double K2_Poi(double t1, arma::vec & mu, arma::vec & g)
 		
 	temp0 = arma::exp(g * t1);
 	temp1 = arma::pow(g,2);
-        temp2 = mu % temp1 + temp0;
+        temp2 = mu % temp1 % temp0;
         double out = sum_arma1(temp2);
         return(out);
 }
@@ -130,12 +130,12 @@ Rcpp::List Get_Saddle_Prob_Poi(double zeta,  arma::vec & mu, arma::vec & g, doub
 	temp1 = zeta * q - k1;
 	Rcpp::List result;
 	bool isSaddle = false;
-	//std::cout << "k1 " << k1 << std::endl;
-	//std::cout << "k2 " << k2 << std::endl;
-	//std::cout << "temp1 " << temp1 << std::endl;
-	//std::cout << "zeta " << zeta << std::endl;
-	//std::cout << "q " << q << std::endl;
-
+/*	std::cout << "k1 " << k1 << std::endl;
+	std::cout << "k2 " << k2 << std::endl;
+	std::cout << "temp1 " << temp1 << std::endl;
+	std::cout << "zeta " << zeta << std::endl;
+	std::cout << "q " << q << std::endl;
+*/
 	bool flagrun=false;
         if(std::isfinite(k1) && std::isfinite(k2) && temp1 >= 0 && k2 >= 0){
                  w = arma::sign(zeta) * std::sqrt(2 *temp1);
@@ -155,10 +155,10 @@ Rcpp::List Get_Saddle_Prob_Poi(double zeta,  arma::vec & mu, arma::vec & g, doub
 		//v = zeta *  std::sqrt(k2);
 		Ztest = w + (1/w) * std::log(v/w);
 
-		//std::cout << "Ztest: " << Ztest << std::endl;
-		//std::cout << "w: " << w << std::endl;
-		//std::cout << "v: " << v << std::endl;
-
+		/*std::cout << "w: " << w << std::endl;
+		std::cout << "v: " << v << std::endl;
+		std::cout << "Ztest: " << Ztest << std::endl;
+*/
    		boost::math::normal norm_dist(0,1);
 		double pval0;
 		
@@ -293,10 +293,13 @@ double K2_fast_Poi(double t1, arma::vec & mu, arma::vec & g, arma::vec & gNA, ar
         arma::vec temp0;
         arma::vec temp1;
         arma::vec temp2;
-		
+	//std::cout << "t1 " << t1 << std::endl;		
 	temp0 = arma::exp(gNB * t1);
        	temp1 = arma::pow(gNB,2) % temp0;			
         temp2 = muNB % temp1;
+	//temp2.print("temp2");
+	//std::cout << "NAsigma " << NAsigma << std::endl;		
+	
         double out = sum_arma1(temp2)+NAsigma;
         return(out);
 }
@@ -317,10 +320,12 @@ Rcpp::List getroot_K1_fast_Poi(double init, arma::vec & mu, arma::vec & g, doubl
 
 	t = init;
 	K1_eval = K1_adj_fast_Poi(t,mu,g,q,gNA,gNB,muNA,muNB,NAmu, NAsigma);
+	//std::cout << "K1_eval " << K1_eval << std::endl; 
 	prevJump = std::numeric_limits<double>::infinity();
 	bool conv = true;
 	while(rep <= maxiter){
 		K2_eval = K2_fast_Poi(t,mu,g, gNA,gNB,muNA,muNB,NAmu, NAsigma);
+		//std::cout << "K2_eval " << K2_eval << std::endl; 
 		tnew = t-K1_eval/K2_eval;
 		if(tnew == NA_REAL){
 			conv = false;

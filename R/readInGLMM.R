@@ -124,9 +124,16 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
 	     modglmm$obj_cc$mu = modglmm$mu
 	     modglmm$obj_cc$res = modglmm$res
 	     modglmm$obj_cc$pi_1 = modglmm$mu2
-           }else if(modglmm$traitType == "quantitative"){
+     }else if(modglmm$traitType == "quantitative"){
              modglmm$mu2 = (1/tau[1])*rep(1,N)
-           }
+     }else if(modglmm$traitType == "survival"){
+	      modglmm$mu2 = modglmm$mu
+	      modglmm$obj.noK$XVX = modglmm$obj.noK$XVX_fg
+	      modglmm$obj.noK$XXVX_inv = modglmm$obj.noK$XXVX_inv_fg
+	      modglmm$obj.noK$XV = modglmm$obj.noK$XV_fg
+	      modglmm$obj.noK$XVX_inv_XV = modglmm$obj.noK$XVX_inv_XV_fg
+	      modglmm$X = modglmm$obj.noK$X1_fg 
+     }
  #if(FALSE){
 
  if(is_Firth_beta){
@@ -381,9 +388,9 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 	    if(length(spindex) > 0){
 	        ratioVec_sparse = varRatioData[which(varRatioData[,2] == "sparse"),1]
 		ratioVec_sparse = as.numeric(ratioVec_sparse)
-		if(!isSparseGRM & sum(ratioVec_sparse > 1.0001 | ratioVec_sparse < 0.9999) > 0){
-		       	stop("sparse GRM is not specified but it was used for estimating variance ratios in Step 1. Please specify --sparseGRMFile and --sparseGRMSampleIDFile\n")
-		}	
+		#if(!isSparseGRM & sum(ratioVec_sparse > 1.0001 | ratioVec_sparse < 0.9999) > 0){
+		#       	stop("sparse GRM is not specified but it was used for estimating variance ratios in Step 1. Please specify --sparseGRMFile and --sparseGRMSampleIDFile\n")
+		#}	
 	    }else{    
 		ratioVec_sparse = c(-1)
 	    	if(isSparseGRM){
@@ -437,6 +444,11 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 	
 
     }
+
+    print("ratioVec_sparse")
+    print(ratioVec_sparse)
+    print("ratioVec_null")
+    print(ratioVec_null)
     return(list(ratioVec_sparse = ratioVec_sparse, ratioVec_null = ratioVec_null))
 }
 
