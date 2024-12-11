@@ -7,7 +7,7 @@ install.packages("vctrs", repos='http://cran.rstudio.com/')
 print(packageVersion("vctrs"))
 
 
-req_packages <- c("R.utils", "devtools", "Rcpp", "RcppParallel", "RcppArmadillo", "data.table", "RcppEigen", "Matrix", "methods", "BH", "optparse", "SPAtest", "roxygen2", "rversions","devtools", "SKAT", "RhpcBLASctl", "dplyr", "dbplyr", "tibble", "sparsesvd", "stringr")
+req_packages <- c("R.utils", "devtools", "Rcpp", "RcppParallel", "RcppArmadillo", "data.table", "RcppEigen", "Matrix", "methods", "BH", "optparse", "SPAtest", "roxygen2", "rversions","devtools", "SKAT", "RhpcBLASctl", "dplyr", "dbplyr", "tibble", "sparsesvd", "stringr", "lintools")
 for (pack in req_packages) {
     if(!require(pack, character.only = TRUE)) {
         install.packages(pack, repos = "https://cloud.r-project.org", dependencies=TRUE)
