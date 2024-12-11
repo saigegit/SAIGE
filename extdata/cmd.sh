@@ -173,3 +173,5 @@ Rscript step2_SPAtests.R        \
       --rangestoIncludeFile=./input/includerange_oneline.txt
 
 
+##time-to-event phenotypes
+Rscript step1_fitNULLGLMM.R             --plinkFile=./input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly         --phenoFile=./input/pheno_1000samples_survival.txt         --phenoCol=casecontrol         --covarColList=X         --eventTimeCol=AgeOfEventFinal         --sampleIDColinphenoFile=IND_ID         --traitType=survival                --outputPrefix=./output/example_survival         --nThreads=4            --LOCO=FALSE            --minMAFforGRM=0.01             --skipModelFitting=FALSE    --tol=0.01  --isCovariateOffset=FALSE --IsOverwriteVarianceRatioFile=TRUE  > test.log.survival
