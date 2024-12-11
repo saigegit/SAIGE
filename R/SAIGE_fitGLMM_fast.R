@@ -961,7 +961,7 @@ fitNULLGLMM = function(plinkFile = "",
     	eventTimeCol = ""
     }else{
 	isCovariateOffset = FALSE
-	cat("trait type is survival. Covariates are not includes as offset\n")
+	cat("trait type is survival. Covariates are not included as offset\n")
     }
 
 

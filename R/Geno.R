@@ -137,6 +137,8 @@ setGenoInput = function(bgenFile = "",
 		 sampleInModel = NULL)
 {
 
+  #time_geno_0 = proc.time()
+
   dosageFileType = checkGenoInput(bgenFile = bgenFile,
                  bgenFileIndex = bgenFileIndex,
                  vcfFile = vcfFile,
@@ -148,6 +150,11 @@ setGenoInput = function(bgenFile = "",
                  bimFile = bimFile,
                  famFile = famFile,
 		 sampleInModel = sampleInModel)
+
+  #time_geno_1 = proc.time()
+
+  #cat("time_geno_1 - time_geno_0\n")
+  #print(time_geno_1 - time_geno_0)
 
   ########## ----------  Plink format ---------- ##########
   
@@ -233,39 +240,128 @@ setGenoInput = function(bgenFile = "",
  	#print(samplesInGeno[1:100])		    
     } 
 
+      #time_geno_1a = proc.time()
+
+        #cat("time_geno_1a - time_geno_1\n")
+	  #print(time_geno_1a - time_geno_1)
+
 
     db_con <- RSQLite::dbConnect(RSQLite::SQLite(), bgenFileIndex)
     on.exit(RSQLite::dbDisconnect(db_con), add = TRUE)
-    markerInfo = dplyr::tbl(db_con, "Variant")
+        #time_geno_1a2 = proc.time()
+	        #cat("time_geno_1a2 - time_geno_1a\n")
+		          #print(time_geno_1a2 - time_geno_1a)
+
+if(chrom != ""){
+
+  if(AlleleOrder == "alt-first"){
+    markerInfo = dplyr::tbl(db_con, "Variant") %>% dplyr::select(chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes) %>%
+        filter(chromosome == chrom) %>%
+    mutate(ID2 = paste0(chromosome, ":", position, ":", allele2, ":", allele1)) %>% 
+    mutate(genoIndex_prev = file_start_position + size_in_bytes) %>%
+    select(rsid, ID2, chromosome, position, genoIndex_prev, file_start_position) %>%
+    rename(ID = rsid, CHROM=chromosome, POS=position, genoIndex = file_start_position) %>%    
+    collect()
+  }
+
+  if(AlleleOrder == "ref-first"){
+    markerInfo = dplyr::tbl(db_con, "Variant") %>% dplyr::select(chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes) %>%
+    filter(chromosome == chrom) %>%
+    mutate(ID2 = paste0(chromosome, ":", position, ":", allele1, ":", allele2)) %>% 
+    mutate(genoIndex_prev = file_start_position + size_in_bytes) %>%
+    select(rsid, ID2, chromosome, position, genoIndex_prev, file_start_position) %>%
+    rename(ID = rsid, CHROM=chromosome, POS=position, genoIndex = file_start_position) %>%    
+    collect()
+  }
+}else{
+
+  if(AlleleOrder == "alt-first"){
+    markerInfo = dplyr::tbl(db_con, "Variant") %>% dplyr::select(chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes) %>%
+    mutate(ID2 = paste0(chromosome, ":", position, ":", allele2, ":", allele1)) %>%
+    mutate(genoIndex_prev = file_start_position + size_in_bytes) %>%
+    select(rsid, ID2, chromosome, position, genoIndex_prev, file_start_position) %>%
+    rename(ID = rsid, CHROM=chromosome, POS=position, genoIndex = file_start_position) %>%
+    collect()
+  }
+
+  if(AlleleOrder == "ref-first"){
+    markerInfo = dplyr::tbl(db_con, "Variant") %>% dplyr::select(chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes) %>%
+    mutate(ID2 = paste0(chromosome, ":", position, ":", allele1, ":", allele2)) %>%
+    mutate(genoIndex_prev = file_start_position + size_in_bytes) %>%
+    select(rsid, ID2, chromosome, position, genoIndex_prev, file_start_position) %>%
+    rename(ID = rsid, CHROM=chromosome, POS=position, genoIndex = file_start_position) %>%
+    collect()
+  }
+
+}
+    #markerInfo = dplyr::collect(dplyr::select(dplyr::tbl(db_con, "Variant"), chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes))
+    
+    #query <- "SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes FROM Variant"
+    #markerInfo <- data.table(DBI::dbGetQuery(db_con, query))
+    #markerInfo = setDT(dplyr::collect(dplyr::select(dplyr::tbl(db_con, "Variant"), chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes)))
+     
+
+	#time_geno_1a2b = proc.time()
+	#        cat("time_geno_1a2b - time_geno_1a2\n")
+	#	          print(time_geno_1a2b - time_geno_1a2)
     #markerInfo = as.data.frame(markerInfo)
     #markerInfo = as.data.frame(markerInfo)
-    markerInfo = as.data.table(markerInfo, keep.rownames = FALSE)
-    rmcol = setdiff(names(markerInfo), c("chromosome", "position", "rsid", "allele1", "allele2", 'file_start_position', 'size_in_bytes'))
-    markerInfo = markerInfo[, !..rmcol]
-    if(AlleleOrder == "alt-first")
-      names(markerInfo) = c("CHROM", "POS", "ID", "ALT", "REF", "genoIndex", "size_in_bytes")
-      #markerInfo = markerInfo[,c(1,2,3,6,5,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
-    if(AlleleOrder == "ref-first")
-      names(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT", "genoIndex", "size_in_bytes")
+
+    setDT(markerInfo)
+    setkeyv(markerInfo, c("ID","ID2"))
+   #########markerInfo = as.data.table(markerInfo, keep.rownames = FALSE)
+        #time_geno_1a2b2 = proc.time()
+	#        cat("time_geno_1a2b2 - time_geno_1a2b\n")
+	#	          print(time_geno_1a2b2 - time_geno_1a2b)
+#markerInfo <- markerInfo[, .(chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes)]
+    #rmcol = setdiff(names(markerInfo), c("chromosome", "position", "rsid", "allele1", "allele2", 'file_start_position', 'size_in_bytes'))
+        #time_geno_1a2b3 = proc.time()
+	#cat("time_geno_1a2b3 - time_geno_1a2b2\n")
+	#print(time_geno_1a2b3 - time_geno_1a2b2)
+    #markerInfo = markerInfo[, !..rmcol]
+
+        #time_geno_1a3 = proc.time()
+        #cat("time_geno_1a3 - time_geno_1a2b3\n")
+        #print(time_geno_1a3 - time_geno_1a2b3)
+
+
+    #if(AlleleOrder == "alt-first")
+    #  names(markerInfo) = c("CHROM", "POS", "ID", "ALT", "REF", "genoIndex", "size_in_bytes")
+    #if(AlleleOrder == "ref-first")
+    #  names(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT", "genoIndex", "size_in_bytes")
 
       #markerInfo = markerInfo[,c(1,2,3,5,6,7)]  # https://www.well.ox.ac.uk/~gav/bgen_format/spec/v1.2.html
     #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)
-    markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,":", markerInfo$REF, ":", markerInfo$ALT)
-    markerInfo$genoIndex_prev = markerInfo$genoIndex + markerInfo$size_in_bytes
+    #markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,":", markerInfo$REF, ":", markerInfo$ALT)
+    #markerInfo$genoIndex_prev = markerInfo$genoIndex + markerInfo$size_in_bytes
+
+#markerInfo[, ID2 := paste0(CHROM, ":", POS, ":", REF, ":", ALT)]
+#markerInfo[, genoIndex_prev := genoIndex + size_in_bytes]
+
+
 #    markerInfo[,POS:=NULL]
-    markerInfo[,REF:=NULL]
-    markerInfo[,ALT:=NULL]
-    markerInfo[,size_in_bytes:=NULL]
+#    markerInfo[,REF:=NULL]
+#    markerInfo[,ALT:=NULL]
+#    markerInfo[,size_in_bytes:=NULL]
     
-    if(chrom != ""){
-      markerInfo = markerInfo[which(markerInfo[,1] == chrom), ]
-    }  
-    	
-    setkeyv(markerInfo, c("ID","ID2"))
+    #if(chrom != ""){
+    #  markerInfo <- markerInfo[CHROM == chrom]
+    #}  
+   
+    #time_geno_1b = proc.time()
+
+     #       cat("time_geno_1b - time_geno_1a3\n")
+	#              print(time_geno_1b - time_geno_1a3)
+
+    #setkeyv(markerInfo, c("ID","ID2"))
     #markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$ALT, "/", markerInfo$REF)
     setBGENobjInCPP(bgenFile, bgenFileIndex, t_SampleInBgen = samplesInGeno, t_SampleInModel = sampleInModel, AlleleOrder)
   }
-  
+ 
+   #time_geno_2 = proc.time()
+
+    # cat("time_geno_2 - time_geno_1\n")
+     #  print(time_geno_2 - time_geno_1)
 
   if(dosageFileType == "vcf"){
     if(idstoIncludeFile != "" & rangestoIncludeFile != ""){

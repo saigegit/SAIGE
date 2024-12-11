@@ -296,7 +296,7 @@ void mainMarkerInCPP(
    indexForMissing.clear();
    //t_GVec0.clear();
    //t_GVec.clear();
-   //
+   //arma::vec timeoutput1 = getTime();
    bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
@@ -558,7 +558,8 @@ void mainMarkerInCPP(
     
    } //    if((missingRate > g_missingRate_cutoff) || (MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff || imputeInfo < g_marker_minINFO_cutoff)){
  
-   
+    //arma::vec timeoutput3 = getTime();
+    //printTime(timeoutput2, timeoutput3, "after Unified_getOneMarker");
   
     //t_GVec.clear();
   }
@@ -637,19 +638,19 @@ bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN", "Vcf"
    bool isTrueGenotype = true;
    //t_gIndex_prev is after reading the last marker
 
-   //arma::vec timeoutput1 = getTime();
    ptr_gPLINKobj->getOneMarker(t_gIndex_prev, t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, 
                                        t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero,
                                        isTrueGenotype, t_GVec);   // t_isTrueGenotype, only used for PLINK format.
-   //arma::vec timeoutput2 = getTime();
-     //   printTime(timeoutput1, timeoutput2, "Unified_getOneMarker a");
   }
   
   if(t_genoType == "bgen"){
+    //arma::vec timeoutput1 = getTime();
     //bool isBoolRead = true;
     ptr_gBGENobj->getOneMarker(t_gIndex_prev, t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, 
                                       t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero,
                                       isBoolRead, t_GVec, t_isImputation);
+   //arma::vec timeoutput2 = getTime();
+   //printTime(timeoutput1, timeoutput2, "Unified_getOneMarker a");
   }
 
   if(t_genoType == "vcf"){
@@ -1893,8 +1894,14 @@ if(t_regionTestType == "BURDEN"){
   OutList.push_back(MAC_GroupVec, "MAC_GroupVec");
   OutList.push_back(q_maf_for_anno, "q_maf_for_annoVec");
   if(t_traitType == "binary" || t_traitType == "survival"){
+   if(t_traitType == "binary"){
     OutList.push_back(MACCase_GroupVec, "MACCase_GroupVec");
     OutList.push_back(MACControl_GroupVec, "MACCtrl_GroupVec");
+   }else if(t_traitType == "survival"){
+    OutList.push_back(MACCase_GroupVec, "MACEvent_GroupVec");
+    OutList.push_back(MACControl_GroupVec, "MACCensor_GroupVec");
+   }
+
     OutList.push_back(genoSumMat, "genoSumMat");
     OutList.push_back(gyVec, "gyVec");
   }
