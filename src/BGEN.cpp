@@ -135,12 +135,36 @@ void BgenClass::Parse2(unsigned char *buf, uint bufLen, const unsigned char *zBu
  
   //arma::vec timeoutput0 = getTime();
        
-  uLongf destLen = bufLen;
-  if (uncompress(buf, &destLen, zBuf, zBufLen) != Z_OK || destLen != bufLen) {
-    std::cerr << "ERROR: uncompress() failed" << std::endl;
-    exit(1);
-  }
-  
+  //uLongf destLen = bufLen;
+  //if (uncompress(buf, &destLen, zBuf, zBufLen) != Z_OK || destLen != bufLen) {
+  //  std::cerr << "ERROR: uncompress() failed" << std::endl;
+  //  exit(1);
+  //}
+    
+    z_stream strm = {};
+strm.next_in = const_cast<Bytef*>(zBuf); // Compressed input
+strm.avail_in = zBufLen;
+strm.next_out = buf; // Decompressed output
+strm.avail_out = bufLen;
+
+    if (inflateInit(&strm) != Z_OK) {
+        std::cerr << "inflateInit failed" << std::endl;
+        return;
+    }
+
+    int ret = inflate(&strm, Z_FINISH);
+    if (ret != Z_STREAM_END) {
+        std::cerr << "inflate failed with code " << ret << std::endl;
+    }
+
+    inflateEnd(&strm);
+    //std::cout << "Decompressed size: " << strm.total_out << " bytes" << std::endl; 
+ 
+ //arma::vec timeoutput0_uncompress = getTime();
+
+//printTime(timeoutput0, timeoutput0_uncompress, "time uncompress");
+
+
   unsigned char *bufAt = buf;
   uint N = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16)|(bufAt[3]<<24); bufAt += 4;
   
@@ -275,18 +299,19 @@ void BgenClass::Parse2(unsigned char *buf, uint bufLen, const unsigned char *zBu
       //bufAt += 2;
       p11 = lut[*bufAt]; bufAt++;
       p10 = lut[*bufAt]; bufAt++;
+      uint ninzeroind = 0;
+     if(m_posSampleInModel[i] >= 0){
       p00 = 1 - p11 - p10; //can remove
       dosage = 2*p11 + p10;
 
-  //if(m_AlleleOrder == "alt-first"){
+    //if(m_AlleleOrder == "alt-first"){
     //        dosage_new = dosage;
     //  }else{
            dosage_new = 2-dosage;
     //  }
 
         eij = dosage;
-	uint ninzeroind = 0;
-        if(m_posSampleInModel[i] >= 0){
+     //if(m_posSampleInModel[i] >= 0){
         fij = 4*p11 + p10;
         sum_eij += eij;
         sum_fij_minus_eij2 += fij - eij*eij;
@@ -303,7 +328,10 @@ void BgenClass::Parse2(unsigned char *buf, uint bufLen, const unsigned char *zBu
               }
           }
           sum_eij_sub += eij;
-   }
+      }
+
+
+
      }else if(ploidyMissBytes[i] == 130U){
         bufAt += 2;
         if(m_posSampleInModel[i] >= 0){
@@ -377,23 +405,24 @@ void BgenClass::getOneMarker(uint64_t & t_gIndex_prev,
 {
   uint64_t posSeek;
 
+  //arma::vec getOneMarker_timeoutput1 = getTime();	
   
   if(t_gIndex > 0){
-    if(t_gIndex_prev == 0){
-          fseek(m_fin, t_gIndex, SEEK_SET);
-          //m_ibedFile.seekg(posSeek, ios_base::beg);
-    }else{
+    if(t_gIndex_prev > 0){
 	  posSeek = t_gIndex-t_gIndex_prev;
           //posSeek = m_numBytesofEachMarker0 * (t_gIndex-t_gIndex_prev-1);
           if(posSeek > 0){
                 //m_ibedFile.seekg(posSeek, ios_base::cur);
                 fseek(m_fin, posSeek, SEEK_CUR);
           }
+   }else{
+	fseek(m_fin, t_gIndex, SEEK_SET);
    }
   }
 
+  //arma::vec getOneMarker_timeoutput2 = getTime();	
 
-  //arma::vec timeoutput1 = getTime();	
+  //printTime(getOneMarker_timeoutput1,getOneMarker_timeoutput2, "getOneMarker_timeoutput1_2");
   //if(t_gIndex > 0){
   //	  fseek(m_fin, t_gIndex, SEEK_SET);
   //}
@@ -409,7 +438,7 @@ void BgenClass::getOneMarker(uint64_t & t_gIndex_prev,
   //
   t_indexForMissing.clear();
   t_indexForNonZero.clear();
-//arma::vec timeoutput3 = getTime();
+  //arma::vec timeoutput3 = getTime();
 
 
 
@@ -470,10 +499,10 @@ void BgenClass::getOneMarker(uint64_t & t_gIndex_prev,
     AF = 0;
     info = 0;
     if (m_bufLens > m_buf.size()) m_buf.resize(m_bufLens); //fix the length
-    //arma::vec timeoutput3a = getTime();
+    // arma::vec timeoutput3a = getTime();
 
     Parse2(&m_buf[0], m_bufLens, &m_zBuf[0], m_zBufLens, RSID, dosages, AC, AF, t_indexForMissing, info, t_indexForNonZero, t_isImputation);
-    //arma::vec timeoutput3 = getTime();
+    // arma::vec timeoutput3 = getTime();
 //printTime(timeoutput1, timeoutput2, "time 1 to 2 Unified_getOneMarker");
 //printTime(timeoutput2, timeoutput3, "time 2 to 3 Unified_getOneMarker");
 //printTime(timeoutput3a, timeoutput3, "time 3a to 3 Unified_getOneMarker");
@@ -512,7 +541,9 @@ void BgenClass::getOneMarker(uint64_t & t_gIndex_prev,
     // Rcpp::DataFrame variants = NULL;
     // result["isBoolRead"] = isBoolRead;
   }
+  //arma::vec getOneMarker_timeoutput3 = getTime();
 
+   //printTime(getOneMarker_timeoutput2,getOneMarker_timeoutput3, "getOneMarker_timeoutput2_3");
 
 /*
     // dosages.clear();

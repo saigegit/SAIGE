@@ -129,10 +129,16 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
      }else if(modglmm$traitType == "survival"){
 	      modglmm$mu2 = modglmm$mu
 	      modglmm$obj.noK$XVX = modglmm$obj.noK$XVX_fg
+	      modglmm$obj.noK$XVX_fg = NULL
 	      modglmm$obj.noK$XXVX_inv = modglmm$obj.noK$XXVX_inv_fg
+	      modglmm$obj.noK$XXVX_inv_fg = NULL
 	      modglmm$obj.noK$XV = modglmm$obj.noK$XV_fg
+	      modglmm$obj.noK$XV_fg = NULL
 	      modglmm$obj.noK$XVX_inv_XV = modglmm$obj.noK$XVX_inv_XV_fg
-	      modglmm$X = modglmm$obj.noK$X1_fg 
+	      modglmm$obj.noK$XVX_inv_XV_fg = NULL
+	      modglmm$X = modglmm$obj.noK$X1_fg
+	      modglmm$obj.noK$X1_fg = NULL
+	      gc()
      }
  #if(FALSE){
 

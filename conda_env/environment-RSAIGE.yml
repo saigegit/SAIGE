@@ -1,4 +1,4 @@
-name: RSAIGE
+name: RSAIGE_newloc
 channels:
 - anaconda
 - conda-forge
@@ -405,5 +405,5 @@ dependencies:
 - zipp=3.8.0=pyhd8ed1ab_0
 - zlib=1.2.11=h166bdaf_1014
 - zstd=1.5.2=ha95c52a_0
-prefix: /homes/sjones/.conda/envs/RSAIGE
+prefix: /home/unix/wzhou/miniconda3/envs/RSAIGE
 

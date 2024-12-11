@@ -119,10 +119,15 @@ SPAGMMATtest = function(bgenFile = "",
 		 max_MAC_use_ER = 4, 
 		 subSampleFile = ""
 ){
+
+
+   #time_0 = proc.time()
+
    #cat("r.corr is ", r.corr, "\n")
    if(!(impute_method %in% c("best_guess", "mean","minor"))){
      stop("impute_method should be 'best_guess', 'mean' or 'minor'.")
    }
+
 
 
    checkArgsListBool(is_imputed_data = is_imputed_data,
@@ -146,7 +151,7 @@ SPAGMMATtest = function(bgenFile = "",
 		     max_MAC_use_ER = max_MAC_use_ER
 		     )
 
-
+   #time_1 = proc.time()
     #if(file.exists(SAIGEOutputFile)) {print("ok -2 file exist")} 
 
 
@@ -167,6 +172,8 @@ SPAGMMATtest = function(bgenFile = "",
 			weights.beta, 
 			OutputFile,
 			max_MAC_use_ER)	
+   
+    #time_2 = proc.time()
 
     if(groupFile == ""){
       isGroupTest = FALSE
@@ -220,13 +227,16 @@ SPAGMMATtest = function(bgenFile = "",
     }
    
 
-
+    #time_3 = proc.time()
 
     if(subSampleFile == ""){
     	obj.model = ReadModel(GMMATmodelFile, chrom, LOCO, is_Firth_beta) #readInGLMM.R
     }else{
     	obj.model = ReadModel_subsample(GMMATmodelFile, chrom, LOCO, is_Firth_beta, subSampleFile) #readInGLMM.R	
     }
+
+
+       #time_4 = proc.time()
 
 
       if (is_rewrite_XnonPAR_forMales) {
@@ -274,7 +284,7 @@ SPAGMMATtest = function(bgenFile = "",
     } 
 
 
-
+       #time_5 = proc.time()
 
 
     if(obj.model$traitType == "binary"){
@@ -313,6 +323,10 @@ SPAGMMATtest = function(bgenFile = "",
     cat("isSparseGRM is ", isSparseGRM, "\n")
     ratioVecList = Get_Variance_Ratio(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest, isSparseGRM) #readInGLMM.R
 
+
+#time_6 = proc.time()
+
+
     if(is_fastTest){
       if(!file.exists(varianceRatioFile)){
          is_fastTest = FALSE
@@ -337,7 +351,10 @@ SPAGMMATtest = function(bgenFile = "",
 
     nsample = length(obj.model$y)
     cateVarRatioMaxMACVecInclude = c(cateVarRatioMaxMACVecInclude, nsample)	
-    
+   
+#time_6 = proc.time()
+
+
     #in Geno.R
     objGeno = setGenoInput(bgenFile = bgenFile,
                  bgenFileIndex = bgenFileIndex,
@@ -355,6 +372,8 @@ SPAGMMATtest = function(bgenFile = "",
                  chrom = chrom,
                  AlleleOrder = AlleleOrder,
                  sampleInModel = obj.model$sampleID)
+#time_7 = proc.time()
+
 
    genoType = objGeno$genoType
    if(condition != ""){
@@ -405,7 +424,9 @@ SPAGMMATtest = function(bgenFile = "",
 		     t_resout = as.integer(obj.model$obj_cc$res.out))
   rm(sparseSigmaRList)
   gc()
-   #process condition
+
+#time_8 = proc.time()
+#process condition
     if (isCondition) {
         n = length(obj.model$y) #sample size
 
@@ -456,6 +477,9 @@ SPAGMMATtest = function(bgenFile = "",
     #cat("Number of chunks for all markers:\t", nChunks, "\n")
     #}
 
+#time_9 = proc.time()
+
+
     if(!isGroupTest){
     OutputFile = SAIGEOutputFile
 
@@ -480,6 +504,8 @@ SPAGMMATtest = function(bgenFile = "",
 		   isCondition,
 		   is_overwrite_output,
 		   objGeno$anyInclude)
+
+
     }else{
       maxMACbinind = which(maxMAC_in_groupTest > 0)	
       if(length(maxMACbinind) > 0){ 
