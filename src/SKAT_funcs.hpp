@@ -12,23 +12,22 @@
 
 
 #include "qfc_rcpp.hpp"
-#include "SKAT_funcs.hpp"
 
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // // [[Rcpp::plugins(cpp11)]]
 
-arma::vec Get_Lambda(arma::mat& K, bool isFast, int maxK);
+arma::vec Get_Lambda(arma::mat& K, bool isFast = false, int maxK = 100);
 Rcpp::List SKAT_META_Optimal_Param(arma::mat& Phi, arma::vec& r_all);
 Rcpp::List Get_Liu_Params_Mod(arma::vec& c1);
 Rcpp::List Get_Liu_Params_Mod_Lambda(arma::vec& lambda, arma::ivec& df1);
-arma::vec Get_Liu_PVal_MOD_Lambda(arma::vec& Q_all, arma::vec& lambda, arma::ivec& df1, bool log_p);
+arma::vec Get_Liu_PVal_MOD_Lambda(arma::vec& Q_all, arma::vec& lambda, arma::ivec& df1, bool log_p = false);
 std::string Get_Liu_PVal_MOD_Lambda_Zero(double Q, double muQ, double muX, double sigmaQ, double sigmaX, double l, double d);
 arma::vec SKAT_META_Optimal_Get_Q(arma::vec& Score, arma::vec& r_all);
 arma::mat SKAT_META_Optimal_Get_Q_Res(arma::mat& Score_res, arma::vec& r_all);
-double daviesPValue(arma::vec& eigenvalues, double q, double tol);
-Rcpp::List Get_Davies_PVal(arma::mat & Q, arma::mat & W, arma::mat & Q_resampling, bool isFast);
-Rcpp::List SKAT_davies(double q, arma::vec& lambda, arma::ivec& h, arma::vec& delta, double sigma, int lim, double acc);
+double daviesPValue(arma::vec& eigenvalues, double q, double tol = 1e-25);
+Rcpp::List Get_Davies_PVal(arma::mat & Q, arma::mat & W, arma::mat & Q_resampling, bool isFast = false);
+Rcpp::List SKAT_davies(double q, arma::vec& lambda, arma::ivec& h, arma::vec& delta, double sigma = 0.0, int lim = 10000, double acc = 0.0001);
 Rcpp::List Get_PValue_Lambda(arma::vec &lambda, arma::vec &Q, arma::ivec &df1);
 Rcpp::List SKAT_Optimal_Each_Q(Rcpp::List &param_m, arma::mat &Q_all, arma::vec &r_all, Rcpp::List & lambda_all, std::string & method);
 arma::vec SKAT_Optimal_Integrate_Func_Davies(arma::vec & x,  arma::mat &pmin_q, Rcpp::List &param_m,  arma::vec &r_all);
@@ -42,11 +41,10 @@ double SKAT_Optimal_PValue_Liu( arma::mat &pmin_q,  Rcpp::List &param_m,
 Rcpp::List SKAT_META_Optimal_Get_Pvalue( arma::mat &Q_all,  arma::mat &Phi,  arma::vec &r_all, std::string &method, bool isFast);
 Rcpp::List SKAT_META_Optimal( arma::vec &Score,  arma::mat &Phi,  arma::vec &r_all,
                               std::string method,  arma::mat &Score_Resampling, bool isFast);
-Rcpp::List Met_SKAT_Get_Pvalue( arma::vec &Score,  arma::mat &Phi,  arma::vec &r_corr, std::string &method,  arma::mat &Score_Resampling, bool isFast);
+Rcpp::List Met_SKAT_Get_Pvalue( arma::vec &Score,  arma::mat &Phi,  arma::vec &r_corr, std::string &method,  arma::mat &Score_Resampling, bool isFast = false);
 Rcpp::List Get_Liu_Params( arma::vec& c1);
 Rcpp::List Get_Liu_PVal( arma::vec& Q,  arma::mat& W,  arma::mat& Q_resampling);
 
 
 
-
-endif
+#endif

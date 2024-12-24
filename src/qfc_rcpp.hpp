@@ -17,7 +17,7 @@ private:
     double sigsq, lmax, lmin, mean, c;
     double intl, ersm;
     int count, r, lim;
-    static bool ndtsrt, fail;
+    bool ndtsrt, isfail;
     std::vector<int> n, th;
     std::vector<double> lb, nc;
 

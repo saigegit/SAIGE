@@ -25,7 +25,7 @@ namespace QUADFORM {
     QuadFormClass::QuadFormClass(int r, int lim) : r(r), lim(lim) {
         count = 0;
         ndtsrt = false;
-        fail = false;
+        isfail = false;
         lb.resize(r);
         nc.resize(r);
         th.resize(r);
@@ -229,7 +229,7 @@ namespace QUADFORM {
     }
 l:
     if (sum1 > 100.0) {
-        fail = true;
+        isfail = true;
         return 1.0;
     } else {
         return pow(2.0, (sum1 / 4.0)) / (M_PI * pow(axl,2));

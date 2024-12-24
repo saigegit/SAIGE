@@ -11,7 +11,6 @@
 #include "qfc_rcpp.hpp"
 #include "SKAT_funcs.hpp"
 
-
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
 
@@ -392,10 +391,11 @@ Rcpp::List SKAT_davies(double q, arma::vec& lambda, arma::ivec& h, arma::vec& de
   double res = 0.0; // Result of the computation
   
   // Call the qfc_1 function (from the C code)
-  QUADFORM::QuadFormClass quadForm(r, lim);
+  QUADFORM::QuadFormClass* quadForm = new QUADFORM::QuadFormClass(r, lim);
 
-  quadForm.qfc_1(lambda, delta, h, r, sigma, q, lim, acc, trace, ifault, res);
- 
+  quadForm->qfc_1(lambda, delta, h, r, sigma, q, lim, acc, trace, ifault, res);
+
+  delete quadForm;
 
   // Adjust result
   res = 1.0 - res;
