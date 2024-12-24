@@ -568,7 +568,10 @@ arma::vec SKAT_Optimal_Integrate_Func_Davies(arma::vec & x,  arma::mat &pmin_q, 
   int n_r = r_all.n_elem;
   int n_x = x.n_elem;;
 
-  arma::mat temp1 = (param_m["tau"]) * (x.t());
+    arma::mat taumat = param_m["tau"];
+      arma::mat xt(1, n_x);
+        xt.row(0) = x.t();
+	  arma::mat temp1 = arma::kron(taumat ,  xt);
 
   arma::mat tempmat = (pmin_q - temp1) / (1 - r_all);
   arma::vec temp_min = arma::min(tempmat, 0);
@@ -681,7 +684,10 @@ arma::vec SKAT_Optimal_Integrate_Func_Liu(arma::vec & x,  arma::mat &pmin_q,  Rc
   int n_r = r_all.n_elem;
   int n_x = x.n_elem;
 
-  arma::mat temp1 = param_m["tau"] * (x.t());
+  arma::mat taumat = param_m["tau"];
+  arma::mat xt(1, n_x);
+  xt.row(0) = x.t(); 
+  arma::mat temp1 = arma::kron(taumat ,  xt);
 
   arma::mat temp = (pmin_q - temp1) / (1 - r_all);
   arma::vec temp_min = arma::min(temp, 0);
