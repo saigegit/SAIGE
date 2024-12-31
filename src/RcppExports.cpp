@@ -2458,6 +2458,110 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// Get_Davies_PVal
+Rcpp::List Get_Davies_PVal(arma::mat& Q, arma::mat& W, arma::mat& Q_resampling, bool isFast);
+RcppExport SEXP _SAIGE_Get_Davies_PVal(SEXP QSEXP, SEXP WSEXP, SEXP Q_resamplingSEXP, SEXP isFastSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type W(WSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Q_resampling(Q_resamplingSEXP);
+    Rcpp::traits::input_parameter< bool >::type isFast(isFastSEXP);
+    rcpp_result_gen = Rcpp::wrap(Get_Davies_PVal(Q, W, Q_resampling, isFast));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SKAT_davies
+Rcpp::List SKAT_davies(double q, arma::vec& lambda, arma::ivec& h, arma::vec& delta, double sigma, int lim, double acc);
+RcppExport SEXP _SAIGE_SKAT_davies(SEXP qSEXP, SEXP lambdaSEXP, SEXP hSEXP, SEXP deltaSEXP, SEXP sigmaSEXP, SEXP limSEXP, SEXP accSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type q(qSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type h(hSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type delta(deltaSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< int >::type lim(limSEXP);
+    Rcpp::traits::input_parameter< double >::type acc(accSEXP);
+    rcpp_result_gen = Rcpp::wrap(SKAT_davies(q, lambda, h, delta, sigma, lim, acc));
+    return rcpp_result_gen;
+END_RCPP
+}
+// integrate_SKAT_Optimal_Davies
+arma::vec integrate_SKAT_Optimal_Davies(arma::vec& pmin_q, Rcpp::List& param_m, arma::vec& r_all, double lower, double upper, int subdivisions, double abs_tol);
+RcppExport SEXP _SAIGE_integrate_SKAT_Optimal_Davies(SEXP pmin_qSEXP, SEXP param_mSEXP, SEXP r_allSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP subdivisionsSEXP, SEXP abs_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type pmin_q(pmin_qSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List& >::type param_m(param_mSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type r_all(r_allSEXP);
+    Rcpp::traits::input_parameter< double >::type lower(lowerSEXP);
+    Rcpp::traits::input_parameter< double >::type upper(upperSEXP);
+    Rcpp::traits::input_parameter< int >::type subdivisions(subdivisionsSEXP);
+    Rcpp::traits::input_parameter< double >::type abs_tol(abs_tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(integrate_SKAT_Optimal_Davies(pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// integrate_SKAT_Optimal_Liu
+arma::vec integrate_SKAT_Optimal_Liu(arma::mat& pmin_q, Rcpp::List& param_m, arma::vec& r_all, double lower, double upper, int subdivisions, double abs_tol);
+RcppExport SEXP _SAIGE_integrate_SKAT_Optimal_Liu(SEXP pmin_qSEXP, SEXP param_mSEXP, SEXP r_allSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP subdivisionsSEXP, SEXP abs_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type pmin_q(pmin_qSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List& >::type param_m(param_mSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type r_all(r_allSEXP);
+    Rcpp::traits::input_parameter< double >::type lower(lowerSEXP);
+    Rcpp::traits::input_parameter< double >::type upper(upperSEXP);
+    Rcpp::traits::input_parameter< int >::type subdivisions(subdivisionsSEXP);
+    Rcpp::traits::input_parameter< double >::type abs_tol(abs_tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(integrate_SKAT_Optimal_Liu(pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Met_SKAT_Get_Pvalue
+Rcpp::List Met_SKAT_Get_Pvalue(arma::vec& Score, arma::mat& Phi, arma::vec& r_corr, std::string& method, bool isFast);
+RcppExport SEXP _SAIGE_Met_SKAT_Get_Pvalue(SEXP ScoreSEXP, SEXP PhiSEXP, SEXP r_corrSEXP, SEXP methodSEXP, SEXP isFastSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type Score(ScoreSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Phi(PhiSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type r_corr(r_corrSEXP);
+    Rcpp::traits::input_parameter< std::string& >::type method(methodSEXP);
+    Rcpp::traits::input_parameter< bool >::type isFast(isFastSEXP);
+    rcpp_result_gen = Rcpp::wrap(Met_SKAT_Get_Pvalue(Score, Phi, r_corr, method, isFast));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Get_Liu_Params
+Rcpp::List Get_Liu_Params(arma::vec& c1);
+RcppExport SEXP _SAIGE_Get_Liu_Params(SEXP c1SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type c1(c1SEXP);
+    rcpp_result_gen = Rcpp::wrap(Get_Liu_Params(c1));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Get_Liu_PVal
+Rcpp::List Get_Liu_PVal(arma::vec& Q, arma::mat& W, arma::mat& Q_resampling);
+RcppExport SEXP _SAIGE_Get_Liu_PVal(SEXP QSEXP, SEXP WSEXP, SEXP Q_resamplingSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type W(WSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Q_resampling(Q_resamplingSEXP);
+    rcpp_result_gen = Rcpp::wrap(Get_Liu_PVal(Q, W, Q_resampling));
+    return rcpp_result_gen;
+END_RCPP
+}
 // SPA
 void SPA(arma::vec& mu, arma::vec& g, double q, double qinv, double pval_noadj, double tol, bool logp, std::string traitType, double& pval, bool& isSPAConverge);
 RcppExport SEXP _SAIGE_SPA(SEXP muSEXP, SEXP gSEXP, SEXP qSEXP, SEXP qinvSEXP, SEXP pval_noadjSEXP, SEXP tolSEXP, SEXP logpSEXP, SEXP traitTypeSEXP, SEXP pvalSEXP, SEXP isSPAConvergeSEXP) {
@@ -3193,6 +3297,13 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setmaxMissingRateforGRM", (DL_FUNC) &_SAIGE_setmaxMissingRateforGRM, 1},
     {"_SAIGE_set_Diagof_StdGeno_LOCO", (DL_FUNC) &_SAIGE_set_Diagof_StdGeno_LOCO, 0},
     {"_SAIGE_setminMAC_VarianceRatio", (DL_FUNC) &_SAIGE_setminMAC_VarianceRatio, 3},
+    {"_SAIGE_Get_Davies_PVal", (DL_FUNC) &_SAIGE_Get_Davies_PVal, 4},
+    {"_SAIGE_SKAT_davies", (DL_FUNC) &_SAIGE_SKAT_davies, 7},
+    {"_SAIGE_integrate_SKAT_Optimal_Davies", (DL_FUNC) &_SAIGE_integrate_SKAT_Optimal_Davies, 7},
+    {"_SAIGE_integrate_SKAT_Optimal_Liu", (DL_FUNC) &_SAIGE_integrate_SKAT_Optimal_Liu, 7},
+    {"_SAIGE_Met_SKAT_Get_Pvalue", (DL_FUNC) &_SAIGE_Met_SKAT_Get_Pvalue, 5},
+    {"_SAIGE_Get_Liu_Params", (DL_FUNC) &_SAIGE_Get_Liu_Params, 1},
+    {"_SAIGE_Get_Liu_PVal", (DL_FUNC) &_SAIGE_Get_Liu_PVal, 3},
     {"_SAIGE_SPA", (DL_FUNC) &_SAIGE_SPA, 10},
     {"_SAIGE_SPA_fast", (DL_FUNC) &_SAIGE_SPA_fast, 16},
     {"_SAIGE_SPA_pval", (DL_FUNC) &_SAIGE_SPA_pval, 9},

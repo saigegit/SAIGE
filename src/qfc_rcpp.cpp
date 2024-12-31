@@ -34,7 +34,13 @@ namespace QUADFORM {
 
     // Helper functions
     double QuadFormClass::exp1(double x) {
-        return x < -50.0 ? 0.0 : exp(x);
+        double y;
+	if(x < -50.0){
+	   y = 0.0;
+	}else{
+	   y = std::exp(x);
+	}
+	return(y);
     }
 
     void QuadFormClass::counter() {
@@ -85,17 +91,22 @@ namespace QUADFORM {
         xconst = u * sigsq;
         sum1 = u * xconst;
         u = 2.0 * u;
-
+        int nj;
+	std::cout << "sum1 a " << sum1 << std::endl;
+	std::cout << "sigsq " << sigsq << std::endl;
+	std::cout << "u " << u << std::endl;
         for (int j = r - 1; j >= 0; j--) {
-            int nj = n[j];
+            nj = n[j];
             lj = lb[j];
             ncj = nc[j];
             x = u * lj;
             y = 1.0 - x;
-            xconst += lj * (ncj / y + nj) / y;
-            sum1 += ncj * pow(x / y, 2) + nj * (pow(x, 2) / y + log1(-x, FALSE));
+	    xconst = xconst + lj * (ncj / y + nj) / y;
+   	    sum1 = sum1 + ncj * std::pow(x / y, 2)
+            + nj * (std::pow(x, 2) / y + log1(-x, FALSE ));
         }
 
+	std::cout << "sum1 " << sum1 << std::endl;
         cx = xconst;
         return exp1(-0.5 * sum1);
     }
@@ -103,12 +114,28 @@ namespace QUADFORM {
     double QuadFormClass::ctff(double accx, double& upn) {
         double u1 = 0.0, u2 = upn, c1 = mean, c2, rb, xconst, u;
 
+        std::cout << "u2 " << u2 << std::endl;
+        std::cout << "lmax " << lmax << std::endl;
+        std::cout << "lmin " << lmin << std::endl;
+        std::cout << "ctff 0" << std::endl;
         rb = 2.0 * ((u2 > 0.0) ? lmax : lmin);
-        while (errbd(u2 / (1.0 + u2 * rb), c2) > accx) {
+        std::cout << "rb " << rb << std::endl;
+        std::cout << "ctff 1" << std::endl;
+	double errbdval, u2temp;
+	u2temp = u2 / (1.0 + u2 * rb);
+	std::cout << "u2temp " << u2temp << std::endl;
+	std::cout << "c2 " << c2 << std::endl;
+	errbdval = errbd(u2temp, c2);
+	std::cout << "errbdval " << errbdval << " accx " << accx << std::endl;
+        while (errbdval > accx) {
             u1 = u2;
             c1 = c2;
             u2 = 2.0 * u2;
+	    u2temp = u2 / (1.0 + u2 * rb);
+	    errbdval = errbd(u2temp, c2);
+	std::cout << "errbdval " << errbdval << " accx " << accx << std::endl;
         }
+        std::cout << "ctff 2" << std::endl;
 
         while ((c1 - mean) / (c2 - mean) < 0.9) {
             u = (u1 + u2) / 2.0;
@@ -120,6 +147,7 @@ namespace QUADFORM {
                 c2 = xconst;
             }
         }
+        std::cout << "ctff 3" << std::endl;
         upn = u2;
         return c2;
     }
@@ -176,8 +204,10 @@ namespace QUADFORM {
     }
 
     void QuadFormClass::integrate(int nterm, double interv, double tausq, bool mainx) {
+	    std::cout << "integrate 1" << std::endl;
         double inpi = interv / M_PI;
         for (int k = nterm; k >= 0; k--) {
+	    std::cout << "k " << k << std::endl;
             double u = (k + 0.5) * interv;
             double sum1 = -2.0 * u * c;
             double sum2 = fabs(sum1);
@@ -266,6 +296,7 @@ l:
 
     int nj;
     //double lj, ncj;
+    std::cout << "qfc_1 1 " << std::endl;
     for (int j = 0; j < r; ++j) {
         nj = n1[j];
         lj = lb1[j];
@@ -279,12 +310,14 @@ l:
         lmax = std::max(lmax, lj);
         lmin = std::min(lmin, lj);
     }
+    std::cout << "qfc_1 2 " << std::endl;
 
     if (sd == 0.0) {
         qfval = (c > 0.0) ? 1.0 : 0.0;
         res = qfval;
         return;
     }
+    std::cout << "qfc_1 3 " << std::endl;
 
     if (lmin == 0.0 && lmax == 0.0 && sigma == 0.0) {
         ifault = 3; // Invalid parameters
@@ -294,6 +327,7 @@ l:
     sd = std::sqrt(sd);
     almx = (lmax < -lmin) ? -lmin : lmax;
 
+    std::cout << "qfc_1 4 " << std::endl;
     // Starting values for findu, ctff
     utx = 16.0 / sd;
     up = 4.5 / sd;
@@ -302,6 +336,7 @@ l:
     // Truncation point with no convergence factor
     findu(utx, 0.5 * acc);
 
+    std::cout << "qfc_1 5 " << std::endl;
     if (c != 0.0 && (almx > 0.07 * sd)) {
         tausq = 0.25 * acc / cfe(c);
         if (false) { /* Fail condition placeholder */ }
@@ -313,8 +348,10 @@ l:
     }
     trace[4] = utx;
     acc = 0.5 * acc;
+    std::cout << "qfc_1 6 " << std::endl;
     // Find range of distribution
     while (true) {
+    std::cout << "qfc_1 6a " << std::endl;
         d1 = ctff(acc, up) - c;
         if (d1 < 0.0) { qfval = 1.0; break; }
         d2 = c - ctff(acc, un);
@@ -324,6 +361,7 @@ l:
         xnt = utx / intv;
         xntm = 3.0 / std::sqrt(acc);
 
+    std::cout << "qfc_1 6a0 " << std::endl;
         if (xnt > xntm * 1.5) {
             if (xntm > xlim) {
                 ifault = 1; // Accuracy not achieved
@@ -333,12 +371,15 @@ l:
             intv1 = utx / ntm;
             x = 2.0 * M_PI / intv1;
             if (x <= std::abs(c)) break;
+    std::cout << "qfc_1 6a01 " << std::endl;
 
             tausq = 0.33 * acc / (1.1 * (cfe(c - x) + cfe(c + x)));
             if (false) break; // Placeholder fail condition
 
             acc = 0.67 * acc;
+    std::cout << "qfc_1 6a1 " << std::endl;
             integrate(ntm, intv1, tausq, false);
+    std::cout << "qfc_1 6a2 " << std::endl;
             xlim -= xntm;
             sigsq += tausq;
             trace[2] += 1;
@@ -348,12 +389,14 @@ l:
             acc = 0.75 * acc;
             continue;
         }
+       std::cout << "qfc_1 6b " << std::endl;
 
         trace[3] = intv;
         if (xnt > xlim) { ifault = 1; break; }
 
         int nt = std::floor(xnt + 0.5);
         integrate(nt, intv, 0.0, true);
+       std::cout << "qfc_1 7 " << std::endl;
         trace[2] += 1;
         trace[1] += nt + 1;
 
@@ -365,12 +408,14 @@ l:
         for (int j = 0; j < 4; ++j) {
             if (rats[j] * x == rats[j] * up) ifault = 2; // Round-off error
         }
+       std::cout << "qfc_1 8 " << std::endl;
         break;
     }
 
     res = qfval;
 
 
+    std::cout << "qfc_1 9 " << std::endl;
 }    
 
 

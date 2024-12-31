@@ -705,6 +705,34 @@ setminMAC_VarianceRatio <- function(t_minMACVarRatio, t_maxMACVarRatio, t_isVari
     invisible(.Call('_SAIGE_setminMAC_VarianceRatio', PACKAGE = 'SAIGE', t_minMACVarRatio, t_maxMACVarRatio, t_isVarianceRatioinGeno))
 }
 
+Get_Davies_PVal <- function(Q, W, Q_resampling, isFast) {
+    .Call('_SAIGE_Get_Davies_PVal', PACKAGE = 'SAIGE', Q, W, Q_resampling, isFast)
+}
+
+SKAT_davies <- function(q, lambda, h, delta, sigma, lim, acc) {
+    .Call('_SAIGE_SKAT_davies', PACKAGE = 'SAIGE', q, lambda, h, delta, sigma, lim, acc)
+}
+
+integrate_SKAT_Optimal_Davies <- function(pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol) {
+    .Call('_SAIGE_integrate_SKAT_Optimal_Davies', PACKAGE = 'SAIGE', pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol)
+}
+
+integrate_SKAT_Optimal_Liu <- function(pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol) {
+    .Call('_SAIGE_integrate_SKAT_Optimal_Liu', PACKAGE = 'SAIGE', pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol)
+}
+
+Met_SKAT_Get_Pvalue <- function(Score, Phi, r_corr, method, isFast) {
+    .Call('_SAIGE_Met_SKAT_Get_Pvalue', PACKAGE = 'SAIGE', Score, Phi, r_corr, method, isFast)
+}
+
+Get_Liu_Params <- function(c1) {
+    .Call('_SAIGE_Get_Liu_Params', PACKAGE = 'SAIGE', c1)
+}
+
+Get_Liu_PVal <- function(Q, W, Q_resampling) {
+    .Call('_SAIGE_Get_Liu_PVal', PACKAGE = 'SAIGE', Q, W, Q_resampling)
+}
+
 SPA <- function(mu, g, q, qinv, pval_noadj, tol, logp, traitType, pval, isSPAConverge) {
     invisible(.Call('_SAIGE_SPA', PACKAGE = 'SAIGE', mu, g, q, qinv, pval_noadj, tol, logp, traitType, pval, isSPAConverge))
 }

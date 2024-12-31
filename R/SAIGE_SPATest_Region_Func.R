@@ -294,13 +294,23 @@ get_newPhi_scaleFactor = function(q.sum, mu.a, g.sum, p.new, Score, Phi, regionT
 
 get_SKAT_pvalue = function(Score, Phi, r.corr, regionTestType){
 
-		out_SKAT_List = try(SKAT:::Met_SKAT_Get_Pvalue(Score = Score,
+		out_SKAT_List_old = try(SKAT:::Met_SKAT_Get_Pvalue(Score = Score,
                                                          Phi = Phi,
                                                          r.corr = r.corr,
                                                          method = "optimal.adj",
                                                          Score.Resampling = NULL),
                               silent = TRUE)
+		print("out_SKAT_List_old")
+		print(out_SKAT_List_old)
 
+		out_SKAT_List = Met_SKAT_Get_Pvalue(Score = Score,
+                                                         Phi = Phi,
+                                                         r_corr = r.corr,
+                                                         method = "optimal.adj",
+							 isFast=FALSE)
+
+		print("out_SKAT_List")
+		print(out_SKAT_List)	
 
                 BETA_Burden = sum(Score)/(sum(diag(Phi)))
                 if(class(out_SKAT_List) == "try-error"){

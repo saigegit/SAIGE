@@ -41,10 +41,9 @@ double SKAT_Optimal_PValue_Liu( arma::mat &pmin_q,  Rcpp::List &param_m,
 Rcpp::List SKAT_META_Optimal_Get_Pvalue( arma::mat &Q_all,  arma::mat &Phi,  arma::vec &r_all, std::string &method, bool isFast);
 Rcpp::List SKAT_META_Optimal( arma::vec &Score,  arma::mat &Phi,  arma::vec &r_all,
                               std::string method,  arma::mat &Score_Resampling, bool isFast);
-Rcpp::List Met_SKAT_Get_Pvalue( arma::vec &Score,  arma::mat &Phi,  arma::vec &r_corr, std::string &method,  arma::mat &Score_Resampling, bool isFast = false);
+Rcpp::List Met_SKAT_Get_Pvalue( arma::vec &Score,  arma::mat &Phi,  arma::vec &r_corr, std::string &method, bool isFast = false);
 Rcpp::List Get_Liu_Params( arma::vec& c1);
 Rcpp::List Get_Liu_PVal( arma::vec& Q,  arma::mat& W,  arma::mat& Q_resampling);
-
 
 
 #endif
