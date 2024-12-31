@@ -293,7 +293,7 @@ get_newPhi_scaleFactor = function(q.sum, mu.a, g.sum, p.new, Score, Phi, regionT
 }
 
 get_SKAT_pvalue = function(Score, Phi, r.corr, regionTestType){
-
+	if(FALSE){
 		out_SKAT_List_old = try(SKAT:::Met_SKAT_Get_Pvalue(Score = Score,
                                                          Phi = Phi,
                                                          r.corr = r.corr,
@@ -302,7 +302,7 @@ get_SKAT_pvalue = function(Score, Phi, r.corr, regionTestType){
                               silent = TRUE)
 		print("out_SKAT_List_old")
 		print(out_SKAT_List_old)
-
+	}
 		out_SKAT_List = Met_SKAT_Get_Pvalue(Score = Score,
                                                          Phi = Phi,
                                                          r_corr = r.corr,
@@ -310,7 +310,20 @@ get_SKAT_pvalue = function(Score, Phi, r.corr, regionTestType){
 							 isFast=FALSE)
 
 		print("out_SKAT_List")
-		print(out_SKAT_List)	
+		print(out_SKAT_List)
+		#if(length(out_SKAT_List$p.value.resampling) == 0){
+		out_SKAT_List$p.value.resampling = NULL
+		#}else{
+		#	out_SKAT_List$p.value.resampling = as.vector(out_SKAT_List$p.value.resampling)
+		#}
+		out_SKAT_List$param$p.val.each = as.vector(out_SKAT_List$param$p.val.each)
+		out_SKAT_List$param$rho = as.vector(out_SKAT_List$param$rho)
+		out_SKAT_List$param$rho_est = as.vector(out_SKAT_List$param$rho_est)
+                
+		
+		
+		print("out_SKAT_List_new")	
+		print(out_SKAT_List)
 
                 BETA_Burden = sum(Score)/(sum(diag(Phi)))
                 if(class(out_SKAT_List) == "try-error"){

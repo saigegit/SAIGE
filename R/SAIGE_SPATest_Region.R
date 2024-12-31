@@ -616,7 +616,8 @@ SAIGE.Region = function(mu,
             #}
             
             
-            
+            print("pval.Region") 
+	    print(pval.Region)
             #if(regionTestType != "BURDEN"){
             
             if (length(annoMAFIndVec) > 0) {

@@ -705,12 +705,20 @@ setminMAC_VarianceRatio <- function(t_minMACVarRatio, t_maxMACVarRatio, t_isVari
     invisible(.Call('_SAIGE_setminMAC_VarianceRatio', PACKAGE = 'SAIGE', t_minMACVarRatio, t_maxMACVarRatio, t_isVarianceRatioinGeno))
 }
 
+call_qfc <- function(lambdas, noncentral, df, r, sigma, q, lim, acc) {
+    .Call('_SAIGE_call_qfc', PACKAGE = 'SAIGE', lambdas, noncentral, df, r, sigma, q, lim, acc)
+}
+
 Get_Davies_PVal <- function(Q, W, Q_resampling, isFast) {
     .Call('_SAIGE_Get_Davies_PVal', PACKAGE = 'SAIGE', Q, W, Q_resampling, isFast)
 }
 
 SKAT_davies <- function(q, lambda, h, delta, sigma, lim, acc) {
     .Call('_SAIGE_SKAT_davies', PACKAGE = 'SAIGE', q, lambda, h, delta, sigma, lim, acc)
+}
+
+SKAT_Optimal_Integrate_Func_Davies <- function(x, pmin_q, param_m, r_all) {
+    .Call('_SAIGE_SKAT_Optimal_Integrate_Func_Davies', PACKAGE = 'SAIGE', x, pmin_q, param_m, r_all)
 }
 
 integrate_SKAT_Optimal_Davies <- function(pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol) {
@@ -731,6 +739,10 @@ Get_Liu_Params <- function(c1) {
 
 Get_Liu_PVal <- function(Q, W, Q_resampling) {
     .Call('_SAIGE_Get_Liu_PVal', PACKAGE = 'SAIGE', Q, W, Q_resampling)
+}
+
+forceSymmetric <- function(K) {
+    .Call('_SAIGE_forceSymmetric', PACKAGE = 'SAIGE', K)
 }
 
 SPA <- function(mu, g, q, qinv, pval_noadj, tol, logp, traitType, pval, isSPAConverge) {

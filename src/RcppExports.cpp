@@ -2458,6 +2458,24 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// call_qfc
+Rcpp::List call_qfc(arma::vec& lambdas, arma::vec& noncentral, arma::ivec& df, int r, double sigma, double q, int lim, double acc);
+RcppExport SEXP _SAIGE_call_qfc(SEXP lambdasSEXP, SEXP noncentralSEXP, SEXP dfSEXP, SEXP rSEXP, SEXP sigmaSEXP, SEXP qSEXP, SEXP limSEXP, SEXP accSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type lambdas(lambdasSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type noncentral(noncentralSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type df(dfSEXP);
+    Rcpp::traits::input_parameter< int >::type r(rSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< double >::type q(qSEXP);
+    Rcpp::traits::input_parameter< int >::type lim(limSEXP);
+    Rcpp::traits::input_parameter< double >::type acc(accSEXP);
+    rcpp_result_gen = Rcpp::wrap(call_qfc(lambdas, noncentral, df, r, sigma, q, lim, acc));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Get_Davies_PVal
 Rcpp::List Get_Davies_PVal(arma::mat& Q, arma::mat& W, arma::mat& Q_resampling, bool isFast);
 RcppExport SEXP _SAIGE_Get_Davies_PVal(SEXP QSEXP, SEXP WSEXP, SEXP Q_resamplingSEXP, SEXP isFastSEXP) {
@@ -2489,8 +2507,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// SKAT_Optimal_Integrate_Func_Davies
+arma::vec SKAT_Optimal_Integrate_Func_Davies(arma::vec& x, arma::mat& pmin_q, Rcpp::List& param_m, arma::vec& r_all);
+RcppExport SEXP _SAIGE_SKAT_Optimal_Integrate_Func_Davies(SEXP xSEXP, SEXP pmin_qSEXP, SEXP param_mSEXP, SEXP r_allSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type pmin_q(pmin_qSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List& >::type param_m(param_mSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type r_all(r_allSEXP);
+    rcpp_result_gen = Rcpp::wrap(SKAT_Optimal_Integrate_Func_Davies(x, pmin_q, param_m, r_all));
+    return rcpp_result_gen;
+END_RCPP
+}
 // integrate_SKAT_Optimal_Davies
-arma::vec integrate_SKAT_Optimal_Davies(arma::vec& pmin_q, Rcpp::List& param_m, arma::vec& r_all, double lower, double upper, int subdivisions, double abs_tol);
+double integrate_SKAT_Optimal_Davies(arma::vec& pmin_q, Rcpp::List& param_m, arma::vec& r_all, double lower, double upper, int subdivisions, double abs_tol);
 RcppExport SEXP _SAIGE_integrate_SKAT_Optimal_Davies(SEXP pmin_qSEXP, SEXP param_mSEXP, SEXP r_allSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP subdivisionsSEXP, SEXP abs_tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -2559,6 +2591,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat& >::type W(WSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type Q_resampling(Q_resamplingSEXP);
     rcpp_result_gen = Rcpp::wrap(Get_Liu_PVal(Q, W, Q_resampling));
+    return rcpp_result_gen;
+END_RCPP
+}
+// forceSymmetric
+arma::mat forceSymmetric(const arma::mat& K);
+RcppExport SEXP _SAIGE_forceSymmetric(SEXP KSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type K(KSEXP);
+    rcpp_result_gen = Rcpp::wrap(forceSymmetric(K));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -3297,13 +3340,16 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setmaxMissingRateforGRM", (DL_FUNC) &_SAIGE_setmaxMissingRateforGRM, 1},
     {"_SAIGE_set_Diagof_StdGeno_LOCO", (DL_FUNC) &_SAIGE_set_Diagof_StdGeno_LOCO, 0},
     {"_SAIGE_setminMAC_VarianceRatio", (DL_FUNC) &_SAIGE_setminMAC_VarianceRatio, 3},
+    {"_SAIGE_call_qfc", (DL_FUNC) &_SAIGE_call_qfc, 8},
     {"_SAIGE_Get_Davies_PVal", (DL_FUNC) &_SAIGE_Get_Davies_PVal, 4},
     {"_SAIGE_SKAT_davies", (DL_FUNC) &_SAIGE_SKAT_davies, 7},
+    {"_SAIGE_SKAT_Optimal_Integrate_Func_Davies", (DL_FUNC) &_SAIGE_SKAT_Optimal_Integrate_Func_Davies, 4},
     {"_SAIGE_integrate_SKAT_Optimal_Davies", (DL_FUNC) &_SAIGE_integrate_SKAT_Optimal_Davies, 7},
     {"_SAIGE_integrate_SKAT_Optimal_Liu", (DL_FUNC) &_SAIGE_integrate_SKAT_Optimal_Liu, 7},
     {"_SAIGE_Met_SKAT_Get_Pvalue", (DL_FUNC) &_SAIGE_Met_SKAT_Get_Pvalue, 5},
     {"_SAIGE_Get_Liu_Params", (DL_FUNC) &_SAIGE_Get_Liu_Params, 1},
     {"_SAIGE_Get_Liu_PVal", (DL_FUNC) &_SAIGE_Get_Liu_PVal, 3},
+    {"_SAIGE_forceSymmetric", (DL_FUNC) &_SAIGE_forceSymmetric, 1},
     {"_SAIGE_SPA", (DL_FUNC) &_SAIGE_SPA, 10},
     {"_SAIGE_SPA_fast", (DL_FUNC) &_SAIGE_SPA_fast, 16},
     {"_SAIGE_SPA_pval", (DL_FUNC) &_SAIGE_SPA_pval, 9},

@@ -11,7 +11,7 @@
 #include <boost/math/distributions/non_central_chi_squared.hpp>
 
 
-#include "qfc_rcpp.hpp"
+//#include "qfc_rcpp.hpp"
 
 
 // [[Rcpp::depends(RcppArmadillo)]]
@@ -31,7 +31,7 @@ Rcpp::List SKAT_davies(double q, arma::vec& lambda, arma::ivec& h, arma::vec& de
 Rcpp::List Get_PValue_Lambda(arma::vec &lambda, arma::vec &Q, arma::ivec &df1);
 Rcpp::List SKAT_Optimal_Each_Q(Rcpp::List &param_m, arma::mat &Q_all, arma::vec &r_all, Rcpp::List & lambda_all, std::string & method);
 arma::vec SKAT_Optimal_Integrate_Func_Davies(arma::vec & x,  arma::mat &pmin_q, Rcpp::List &param_m,  arma::vec &r_all);
-arma::vec integrate_SKAT_Optimal_Davies(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol);
+double integrate_SKAT_Optimal_Davies(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol);
 double SKAT_Optimal_PValue_Davies(arma::vec &pmin_q, Rcpp::List &param_m,
                                      arma::vec &r_all, double pmin);
 arma::vec SKAT_Optimal_Integrate_Func_Liu(arma::vec & x,  arma::mat &pmin_q,  Rcpp::List &param_m,  arma::vec &r_all);
@@ -44,6 +44,10 @@ Rcpp::List SKAT_META_Optimal( arma::vec &Score,  arma::mat &Phi,  arma::vec &r_a
 Rcpp::List Met_SKAT_Get_Pvalue( arma::vec &Score,  arma::mat &Phi,  arma::vec &r_corr, std::string &method, bool isFast = false);
 Rcpp::List Get_Liu_Params( arma::vec& c1);
 Rcpp::List Get_Liu_PVal( arma::vec& Q,  arma::mat& W,  arma::mat& Q_resampling);
+Rcpp::List call_qfc(const arma::vec& lambdas, const arma::vec& noncentral,
+                    const arma::ivec& df, int r, double sigma, double q,
+                    int lim, double acc);
 
+arma::mat forceSymmetric(const arma::mat& K);
 
 #endif
