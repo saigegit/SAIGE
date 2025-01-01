@@ -29,8 +29,8 @@ closeOutfile_single_LDmat <- function() {
     invisible(.Call('_SAIGE_closeOutfile_single_LDmat', PACKAGE = 'SAIGE'))
 }
 
-setAssocTest_GlobalVarsInCPP <- function(t_impute_method, t_missing_cutoff, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_weights_beta, t_outputFilePrefix, t_MACCutoffforER) {
-    invisible(.Call('_SAIGE_setAssocTest_GlobalVarsInCPP', PACKAGE = 'SAIGE', t_impute_method, t_missing_cutoff, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_weights_beta, t_outputFilePrefix, t_MACCutoffforER))
+setAssocTest_GlobalVarsInCPP <- function(t_impute_method, t_missing_cutoff, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_weights_beta, t_outputFilePrefix, t_MACCutoffforER, t_isadmixed) {
+    invisible(.Call('_SAIGE_setAssocTest_GlobalVarsInCPP', PACKAGE = 'SAIGE', t_impute_method, t_missing_cutoff, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_weights_beta, t_outputFilePrefix, t_MACCutoffforER, t_isadmixed))
 }
 
 setAssocTest_GlobalVarsInCPP_indexInModel_male <- function(t_indexInModel_male) {
@@ -719,10 +719,6 @@ SKAT_davies <- function(q, lambda, h, delta, sigma, lim, acc) {
 
 SKAT_Optimal_Integrate_Func_Davies <- function(x, pmin_q, param_m, r_all) {
     .Call('_SAIGE_SKAT_Optimal_Integrate_Func_Davies', PACKAGE = 'SAIGE', x, pmin_q, param_m, r_all)
-}
-
-integrate_SKAT_Optimal_Davies <- function(pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol) {
-    .Call('_SAIGE_integrate_SKAT_Optimal_Davies', PACKAGE = 'SAIGE', pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol)
 }
 
 integrate_SKAT_Optimal_Liu <- function(pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol) {

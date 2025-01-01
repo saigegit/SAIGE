@@ -171,7 +171,8 @@ SPAGMMATtest = function(bgenFile = "",
                         dosage_zerod_MAC_cutoff,
 			weights.beta, 
 			OutputFile,
-			max_MAC_use_ER)	
+			max_MAC_use_ER, 
+			TRUE)	
    
     #time_2 = proc.time()
 
@@ -526,7 +527,8 @@ SPAGMMATtest = function(bgenFile = "",
 			print("Firth correction will be used for effect sizes of single variant tests")
 
 		}
-	}	
+	}
+	is_admixed=TRUE
 	SAIGE.Region(mu,
 		     OutputFile,
 		     MACCutoff_to_CollapseUltraRare,
@@ -549,7 +551,8 @@ SPAGMMATtest = function(bgenFile = "",
 		     chrom,
 		     is_fastTest,
 		     pval_cutoff_for_fastTest,
-		     is_output_moreDetails)
+		     is_output_moreDetails, 
+		     is_admixed)
 
 
     }	    

@@ -4,7 +4,6 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 
-
 void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
                 double t_missing_cutoff,
                                double t_min_maf_marker,
@@ -13,7 +12,9 @@ void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
                                double t_dosage_zerod_cutoff,
                                double t_dosage_zerod_MAC_cutoff,
                                arma::vec & t_weights_beta,
-			       std::string t_outputFilePrefix);
+                               std::string t_outputFilePrefix,
+                               double t_MACCutoffforER,
+                               bool t_isadmixed);
 
 
 void setAssocTest_GlobalVarsInCPP_indexInModel_male(arma::uvec & t_indexInModel_male);

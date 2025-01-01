@@ -293,16 +293,15 @@ get_newPhi_scaleFactor = function(q.sum, mu.a, g.sum, p.new, Score, Phi, regionT
 }
 
 get_SKAT_pvalue = function(Score, Phi, r.corr, regionTestType){
-	if(FALSE){
-		out_SKAT_List_old = try(SKAT:::Met_SKAT_Get_Pvalue(Score = Score,
+		out_SKAT_List = try(SKAT:::Met_SKAT_Get_Pvalue(Score = Score,
                                                          Phi = Phi,
                                                          r.corr = r.corr,
                                                          method = "optimal.adj",
                                                          Score.Resampling = NULL),
                               silent = TRUE)
-		print("out_SKAT_List_old")
-		print(out_SKAT_List_old)
-	}
+#		print("out_SKAT_List_old")
+#		print(out_SKAT_List_old)
+	if(FALSE){
 		out_SKAT_List = Met_SKAT_Get_Pvalue(Score = Score,
                                                          Phi = Phi,
                                                          r_corr = r.corr,
@@ -324,7 +323,7 @@ get_SKAT_pvalue = function(Score, Phi, r.corr, regionTestType){
 		
 		print("out_SKAT_List_new")	
 		print(out_SKAT_List)
-
+}
                 BETA_Burden = sum(Score)/(sum(diag(Phi)))
                 if(class(out_SKAT_List) == "try-error"){
                         Pvalue = c(NA, NA, NA)
@@ -363,4 +362,16 @@ get_CCT_pvalue = function(pvalue){
      cctpval = NA
    }
    return(cctpval)
-}	
+}
+
+get_multiwayScore_pvalue = function(Score, Phi){
+	Teststat = t(Score) %*% solve(Phi) %*% Score
+	df = length(Score)
+	cat("Score\n")
+	print(Score)
+	print(Phi)
+	print(Teststat)
+	print(df)
+	p_value = pchisq(Teststat, df = df, lower.tail = FALSE)
+	return(p_value)
+}

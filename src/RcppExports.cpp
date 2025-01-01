@@ -103,8 +103,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // setAssocTest_GlobalVarsInCPP
-void setAssocTest_GlobalVarsInCPP(std::string t_impute_method, double t_missing_cutoff, double t_min_maf_marker, double t_min_mac_marker, double t_min_info_marker, double t_dosage_zerod_cutoff, double t_dosage_zerod_MAC_cutoff, arma::vec& t_weights_beta, std::string t_outputFilePrefix, double t_MACCutoffforER);
-RcppExport SEXP _SAIGE_setAssocTest_GlobalVarsInCPP(SEXP t_impute_methodSEXP, SEXP t_missing_cutoffSEXP, SEXP t_min_maf_markerSEXP, SEXP t_min_mac_markerSEXP, SEXP t_min_info_markerSEXP, SEXP t_dosage_zerod_cutoffSEXP, SEXP t_dosage_zerod_MAC_cutoffSEXP, SEXP t_weights_betaSEXP, SEXP t_outputFilePrefixSEXP, SEXP t_MACCutoffforERSEXP) {
+void setAssocTest_GlobalVarsInCPP(std::string t_impute_method, double t_missing_cutoff, double t_min_maf_marker, double t_min_mac_marker, double t_min_info_marker, double t_dosage_zerod_cutoff, double t_dosage_zerod_MAC_cutoff, arma::vec& t_weights_beta, std::string t_outputFilePrefix, double t_MACCutoffforER, bool t_isadmixed);
+RcppExport SEXP _SAIGE_setAssocTest_GlobalVarsInCPP(SEXP t_impute_methodSEXP, SEXP t_missing_cutoffSEXP, SEXP t_min_maf_markerSEXP, SEXP t_min_mac_markerSEXP, SEXP t_min_info_markerSEXP, SEXP t_dosage_zerod_cutoffSEXP, SEXP t_dosage_zerod_MAC_cutoffSEXP, SEXP t_weights_betaSEXP, SEXP t_outputFilePrefixSEXP, SEXP t_MACCutoffforERSEXP, SEXP t_isadmixedSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type t_impute_method(t_impute_methodSEXP);
@@ -117,7 +117,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec& >::type t_weights_beta(t_weights_betaSEXP);
     Rcpp::traits::input_parameter< std::string >::type t_outputFilePrefix(t_outputFilePrefixSEXP);
     Rcpp::traits::input_parameter< double >::type t_MACCutoffforER(t_MACCutoffforERSEXP);
-    setAssocTest_GlobalVarsInCPP(t_impute_method, t_missing_cutoff, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_weights_beta, t_outputFilePrefix, t_MACCutoffforER);
+    Rcpp::traits::input_parameter< bool >::type t_isadmixed(t_isadmixedSEXP);
+    setAssocTest_GlobalVarsInCPP(t_impute_method, t_missing_cutoff, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_weights_beta, t_outputFilePrefix, t_MACCutoffforER, t_isadmixed);
     return R_NilValue;
 END_RCPP
 }
@@ -2521,23 +2522,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// integrate_SKAT_Optimal_Davies
-double integrate_SKAT_Optimal_Davies(arma::vec& pmin_q, Rcpp::List& param_m, arma::vec& r_all, double lower, double upper, int subdivisions, double abs_tol);
-RcppExport SEXP _SAIGE_integrate_SKAT_Optimal_Davies(SEXP pmin_qSEXP, SEXP param_mSEXP, SEXP r_allSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP subdivisionsSEXP, SEXP abs_tolSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec& >::type pmin_q(pmin_qSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List& >::type param_m(param_mSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type r_all(r_allSEXP);
-    Rcpp::traits::input_parameter< double >::type lower(lowerSEXP);
-    Rcpp::traits::input_parameter< double >::type upper(upperSEXP);
-    Rcpp::traits::input_parameter< int >::type subdivisions(subdivisionsSEXP);
-    Rcpp::traits::input_parameter< double >::type abs_tol(abs_tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(integrate_SKAT_Optimal_Davies(pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol));
-    return rcpp_result_gen;
-END_RCPP
-}
 // integrate_SKAT_Optimal_Liu
 arma::vec integrate_SKAT_Optimal_Liu(arma::mat& pmin_q, Rcpp::List& param_m, arma::vec& r_all, double lower, double upper, int subdivisions, double abs_tol);
 RcppExport SEXP _SAIGE_integrate_SKAT_Optimal_Liu(SEXP pmin_qSEXP, SEXP param_mSEXP, SEXP r_allSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP subdivisionsSEXP, SEXP abs_tolSEXP) {
@@ -3171,7 +3155,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_openOutfile_LDmat", (DL_FUNC) &_SAIGE_openOutfile_LDmat, 1},
     {"_SAIGE_openOutfile_index_LDmat", (DL_FUNC) &_SAIGE_openOutfile_index_LDmat, 1},
     {"_SAIGE_closeOutfile_single_LDmat", (DL_FUNC) &_SAIGE_closeOutfile_single_LDmat, 0},
-    {"_SAIGE_setAssocTest_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP, 10},
+    {"_SAIGE_setAssocTest_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP, 11},
     {"_SAIGE_setAssocTest_GlobalVarsInCPP_indexInModel_male", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP_indexInModel_male, 1},
     {"_SAIGE_setAssocTest_GlobalVarsInCPP_X_PARregion_mat", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP_X_PARregion_mat, 1},
     {"_SAIGE_setMarker_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setMarker_GlobalVarsInCPP, 2},
@@ -3344,7 +3328,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_Get_Davies_PVal", (DL_FUNC) &_SAIGE_Get_Davies_PVal, 4},
     {"_SAIGE_SKAT_davies", (DL_FUNC) &_SAIGE_SKAT_davies, 7},
     {"_SAIGE_SKAT_Optimal_Integrate_Func_Davies", (DL_FUNC) &_SAIGE_SKAT_Optimal_Integrate_Func_Davies, 4},
-    {"_SAIGE_integrate_SKAT_Optimal_Davies", (DL_FUNC) &_SAIGE_integrate_SKAT_Optimal_Davies, 7},
     {"_SAIGE_integrate_SKAT_Optimal_Liu", (DL_FUNC) &_SAIGE_integrate_SKAT_Optimal_Liu, 7},
     {"_SAIGE_Met_SKAT_Get_Pvalue", (DL_FUNC) &_SAIGE_Met_SKAT_Get_Pvalue, 5},
     {"_SAIGE_Get_Liu_Params", (DL_FUNC) &_SAIGE_Get_Liu_Params, 1},

@@ -34,6 +34,19 @@ bool imputeGenoAndFlip(arma::vec& t_GVec,
 		       std::vector<uint> & t_indexZero,
                        std::vector<uint> & t_indexNonZero);
 
+
+bool imputeGenoAndFlip_fakeflip(arma::vec& t_GVec,
+                       double & t_altFreq,
+                       double & t_altCount,
+                       std::vector<uint32_t> & t_indexForMissing,
+                       std::string t_impute_method,
+                       double t_dosage_zerod_cutoff,
+                       double t_dosage_zerod_MAC_cutoff,
+                       double & t_MAC,
+                       std::vector<uint> & t_indexZero,
+                       std::vector<uint> & t_indexNonZero);
+
+
 arma::vec getTime();
 
 void printTime(arma::vec t1, arma::vec t2, std::string message);

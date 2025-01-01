@@ -122,7 +122,8 @@ SAIGE.Region = function(mu,
                         chrom,
                         is_fastTest,
                         pval_cutoff_for_fastTest,
-                        is_output_moreDetails) {
+                        is_output_moreDetails, 
+			is_admixed) {
   OutputFileIndex = NULL
   if (is.null(OutputFileIndex))
     OutputFileIndex = paste0(OutputFile, ".index")
@@ -423,7 +424,26 @@ SAIGE.Region = function(mu,
             }
           }
         }
-        
+       
+
+
+       print("outList")
+       print(outList)
+
+	if(is_admixed){
+		outList$MAFVec = outList$MAFVec[1:(length(outList$MAFVec)-1)]
+		outList$TstatVec_flip = outList$TstatVec_flip[1:(length(outList$TstatVec_flip)-1)]
+		P_hom_admixed = outList$pvalVec[length(outList$pvalVec)]
+		outList$pvalVec = outList$pvalVec[1:(length(outList$pvalVec)-1)]
+		outList$annoMAFIndicatorMat = outList$annoMAFIndicatorMat[1:(nrow(outList$annoMAFIndicatorMat)-1),, drop=F]
+
+
+		if(isCondition){
+			P_hom_admixed_cond = outList$pval_cVec[length(outList$pval_cVec)]
+		}
+	}
+
+
         #print("time_mainRegionInCPP")
         #print(time_mainRegionInCPP)
         if (!is_fastTest) {
@@ -492,6 +512,9 @@ SAIGE.Region = function(mu,
             } else {
               AnnoWeights = dbeta(MAFVec, 1, 25)
             }
+		if(is_admixed){
+			AnnoWeights = rep(1, length(MAFVec))
+		}
             weightMat = AnnoWeights %*% t(AnnoWeights)
             
             
@@ -555,6 +578,15 @@ SAIGE.Region = function(mu,
                       SE_Burden = groupOutList$SE_Burden
                     )
 
+			if(is_admixed){
+				P_het_admixed = get_multiwayScore_pvalue(Score, Phi)
+                                resultDF$P_het_admixed = P_het_admixed
+                                resultDF$P_hom_admixed = P_hom_admixed
+			}
+
+
+
+
                     if (isCondition) {
                       if (traitType == "binary") {
                         G1tilde_P_G2tilde_Mat_scaled = t(t((
@@ -588,6 +620,12 @@ SAIGE.Region = function(mu,
                       resultDF$Pvalue_SKAT_cond = groupOutList_cond$Pvalue_SKAT
                       resultDF$BETA_Burden_cond = groupOutList_cond$BETA_Burden
                       resultDF$SE_Burden_cond = groupOutList_cond$SE_Burden
+			
+			if(is_admixed){
+				P_het_admixedi_cond = get_multiwayScore_pvalue(Score_cond, Phi_cond)
+                                resultDF$P_het_admixed_cond = P_het_admixed_cond
+                                resultDF$P_hom_admixed_cond = P_hom_admixed_cond
+			}
                     }#if(isCondition){
                     pval.Region = rbind.data.frame(pval.Region, resultDF)
                     
@@ -618,6 +656,9 @@ SAIGE.Region = function(mu,
             
             print("pval.Region") 
 	    print(pval.Region)
+	    padmixedvec = as.numeric(c(resultDF$Pvalue[1], resultDF$P_het_admixed[1], resultDF$P_hom_admixed[1]))
+	    pval.Region$Pvalue_admixed = get_CCT_pvalue(padmixedvec)		
+
             #if(regionTestType != "BURDEN"){
             
             if (length(annoMAFIndVec) > 0) {
@@ -768,8 +809,7 @@ SAIGE.Region = function(mu,
                 if (isCondition) {
                   outList$VarMatAdjCond = outList$VarMatAdjCond[noNAIndices, noNAIndices]
                   outList$TstatAdjCond = outList$TstatAdjCond[noNAIndices]
-                  outList$G1tilde_P_G2tilde_Weighted_Mat = outList$G1tilde_P_G2tilde_Weighted_Mat[noNAIndices, , drop =
-                                                                                                    F]
+                  outList$G1tilde_P_G2tilde_Weighted_Mat = outList$G1tilde_P_G2tilde_Weighted_Mat[noNAIndices, , drop = F]
                   weightMat_G2_G2 = outList$G2_Weight_cond %*% t(outList$G2_Weight_cond)
                 }
                 
@@ -848,7 +888,9 @@ SAIGE.Region = function(mu,
                           Phi = re_phi$val
                         }
                         groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType)
-                        
+			
+                       
+
                         resultDF = data.frame(
                           Region = regionName,
                           Group = AnnoName,
@@ -859,6 +901,11 @@ SAIGE.Region = function(mu,
                           BETA_Burden = groupOutList$BETA_Burden,
                           SE_Burden = groupOutList$SE_Burden
                         )
+			if(is_admixed){
+				P_het_admixed = get_multiwayScore_pvalue(Score, Phi)
+                                resultDF$P_het_admixed = P_het_admixed
+                                resultDF$P_hom_admixed = P_hom_admixed
+			}
                         if (isCondition) {
                           if (traitType == "binary") {
                             G1tilde_P_G2tilde_Mat_scaled = t(t((
@@ -891,6 +938,15 @@ SAIGE.Region = function(mu,
                           resultDF$Pvalue_SKAT_cond = groupOutList_cond$Pvalue_SKAT
                           resultDF$BETA_Burden_cond = groupOutList_cond$BETA_Burden
                           resultDF$SE_Burden_cond = groupOutList_cond$SE_Burden
+
+
+			if(is_admixed){
+				P_het_admixed_cond = get_multiwayScore_pvalue(Score_cond, Phi_cond)
+				resultDF$P_het_admixed_cond = P_het_admixed_cond
+				resultDF$P_hom_admixed_cond = P_hom_admixed_cond
+			}
+
+
                         }#if(isCondition){
                         pval.Region = rbind.data.frame(pval.Region, resultDF)
                         

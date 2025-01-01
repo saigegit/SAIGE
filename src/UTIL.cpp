@@ -134,6 +134,90 @@ switch(string_to_case.at(t_impute_method)) {
 }
 
 
+
+// used in Main.cpp::mainMarkerInCPP
+bool imputeGenoAndFlip_fakeflip(arma::vec& t_GVec,
+                       double & t_altFreq,
+                       double & t_altCount,
+                       std::vector<uint32_t> & t_indexForMissing,
+                       std::string t_impute_method,
+                       double t_dosage_zerod_cutoff,
+                       double t_dosage_zerod_MAC_cutoff,
+                       double & t_MAC,
+                       std::vector<uint> & t_indexZero,
+                       std::vector<uint> & t_indexNonZero)
+{
+  bool flip = false;
+  t_indexNonZero.clear();
+  t_indexZero.clear();
+  int nMissing = t_indexForMissing.size();
+  uint dosagesSize = t_GVec.size();
+  double imputeG = 0;
+/*
+  if(t_altFreq > 0.5){
+    flip = true;
+    t_GVec = 2 - t_GVec;
+    t_altFreq = 1 - t_altFreq;
+  }
+*/
+if(nMissing > 0){
+
+switch(string_to_case.at(t_impute_method)) {
+  case 1:
+    imputeG = std::round(2 * t_altFreq);
+    //std::cout << "t_impute_method " << t_impute_method << std::endl;
+    break;
+  case 2:
+    imputeG = 2 * t_altFreq;
+    //std::cout << "t_impute_method " << t_impute_method << std::endl;
+    break;
+  case 3:
+    imputeG = 0;
+    //std::cout << "t_impute_method " << t_impute_method << std::endl;
+    break;
+}
+
+
+  for(int i = 0; i < nMissing; i++){
+    uint32_t j = t_indexForMissing.at(i);
+    t_GVec.at(j) = imputeG;
+  }
+if(t_altFreq <= 0.5){
+ t_MAC = t_MAC + imputeG * nMissing;
+}
+
+}
+
+
+  if(t_dosage_zerod_cutoff > 0){
+    if(t_MAC <= t_dosage_zerod_MAC_cutoff){
+      t_GVec.clean(t_dosage_zerod_cutoff);
+    }
+  }
+
+  //if(nMissing > 0 || t_dosage_zerod_cutoff > 0){
+     t_altCount = arma::sum(t_GVec);
+     t_altFreq = t_altCount / (2*dosagesSize);
+     if(flip){
+        t_altFreq = 1 - t_altFreq;
+        t_altCount = 2*dosagesSize - t_altCount;
+        //t_altCount = 2 * t_altFreq * dosagesSize;
+     }
+  //}
+
+ for(unsigned int i = 0; i < dosagesSize; i++){
+        if(t_GVec(i) == 0){
+                t_indexZero.push_back(i);
+        }else{
+                t_indexNonZero.push_back(i);
+        }
+ }
+
+  return flip;
+}
+
+
+
 double getInnerProd(arma::mat& x1Mat, arma::mat& x2Mat)
 {
   double innerProd = arma::accu(x1Mat % x2Mat);
