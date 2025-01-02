@@ -2126,6 +2126,7 @@ if(t_isSingleinGroupTest){
  if(g_isadmixed && isCondition){
 	OutList.push_back(pval_cVec, "pval_cVec");
  }
+if(!g_isadmixed){
 if(iswriteOutput){
   numofUR0 = writeOutfile_singleInGroup(t_isMoreOutput,
       t_isImputation,
@@ -2211,6 +2212,56 @@ if(iswriteOutput){
 
  }//iswriteOutput
  OutList.push_back(numofUR, "numofUR");
+
+ }else{ //if(!g_isadmixed){
+  bool isopen0 = OutFile_singleInGroup_temp.is_open();
+  if(isopen0){OutFile_singleInGroup_temp.close();}
+  OutFile_singleInGroup_temp.open(g_outputFilePrefixSingleInGroup_temp.c_str(), std::ofstream::out );  
+  bool isopen = openOutfile_single_admixed(t_traitType,isCondition, t_isMoreOutput, pvalVec, OutFile_singleInGroup_temp);
+  OutFile_singleInGroup_temp.close();
+  OutFile_singleInGroup_temp.open(g_outputFilePrefixSingleInGroup_temp.c_str(), std::ofstream::out | std::ofstream::app); 
+
+  int numofAnc =  writeOutfile_singleInadmixed(t_isMoreOutput,
+      t_isImputation,
+      isCondition,
+      is_Firth,
+      mFirth,
+      is_FirthConverge,
+      t_traitType,
+      chrVec,
+      posVec,
+      markerVec,
+      refVec,
+      altVec,
+      altCountsVec,
+      altFreqVec,
+      imputationInfoVec,
+      missingRateVec,
+      BetaVec,
+      seBetaVec,
+      TstatVec,
+      varTVec,
+      pvalVec,
+      pvalNAVec,
+      isSPAConvergeVec,
+      Beta_cVec,
+      seBeta_cVec,
+      Tstat_cVec,
+      varT_cVec,
+      pval_cVec,
+      pvalNA_cVec,
+      AF_caseVec,
+      AF_ctrlVec,
+      N_caseVec,
+      N_ctrlVec,
+      N_case_homVec,
+      N_ctrl_hetVec,
+      N_case_hetVec,
+      N_ctrl_homVec,
+      N_Vec,
+      OutFile_singleInGroup_temp);
+OutFile_singleInGroup_temp.close();
+ }
 }
 
 OutList.push_back(iswriteOutput, "iswriteOutput");
@@ -3094,3 +3145,246 @@ void copy_singleInGroup(){
 }
 
 
+int writeOutfile_singleInadmixed(bool t_isMoreOutput,
+                        bool t_isImputation,
+                        bool t_isCondition,
+                        bool t_isFirth,
+                        int mFirth,
+                        int mFirthConverge,
+                        std::string t_traitType,
+                        std::vector<std::string> & chrVec,
+                        std::vector<std::string> & posVec,
+                        std::vector<std::string> & markerVec,
+                        std::vector<std::string> & refVec,
+                        std::vector<std::string> & altVec,
+                        std::vector<double> & altCountsVec,
+                        std::vector<double> & altFreqVec,
+                        std::vector<double> & imputationInfoVec,
+                        std::vector<double> & missingRateVec,
+                        std::vector<double> & BetaVec,
+                        std::vector<double> & seBetaVec,
+                        std::vector<double> & TstatVec,
+                        std::vector<double> & varTVec,
+                        std::vector<std::string> & pvalVec,
+                        std::vector<std::string> & pvalNAVec,
+                        std::vector<bool>  & isSPAConvergeVec,
+                        std::vector<double> & Beta_cVec,
+                        std::vector<double> & seBeta_cVec,
+                        std::vector<double> & Tstat_cVec,
+                        std::vector<double> & varT_cVec,
+                        std::vector<std::string> & pval_cVec,
+                        std::vector<std::string> & pvalNA_cVec,
+                        std::vector<double> & AF_caseVec,
+                        std::vector<double> & AF_ctrlVec,
+                        std::vector<uint32_t> & N_caseVec,
+                        std::vector<uint32_t> & N_ctrlVec,
+                        std::vector<double>  & N_case_homVec,
+                        std::vector<double>  & N_ctrl_hetVec,
+                        std::vector<double>  & N_case_hetVec,
+                        std::vector<double>  & N_ctrl_homVec,
+                        std::vector<uint32_t> & N_Vec,
+                        std::ofstream & t_OutFile_singleInGroup){
+  int numofAnc = 0;
+  int k = 0;
+  t_OutFile_singleInGroup << chrVec.at(k);
+  t_OutFile_singleInGroup << "\t";
+  t_OutFile_singleInGroup << posVec.at(k);
+  t_OutFile_singleInGroup << "\t";
+  t_OutFile_singleInGroup << markerVec.at(k);
+  t_OutFile_singleInGroup << "\t";
+  t_OutFile_singleInGroup << refVec.at(k);
+  t_OutFile_singleInGroup << "\t";
+  t_OutFile_singleInGroup << altVec.at(k);
+  t_OutFile_singleInGroup << "\t";
+
+  for(unsigned int k = 0; k < pvalVec.size(); k++){
+        //if(std::isfinite(pvalVec.at(k))){
+        //if(!std::isnan(pvalVec.at(k))){
+        if(pvalVec.at(k) != "NA"){
+                if(k != pvalVec.size()-1){
+			numofAnc = numofAnc + 1;
+		}
+  		if(k > 0){
+               		t_OutFile_singleInGroup << "\t";
+             	}
+                t_OutFile_singleInGroup << altCountsVec.at(k);
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << altFreqVec.at(k);
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << BetaVec.at(k);
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << seBetaVec.at(k);
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << TstatVec.at(k);
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << varTVec.at(k);
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << pvalVec.at(k);
+
+                if(t_traitType == "binary" || t_traitType == "survival"){
+                	t_OutFile_singleInGroup << "\t";
+                        t_OutFile_singleInGroup << pvalNAVec.at(k);
+                        t_OutFile_singleInGroup << "\t";
+                        t_OutFile_singleInGroup << std::boolalpha << isSPAConvergeVec.at(k);
+                }
+                if(t_isCondition){
+                        t_OutFile_singleInGroup << "\t";
+                        t_OutFile_singleInGroup << Beta_cVec.at(k);
+                        t_OutFile_singleInGroup << "\t";
+                        t_OutFile_singleInGroup << seBeta_cVec.at(k);
+                        t_OutFile_singleInGroup << "\t";
+                        t_OutFile_singleInGroup << Tstat_cVec.at(k);
+                        t_OutFile_singleInGroup << "\t";
+                        t_OutFile_singleInGroup << varT_cVec.at(k);
+                        t_OutFile_singleInGroup << "\t";
+                        t_OutFile_singleInGroup << pval_cVec.at(k);
+                        if(t_traitType == "binary" || t_traitType == "survival"){
+                        	t_OutFile_singleInGroup << "\t";
+                                t_OutFile_singleInGroup << pvalNA_cVec.at(k);
+                        }
+                }
+                if(t_traitType == "binary" || t_traitType == "survival"){
+                        t_OutFile_singleInGroup << "\t";
+                        t_OutFile_singleInGroup << AF_caseVec.at(k);
+                        t_OutFile_singleInGroup << "\t";
+                        t_OutFile_singleInGroup << AF_ctrlVec.at(k);
+                        t_OutFile_singleInGroup << "\t";
+                        t_OutFile_singleInGroup << N_caseVec.at(k);
+                        t_OutFile_singleInGroup << "\t";
+                        t_OutFile_singleInGroup << N_ctrlVec.at(k);
+
+                        if(t_isMoreOutput){
+                                t_OutFile_singleInGroup << "\t";
+                                t_OutFile_singleInGroup << N_case_homVec.at(k);
+                                t_OutFile_singleInGroup << "\t";
+                                t_OutFile_singleInGroup << N_case_hetVec.at(k);
+                                t_OutFile_singleInGroup << "\t";
+                                t_OutFile_singleInGroup << N_ctrl_homVec.at(k);
+                                t_OutFile_singleInGroup << "\t";
+                                t_OutFile_singleInGroup << N_ctrl_hetVec.at(k);
+                        }
+                }else if(t_traitType == "quantitative"){
+                        t_OutFile_singleInGroup << "\t";
+                        t_OutFile_singleInGroup << N_Vec.at(k);
+
+                }
+        }
+  }
+  t_OutFile_singleInGroup << "\n";
+  return(numofAnc);
+}
+
+
+bool openOutfile_single_admixed(std::string t_traitType, bool t_isCondition, bool t_isMoreOutput, std::vector<std::string> & pvalVec, std::ofstream & t_OutFile_singleInGroup){
+      bool isopen = t_OutFile_singleInGroup.is_open();
+      //if(!isopen){
+//	t_OutFile_singleInGroup.open(Outfile_single_temp_admixed.c_str(), std::ofstream::out);
+      //}
+      //isopen = t_OutFile_singleInGroup.is_open();
+      std::cout << "pvalVec.size() " << pvalVec.size() << std::endl;
+      if(isopen){
+        std::string ancstr;
+        t_OutFile_singleInGroup << "CHR\tPOS\tMarkerID\tAllele1\tAllele2\t";
+        for(unsigned int k = 0; k < pvalVec.size(); k++){		 if(pvalVec.at(k) != "NA"){	
+	     if(k != pvalVec.size()-1){	
+		ancstr = "_anc"+std::to_string(k);
+	     }else{
+		ancstr = "_ancALL";
+	     }
+	     if(k > 0){
+	       t_OutFile_singleInGroup << "\t";
+	     }
+	     t_OutFile_singleInGroup << "AC_Allele2";
+	     t_OutFile_singleInGroup << ancstr;;
+	     t_OutFile_singleInGroup << "\t";
+	     t_OutFile_singleInGroup << "AF_Allele2";
+	     t_OutFile_singleInGroup << ancstr;;
+	     t_OutFile_singleInGroup << "\t";
+	     t_OutFile_singleInGroup << "BETA";
+	     t_OutFile_singleInGroup << ancstr;;
+	     t_OutFile_singleInGroup << "\t";
+	     t_OutFile_singleInGroup << "SE";
+	     t_OutFile_singleInGroup << ancstr;;
+	     t_OutFile_singleInGroup << "\t";
+	     t_OutFile_singleInGroup << "Tstat";
+	     t_OutFile_singleInGroup << ancstr;;
+	     t_OutFile_singleInGroup << "\t";
+	     t_OutFile_singleInGroup << "var";
+	     t_OutFile_singleInGroup << ancstr;;
+	     t_OutFile_singleInGroup << "\t";
+	     t_OutFile_singleInGroup << "p.value";
+	     t_OutFile_singleInGroup << ancstr;;
+	     t_OutFile_singleInGroup << "\t";
+             if(t_traitType == "binary" || t_traitType == "survival"){
+	     	t_OutFile_singleInGroup << "p.value.NA";
+	     	t_OutFile_singleInGroup << ancstr;;
+	     	t_OutFile_singleInGroup << "\t";
+	     	t_OutFile_singleInGroup << "Is.SPA";
+	     	t_OutFile_singleInGroup << ancstr;;
+             }
+	     if(t_isCondition){
+	     	t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "BETA_c";
+	        t_OutFile_singleInGroup << ancstr;;
+	        t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "SE_c";
+	        t_OutFile_singleInGroup << ancstr;;
+	        t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "Tstat_c";
+	        t_OutFile_singleInGroup << ancstr;;
+	        t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "var_c";
+	        t_OutFile_singleInGroup << ancstr;;
+	        t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "p.value_c";
+	        t_OutFile_singleInGroup << ancstr;;
+		if(t_traitType == "binary" || t_traitType == "survival"){	
+		
+	        t_OutFile_singleInGroup << "\t";
+	     	t_OutFile_singleInGroup << "p.value.NA_c";
+	     	t_OutFile_singleInGroup << ancstr;;
+
+		}		
+	     }
+
+	     if(t_traitType == "binary" || t_traitType == "survival"){	
+	     	t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "AF_case";
+	        t_OutFile_singleInGroup << ancstr;
+	        t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "AF_ctrl";
+	        t_OutFile_singleInGroup << ancstr;
+	        t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "N_case";
+	        t_OutFile_singleInGroup << ancstr;;
+	        t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "N_ctrl";
+	        t_OutFile_singleInGroup << ancstr;;
+	
+		if(t_isMoreOutput){
+	        t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "N_case_hom";
+	        t_OutFile_singleInGroup << ancstr;
+	        t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "N_case_het";
+	        t_OutFile_singleInGroup << ancstr;
+	        t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "N_ctrl_hom";
+	        t_OutFile_singleInGroup << ancstr;;
+	        t_OutFile_singleInGroup << "\t";
+	        t_OutFile_singleInGroup << "N_ctrl_het";
+	        t_OutFile_singleInGroup << ancstr;;
+	        //t_OutFile_singleInGroup << "\t";	
+		}
+	  }else if(t_traitType == "quantitative"){//if(t_traitType == "binary" || t_traitType == "survival")
+		t_OutFile_singleInGroup << "\t";
+		t_OutFile_singleInGroup << "N";
+		t_OutFile_singleInGroup << ancstr;
+	  }
+	}//if(pvalVec.at(k) != "NA"){
+
+	}//for(unsigned int k = 0; k < pvalVec.size(); k++)
+	t_OutFile_singleInGroup << "\n";
+     }//if(isopen){
+     return(isopen);
+}

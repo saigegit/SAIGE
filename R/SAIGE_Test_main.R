@@ -115,6 +115,7 @@ SPAGMMATtest = function(bgenFile = "",
 		 is_no_weight_in_groupTest = FALSE,
 		 is_output_markerList_in_groupTest = FALSE,
 		 is_fastTest = FALSE,
+		 is_admixed = FALSE,
 		 pval_cutoff_for_fastTest = 0.05, 
 		 max_MAC_use_ER = 4, 
 		 subSampleFile = ""
@@ -172,7 +173,7 @@ SPAGMMATtest = function(bgenFile = "",
 			weights.beta, 
 			OutputFile,
 			max_MAC_use_ER, 
-			TRUE)	
+			is_admixed)	
    
     #time_2 = proc.time()
 
@@ -528,7 +529,6 @@ SPAGMMATtest = function(bgenFile = "",
 
 		}
 	}
-	is_admixed=TRUE
 	SAIGE.Region(mu,
 		     OutputFile,
 		     MACCutoff_to_CollapseUltraRare,

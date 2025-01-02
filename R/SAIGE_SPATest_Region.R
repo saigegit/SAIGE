@@ -1153,6 +1153,9 @@ SAIGE.Region = function(mu,
         #cat("n1 is ", n1, "\n")
         #cat("n2 is ", n2, "\n")
         if (regionTestType != "BURDEN") {
+
+	if(!is_admixed){
+
           if (Start) {
             if (!is.null(pval.Region.all)) {
               fwrite(
@@ -1181,6 +1184,51 @@ SAIGE.Region = function(mu,
             }
             #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
           }
+	}else{ #if(!is_admixed)
+          if (Start) {
+            if (!is.null(pval.Region.all)) {
+	  print(paste0(OutputFile,".singleAssoc.txt_temp"))
+	  isexist = file.exists(paste0(OutputFile,".singleAssoc.txt_temp"))
+	  print(isexist)
+	  singleout = read.table(paste0(OutputFile,".singleAssoc.txt_temp"), header=T)	
+	  print("singleout here")
+	  print(singleout)
+	  print(colnames(singleout))
+	      pval.Region.all = cbind(pval.Region.all, singleout)
+	      fwrite(
+                pval.Region.all,
+                OutputFile,
+                quote = F,
+                sep = "\t",
+                append = F,
+                col.names = T,
+                row.names = F,
+                na = "NA"
+              )
+            }
+          } else {
+            if (!is.null(pval.Region.all)) {
+	  print(paste0(OutputFile,".singleAssoc.txt_temp"))
+	  singleout = read.table(paste0(OutputFile,".singleAssoc.txt_temp"), header=T)	
+	  print("singleout")
+	  print(singleout)
+	      pval.Region.all = cbind(pval.Region.all, singleout)
+              fwrite(
+                pval.Region.all,
+                OutputFile,
+                quote = F,
+                sep = "\t",
+                append = T,
+                col.names = F,
+                row.names = F,
+                na = "NA"
+              )
+            }
+            #write.table(Output, OutputFile, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+          }	
+
+	}
+
         }
         if (is_output_markerList_in_groupTest) {
           if (Start) {
