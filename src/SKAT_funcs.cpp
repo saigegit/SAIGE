@@ -1373,3 +1373,188 @@ Rcpp::List Get_Liu_PVal( arma::vec& Q,  arma::mat& W,  arma::mat& Q_resampling) 
 arma::mat forceSymmetric(const arma::mat& K) {
     return 0.5 * (K + K.t());
 }
+
+
+
+// [[Rcpp::export]]
+void get_SKAT_pvalue_cpp(arma::vec& Score, 
+                               arma::mat& Phi, 
+                               arma::vec& r_corr, 
+			       double& Pvalue_SKATO,
+			       double& Pvalue_Burden, 
+			       double& Pvalue_SKAT,
+			       double& BETA_Burden,
+			       double& SE_Burden.
+			       int& error_code
+			       ) {
+
+  std::string method = "optimal.adj";
+  bool isFast = false;
+  Rcpp::List out_SKAT_List = Met_SKAT_Get_Pvalue(Score, Phi, r_corr, method, isFast); 
+  
+  double BETA_Burden = arma::accu(Score) / arma::trace(Phi);
+  double SE_Burden;
+  error_code = 0;
+  double p_value = out_SKAT_List["p.value"];
+  arma::vec Pvalue(3, arma::fill::zeros);
+  arma::vec rho = out_SKAT_List["param"]["rho"];
+  arma::vec p_val_each = out_SKAT_List["param"]["p.val.each"];
+  
+
+  // Check conditions similar to the R logic
+  if (p_val_each.is_empty() || rho.is_empty()) {
+    error_code = 2;
+    BETA_Burden = NA_REAL;
+  } else if (!arma::any(rho == 0) || !arma::any(rho == 1)) {
+    Pvalue.fill(p_value);
+    SE_Burden = std::abs(BETA_Burden / R::qnorm(p_value/2, 0, 1, true, false));
+  } else {
+    int pos00 = arma::as_scalar(arma::find(rho == 0, 1, "first"));
+    int pos01 = arma::as_scalar(arma::find(rho == 1, 1, "first"));
+    Pvalue[0] = p_value;
+    Pvalue[1] = p_val_each[pos00];
+    Pvalue[2] = p_val_each[pos01];
+    SE_Burden = std::abs(BETA_Burden / R::qnorm(p_val_each[pos01] / 2, 0, 1, true, false));
+  }
+}
+
+
+// [[Rcpp::export]]
+double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi) {
+    arma::mat Phi_inv = arma::inv(Phi); // Inverse of Phi
+    double Teststat = arma::as_scalar(Score.t() * Phi_inv * Score);
+    
+    // Degrees of freedom
+    int df = Score.n_elem;
+    
+    // Debugging print statements (optional, remove in production)
+    Rcpp::Rcout << "Score:" << std::endl << Score << std::endl;
+    Rcpp::Rcout << "Phi:" << std::endl << Phi << std::endl;
+    Rcpp::Rcout << "Teststat: " << Teststat << std::endl;
+    Rcpp::Rcout << "df: " << df << std::endl;
+    
+    // Create central chi-squared distribution
+    boost::math::chi_squared chi2(df);
+
+    // Compute the p-value
+    double p_value;
+    if (Teststat > 0) {
+        p_value = 1 - boost::math::cdf(chi2, Teststat); // 1 - CDF for upper-tail probability
+    } else {
+        p_value = 1.0;
+    }    
+    
+    return p_value;
+}
+
+// [[Rcpp::export]]
+void SPA_ER_kernel_related_Phiadj_fast_new_cpp(arma::vec& p_new,
+                                                 arma::vec& Score,
+                                                 arma::mat& Phi,
+                                                 double p_value_burden,
+                                                 std::string regionTestType,
+						 arma::vec& scaleFactor
+						 ) {
+    int p_m = Score.n_elem;
+    arma::vec zscore_all_0 = Score;
+    arma::vec zscore_all_1(p_m, arma::fill::zeros);
+
+    arma::vec VarS_org = (regionTestType != "BURDEN") ? Phi.diag() : arma::vec(Phi);
+
+    arma::vec stat_qtemp = arma::square(Score) / VarS_org;
+
+    arma::uvec idx_0 = arma::find(VarS_org > 0);
+    arma::uvec idx_p0 = arma::find_finite(p_new);
+
+    arma::vec VarS = arma::square(zscore_all_0) / 500.0;
+
+    if (!idx_p0.is_empty()) {
+        double df = 1.0;
+    	for (size_t i = 0; i < idx_p0.n_elem; i++) {
+		VarS(idx_p0(i)) = std::pow(zscore_all_0(idx_p0(i)),2) / qchisq_log(p_new(idx_p0)(i), df);
+    	}
+    }
+    arma::uvec vars_inf = arma::find(VarS == arma::datum::inf);
+    if (regionTestType != "BURDEN") {
+        if (!vars_inf.is_empty()) {
+            VarS(vars_inf).fill(0);
+            zscore_all_1(vars_inf).fill(0);
+            Phi.rows(vars_inf).zeros();
+            Phi.cols(vars_inf).zeros();
+        }
+    } else {
+        if (!vars_inf.is_empty()) {
+            VarS(vars_inf).fill(0);
+            zscore_all_1(vars_inf).fill(0);
+            Phi(vars_inf).zeros();
+        }
+    }
+
+    scaleFactor = arma::sqrt(VarS / VarS_org);
+    zscore_all_1 = zscore_all_0;
+
+    arma::vec VarStoorg = VarS / VarS_org;
+
+    arma::mat G2_adj_n;
+    if (regionTestType != "BURDEN") {
+        arma::mat PhiVarS = (Phi % arma::sqrt(VarStoorg)).t();
+        G2_adj_n = (PhiVarS % arma::sqrt(VarStoorg)).t();
+    } else {
+        G2_adj_n = Phi % VarStoorg;
+    }
+
+    double VarQ = arma::accu(G2_adj_n);
+    double Q_b = std::pow(arma::accu(zscore_all_1), 2);
+
+    double VarQ_2 = Q_b / qchisq_log(p_value_burden, 1);
+    double r = (VarQ_2 == 0) ? 1.0 : VarQ / VarQ_2;
+    r = std::min(r, 1.0);
+
+    //arma::mat Phi_ccadj;
+    Phi = G2_adj_n / r;
+    scaleFactor /= std::sqrt(r);
+
+}
+
+
+// Helper function for qchisq with log.p = TRUE
+double qchisq_log(double pval, double df) {
+    boost::math::chi_squared dist(df);
+    double qval;
+    qval = boost::math::quantile(boost::math::complement(dist, std::exp(pval)));
+}
+
+
+// [[Rcpp::export]]
+void get_newPhi_scaleFactor_cpp(double q_sum,
+                                  arma::vec& mu_a,
+                                  arma::vec& g_sum,
+                                  arma::vec& p_new,
+                                  arma::vec& Score,
+                                  arma::mat& Phi,
+                                  std::string regionTestType,
+                                  arma::vec& scaleFactor) {
+    double m1 = arma::accu(mu_a % g_sum);
+    double var1 = arma::accu(mu_a % (1.0 - mu_a) % arma::square(g_sum));
+
+    double qinv = -std::copysign(1.0, q_sum - m1) * std::abs(q_sum - m1) + m1;
+    //        pval_noadj <- pchisq((q.sum - m1)^2/var1, lower.tail = FALSE, df = 1, log.p = TRUE)
+    boost::math::chi_squared chi2(1.0);
+    double qval = std::pow(q_sum - m1, 2) / var1;
+    double pval_noadj = 1.0 - boost::math::cdf(chi2, qval);
+    pval_noadj = std::log(pval_noadj);
+
+    bool isSPAConverge = true;
+
+    double p_value_burden;
+    if (std::abs(q_sum - m1) / std::sqrt(var1) < 2) {
+        p_value_burden = pval_noadj;
+    } else {
+        double epsilon = std::numeric_limits<double>::epsilon();
+	double epsilon_0_25 = std::pow(epsilon, 0.25);
+	p.value_burden = SPA_pval(mu_a, g_sum, q_sum, qinv, pval_noadj, epsilon_0_25, true, "binary", isSPAConverge); 
+    }
+
+    SPA_ER_kernel_related_Phiadj_fast_new_cpp(p_new, Score, Phi, p.value_burden, regionTestType, scaleFactor); 	
+}
+

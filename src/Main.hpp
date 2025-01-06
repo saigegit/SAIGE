@@ -34,7 +34,8 @@ void setRegion_GlobalVarsInCPP(
                                arma::vec t_max_maf_region,
                                unsigned int t_max_markers_region,
                                double t_MACCutoff_to_CollapseUltraRare,
-			       double t_min_gourpmac_for_burdenonly);
+			       double t_min_gourpmac_for_burdenonly,
+			        arma::vec t_r_corr);
 
 
 
@@ -374,6 +375,7 @@ int writeOutfile_singleInadmixed(bool t_isMoreOutput,
                         bool t_isFirth,
                         int mFirth,
                         int mFirthConverge,
+			int q0,
                         std::string t_traitType,
                         std::vector<std::string> & chrVec,
                         std::vector<std::string> & posVec,
@@ -406,7 +408,9 @@ int writeOutfile_singleInadmixed(bool t_isMoreOutput,
                         std::vector<double>  & N_case_hetVec,
                         std::vector<double>  & N_ctrl_homVec,
                         std::vector<uint32_t> & N_Vec,
-                        std::ofstream & t_OutFile_singleInGroup);
+			std::vector<uint32_t> & nonNAIndexVec,
+                        std::ofstream & t_OutFile_singleInGroup,
+			std::string markerName);
 
 bool openOutfile_single_admixed(std::string t_traitType, bool t_isCondition, bool t_isMoreOutput, std::vector<std::string> & pvalVec, std::ofstream & t_OutFile_singleInGroup);
 

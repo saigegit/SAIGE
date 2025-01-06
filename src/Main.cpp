@@ -156,13 +156,15 @@ void setRegion_GlobalVarsInCPP(
                                arma::vec t_max_maf_region,
                                unsigned int t_max_markers_region,
 			       double t_MACCutoff_to_CollapseUltraRare, 
-			       double t_min_gourpmac_for_burdenonly)
+			       double t_min_gourpmac_for_burdenonly,
+			       arma::vec t_r_corr)
 {
   g_region_maxMAF_cutoff = t_max_maf_region;
   g_maxMAFLimit = g_region_maxMAF_cutoff.max();
   g_region_maxMarkers_cutoff = t_max_markers_region;
   g_region_minMAC_cutoff = t_MACCutoff_to_CollapseUltraRare;
   g_min_gourpmac_for_burdenonly = t_min_gourpmac_for_burdenonly;
+  g_r_corr = t_r_corr;
 }
 
 
@@ -1054,6 +1056,7 @@ Rcpp::List mainRegionInCPP(
   std::vector<double> BetaVec(q, arma::datum::nan);         // beta value for ALT allele
   std::vector<double> seBetaVec(q, arma::datum::nan);
   std::vector<std::string> pvalVec(q, "NA");
+  std::vector<uint32_t> nonNAIndexVec;
   //std::vector<double> pvalVec_val(q, arma::datum::nan);
   std::vector<double> TstatVec(q, arma::datum::nan);
   std::vector<double> TstatVec_flip(q, arma::datum::nan);
@@ -2214,19 +2217,27 @@ if(iswriteOutput){
  OutList.push_back(numofUR, "numofUR");
 
  }else{ //if(!g_isadmixed){
-  bool isopen0 = OutFile_singleInGroup_temp.is_open();
+  /*bool isopen0 = OutFile_singleInGroup_temp.is_open();
   if(isopen0){OutFile_singleInGroup_temp.close();}
   OutFile_singleInGroup_temp.open(g_outputFilePrefixSingleInGroup_temp.c_str(), std::ofstream::out );  
   bool isopen = openOutfile_single_admixed(t_traitType,isCondition, t_isMoreOutput, pvalVec, OutFile_singleInGroup_temp);
   OutFile_singleInGroup_temp.close();
   OutFile_singleInGroup_temp.open(g_outputFilePrefixSingleInGroup_temp.c_str(), std::ofstream::out | std::ofstream::app); 
-
+  */
+  bool isopen0 = OutFile.is_open();
+  if(isopen0){OutFile.close();}
+  OutFile.open(g_outputFilePrefixGroup.c_str(), std::ofstream::out );  
+  bool isopen = openOutfile_single_admixed(t_traitType,isCondition, t_isMoreOutput, pvalVec, OutFile);
+  OutFile.close();
+  OutFile.open(g_outputFilePrefixGroup.c_str(), std::ofstream::out | std::ofstream::app); 
+  nonNAIndexVec.clear();
   int numofAnc =  writeOutfile_singleInadmixed(t_isMoreOutput,
       t_isImputation,
       isCondition,
       is_Firth,
       mFirth,
       is_FirthConverge,
+      q0,
       t_traitType,
       chrVec,
       posVec,
@@ -2259,7 +2270,141 @@ if(iswriteOutput){
       N_case_hetVec,
       N_ctrl_homVec,
       N_Vec,
-      OutFile_singleInGroup_temp);
+      nonNAIndexVec,
+      OutFile,
+      regionName      
+      );
+
+
+  if(numofArc > 0){
+    double P_hom_admixed = pvalVec.tail(1)(0);
+    arma::uvec nonNAIndexVec_arma =  arma::conv_to<arma::uvec>::from(nonNAIndexVec);
+    arma::vec TstatVec_arma = arma::conv_to<arma::vec>::from(TstatVec);
+    arma::vec Scorevec = TstatVec_arma(nonNAIndexVec_arma);
+
+    double Pvalue_SKATO, Pvalue_Burden, Pvalue_SKAT, BETA_Burden, SE_Burden;
+    double Pvalue_SKATO_cond, Pvalue_Burden_cond, Pvalue_SKAT_cond, BETA_Burden_cond, SE_Burden_cond;
+    int error_code;
+    arma::mat VarMat_sub = VarMat(nonNAIndexVec_arma, nonNAIndexVec_arma); 
+   if (t_traitType == "binary") {
+   	arma::vec scaleFactor;
+        arma::vec p_new(nonNAIndexVec_arma.n_elem);
+        arma::vec gyVec_arma(nonNAIndexVec_arma.n_elem);
+        for(unsigned int k = 0; k < nonNAIndexVec_arma.n_elem; k++){
+                std::string pvalstr = pvalVec[nonNAIndexVec_arma(k)];
+                p_new(k) = std::stod(pvalstr);
+                gyVec_arma(k) = gyVec[nonNAIndexVec_arma(k)];
+        }
+        double q_sum = arma::accu(gyVec_arma);
+        arma::vec mu_a = ptr_gSAIGEobj->m_mu;
+        arma::vec g_sum = genoSumMat.col(0);
+
+        get_newPhi_scaleFactor_cpp(q_sym,
+                                mu_a,
+                                g_sum,
+                                p_new,
+                                Scorevec,
+                                VarMat_sub,
+                                "SKAT-O",
+				scaleFactor);
+
+   }
+
+
+    get_SKAT_pvalue_cpp(Scorevec,
+                VarMat,
+                g_r_corr,
+                Pvalue_SKATO,
+                Pvalue_Burden,
+                Pvalue_SKAT,
+                BETA_Burden,
+                SE_Burden,
+                error_code
+                );
+    double P_het_admixed = get_jointScore_pvalue(Scorevec, VarMat);
+    arma::vec pvecforcct = {Pvalue_SKATO, P_het_admixed, P_hom_admixed};
+    double P_cct_admixed = CCT_cpp(pvecforcct);
+
+
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << Pvalue_SKATO;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << Pvalue_Burden;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << Pvalue_SKAT;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << BETA_Burden;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << SE_Burden;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << P_het_admixed;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << P_hom_admixed;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << P_cct_admixed;
+
+
+    if(isCondition){
+        double P_hom_admixed_cond = pvalVec_c.tail(1)(0);
+  	arma::mat VarMatAdjCond_sub = VarMatAdjCond(nonNAIndexVec_arma, nonNAIndexVec_arma); 
+	arma::vec TstatAdjCond_sub = TstatAdjCond(nonNAIndexVec_arma);
+	arma::mat G1tilde_P_G2tilde_Weighted_Mat_sub = G1tilde_P_G2tilde_Weighted_Mat(nonNAIndexVec_arma, nonNAIndexVec_arma);
+	arma::vec wStatVec_cond = Scorevec - TstatAdjCond_sub;
+	arma::mat wadjVarSMat_cond = VarMat_sub - VarMatAdjCond_sub;
+
+
+	arma::mat Phi_cond;
+	arma::vec Score_cond;
+ 
+	if(t_traitType == "binary"){	
+		arma::mat G1tilde_P_G2tilde_Mat_scaledTemp = G1tilde_P_G2tilde_Weighted_Mat.rows(nonNAIndexVec_arma);
+		G1tilde_P_G2tilde_Mat_scaledTemp.each_col() %= arma::sqrt(scaleFactor);
+		G1tilde_P_G2tilde_Mat_scaledTemp.each_row() %= arma::sqrt(scalefactor_G2_cond).t();
+		arma::mat adjCondTemp = G1tilde_P_G2tilde_Mat_scaledtemo * VarInvMat_G2_cond_scaled;
+		amra::mat VarMatAdjCondTemp = adjCondTemp * (G1tilde_P_G2tilde_Mat_scaled.t());
+		arma::vec TstatAdjCondTemp = adjCondTemp * Tstat_G2_cond;
+		Phi_cond = VarMat_sub; 
+		Phi_cond.diag() = Phi_cond.diag() -  (VarMatAdjCondTemp.diag());
+		Score_cond = Scorevec - TstatAdjCondTemp;
+	}else{
+		Phi_cond = wadjVarSMat_cond;
+		Score_cond = wStatVec_cond;
+	}
+
+       get_SKAT_pvalue_cpp(Score_cond,
+                Phi_cond,
+                g_r_corr,
+                Pvalue_SKATO_cond,
+                Pvalue_Burden_cond,
+                Pvalue_SKAT_cond,
+                BETA_Burden_cond,
+                SE_Burden_cond,
+                error_code
+                );
+        double P_het_admixed_cond = get_jointScore_pvalue(Score_cond, Phi_cond);
+	arma::vec pvecforcct_cond = {Pvalue_SKATO_cond, P_het_admixed_cond, P_hom_admixed_cond};
+    double P_cct_admixed_cond = CCT_cpp(pvecforcct_cond);
+
+
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << Pvalue_SKATO_cond;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << Pvalue_Burden_cond;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << Pvalue_SKAT_cond;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << BETA_Burden_cond;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << SE_Burden_cond;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << P_het_admixed_cond;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << P_hom_admixed_cond;
+    t_OutFile_singleInGroup << "\t";
+    t_OutFile_singleInGroup << P_cct_admixed_cond;
+    t_OutFile_singleInGroup << "\n";
+    }//if(isCondition){
+}//if(isCondition){
 OutFile_singleInGroup_temp.close();
  }
 }
@@ -2279,7 +2424,9 @@ OutList.push_back(iswriteOutput, "iswriteOutput");
  if(t_regionTestType != "BURDEN" || t_isOutputMarkerList){
   OutList.push_back(annoMAFIndicatorMat, "annoMAFIndicatorMat");
  }
-  
+
+
+
   return OutList;
 }
 
@@ -3151,6 +3298,7 @@ int writeOutfile_singleInadmixed(bool t_isMoreOutput,
                         bool t_isFirth,
                         int mFirth,
                         int mFirthConverge,
+			int q0,
                         std::string t_traitType,
                         std::vector<std::string> & chrVec,
                         std::vector<std::string> & posVec,
@@ -3183,7 +3331,13 @@ int writeOutfile_singleInadmixed(bool t_isMoreOutput,
                         std::vector<double>  & N_case_hetVec,
                         std::vector<double>  & N_ctrl_homVec,
                         std::vector<uint32_t> & N_Vec,
-                        std::ofstream & t_OutFile_singleInGroup){
+			std::vector<uint32_t> & nonNAIndexVec,
+                        std::ofstream & t_OutFile_singleInGroup, 				
+			std::string markerName
+
+			){
+  t_OutFile_singleInGroup << markerName;
+  t_OutFile_singleInGroup << "\t";
   int numofAnc = 0;
   int k = 0;
   t_OutFile_singleInGroup << chrVec.at(k);
@@ -3207,6 +3361,9 @@ int writeOutfile_singleInadmixed(bool t_isMoreOutput,
   		if(k > 0){
                		t_OutFile_singleInGroup << "\t";
              	}
+		if(k < q0){
+			nonNAIndexVec.push_back(k);	
+		}
                 t_OutFile_singleInGroup << altCountsVec.at(k);
                 t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << altFreqVec.at(k);
@@ -3270,7 +3427,7 @@ int writeOutfile_singleInadmixed(bool t_isMoreOutput,
                 }
         }
   }
-  t_OutFile_singleInGroup << "\n";
+  //t_OutFile_singleInGroup << "\n";
   return(numofAnc);
 }
 
@@ -3284,7 +3441,7 @@ bool openOutfile_single_admixed(std::string t_traitType, bool t_isCondition, boo
       std::cout << "pvalVec.size() " << pvalVec.size() << std::endl;
       if(isopen){
         std::string ancstr;
-        t_OutFile_singleInGroup << "CHR\tPOS\tMarkerID\tAllele1\tAllele2\t";
+        t_OutFile_singleInGroup << "Marker\tHR\tPOS\tMarkerID\tAllele1\tAllele2\t";
         for(unsigned int k = 0; k < pvalVec.size(); k++){		 if(pvalVec.at(k) != "NA"){	
 	     if(k != pvalVec.size()-1){	
 		ancstr = "_anc"+std::to_string(k);

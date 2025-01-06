@@ -239,8 +239,7 @@ SAIGE.Region = function(mu,
   }
   
   chrom1 = "FakeCHR"
-  
-  
+
   gc()
   num_region = 0
   mth = 0
@@ -255,6 +254,8 @@ SAIGE.Region = function(mu,
   iswriteMarkerList = FALSE 
   i = indexChunk + 1
   nEachChunk = numberRegionsInChunk
+
+
   while (i <= nRegions) {
     #for(i in (indexChunk+1):nRegions){
     if (mth ==  numberRegionsInChunk) {
@@ -394,7 +395,7 @@ SAIGE.Region = function(mu,
         #            " are found in the VCF file")
         #    next
         #  }
-        }	
+        }# if (genoType == "vcf")	
 
 
 
@@ -423,7 +424,7 @@ SAIGE.Region = function(mu,
               )
             }
           }
-        }
+        } # if (regionTestType == "BURDEN" & is_fastTest) {
        
 
 

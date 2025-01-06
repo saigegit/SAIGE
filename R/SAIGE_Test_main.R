@@ -221,7 +221,8 @@ SPAGMMATtest = function(bgenFile = "",
 				maxMAF_in_groupTest,
 				markers_per_chunk_in_groupTest,
 				MACCutoff_to_CollapseUltraRare,
-				minGroupMAC_in_BurdenTest
+				minGroupMAC_in_BurdenTest,
+				r.corr
                             )
      #cat("dosage_zerod_cutoff is ", dosage_zerod_cutoff, "\n")
      #cat("dosage_zerod_MAC_cutoff is ", dosage_zerod_MAC_cutoff, "\n")

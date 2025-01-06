@@ -50,4 +50,32 @@ Rcpp::List call_qfc(const arma::vec& lambdas, const arma::vec& noncentral,
 
 arma::mat forceSymmetric(const arma::mat& K);
 
+void get_SKAT_pvalue_cpp(arma::vec& Score,
+                               arma::mat& Phi,
+                               arma::vec& r_corr,
+                               std::string& regionTestType,
+                               double& Pvalue_SKATO,
+                               double& Pvalue_Burden,
+                               double& Pvalue_SKAT,
+                               double& BETA_Burden,
+                               double& SE_Burden.
+                               int& error_code
+                               );
+double qchisq_log(double pval, double df);
+
+void SPA_ER_kernel_related_Phiadj_fast_new_cpp(arma::vec& p_new,
+                                                 arma::vec& Score,
+                                                 arma::mat& Phi,
+                                                 double p_value_burden,
+                                                 std::string regionTestType,
+                                                 arma::vec& scaleFactor
+                                                 );
+void get_newPhi_scaleFactor_cpp(double q_sum,
+                                  arma::vec& mu_a,
+                                  arma::vec& g_sum,
+                                  arma::vec& p_new,
+                                  arma::vec& Score,
+                                  arma::mat& Phi,
+                                  std::string regionTestType,
+                                  arma::vec& scaleFactor);
 #endif
