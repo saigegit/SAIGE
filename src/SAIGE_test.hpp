@@ -17,7 +17,6 @@ class SAIGEClass
       arma::mat m_Sigma_iXXSigma_iX;
       arma::vec m_res;
       arma::vec m_resout;
-      arma::vec m_mu;
       arma::vec m_mu2;
       arma::vec m_tauvec;
       arma::vec  m_S_a;
@@ -30,6 +29,7 @@ class SAIGEClass
       arma::mat m_XXVX_inv;
       arma::mat m_XV;
       int m_n, m_p; //MAIN Dimensions: sample size, number of covariates
+      arma::vec m_mu;
       double m_varRatioVal;
       arma::vec m_varRatio_sparse;
       arma::vec m_varRatio_null;

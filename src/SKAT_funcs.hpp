@@ -53,12 +53,11 @@ arma::mat forceSymmetric(const arma::mat& K);
 void get_SKAT_pvalue_cpp(arma::vec& Score,
                                arma::mat& Phi,
                                arma::vec& r_corr,
-                               std::string& regionTestType,
                                double& Pvalue_SKATO,
                                double& Pvalue_Burden,
                                double& Pvalue_SKAT,
                                double& BETA_Burden,
-                               double& SE_Burden.
+                               double& SE_Burden,
                                int& error_code
                                );
 double qchisq_log(double pval, double df);
@@ -78,4 +77,7 @@ void get_newPhi_scaleFactor_cpp(double q_sum,
                                   arma::mat& Phi,
                                   std::string regionTestType,
                                   arma::vec& scaleFactor);
+
+
+double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi);
 #endif

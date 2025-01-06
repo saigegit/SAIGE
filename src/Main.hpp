@@ -414,4 +414,33 @@ int writeOutfile_singleInadmixed(bool t_isMoreOutput,
 
 bool openOutfile_single_admixed(std::string t_traitType, bool t_isCondition, bool t_isMoreOutput, std::vector<std::string> & pvalVec, std::ofstream & t_OutFile_singleInGroup);
 
+void mainAdmixedInCPP_inner(
+                           std::string t_genoType,     // "PLINK", "BGEN"
+                           std::vector<std::string> & t_genoIndex_prev,
+                           std::vector<std::string> & t_genoIndex,
+                           std::string t_outputFile,
+                           std::string t_traitType,
+                           unsigned int t_n,           // sample size
+                           std::string t_regionTestType,
+                           bool t_isImputation,
+                           arma::vec & t_weight,
+                           arma::vec & t_weight_cond,
+                           std::string regionName,
+                           bool t_isFastTest,
+                           bool t_isMoreOutput
+);
+
+void mainAdmixedInCPP(
+        Rcpp::List & RegionList,
+        std::string t_genoType,
+        std::string t_outputFile,
+        std::string t_traitType,
+        unsigned int t_n,           // sample size
+        std::string t_regionTestType,
+        arma::vec & t_weight_cond,
+        bool t_isImputation,
+        bool t_isFastTest,
+        bool t_isMoreOutput);
+
+
 #endif

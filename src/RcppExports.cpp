@@ -154,15 +154,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // setRegion_GlobalVarsInCPP
-void setRegion_GlobalVarsInCPP(arma::vec t_max_maf_region, unsigned int t_max_markers_region, double t_MACCutoff_to_CollapseUltraRare, double t_min_gourpmac_for_burdenonly);
-RcppExport SEXP _SAIGE_setRegion_GlobalVarsInCPP(SEXP t_max_maf_regionSEXP, SEXP t_max_markers_regionSEXP, SEXP t_MACCutoff_to_CollapseUltraRareSEXP, SEXP t_min_gourpmac_for_burdenonlySEXP) {
+void setRegion_GlobalVarsInCPP(arma::vec t_max_maf_region, unsigned int t_max_markers_region, double t_MACCutoff_to_CollapseUltraRare, double t_min_gourpmac_for_burdenonly, arma::vec t_r_corr);
+RcppExport SEXP _SAIGE_setRegion_GlobalVarsInCPP(SEXP t_max_maf_regionSEXP, SEXP t_max_markers_regionSEXP, SEXP t_MACCutoff_to_CollapseUltraRareSEXP, SEXP t_min_gourpmac_for_burdenonlySEXP, SEXP t_r_corrSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type t_max_maf_region(t_max_maf_regionSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type t_max_markers_region(t_max_markers_regionSEXP);
     Rcpp::traits::input_parameter< double >::type t_MACCutoff_to_CollapseUltraRare(t_MACCutoff_to_CollapseUltraRareSEXP);
     Rcpp::traits::input_parameter< double >::type t_min_gourpmac_for_burdenonly(t_min_gourpmac_for_burdenonlySEXP);
-    setRegion_GlobalVarsInCPP(t_max_maf_region, t_max_markers_region, t_MACCutoff_to_CollapseUltraRare, t_min_gourpmac_for_burdenonly);
+    Rcpp::traits::input_parameter< arma::vec >::type t_r_corr(t_r_corrSEXP);
+    setRegion_GlobalVarsInCPP(t_max_maf_region, t_max_markers_region, t_MACCutoff_to_CollapseUltraRare, t_min_gourpmac_for_burdenonly, t_r_corr);
     return R_NilValue;
 END_RCPP
 }
@@ -534,6 +535,25 @@ RcppExport SEXP _SAIGE_copy_singleInGroup() {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     copy_singleInGroup();
+    return R_NilValue;
+END_RCPP
+}
+// mainAdmixedInCPP
+void mainAdmixedInCPP(Rcpp::List& RegionList, std::string t_genoType, std::string t_outputFile, std::string t_traitType, unsigned int t_n, std::string t_regionTestType, arma::vec& t_weight_cond, bool t_isImputation, bool t_isFastTest, bool t_isMoreOutput);
+RcppExport SEXP _SAIGE_mainAdmixedInCPP(SEXP RegionListSEXP, SEXP t_genoTypeSEXP, SEXP t_outputFileSEXP, SEXP t_traitTypeSEXP, SEXP t_nSEXP, SEXP t_regionTestTypeSEXP, SEXP t_weight_condSEXP, SEXP t_isImputationSEXP, SEXP t_isFastTestSEXP, SEXP t_isMoreOutputSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type RegionList(RegionListSEXP);
+    Rcpp::traits::input_parameter< std::string >::type t_genoType(t_genoTypeSEXP);
+    Rcpp::traits::input_parameter< std::string >::type t_outputFile(t_outputFileSEXP);
+    Rcpp::traits::input_parameter< std::string >::type t_traitType(t_traitTypeSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type t_n(t_nSEXP);
+    Rcpp::traits::input_parameter< std::string >::type t_regionTestType(t_regionTestTypeSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type t_weight_cond(t_weight_condSEXP);
+    Rcpp::traits::input_parameter< bool >::type t_isImputation(t_isImputationSEXP);
+    Rcpp::traits::input_parameter< bool >::type t_isFastTest(t_isFastTestSEXP);
+    Rcpp::traits::input_parameter< bool >::type t_isMoreOutput(t_isMoreOutputSEXP);
+    mainAdmixedInCPP(RegionList, t_genoType, t_outputFile, t_traitType, t_n, t_regionTestType, t_weight_cond, t_isImputation, t_isFastTest, t_isMoreOutput);
     return R_NilValue;
 END_RCPP
 }
@@ -2589,6 +2609,68 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_SKAT_pvalue_cpp
+void get_SKAT_pvalue_cpp(arma::vec& Score, arma::mat& Phi, arma::vec& r_corr, double& Pvalue_SKATO, double& Pvalue_Burden, double& Pvalue_SKAT, double& BETA_Burden, double& SE_Burden, int& error_code);
+RcppExport SEXP _SAIGE_get_SKAT_pvalue_cpp(SEXP ScoreSEXP, SEXP PhiSEXP, SEXP r_corrSEXP, SEXP Pvalue_SKATOSEXP, SEXP Pvalue_BurdenSEXP, SEXP Pvalue_SKATSEXP, SEXP BETA_BurdenSEXP, SEXP SE_BurdenSEXP, SEXP error_codeSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type Score(ScoreSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Phi(PhiSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type r_corr(r_corrSEXP);
+    Rcpp::traits::input_parameter< double& >::type Pvalue_SKATO(Pvalue_SKATOSEXP);
+    Rcpp::traits::input_parameter< double& >::type Pvalue_Burden(Pvalue_BurdenSEXP);
+    Rcpp::traits::input_parameter< double& >::type Pvalue_SKAT(Pvalue_SKATSEXP);
+    Rcpp::traits::input_parameter< double& >::type BETA_Burden(BETA_BurdenSEXP);
+    Rcpp::traits::input_parameter< double& >::type SE_Burden(SE_BurdenSEXP);
+    Rcpp::traits::input_parameter< int& >::type error_code(error_codeSEXP);
+    get_SKAT_pvalue_cpp(Score, Phi, r_corr, Pvalue_SKATO, Pvalue_Burden, Pvalue_SKAT, BETA_Burden, SE_Burden, error_code);
+    return R_NilValue;
+END_RCPP
+}
+// get_jointScore_pvalue
+double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi);
+RcppExport SEXP _SAIGE_get_jointScore_pvalue(SEXP ScoreSEXP, SEXP PhiSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type Score(ScoreSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Phi(PhiSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_jointScore_pvalue(Score, Phi));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SPA_ER_kernel_related_Phiadj_fast_new_cpp
+void SPA_ER_kernel_related_Phiadj_fast_new_cpp(arma::vec& p_new, arma::vec& Score, arma::mat& Phi, double p_value_burden, std::string regionTestType, arma::vec& scaleFactor);
+RcppExport SEXP _SAIGE_SPA_ER_kernel_related_Phiadj_fast_new_cpp(SEXP p_newSEXP, SEXP ScoreSEXP, SEXP PhiSEXP, SEXP p_value_burdenSEXP, SEXP regionTestTypeSEXP, SEXP scaleFactorSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type p_new(p_newSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type Score(ScoreSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Phi(PhiSEXP);
+    Rcpp::traits::input_parameter< double >::type p_value_burden(p_value_burdenSEXP);
+    Rcpp::traits::input_parameter< std::string >::type regionTestType(regionTestTypeSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type scaleFactor(scaleFactorSEXP);
+    SPA_ER_kernel_related_Phiadj_fast_new_cpp(p_new, Score, Phi, p_value_burden, regionTestType, scaleFactor);
+    return R_NilValue;
+END_RCPP
+}
+// get_newPhi_scaleFactor_cpp
+void get_newPhi_scaleFactor_cpp(double q_sum, arma::vec& mu_a, arma::vec& g_sum, arma::vec& p_new, arma::vec& Score, arma::mat& Phi, std::string regionTestType, arma::vec& scaleFactor);
+RcppExport SEXP _SAIGE_get_newPhi_scaleFactor_cpp(SEXP q_sumSEXP, SEXP mu_aSEXP, SEXP g_sumSEXP, SEXP p_newSEXP, SEXP ScoreSEXP, SEXP PhiSEXP, SEXP regionTestTypeSEXP, SEXP scaleFactorSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type q_sum(q_sumSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type mu_a(mu_aSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type g_sum(g_sumSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type p_new(p_newSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type Score(ScoreSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Phi(PhiSEXP);
+    Rcpp::traits::input_parameter< std::string >::type regionTestType(regionTestTypeSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type scaleFactor(scaleFactorSEXP);
+    get_newPhi_scaleFactor_cpp(q_sum, mu_a, g_sum, p_new, Score, Phi, regionTestType, scaleFactor);
+    return R_NilValue;
+END_RCPP
+}
 // SPA
 void SPA(arma::vec& mu, arma::vec& g, double q, double qinv, double pval_noadj, double tol, bool logp, std::string traitType, double& pval, bool& isSPAConverge);
 RcppExport SEXP _SAIGE_SPA(SEXP muSEXP, SEXP gSEXP, SEXP qSEXP, SEXP qinvSEXP, SEXP pval_noadjSEXP, SEXP tolSEXP, SEXP logpSEXP, SEXP traitTypeSEXP, SEXP pvalSEXP, SEXP isSPAConvergeSEXP) {
@@ -3159,7 +3241,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setAssocTest_GlobalVarsInCPP_indexInModel_male", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP_indexInModel_male, 1},
     {"_SAIGE_setAssocTest_GlobalVarsInCPP_X_PARregion_mat", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP_X_PARregion_mat, 1},
     {"_SAIGE_setMarker_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setMarker_GlobalVarsInCPP, 2},
-    {"_SAIGE_setRegion_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setRegion_GlobalVarsInCPP, 4},
+    {"_SAIGE_setRegion_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setRegion_GlobalVarsInCPP, 5},
     {"_SAIGE_mainMarkerInCPP", (DL_FUNC) &_SAIGE_mainMarkerInCPP, 7},
     {"_SAIGE_Unified_getOneMarker", (DL_FUNC) &_SAIGE_Unified_getOneMarker, 18},
     {"_SAIGE_processMale_XnonPAR", (DL_FUNC) &_SAIGE_processMale_XnonPAR, 3},
@@ -3185,6 +3267,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_set_flagSparseGRM_cur_SAIGE", (DL_FUNC) &_SAIGE_set_flagSparseGRM_cur_SAIGE, 1},
     {"_SAIGE_set_flagSparseGRM_cur_SAIGE_org", (DL_FUNC) &_SAIGE_set_flagSparseGRM_cur_SAIGE_org, 0},
     {"_SAIGE_copy_singleInGroup", (DL_FUNC) &_SAIGE_copy_singleInGroup, 0},
+    {"_SAIGE_mainAdmixedInCPP", (DL_FUNC) &_SAIGE_mainAdmixedInCPP, 10},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
     {"_SAIGE_getAlleleFreqVec", (DL_FUNC) &_SAIGE_getAlleleFreqVec, 0},
@@ -3333,6 +3416,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_Get_Liu_Params", (DL_FUNC) &_SAIGE_Get_Liu_Params, 1},
     {"_SAIGE_Get_Liu_PVal", (DL_FUNC) &_SAIGE_Get_Liu_PVal, 3},
     {"_SAIGE_forceSymmetric", (DL_FUNC) &_SAIGE_forceSymmetric, 1},
+    {"_SAIGE_get_SKAT_pvalue_cpp", (DL_FUNC) &_SAIGE_get_SKAT_pvalue_cpp, 9},
+    {"_SAIGE_get_jointScore_pvalue", (DL_FUNC) &_SAIGE_get_jointScore_pvalue, 2},
+    {"_SAIGE_SPA_ER_kernel_related_Phiadj_fast_new_cpp", (DL_FUNC) &_SAIGE_SPA_ER_kernel_related_Phiadj_fast_new_cpp, 6},
+    {"_SAIGE_get_newPhi_scaleFactor_cpp", (DL_FUNC) &_SAIGE_get_newPhi_scaleFactor_cpp, 8},
     {"_SAIGE_SPA", (DL_FUNC) &_SAIGE_SPA, 10},
     {"_SAIGE_SPA_fast", (DL_FUNC) &_SAIGE_SPA_fast, 16},
     {"_SAIGE_SPA_pval", (DL_FUNC) &_SAIGE_SPA_pval, 9},

@@ -45,8 +45,8 @@ setMarker_GlobalVarsInCPP <- function(t_isOutputMoreDetails, t_marker_chunksize)
     invisible(.Call('_SAIGE_setMarker_GlobalVarsInCPP', PACKAGE = 'SAIGE', t_isOutputMoreDetails, t_marker_chunksize))
 }
 
-setRegion_GlobalVarsInCPP <- function(t_max_maf_region, t_max_markers_region, t_MACCutoff_to_CollapseUltraRare, t_min_gourpmac_for_burdenonly) {
-    invisible(.Call('_SAIGE_setRegion_GlobalVarsInCPP', PACKAGE = 'SAIGE', t_max_maf_region, t_max_markers_region, t_MACCutoff_to_CollapseUltraRare, t_min_gourpmac_for_burdenonly))
+setRegion_GlobalVarsInCPP <- function(t_max_maf_region, t_max_markers_region, t_MACCutoff_to_CollapseUltraRare, t_min_gourpmac_for_burdenonly, t_r_corr) {
+    invisible(.Call('_SAIGE_setRegion_GlobalVarsInCPP', PACKAGE = 'SAIGE', t_max_maf_region, t_max_markers_region, t_MACCutoff_to_CollapseUltraRare, t_min_gourpmac_for_burdenonly, t_r_corr))
 }
 
 mainMarkerInCPP <- function(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth) {
@@ -147,6 +147,10 @@ set_flagSparseGRM_cur_SAIGE_org <- function() {
 
 copy_singleInGroup <- function() {
     invisible(.Call('_SAIGE_copy_singleInGroup', PACKAGE = 'SAIGE'))
+}
+
+mainAdmixedInCPP <- function(RegionList, t_genoType, t_outputFile, t_traitType, t_n, t_regionTestType, t_weight_cond, t_isImputation, t_isFastTest, t_isMoreOutput) {
+    invisible(.Call('_SAIGE_mainAdmixedInCPP', PACKAGE = 'SAIGE', RegionList, t_genoType, t_outputFile, t_traitType, t_n, t_regionTestType, t_weight_cond, t_isImputation, t_isFastTest, t_isMoreOutput))
 }
 
 closeGenoFile_plink <- function() {
@@ -739,6 +743,22 @@ Get_Liu_PVal <- function(Q, W, Q_resampling) {
 
 forceSymmetric <- function(K) {
     .Call('_SAIGE_forceSymmetric', PACKAGE = 'SAIGE', K)
+}
+
+get_SKAT_pvalue_cpp <- function(Score, Phi, r_corr, Pvalue_SKATO, Pvalue_Burden, Pvalue_SKAT, BETA_Burden, SE_Burden, error_code) {
+    invisible(.Call('_SAIGE_get_SKAT_pvalue_cpp', PACKAGE = 'SAIGE', Score, Phi, r_corr, Pvalue_SKATO, Pvalue_Burden, Pvalue_SKAT, BETA_Burden, SE_Burden, error_code))
+}
+
+get_jointScore_pvalue <- function(Score, Phi) {
+    .Call('_SAIGE_get_jointScore_pvalue', PACKAGE = 'SAIGE', Score, Phi)
+}
+
+SPA_ER_kernel_related_Phiadj_fast_new_cpp <- function(p_new, Score, Phi, p_value_burden, regionTestType, scaleFactor) {
+    invisible(.Call('_SAIGE_SPA_ER_kernel_related_Phiadj_fast_new_cpp', PACKAGE = 'SAIGE', p_new, Score, Phi, p_value_burden, regionTestType, scaleFactor))
+}
+
+get_newPhi_scaleFactor_cpp <- function(q_sum, mu_a, g_sum, p_new, Score, Phi, regionTestType, scaleFactor) {
+    invisible(.Call('_SAIGE_get_newPhi_scaleFactor_cpp', PACKAGE = 'SAIGE', q_sum, mu_a, g_sum, p_new, Score, Phi, regionTestType, scaleFactor))
 }
 
 SPA <- function(mu, g, q, qinv, pval_noadj, tol, logp, traitType, pval, isSPAConverge) {

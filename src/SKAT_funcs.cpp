@@ -11,6 +11,8 @@
 
 //#include "qfc_rcpp.hpp"
 #include "SKAT_funcs.hpp"
+#include "SPA.hpp"
+
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
@@ -1376,15 +1378,17 @@ arma::mat forceSymmetric(const arma::mat& K) {
 
 
 
+
+
 // [[Rcpp::export]]
 void get_SKAT_pvalue_cpp(arma::vec& Score, 
                                arma::mat& Phi, 
-                               arma::vec& r_corr, 
+                               arma::vec& r_corr,
 			       double& Pvalue_SKATO,
 			       double& Pvalue_Burden, 
 			       double& Pvalue_SKAT,
 			       double& BETA_Burden,
-			       double& SE_Burden.
+			       double& SE_Burden,
 			       int& error_code
 			       ) {
 
@@ -1392,28 +1396,32 @@ void get_SKAT_pvalue_cpp(arma::vec& Score,
   bool isFast = false;
   Rcpp::List out_SKAT_List = Met_SKAT_Get_Pvalue(Score, Phi, r_corr, method, isFast); 
   
-  double BETA_Burden = arma::accu(Score) / arma::trace(Phi);
-  double SE_Burden;
+  BETA_Burden = arma::accu(Score) / arma::trace(Phi);
   error_code = 0;
   double p_value = out_SKAT_List["p.value"];
-  arma::vec Pvalue(3, arma::fill::zeros);
-  arma::vec rho = out_SKAT_List["param"]["rho"];
-  arma::vec p_val_each = out_SKAT_List["param"]["p.val.each"];
+  //arma::vec Pvalue(3, arma::fill::zeros);
+  Rcpp::RObject paramElement = out_SKAT_List["param"];
+  Rcpp::List param = Rcpp::as<Rcpp::List>(paramElement);
   
+  
+  arma::vec rho = param["rho"];
+  arma::vec p_val_each = param["p.val.each"];
+    
 
+  Pvalue_SKATO = p_value;
   // Check conditions similar to the R logic
   if (p_val_each.is_empty() || rho.is_empty()) {
     error_code = 2;
     BETA_Burden = NA_REAL;
   } else if (!arma::any(rho == 0) || !arma::any(rho == 1)) {
-    Pvalue.fill(p_value);
     SE_Burden = std::abs(BETA_Burden / R::qnorm(p_value/2, 0, 1, true, false));
+    Pvalue_SKAT = p_value;
+    Pvalue_Burden = p_value;
   } else {
     int pos00 = arma::as_scalar(arma::find(rho == 0, 1, "first"));
     int pos01 = arma::as_scalar(arma::find(rho == 1, 1, "first"));
-    Pvalue[0] = p_value;
-    Pvalue[1] = p_val_each[pos00];
-    Pvalue[2] = p_val_each[pos01];
+    Pvalue_SKAT = p_val_each[pos00];
+    Pvalue_Burden = p_val_each[pos01];
     SE_Burden = std::abs(BETA_Burden / R::qnorm(p_val_each[pos01] / 2, 0, 1, true, false));
   }
 }
@@ -1468,10 +1476,13 @@ void SPA_ER_kernel_related_Phiadj_fast_new_cpp(arma::vec& p_new,
 
     arma::vec VarS = arma::square(zscore_all_0) / 500.0;
 
+    
     if (!idx_p0.is_empty()) {
         double df = 1.0;
     	for (size_t i = 0; i < idx_p0.n_elem; i++) {
-		VarS(idx_p0(i)) = std::pow(zscore_all_0(idx_p0(i)),2) / qchisq_log(p_new(idx_p0)(i), df);
+		unsigned int idx_p0_i = idx_p0(i);
+		double p_new_i = p_new(idx_p0_i);
+		VarS(idx_p0_i) = std::pow(zscore_all_0(idx_p0_i),2) / qchisq_log(p_new_i, df);
     	}
     }
     arma::uvec vars_inf = arma::find(VarS == arma::datum::inf);
@@ -1552,9 +1563,9 @@ void get_newPhi_scaleFactor_cpp(double q_sum,
     } else {
         double epsilon = std::numeric_limits<double>::epsilon();
 	double epsilon_0_25 = std::pow(epsilon, 0.25);
-	p.value_burden = SPA_pval(mu_a, g_sum, q_sum, qinv, pval_noadj, epsilon_0_25, true, "binary", isSPAConverge); 
+	p_value_burden = SPA_pval(mu_a, g_sum, q_sum, qinv, pval_noadj, epsilon_0_25, true, "binary", isSPAConverge); 
     }
 
-    SPA_ER_kernel_related_Phiadj_fast_new_cpp(p_new, Score, Phi, p.value_burden, regionTestType, scaleFactor); 	
+    SPA_ER_kernel_related_Phiadj_fast_new_cpp(p_new, Score, Phi, p_value_burden, regionTestType, scaleFactor); 	
 }
 
