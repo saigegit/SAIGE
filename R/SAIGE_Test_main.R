@@ -217,6 +217,10 @@ SPAGMMATtest = function(bgenFile = "",
 
 				#method_to_CollapseUltraRare,
 				#DosageCutoff_for_UltraRarePresence,
+
+     if(is_admixed){
+	r.corr = c(0, 0.1^2, 0.2^2, 0.3^2, 0.5^2, 0.5, 1)
+     }	
       setRegion_GlobalVarsInCPP(
 				maxMAF_in_groupTest,
 				markers_per_chunk_in_groupTest,
@@ -509,7 +513,9 @@ SPAGMMATtest = function(bgenFile = "",
 		   objGeno$anyInclude)
 
 
-    }else{
+    }else{ #if(!isGroupTest){
+
+    if(!is_admixed){
       maxMACbinind = which(maxMAC_in_groupTest > 0)	
       if(length(maxMACbinind) > 0){ 
 	 maxMAC_in_groupTest_to_MAF = (maxMAC_in_groupTest[maxMACbinind])/(2*length(mu))
@@ -555,6 +561,27 @@ SPAGMMATtest = function(bgenFile = "",
 		     is_output_moreDetails, 
 		     is_admixed)
 
+	}else{ #is_admixed
+	SAIGE.Admixed(mu,
+		    OutputFile,
+		    MACCutoff_to_CollapseUltraRare,
+		    groupFile,
+		    annotation_in_groupTest,
+		    genoType,
+		    objGeno$markerInfo,
+		    traitType,
+		    is_imputed_data,
+		    isCondition,
+		    condition_weights,
+		    groups_per_chunk,
+		    is_overwrite_output,
+		    is_no_weight_in_groupTest,
+		    chrom,
+		    is_fastTest,
+		    pval_cutoff_for_fastTest,
+		    is_output_moreDetails)
+		
+	}	
 
     }	    
 }

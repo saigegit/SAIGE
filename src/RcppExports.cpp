@@ -539,8 +539,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // mainAdmixedInCPP
-void mainAdmixedInCPP(Rcpp::List& RegionList, std::string t_genoType, std::string t_outputFile, std::string t_traitType, unsigned int t_n, std::string t_regionTestType, arma::vec& t_weight_cond, bool t_isImputation, bool t_isFastTest, bool t_isMoreOutput);
-RcppExport SEXP _SAIGE_mainAdmixedInCPP(SEXP RegionListSEXP, SEXP t_genoTypeSEXP, SEXP t_outputFileSEXP, SEXP t_traitTypeSEXP, SEXP t_nSEXP, SEXP t_regionTestTypeSEXP, SEXP t_weight_condSEXP, SEXP t_isImputationSEXP, SEXP t_isFastTestSEXP, SEXP t_isMoreOutputSEXP) {
+void mainAdmixedInCPP(Rcpp::List& RegionList, std::string t_genoType, std::string t_outputFile, std::string t_traitType, unsigned int t_n, std::string t_regionTestType, arma::vec& t_weight_cond, bool t_isImputation, bool t_isFastTest, bool t_isMoreOutput, bool t_isWriteHeader);
+RcppExport SEXP _SAIGE_mainAdmixedInCPP(SEXP RegionListSEXP, SEXP t_genoTypeSEXP, SEXP t_outputFileSEXP, SEXP t_traitTypeSEXP, SEXP t_nSEXP, SEXP t_regionTestTypeSEXP, SEXP t_weight_condSEXP, SEXP t_isImputationSEXP, SEXP t_isFastTestSEXP, SEXP t_isMoreOutputSEXP, SEXP t_isWriteHeaderSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type RegionList(RegionListSEXP);
@@ -553,7 +553,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type t_isImputation(t_isImputationSEXP);
     Rcpp::traits::input_parameter< bool >::type t_isFastTest(t_isFastTestSEXP);
     Rcpp::traits::input_parameter< bool >::type t_isMoreOutput(t_isMoreOutputSEXP);
-    mainAdmixedInCPP(RegionList, t_genoType, t_outputFile, t_traitType, t_n, t_regionTestType, t_weight_cond, t_isImputation, t_isFastTest, t_isMoreOutput);
+    Rcpp::traits::input_parameter< bool >::type t_isWriteHeader(t_isWriteHeaderSEXP);
+    mainAdmixedInCPP(RegionList, t_genoType, t_outputFile, t_traitType, t_n, t_regionTestType, t_weight_cond, t_isImputation, t_isFastTest, t_isMoreOutput, t_isWriteHeader);
     return R_NilValue;
 END_RCPP
 }
@@ -2542,23 +2543,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// integrate_SKAT_Optimal_Liu
-arma::vec integrate_SKAT_Optimal_Liu(arma::mat& pmin_q, Rcpp::List& param_m, arma::vec& r_all, double lower, double upper, int subdivisions, double abs_tol);
-RcppExport SEXP _SAIGE_integrate_SKAT_Optimal_Liu(SEXP pmin_qSEXP, SEXP param_mSEXP, SEXP r_allSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP subdivisionsSEXP, SEXP abs_tolSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat& >::type pmin_q(pmin_qSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List& >::type param_m(param_mSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type r_all(r_allSEXP);
-    Rcpp::traits::input_parameter< double >::type lower(lowerSEXP);
-    Rcpp::traits::input_parameter< double >::type upper(upperSEXP);
-    Rcpp::traits::input_parameter< int >::type subdivisions(subdivisionsSEXP);
-    Rcpp::traits::input_parameter< double >::type abs_tol(abs_tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(integrate_SKAT_Optimal_Liu(pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol));
-    return rcpp_result_gen;
-END_RCPP
-}
 // Met_SKAT_Get_Pvalue
 Rcpp::List Met_SKAT_Get_Pvalue(arma::vec& Score, arma::mat& Phi, arma::vec& r_corr, std::string& method, bool isFast);
 RcppExport SEXP _SAIGE_Met_SKAT_Get_Pvalue(SEXP ScoreSEXP, SEXP PhiSEXP, SEXP r_corrSEXP, SEXP methodSEXP, SEXP isFastSEXP) {
@@ -3267,7 +3251,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_set_flagSparseGRM_cur_SAIGE", (DL_FUNC) &_SAIGE_set_flagSparseGRM_cur_SAIGE, 1},
     {"_SAIGE_set_flagSparseGRM_cur_SAIGE_org", (DL_FUNC) &_SAIGE_set_flagSparseGRM_cur_SAIGE_org, 0},
     {"_SAIGE_copy_singleInGroup", (DL_FUNC) &_SAIGE_copy_singleInGroup, 0},
-    {"_SAIGE_mainAdmixedInCPP", (DL_FUNC) &_SAIGE_mainAdmixedInCPP, 10},
+    {"_SAIGE_mainAdmixedInCPP", (DL_FUNC) &_SAIGE_mainAdmixedInCPP, 11},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
     {"_SAIGE_getAlleleFreqVec", (DL_FUNC) &_SAIGE_getAlleleFreqVec, 0},
@@ -3411,7 +3395,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_Get_Davies_PVal", (DL_FUNC) &_SAIGE_Get_Davies_PVal, 4},
     {"_SAIGE_SKAT_davies", (DL_FUNC) &_SAIGE_SKAT_davies, 7},
     {"_SAIGE_SKAT_Optimal_Integrate_Func_Davies", (DL_FUNC) &_SAIGE_SKAT_Optimal_Integrate_Func_Davies, 4},
-    {"_SAIGE_integrate_SKAT_Optimal_Liu", (DL_FUNC) &_SAIGE_integrate_SKAT_Optimal_Liu, 7},
     {"_SAIGE_Met_SKAT_Get_Pvalue", (DL_FUNC) &_SAIGE_Met_SKAT_Get_Pvalue, 5},
     {"_SAIGE_Get_Liu_Params", (DL_FUNC) &_SAIGE_Get_Liu_Params, 1},
     {"_SAIGE_Get_Liu_PVal", (DL_FUNC) &_SAIGE_Get_Liu_PVal, 3},

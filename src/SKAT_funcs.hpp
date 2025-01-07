@@ -35,9 +35,9 @@ double integrate_SKAT_Optimal_Davies(arma::vec &pmin_q, Rcpp::List &param_m, arm
 double SKAT_Optimal_PValue_Davies(arma::vec &pmin_q, Rcpp::List &param_m,
                                      arma::vec &r_all, double pmin);
 arma::vec SKAT_Optimal_Integrate_Func_Liu(arma::vec & x,  arma::mat &pmin_q,  Rcpp::List &param_m,  arma::vec &r_all);
-arma::vec integrate_SKAT_Optimal_Liu(arma::mat &pmin_q, Rcpp::List &param_m, arma::vec &r_all,double lower, double upper, int subdivisions, double abs_tol);
-double SKAT_Optimal_PValue_Liu( arma::mat &pmin_q,  Rcpp::List &param_m,
-                                   arma::vec &r_all, double pmin);
+double SKAT_Optimal_PValue_Liu(arma::vec &pmin_q, Rcpp::List &param_m,
+                                     arma::vec &r_all, double pmin);
+
 Rcpp::List SKAT_META_Optimal_Get_Pvalue( arma::mat &Q_all,  arma::mat &Phi,  arma::vec &r_all, std::string &method, bool isFast);
 Rcpp::List SKAT_META_Optimal( arma::vec &Score,  arma::mat &Phi,  arma::vec &r_all,
                               std::string method,  arma::mat &Score_Resampling, bool isFast);
@@ -80,4 +80,8 @@ void get_newPhi_scaleFactor_cpp(double q_sum,
 
 
 double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi);
+
+double integrate_SKAT_Optimal_Liu(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol);
+
+double integrate_SKAT_Optimal_Liu_v2(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol);
 #endif

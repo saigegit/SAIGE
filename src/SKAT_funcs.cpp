@@ -406,6 +406,8 @@ Rcpp::List Get_Davies_PVal(arma::mat & Q, arma::mat & W, arma::mat & Q_resamplin
     double qall0 = Q_all(0);
     double p_value = daviesPValue(eigvalK, qall0); // Test statistic Q.all[0]
 
+    std::cout << "Get_Davies_PVal p_value " << p_value << std::endl;
+
     // Prepare the result list
     Rcpp::List result;
     Rcpp::List param;
@@ -431,7 +433,8 @@ Rcpp::List Get_Davies_PVal(arma::mat & Q, arma::mat & W, arma::mat & Q_resamplin
     result["param"] = param;
     result["p.value.resampling"] = p_value_resampling;
     result["pval.zero.msg"] = "No zero p-values";  // Assuming no zero p-values for simplicity
-    
+
+    std::cout << "Get_Davies_PVal end" << std::endl;
     return result;
 }
 
@@ -782,17 +785,41 @@ public:
     }
 };
 
+
+// Wrapper class to integrate over x using Boost's Gauss-Kronrod quadrature
+class LiuFunction {
+    arma::mat &pmin_q;
+    Rcpp::List &param_m;
+    arma::vec &r_all;
+
+public:
+    LiuFunction(arma::mat &pmin_q_, Rcpp::List &param_m_, arma::vec &r_all_)
+        : pmin_q(pmin_q_), param_m(param_m_), r_all(r_all_) {}
+
+    double operator()(double x) const {
+        // Convert scalar x to vector form for SKAT_Optimal_Integrate_Func_Davies
+        arma::vec x_vec(1, arma::fill::value(x));
+        arma::vec result = SKAT_Optimal_Integrate_Func_Liu(x_vec, pmin_q, param_m, r_all);
+        return result[0]; // Assuming scalar output for each input x
+    }
+};
+
+
 // Perform adaptive integration over x using Gauss-Kronrod
 double integrate_SKAT_Optimal_Davies(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol){
     DaviesFunction func(pmin_q, param_m, r_all);
 
     // Perform integration with adaptive Gauss-Kronrod quadrature (15-point rule)
+   try {
     boost::math::quadrature::gauss_kronrod<double, 15> integrator;
-    double tolerance = 1e-6; // Error tolerance
-
+    double tolerance = 1e-25; // Error tolerance
     // Integrate from lower to upper bound
     double result = integrator.integrate(func, lower, upper, tolerance);
     return result;
+   } catch (const std::exception& e) {
+   	std::cerr << "Integration error: " << e.what() << std::endl;
+	return -1.0;                 
+    }
 }
 
 
@@ -884,9 +911,9 @@ double SKAT_Optimal_PValue_Davies(arma::vec &pmin_q, Rcpp::List &param_m,
 	r_all.print("r_all");
         double re = integrate_SKAT_Optimal_Davies(pmin_q, param_m, r_all, 0, 40, 1000, 1e-25);
 	std::cout << "integrate_SKAT_Optimal_Davies after" << std::endl;
-
+	std::cout << "re" << re << std::endl;
         // Compute the p-value
-	if(re > -1.0){
+	if(re > 0.0){
         	pvalue = 1 - re;
         	if (pmin != arma::datum::nan) {
             		if ((pmin * (r_all.n_elem)) < pvalue) {
@@ -903,6 +930,8 @@ double SKAT_Optimal_PValue_Davies(arma::vec &pmin_q, Rcpp::List &param_m,
         // Fall back to Liu method
         	pvalue = SKAT_Optimal_PValue_Liu(pmin_q, param_m, r_all, pmin);
 	}
+	std::cout << "pmin " << pmin << std::endl;
+	std::cout << "pvalue " << pvalue << std::endl;
 
 	return pvalue;
     //}
@@ -915,70 +944,114 @@ arma::vec SKAT_Optimal_Integrate_Func_Liu(arma::vec & x,  arma::mat &pmin_q,  Rc
   int n_x = x.n_elem;
 
   arma::mat taumat = param_m["tau"];
+  x.print("x");
   arma::mat xt(1, n_x);
   xt.row(0) = x.t(); 
-  arma::mat temp1 = arma::kron(taumat ,  xt);
+  xt.print("xt SKAT_Optimal_Integrate_Func_Liu");
+  taumat.print("taumat SKAT_Optimal_Integrate_Func_Liu");
+  arma::mat temp1 = arma::kron(taumat , xt);
 
-  arma::mat temp = (pmin_q - temp1) / (1 - r_all);
-  arma::vec temp_min = arma::min(temp, 0);
+  //temp1.print("temp1 SKAT_Optimal_Integrate_Func_Liu");
+  //pmin_q.print("pmin_q SKAT_Optimal_Integrate_Func_Liu");
+  //r_all.print("r_all SKAT_Optimal_Integrate_Func_Liu");
+arma::mat temp_sub = arma::repmat(pmin_q, 1, temp1.n_cols) - temp1;  // Replicate pmin_q to 7x2000
+arma::mat r_all_expanded = arma::repmat(r_all, 1, temp1.n_cols);  // Replicate r_all to 7x2000
+arma::mat temp = temp_sub / (1 - r_all_expanded); 
 
+  //arma::mat temp = (pmin_q - temp1.each_col()) / (1 - r_all);
+  temp.print("temp SKAT_Optimal_Integrate_Func_Liu");
+  std::cout << "temp.n_cols " << temp.n_cols << std::endl;
+  std::cout << "temp.n_rows " << temp.n_rows << std::endl;
+ arma::rowvec temp_min = arma::min(temp, 0);
+
+  temp_min.print("temp_min SKAT_Optimal_Integrate_Func_Liu");
+  
+  
   double MuQ, VarQ, Df;
-  arma::vec temp_q = (temp_min - MuQ) / VarQ * std::sqrt(2 * Df) + Df;
-  //arma::vec temp_q = (temp_min - param_m["MuQ"]) / std::sqrt(param_m["VarQ"]) * std::sqrt(2 * param_m["Df"]) + param_m["Df"];
-  arma::vec re(temp_q.n_elem);
+  MuQ = param_m["MuQ"];
+  VarQ = param_m["VarQ"];
+  Df = param_m["Df"];
+  
+  arma::vec temp_q(n_x);
+  arma::vec re(n_x);
   boost::math::chi_squared dist(Df);
   boost::math::chi_squared dist1(1);
-
-
-  for (size_t i = 0; i < temp_q.n_elem; ++i) {
-
-        re(i) = boost::math::cdf(dist, temp_q(i)) *  boost::math::pdf(dist1, x(i));
+  for (int i = 0; i < n_x; i++) {
+	std::cout << "i " << i << std::endl;
+	double temp_min_val = temp_min(i);
+	double  temp_q_val = (temp_min_val - MuQ)/(std::sqrt(VarQ)) * (std::sqrt(2*Df)) + Df;
+	double temp_cdf, temp_pdf;
+	if(temp_q_val <= 0){
+		temp_cdf = 0;
+	}else{
+		temp_cdf = boost::math::cdf(dist, temp_q_val);
+	}
+	if(x(i) <= 0){
+		temp_pdf = 0;
+	}else{
+		temp_pdf =  boost::math::pdf(dist1, x(i));
+	}
+	re(i) = temp_cdf * temp_pdf;	
   }
   
   return re;
 }
 
 
+
 // Numerical integration using the trapezoidal rule over a vector
-// [[Rcpp::export]]
-arma::vec integrate_SKAT_Optimal_Liu(arma::mat &pmin_q, Rcpp::List &param_m, arma::vec &r_all,double lower, double upper, int subdivisions, double abs_tol) {
-    int n_r = r_all.n_elem;
-    arma::vec results = arma::zeros<arma::vec>(n_r);
+double integrate_SKAT_Optimal_Liu_v2(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol){
 
     arma::vec x = arma::linspace(lower, upper, subdivisions + 1); // Points in the range
-
-    for (int i = 0; i < n_r; i++) {
-        // Use each row of r_all to compute the integral
-        arma::vec r_vec = r_all.subvec(i, i);
-        arma::vec y = SKAT_Optimal_Integrate_Func_Liu(x, pmin_q, param_m, r_vec);
+     arma::vec y(subdivisions + 1);
+     
+        y = SKAT_Optimal_Integrate_Func_Liu(x, pmin_q, param_m, r_all);
+	std::cout << "integrate_SKAT_Optimal_Liu_v2 b" << std::endl;
 
         // Apply trapezoidal rule for numerical integration
         double result = 0.5 * (y[0] + y[y.n_elem - 1]);
-        for (int j = 1; j < y.n_elem - 1; j++) {
-            result += y[j];
-        }
+	result = result + arma::accu(y);
         result *= (upper - lower) / subdivisions;
 
         // Check if the result is below the tolerance
         if (result < abs_tol) {
             result = 0;
         }
-        results[i] = result;
+    return result;
+}
+
+
+
+// Perform adaptive integration over x using Gauss-Kronrod
+double integrate_SKAT_Optimal_Liu(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol){
+    LiuFunction func(pmin_q, param_m, r_all);
+
+    // Perform integration with adaptive Gauss-Kronrod quadrature (15-point rule)
+   try {
+    boost::math::quadrature::gauss_kronrod<double, 15> integrator;
+    double tolerance = 1e-25; // Error tolerance
+    // Integrate from lower to upper bound
+    //double result = integrator.integrate(func, lower, upper, tolerance);
+	double result = integrate_SKAT_Optimal_Liu_v2(pmin_q, param_m, r_all, lower, upper, subdivisions, tolerance);
+    std::cout << "result integrate_SKAT_Optimal_Liu " << result << std::endl;
+
+    return result;
+   } catch (const std::exception& e) {
+        std::cerr << "Integration error: " << e.what() << std::endl;
+        return -1.0;
     }
-    return results;
 }
 
 
 
 
-
-
 // Function for computing the Liu p-value
-double SKAT_Optimal_PValue_Liu( arma::mat &pmin_q,  Rcpp::List &param_m, 
-                                   arma::vec &r_all, double pmin) {
-  arma::vec re = integrate_SKAT_Optimal_Liu(pmin_q, param_m, r_all, 0, 40, 2000, 1e-25);
+double SKAT_Optimal_PValue_Liu(arma::vec &pmin_q, Rcpp::List &param_m,
+                                     arma::vec &r_all, double pmin){
+  double re = integrate_SKAT_Optimal_Liu(pmin_q, param_m, r_all, 0, 40, 4000, 1e-25);
 
-  double pvalue = 1 - re(0);
+
+  double pvalue = 1 - re;
 
   if (pmin != arma::datum::nan){
     if ((pmin * r_all.n_elem) < pvalue) {
@@ -1058,7 +1131,8 @@ Rcpp::List SKAT_META_Optimal_Get_Pvalue( arma::mat &Q_all,  arma::mat &Phi,  arm
   if (r_all.n_elem < 3) {
     multi = 2;
   }
-pval.print("pval here");
+
+  pval.print("pval here");
   arma::mat pvalmat = Each_Info["pval"];
   int npval = pvalmat.n_rows;
   arma::vec pval_each(npval);
@@ -1069,10 +1143,10 @@ pval.print("pval here");
     IDX.clear();
     pval_each = pvalmatt.col(i);
     IDX = arma::find(pval_each > 0);
-pval_each.print("pval_each");
-std::cout << "i n_q " << std::endl;
+    pval_each.print("pval_each");
+    std::cout << "i n_q " << std::endl;
     IDX.print("IDX");
-     r_all.print(" r_all");
+    r_all.print(" r_all");
     pval1 = arma::min(pval_each) * multi;
     if (pval[i] <= 0 || IDX.n_elem < r_all.n_elem) {
       pval[i] = pval1;
@@ -1193,6 +1267,8 @@ Rcpp::List Met_SKAT_Get_Pvalue( arma::vec &Score,  arma::mat &Phi,  arma::vec &r
   //  Score_Res = Score_Resampling.t();
   //}
 
+  Phi.print("Phi");
+
   if(Phi.n_rows <= 1){
      r_corr.set_size(1);
      r_corr(0) = 0;
@@ -1264,6 +1340,7 @@ Rcpp::List Met_SKAT_Get_Pvalue( arma::vec &Score,  arma::mat &Phi,  arma::vec &r
      Phi.clear();
      Phi = Phi_rho;
   }
+    std::cout << "Get_Davies_PVal here" << std::endl;
     Rcpp::List re = Get_Davies_PVal(Q, Phi, Q_res, isFast);
     if (r_corr.n_elem == 1) {
       re["Q"] = Q;

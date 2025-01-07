@@ -3549,6 +3549,42 @@ bool openOutfile_single_admixed(std::string t_traitType, bool t_isCondition, boo
 	}//if(pvalVec.at(k) != "NA"){
 
 	}//for(unsigned int k = 0; k < pvalVec.size(); k++)
+
+		t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "Pvalue_SKATO";
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "Pvalue_Burden";
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "Pvalue_SKAT";
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "BETA_Burden";
+		t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "SE_SKATO";
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "P_het_admixed";
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "P_hom_admixed";
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "P_cct_admixed";
+ 	if(t_isCondition){
+		t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "Pvalue_SKATO_c";
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "Pvalue_Burden_c";
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "Pvalue_SKAT_c";
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "BETA_Burden_c";
+		t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "SE_SKATO_c";
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "P_het_admixed_c";
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "P_hom_admixed_c";
+                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "P_cct_admixed_c";
+
+	}
 	t_OutFile_singleInGroup << "\n";
      }//if(isopen){
      return(isopen);
@@ -3565,26 +3601,19 @@ void mainAdmixedInCPP(
 	arma::vec & t_weight_cond,
 	bool t_isImputation,
 	bool t_isFastTest,
-	bool t_isMoreOutput){
+	bool t_isMoreOutput,
+	bool t_isWriteHeader){
 
 	// Iterate through the list
     Rcpp::CharacterVector names = RegionList.names();
+    std::cout << "RegionList.size() " << RegionList.size() << std::endl;
     for (R_xlen_t i = 0; i < RegionList.size(); ++i) {
-        Rcpp::RObject element = RegionList[i]; // Access the i-th element
-        
-        try {
-            // Check if the element is a nested list
-            if (Rf_inherits(element, "list")) {
-                Rcpp::List nestedList = Rcpp::as<Rcpp::List>(element);
-                Rcpp::Rcout << "Element " << i + 1 << " is a nested list with " 
-                            << nestedList.size() << " elements." << std::endl;
-
-		if(nestedList["SNP"] != R_NilValue){
-			std::vector<std::string> t_genoIndex_prev = Rcpp::as<std::vector<std::string>>(nestedList["genoIndex_prev"]);
-			std::vector<std::string> t_genoIndex = Rcpp::as<std::vector<std::string>>(nestedList["genoIndex"]);
+        	Rcpp::DataFrame currentDF = Rcpp::as<Rcpp::DataFrame>(RegionList[i]);
+		if(currentDF["SNP"] != R_NilValue){
+			std::vector<std::string> t_genoIndex_prev = Rcpp::as<std::vector<std::string>>(currentDF["genoIndex_prev"]);
+			std::vector<std::string> t_genoIndex = Rcpp::as<std::vector<std::string>>(currentDF["genoIndex"]);
 			std::string regionName = Rcpp::as<std::string>(names[i]);;
-			arma::vec t_weight = Rcpp::as<arma::vec>(nestedList["WEIGHT"]);
-
+			arma::vec t_weight = Rcpp::as<arma::vec>(currentDF["WEIGHT"]);
 
 			mainAdmixedInCPP_inner(t_genoType,
 					t_genoIndex_prev,
@@ -3598,15 +3627,13 @@ void mainAdmixedInCPP(
 					t_weight_cond,
 					regionName,
 					t_isFastTest,
-					t_isMoreOutput);		
-				
-		}
+					t_isMoreOutput,
+					t_isWriteHeader);		
+			t_isWriteHeader = false;				
+		
             }else {
                 Rcpp::Rcout << "Element " << i + 1 << " is of an unsupported type." << std::endl;
             }
-        } catch (std::exception &e) {
-            Rcpp::Rcerr << "Error processing element " << i + 1 << ": " << e.what() << std::endl;
-        }
     }
 
 }
@@ -3628,7 +3655,8 @@ void mainAdmixedInCPP_inner(
                            arma::vec & t_weight_cond,
                            std::string regionName,
                            bool t_isFastTest,
-                           bool t_isMoreOutput
+                           bool t_isMoreOutput,
+			   bool t_isWriteHeader
 ){
   //arma::vec timeoutput1 = getTime();
   bool isWeightCustomized = false;
@@ -3773,8 +3801,12 @@ void mainAdmixedInCPP_inner(
  arma::mat AdjCondMat, VarMatAdjCond;
      arma::vec TstatAdjCond;
 // cycle for q0 markers
+//
+std::cout << "q " << q << std::endl;
+std::cout << "q0 " << q0 << std::endl;
   for(unsigned int i = 0; i < q0; i++)
   {
+    std::cout << "i " << i << std::endl;
     // marker-level information
     double altFreq, altCounts, missingRate, imputeInfo;
     std::vector<uint32_t> indexForMissing;
@@ -3831,13 +3863,10 @@ void mainAdmixedInCPP_inner(
     double MAF = std::min(altFreq, 1 - altFreq);
     double w0;
     double MAC = MAF * 2 * t_n * (1 - missingRate);   // checked on 08-10-2021
-    if(!g_isadmixed){
-        flip = imputeGenoAndFlip(GVec, altFreq, altCounts, indexForMissing, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec, indexNonZeroVec);
-    }else{
-        flip = imputeGenoAndFlip_fakeflip(GVec, altFreq, altCounts, indexForMissing, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec, indexNonZeroVec);
-        GVec_sumdosage = GVec_sumdosage + GVec;
+    
+    flip = imputeGenoAndFlip_fakeflip(GVec, altFreq, altCounts, indexForMissing, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec, indexNonZeroVec);
+    GVec_sumdosage = GVec_sumdosage + GVec;
 
-    }
 
     arma::uvec indexZeroVec_arma, indexNonZeroVec_arma;
     MAF = std::min(altFreq, 1 - altFreq);
@@ -3888,6 +3917,10 @@ void mainAdmixedInCPP_inner(
 
 
         indexZeroVec_arma = arma::conv_to<arma::uvec>::from(indexZeroVec);
+	std::cout << "MAC " << MAC << std::endl;
+	std::cout << "g_MACCutoffforER " << g_MACCutoffforER << std::endl;
+
+
 
         //set_varianceRatio(MAC, isSingleVarianceRatio);
         if(MAC > g_MACCutoffforER){
@@ -3926,11 +3959,13 @@ void mainAdmixedInCPP_inner(
           G1tilde_P_G2tilde_Weighted_Mat.row(i) = G1tilde_P_G2tilde_Vec % w0G2Vec_cond.t() * w0;
         }
 
-
-        if(t_regionTestType != "BURDEN"){
+	std::cout << "i1InChunk " << i1InChunk << std::endl;
+        //if(t_regionTestType != "BURDEN"){
           P1Mat.row(i1InChunk) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*gtildeVec.t();
           P2Mat.col(i1InChunk) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*P2Vec;
-        }
+        //}
+	//P1Mat.print("P1Mat");
+	//        P2Mat.print("P2Mat");
 
      i1 += 1;
      i1InChunk += 1;
@@ -3977,10 +4012,15 @@ void mainAdmixedInCPP_inner(
       }else if(t_traitType == "quantitative"){
         N_Vec.at(i) = t_n;
       }
-Rcpp::checkUserInterrupt();
 
+	std::cout << "the end of loop i " << i << std::endl;
 
-} //  for(unsigned int i = 0; i < q0; i++)
+	//Rcpp::checkUserInterrupt();
+
+}//   if((missingRate > g_missingRate_cutoff) || (MAF > g_maxMAFLimit) || (MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff) || (imputeInfo < g_marker_minINFO_cutoff)){
+}//if(MAC > g_region_minMAC_cutoff){
+}//  for(unsigned int i = 0; i < q0; i++)
+
 
     int i = q-1;
     double altFreq, altCounts, missingRate, imputeInfo;
@@ -4117,7 +4157,7 @@ Rcpp::checkUserInterrupt();
       }else if(t_traitType == "quantitative"){
         N_Vec.at(i) = t_n;
       }
-     } //if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){
+     //} //if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){
 
       //arma::vec timeoutput4a = getTime();
       //printTime(timeoutput3ab, timeoutput4a, "Unified_getOneMarker 3");
@@ -4130,12 +4170,13 @@ Rcpp::checkUserInterrupt();
           }
 
 
-
   bool isopen0 = OutFile.is_open();
   if(isopen0){OutFile.close();}
-  OutFile.open(g_outputFilePrefixGroup.c_str(), std::ofstream::out );
-  bool isopen = openOutfile_single_admixed(t_traitType,isCondition, t_isMoreOutput, pvalVec, OutFile);
-  OutFile.close();
+  if(t_isWriteHeader){
+  	OutFile.open(g_outputFilePrefixGroup.c_str(), std::ofstream::out );
+  	bool isopen = openOutfile_single_admixed(t_traitType,isCondition, t_isMoreOutput, pvalVec, OutFile);
+  	OutFile.close();
+  }
   OutFile.open(g_outputFilePrefixGroup.c_str(), std::ofstream::out | std::ofstream::app);
   nonNAIndexVec.clear();
   int mFirth = 0;
@@ -4195,8 +4236,12 @@ Rcpp::checkUserInterrupt();
 
     arma::mat P1Matsub = P1Mat.rows(nonNAIndexVec_arma);
     arma::mat P2Matsub = P2Mat.cols(nonNAIndexVec_arma); 
+
+    nonNAIndexVec_arma.print("nonNAIndexVec_arma");	
+
     arma::mat VarMat_sub(numofAnc, numofAnc);
     VarMat_sub = P1Matsub * P2Matsub;
+     VarMat_sub.print("VarMat_sub");
 
     arma::vec scaleFactor;
    if (t_traitType == "binary") {
@@ -4320,6 +4365,6 @@ Rcpp::checkUserInterrupt();
 }//  if(numofAnc > 0){
 OutFile_singleInGroup_temp.close();
 
+//}
 }
 
-}

@@ -427,7 +427,8 @@ void mainAdmixedInCPP_inner(
                            arma::vec & t_weight_cond,
                            std::string regionName,
                            bool t_isFastTest,
-                           bool t_isMoreOutput
+                           bool t_isMoreOutput,
+			   bool t_isWriteHeader
 );
 
 void mainAdmixedInCPP(
@@ -440,7 +441,8 @@ void mainAdmixedInCPP(
         arma::vec & t_weight_cond,
         bool t_isImputation,
         bool t_isFastTest,
-        bool t_isMoreOutput);
+        bool t_isMoreOutput,
+	bool t_isWriteHeader);
 
 
 #endif

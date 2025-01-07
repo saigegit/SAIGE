@@ -2,11 +2,13 @@ SAIGE.Admixed = function(mu,
                         OutputFile,
                         MACCutoff_to_CollapseUltraRare,
                         groupFile,
+			annolist,
                         genoType,
                         markerInfo,
                         traitType,
                         isImputation,
                         isCondition,
+			weight_cond,
                         groups_per_chunk,
                         isOverWriteOutput,
 			is_no_weight_in_groupTest,
@@ -50,6 +52,9 @@ SAIGE.Admixed = function(mu,
   out.method = SKAT:::SKAT_Check_Method(method = "optimal.adj", r.corr = 0)
   method = out.method$method
   r.corr = out.method$r.corr
+
+  cat("r.corr\n")
+  print(r.corr)
   regionTestType = "SKAT-O"
 
   region_list = checkGroupFile(groupFile)
@@ -91,8 +96,9 @@ SAIGE.Admixed = function(mu,
   cat("nRegions ", nRegions, "\n")
   cth_chunk_to_output = 1
   i = indexChunk + 1
-  nEachChunk = numberRegionsInChunkR
+  nEachChunk = numberRegionsInChunk
 
+ is_writeHeader=TRUE
  while (i <= nRegions) {
     #for(i in (indexChunk+1):nRegions){
     if (mth ==  numberRegionsInChunk) {
@@ -119,16 +125,28 @@ SAIGE.Admixed = function(mu,
 
     #mth = mth + 1
     if (!is.null(RegionList)) {
+
+        if (!is_fastTest) {
+          set_flagSparseGRM_cur_SAIGE_org()
+        } else {
+          set_flagSparseGRM_cur_SAIGE(FALSE)
+        }
+
+
 	mainAdmixedInCPP(
 	  RegionList, 
           genoType,
           OutputFile,
           traitType,
           n,
+	  regionTestType,
+	  weight_cond,
           isImputation,
           is_fastTest,
-          is_output_moreDetails
+          is_output_moreDetails,
+	  is_writeHeader
         )
+        is_writeHeader=FALSE
     }else{
         #if(!is.null(region)){
         cat(regionName, " is empty.\n")

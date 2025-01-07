@@ -149,8 +149,8 @@ copy_singleInGroup <- function() {
     invisible(.Call('_SAIGE_copy_singleInGroup', PACKAGE = 'SAIGE'))
 }
 
-mainAdmixedInCPP <- function(RegionList, t_genoType, t_outputFile, t_traitType, t_n, t_regionTestType, t_weight_cond, t_isImputation, t_isFastTest, t_isMoreOutput) {
-    invisible(.Call('_SAIGE_mainAdmixedInCPP', PACKAGE = 'SAIGE', RegionList, t_genoType, t_outputFile, t_traitType, t_n, t_regionTestType, t_weight_cond, t_isImputation, t_isFastTest, t_isMoreOutput))
+mainAdmixedInCPP <- function(RegionList, t_genoType, t_outputFile, t_traitType, t_n, t_regionTestType, t_weight_cond, t_isImputation, t_isFastTest, t_isMoreOutput, t_isWriteHeader) {
+    invisible(.Call('_SAIGE_mainAdmixedInCPP', PACKAGE = 'SAIGE', RegionList, t_genoType, t_outputFile, t_traitType, t_n, t_regionTestType, t_weight_cond, t_isImputation, t_isFastTest, t_isMoreOutput, t_isWriteHeader))
 }
 
 closeGenoFile_plink <- function() {
@@ -723,10 +723,6 @@ SKAT_davies <- function(q, lambda, h, delta, sigma, lim, acc) {
 
 SKAT_Optimal_Integrate_Func_Davies <- function(x, pmin_q, param_m, r_all) {
     .Call('_SAIGE_SKAT_Optimal_Integrate_Func_Davies', PACKAGE = 'SAIGE', x, pmin_q, param_m, r_all)
-}
-
-integrate_SKAT_Optimal_Liu <- function(pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol) {
-    .Call('_SAIGE_integrate_SKAT_Optimal_Liu', PACKAGE = 'SAIGE', pmin_q, param_m, r_all, lower, upper, subdivisions, abs_tol)
 }
 
 Met_SKAT_Get_Pvalue <- function(Score, Phi, r_corr, method, isFast) {
