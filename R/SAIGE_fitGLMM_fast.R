@@ -640,6 +640,8 @@ glmmkin.ai_PCG_Rcpp_Quantitative = function(bedFile, bimFile, famFile, Xorig, is
 
 #    cat("tau0_after_fit: ", tau0,"\n")
 #    print(fit)
+
+   if(tau[1]!=0){
     tau = as.numeric(fit$tau)
     cov = re.coef$cov
     alpha = re.coef$alpha
@@ -675,6 +677,10 @@ glmmkin.ai_PCG_Rcpp_Quantitative = function(bedFile, bimFile, famFile, Xorig, is
       warning("Large variance estimate observed in the iterations, model not converged...", call. = FALSE)
       i = maxiter
       break
+    }
+
+   }else{#if(tau[1]!=0){
+     break
     }
   }
 
