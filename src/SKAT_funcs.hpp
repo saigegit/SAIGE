@@ -2,6 +2,7 @@
 #define SKAT_HPP
 
 #include <RcppArmadillo.h>
+
 #include <cmath>
 #include <vector>
 #include <string>
@@ -84,4 +85,58 @@ double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi);
 double integrate_SKAT_Optimal_Liu(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol);
 
 double integrate_SKAT_Optimal_Liu_v2(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol);
+
+double integrate_SKAT_Optimal_Liu_v3(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol);
+
+double integrate_SKAT_Optimal_Davies_v2(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol);
+
+/*
+Rcpp::List integrate_SKATliu(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol);
+
+class Func
+{
+public:
+    virtual double operator()(const double& x) const = 0;
+    virtual void eval(double* x, const int n) const
+    {
+        for(int i = 0; i < n; i++)
+            x[i] = this->operator()(x[i]);
+    }
+    
+    virtual ~Func() {}
+};
+
+
+
+class SKATLiu : public Numer::Func
+{
+private:
+    arma::mat pmin_q;
+    Rcpp::List param_m ;
+    arma::vec r_all;
+public:
+    // Constructor to initialize shape parameters
+    SKATLiu(arma::mat &pmin_q_,  Rcpp::List &param_m_,  arma::vec &r_all_) : pmin_q(pmin_q_), param_m(param_m_), r_all(r_all_){}
+
+    // Overload the function call operator to compute the PDF value
+    double operator()(const double& x) const override
+    {
+        // Wrap the scalar x into an Armadillo vector
+        arma::vec x_vec = {x};
+
+        // Use calculate_beta_pdf to compute the value
+	const arma::mat& pmin_q_c = pmin_q;
+	const arma::vec& r_all_c = r_all;
+	const Rcpp::List& param_m_c = param_m;
+	arma::vec integratevec  = SKAT_Optimal_Integrate_Func_Liu(x_vec, pmin_q_c, param_m_c, r_all_c);
+
+
+        // Return the first (and only) result
+        return integratevec(0);
+    }
+};
+*/
+
+
+
 #endif

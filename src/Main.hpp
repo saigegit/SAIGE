@@ -187,6 +187,8 @@ void assign_conditionMarkers_factors_binary_region(
 
 void set_iterator_inVcf(std::string & variantList);
 
+void set_iterator_inVcf(std::string & variantList, std::string & chrom, int & beg_pd, int & end_pd);
+
 bool check_Vcf_end();
 
 arma::vec fast_logistf_fit(arma::mat & x,

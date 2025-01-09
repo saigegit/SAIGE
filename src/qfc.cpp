@@ -286,7 +286,7 @@ output:
    trace[6]         cycles to locate integration parameters     */
 
 {
-	printf("qfc_1 test!\n");
+      //printf("qfc_1 test!\n");
       int j, nj, nt, ntm;  double acc1, almx, xlim, xnt, xntm;
       double utx, tausq, sd, intv, intv1, x, up, un, d1, d2, lj, ncj;
       extern double sigsq, lmax, lmin, mean;
@@ -295,7 +295,7 @@ output:
       extern int *n,*th; extern double *lb,*nc;
       double qfval = -1.0;
       static int rats[]={1,2,4,8};
-printf("qfc_2 test!\n");
+      //printf("qfc_2 test!\n");
 
       if (setjmp(env) != 0) { *ifault=4; goto endofproc; }
       r=r1[0]; lim=lim1[0]; c=c1[0];
@@ -314,24 +314,23 @@ printf("qfc_2 test!\n");
       sigsq = square(sigma[0]); sd = sigsq;
       lmax = 0.0; lmin = 0.0; mean = 0.0;
      
-      printf("sd here a  %10.2f\n", sd);
+      //printf("sd here a  %10.2f\n", sd);
      
      for (j=0; j<r; j++ )
       {
          nj = n[j];  lj = lb[j];  ncj = nc[j];
-      printf("j here a  %d\n", j);
-      //printf("nj here a  %10.2f\n", nj);
-      printf("nj here a  %d\n", nj);
-      printf("lj here a  %10.2f\n", lj);
-      printf("ncj here a  %10.2f\n", ncj);
-      printf("sd here a  %10.2f\n", sd);
+      //printf("j here a  %d\n", j);
+      //printf("nj here a  %d\n", nj);
+      //printf("lj here a  %10.2f\n", lj);
+      //printf("ncj here a  %10.2f\n", ncj);
+      //printf("sd here a  %10.2f\n", sd);
 
 
          if ( nj < 0  ||  ncj < 0.0 ) { *ifault = 3;  goto  endofproc;  }
 
-	 printf("sd here b0  %10.2f\n", sd);
+	 //printf("sd here b0  %10.2f\n", sd);
          sd  = sd  + square(lj) * (2 * nj + 4.0 * ncj);
-      printf("sd here b  %10.2f\n", sd);
+         //printf("sd here b  %10.2f\n", sd);
          mean = mean + lj * (nj + ncj);
          if (lmax < lj) lmax = lj ; else if (lmin > lj) lmin = lj;
       }
@@ -361,10 +360,10 @@ printf("qfc_2 test!\n");
          }
       }
       trace[4] = utx;  acc1 = 0.5 * acc1;
-        printf("up a  %10.2f\n", up);
-        printf("un a %10.2f\n", un);
-        printf("utx a  %10.2f\n", utx);
-        printf("sd a  %10.2f\n", sd);
+        //printf("up a  %10.2f\n", up);
+        //printf("un a %10.2f\n", un);
+        //printf("utx a  %10.2f\n", utx);
+        //printf("sd a  %10.2f\n", sd);
 
 
 
@@ -372,13 +371,13 @@ printf("qfc_2 test!\n");
    l1:
       d1 = ctff(acc1, &up) - c;
 
-        printf("up b  %10.2f\n", up);
-        printf("d1 b  %10.2f\n", d1);
+        //printf("up b  %10.2f\n", up);
+        //printf("d1 b  %10.2f\n", d1);
 
       if (d1 < 0.0) { qfval = 1.0; goto endofproc; }
       d2 = c - ctff(acc1, &un);
-	 printf("un b %10.2f\n", un);
-        printf("d2 b  %10.2f\n", d2);
+	//printf("un b %10.2f\n", un);
+        //printf("d2 b  %10.2f\n", d2);
 
 
       if (d2 < 0.0) { qfval = 0.0; goto endofproc; }
@@ -388,10 +387,10 @@ printf("qfc_2 test!\n");
          auxillary integrations */
       xnt = utx / intv;  xntm = 3.0 / sqrt(acc1);
 
-        printf("xnt %10.2f\n", xnt);
-        printf("utx %10.2f\n", utx);
-        printf("intv %10.2f\n", intv);
-        printf("xntm %10.2f\n", xntm);
+        //printf("xnt %10.2f\n", xnt);
+        //printf("utx %10.2f\n", utx);
+        //printf("intv %10.2f\n", intv);
+        //printf("xntm %10.2f\n", xntm);
 
 
       if (xnt > xntm * 1.5)

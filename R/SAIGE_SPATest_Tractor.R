@@ -95,10 +95,18 @@ SAIGE.Admixed = function(mu,
   cat("indexChunk ", indexChunk, "\n")
   cat("nRegions ", nRegions, "\n")
   cth_chunk_to_output = 1
-  i = indexChunk + 1
+  #i = indexChunk + 1
   nEachChunk = numberRegionsInChunk
 
  is_writeHeader=TRUE
+
+
+nChunks = ceiling(nRegions/groups_per_chunk)
+
+
+
+i = 1
+ithchunk = 0
  while (i <= nRegions) {
     #for(i in (indexChunk+1):nRegions){
     if (mth ==  numberRegionsInChunk) {
@@ -125,14 +133,18 @@ SAIGE.Admixed = function(mu,
 
     #mth = mth + 1
     if (!is.null(RegionList)) {
+	ithchunk = ithchunk + 1	
+ 	cat(paste0("(",Sys.time(),") ---- Analyzing Chunk ", ithchunk, "/", nChunks, "\n"))
+
+        ptm <- proc.time()
+        print(ptm)
+	gc()
 
         if (!is_fastTest) {
           set_flagSparseGRM_cur_SAIGE_org()
         } else {
           set_flagSparseGRM_cur_SAIGE(FALSE)
         }
-
-
 	mainAdmixedInCPP(
 	  RegionList, 
           genoType,
@@ -155,6 +167,9 @@ SAIGE.Admixed = function(mu,
     i = i + numberRegionsInChunk
  }
 
+        ptm <- proc.time()
+        print(ptm)
+        gc()
   message = "Analysis done!"
   message = paste0(message,
                    " The association test results for admixed samples have been saved to '",

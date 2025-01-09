@@ -3446,7 +3446,7 @@ bool openOutfile_single_admixed(std::string t_traitType, bool t_isCondition, boo
 //	t_OutFile_singleInGroup.open(Outfile_single_temp_admixed.c_str(), std::ofstream::out);
       //}
       //isopen = t_OutFile_singleInGroup.is_open();
-      std::cout << "pvalVec.size() " << pvalVec.size() << std::endl;
+      //std::cout << "pvalVec.size() " << pvalVec.size() << std::endl;
       if(isopen){
         std::string ancstr;
         t_OutFile_singleInGroup << "Marker\tHR\tPOS\tMarkerID\tAllele1\tAllele2\t";
@@ -3606,14 +3606,15 @@ void mainAdmixedInCPP(
 
 	// Iterate through the list
     Rcpp::CharacterVector names = RegionList.names();
-    std::cout << "RegionList.size() " << RegionList.size() << std::endl;
+    //std::cout << "RegionList.size() " << RegionList.size() << std::endl;
     for (R_xlen_t i = 0; i < RegionList.size(); ++i) {
-        	Rcpp::DataFrame currentDF = Rcpp::as<Rcpp::DataFrame>(RegionList[i]);
-		if(currentDF["SNP"] != R_NilValue){
+        Rcpp::DataFrame currentDF = Rcpp::as<Rcpp::DataFrame>(RegionList[i]);
+	if(currentDF["SNP"] != R_NilValue){
+		std::string regionName = Rcpp::as<std::string>(names[i]);;
+		arma::vec t_weight = Rcpp::as<arma::vec>(currentDF["WEIGHT"]);
+		if (t_genoType != "vcf") {
 			std::vector<std::string> t_genoIndex_prev = Rcpp::as<std::vector<std::string>>(currentDF["genoIndex_prev"]);
 			std::vector<std::string> t_genoIndex = Rcpp::as<std::vector<std::string>>(currentDF["genoIndex"]);
-			std::string regionName = Rcpp::as<std::string>(names[i]);;
-			arma::vec t_weight = Rcpp::as<arma::vec>(currentDF["WEIGHT"]);
 
 			mainAdmixedInCPP_inner(t_genoType,
 					t_genoIndex_prev,
@@ -3632,10 +3633,68 @@ void mainAdmixedInCPP(
 			t_isWriteHeader = false;				
 		
             }else {
-                Rcpp::Rcout << "Element " << i + 1 << " is of an unsupported type." << std::endl;
-            }
-    }
+	        std::vector<std::string> SNP = Rcpp::as<std::vector<std::string>>(currentDF["SNP"]);
+	    	std::string SNPlist = regionName;
+    		for (int k = 0; k < SNP.size(); ++k) {
+        		SNPlist += "\t" + SNP[k];
+    		}
+		int beg_pd = 1;
+		int end_pd = 250000000;
+		std::string chrom1="FakeCHR";
+		if(SNP.size() == 1){
+			std::vector<std::string> fakem;
+			std::string SNP0 = SNP[0];
+    			std::stringstream ss(SNP0);
+    			std::string token;
+			
+    			while (std::getline(ss, token, ':')) {
+        			fakem.push_back(token);
+    			}
 
+			if (fakem.size() < 2) {
+        			Rcpp::stop("SNP string does not have at least two components separated by ':'");
+    			}
+			std::string fakemb = fakem[0] + ":" + std::to_string(std::stoi(fakem[1]) + 2) + ":N:N";
+			std::string SNPlisttemp = SNPlist + "\t" + fakemb;
+			
+			set_iterator_inVcf(SNPlisttemp, chrom1, beg_pd, end_pd);
+		}else{ //if(SNP.size() != 1){	
+			set_iterator_inVcf(SNPlist, chrom1, beg_pd, end_pd);			
+		}
+		bool isVcfEnd =  check_Vcf_end();
+          	if (!isVcfEnd) {
+			std::vector<std::string> t_genoIndex_prev(SNP.size(), "0");		
+			std::vector<std::string> t_genoIndex(SNP.size(), "0");
+
+		         mainAdmixedInCPP_inner(t_genoType,
+                                        t_genoIndex_prev,
+                                        t_genoIndex,
+                                        t_outputFile,
+                                        t_traitType,
+                                        t_n,
+                                        t_regionTestType,
+                                        t_isImputation,
+                                        t_weight,
+                                        t_weight_cond,
+                                        regionName,
+                                        t_isFastTest,
+                                        t_isMoreOutput,
+                                        t_isWriteHeader);
+                        t_isWriteHeader = false;	
+
+
+
+          	}else {
+			Rcpp::warning("No markers in region ",
+                    			regionName,
+                    			" are found in the VCF file");	
+          	}
+	   }	
+    }else{ //if(currentDF["SNP"] != R_NilValue){
+       Rcpp::Rcout << "Element " << i + 1 << " is of an unsupported type." << std::endl;
+
+    }
+   }//for (R_xlen_t i = 0; i < RegionList.size(); ++i) {
 }
 
 
@@ -3802,11 +3861,11 @@ void mainAdmixedInCPP_inner(
      arma::vec TstatAdjCond;
 // cycle for q0 markers
 //
-std::cout << "q " << q << std::endl;
-std::cout << "q0 " << q0 << std::endl;
+//std::cout << "q " << q << std::endl;
+//std::cout << "q0 " << q0 << std::endl;
   for(unsigned int i = 0; i < q0; i++)
   {
-    std::cout << "i " << i << std::endl;
+    //std::cout << "i " << i << std::endl;
     // marker-level information
     double altFreq, altCounts, missingRate, imputeInfo;
     std::vector<uint32_t> indexForMissing;
@@ -3904,9 +3963,9 @@ std::cout << "q0 " << q0 << std::endl;
     if(MAC > g_region_minMAC_cutoff){  // not Ultra-Rare Variants
 
       indicatorVec.at(i) = 1;
-      if(i1InChunk == 0){
-        std::cout << "Start analyzing chunk " << ichunk << "....." << std::endl;
-      }
+      //if(i1InChunk == 0){
+      //  std::cout << "Start analyzing chunk " << ichunk << "....." << std::endl;
+      //}
 
       if(!isSingleVarianceRatio){
         hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur);
@@ -3917,8 +3976,8 @@ std::cout << "q0 " << q0 << std::endl;
 
 
         indexZeroVec_arma = arma::conv_to<arma::uvec>::from(indexZeroVec);
-	std::cout << "MAC " << MAC << std::endl;
-	std::cout << "g_MACCutoffforER " << g_MACCutoffforER << std::endl;
+	//std::cout << "MAC " << MAC << std::endl;
+	//std::cout << "g_MACCutoffforER " << g_MACCutoffforER << std::endl;
 
 
 
@@ -3959,7 +4018,7 @@ std::cout << "q0 " << q0 << std::endl;
           G1tilde_P_G2tilde_Weighted_Mat.row(i) = G1tilde_P_G2tilde_Vec % w0G2Vec_cond.t() * w0;
         }
 
-	std::cout << "i1InChunk " << i1InChunk << std::endl;
+	//std::cout << "i1InChunk " << i1InChunk << std::endl;
         //if(t_regionTestType != "BURDEN"){
           P1Mat.row(i1InChunk) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*gtildeVec.t();
           P2Mat.col(i1InChunk) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*P2Vec;
@@ -4013,7 +4072,7 @@ std::cout << "q0 " << q0 << std::endl;
         N_Vec.at(i) = t_n;
       }
 
-	std::cout << "the end of loop i " << i << std::endl;
+	//std::cout << "the end of loop i " << i << std::endl;
 
 	//Rcpp::checkUserInterrupt();
 
@@ -4237,11 +4296,11 @@ std::cout << "q0 " << q0 << std::endl;
     arma::mat P1Matsub = P1Mat.rows(nonNAIndexVec_arma);
     arma::mat P2Matsub = P2Mat.cols(nonNAIndexVec_arma); 
 
-    nonNAIndexVec_arma.print("nonNAIndexVec_arma");	
+    //nonNAIndexVec_arma.print("nonNAIndexVec_arma");	
 
     arma::mat VarMat_sub(numofAnc, numofAnc);
     VarMat_sub = P1Matsub * P2Matsub;
-     VarMat_sub.print("VarMat_sub");
+    //VarMat_sub.print("VarMat_sub");
 
     arma::vec scaleFactor;
    if (t_traitType == "binary") {

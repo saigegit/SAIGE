@@ -395,12 +395,12 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   //for test
   //arma::vec timeoutput3 = getTime();
   if(!isScoreFast){
-	std::cout << "scoreTest " << std::endl;  
+	//std::cout << "scoreTest " << std::endl;  
   	is_gtilde = true;
   	scoreTest(t_GVec, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq, t_Tstat, t_var1, t_var2, t_gtilde, t_P2Vec, t_gy, is_region, iIndex);
   }else{
   	is_gtilde = false;
-	std::cout << "scoreTestFast "  << std::endl;  
+	//std::cout << "scoreTestFast "  << std::endl;  
         scoreTestFast(t_GVec, iIndex, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq, t_Tstat, t_var1, t_var2);
   }
 
@@ -806,9 +806,9 @@ if(!t_isER){
     }
 
 
-    std::cout << "is_region " << is_region << std::endl;
-    std::cout << "isScoreFast " << isScoreFast << std::endl;
-    std::cout << "m_flagSparseGRM_cur " << m_flagSparseGRM_cur << std::endl;
+    //std::cout << "is_region " << is_region << std::endl;
+    //std::cout << "isScoreFast " << isScoreFast << std::endl;
+    //std::cout << "m_flagSparseGRM_cur " << m_flagSparseGRM_cur << std::endl;
     if(is_region && isScoreFast){
 
       t_gy = dot(t_gtilde, m_y);
