@@ -403,37 +403,33 @@ Rcpp::List Get_Davies_PVal(arma::mat & Q, arma::mat & W, arma::mat & Q_resamplin
     }
 
     // Calculate the Davies p-value based on the kernel matrix K and the combined Q values
-    arma::vec eigvalK = arma::eig_sym(K);
-    double qall0 = Q_all(0);
-    double p_value = daviesPValue(eigvalK, qall0); // Test statistic Q.all[0]
+    arma::vec eigvalK = Get_Lambda(K, false, 100);
+    arma::ivec dfvec = arma::ones<arma::ivec>(eigvalK.n_elem);
+    Rcpp::List re = Get_PValue_Lambda(eigvalK, Q_all, dfvec);
 
+    Rcpp::List param;
+    // Adding param information
+    arma::vec p_val_liu = re["p_val_liu"];
+    arma::ivec is_converge = re["is_converge"];
+    param["liu.pval"] = p_val_liu(0);
+    param["Is_Converged"] = is_converge(0);  // Assuming convergence is always true for simplicity
+    std::string p_val_msg = re["pval_zero_msg"];
+
+    arma::vec p_valuevec = re["p.value"];
+    double p_value = p_valuevec(0);
     //std::cout << "Get_Davies_PVal p_value " << p_value << std::endl;
 
     // Prepare the result list
     Rcpp::List result;
-    Rcpp::List param;
-    
-    // Adding param information
-    param["liu.pval"] = p_value;
-    param["Is.Converged"] = true;  // Assuming convergence is always true for simplicity
     
     // If resampling is available
     arma::vec p_value_resampling;
-    if (Q_resampling.n_elem > 0) {
-        p_value_resampling.set_size(Q_resampling.n_rows);
-        //p_value_resampling = Rcpp::NumericVector(Q_resampling.n_rows);
-        for (size_t i = 0; i < Q_resampling.n_rows; i++) {
-	    double Q_resampling0 = Q_resampling(i,0);
-            p_value_resampling[i] = daviesPValue(eigvalK, Q_resampling0);
-        }
-        param["liu_pval.resampling"] = p_value_resampling;
-        param["Is_Converged.resampling"] = true;
-    }
+    //if (Q_resampling.n_elem > 0) {
 
     result["p.value"] = p_value;
     result["param"] = param;
     result["p.value.resampling"] = p_value_resampling;
-    result["pval.zero.msg"] = "No zero p-values";  // Assuming no zero p-values for simplicity
+    result["pval.zero.msg"] = p_val_msg;  // Assuming no zero p-values for simplicity
 
     //std::cout << "Get_Davies_PVal end" << std::endl;
     return result;
@@ -1366,7 +1362,7 @@ Rcpp::List Met_SKAT_Get_Pvalue( arma::vec &Score,  arma::mat &Phi,  arma::vec &r
 
 
   // If r_corr == 0
-  if (r_corr.n_elem == 1 && r_corr(0) == 0) {
+  if (r_corr(0) == 0) {
     Q.set_size(1);
     Q(0)= arma::accu(arma::square(Score)) / 2;
 
@@ -1405,6 +1401,7 @@ Rcpp::List Met_SKAT_Get_Pvalue( arma::vec &Score,  arma::mat &Phi,  arma::vec &r
      Phi = Phi_rho;
   }
     //std::cout << "Get_Davies_PVal here" << std::endl;
+    //r_corr.print("r_corr");
     Rcpp::List re = Get_Davies_PVal(Q, Phi, Q_res, isFast);
     if (r_corr.n_elem == 1) {
       re["Q"] = Q;
@@ -1535,21 +1532,23 @@ void get_SKAT_pvalue_cpp(arma::vec& Score,
 
   std::string method = "optimal.adj";
   bool isFast = false;
-  Rcpp::List out_SKAT_List = Met_SKAT_Get_Pvalue(Score, Phi, r_corr, method, isFast); 
-  
+  //r_corr.print("r_corr here");
+  Rcpp::List out_SKAT_List = Met_SKAT_Get_Pvalue(Score, Phi, r_corr, method, isFast);  
   BETA_Burden = arma::accu(Score) / arma::trace(Phi);
   error_code = 0;
   double p_value = out_SKAT_List["p.value"];
+  
+
+if(r_corr.n_elem > 1){
+  //std::cout << "p_value " << p_value << std::endl;
   //arma::vec Pvalue(3, arma::fill::zeros);
   Rcpp::RObject paramElement = out_SKAT_List["param"];
-  Rcpp::List param = Rcpp::as<Rcpp::List>(paramElement);
-  
-  
+  Rcpp::List param = Rcpp::as<Rcpp::List>(paramElement); 
   arma::vec rho = param["rho"];
   arma::vec p_val_each = param["p.val.each"];
-    
-
   Pvalue_SKATO = p_value;
+
+
   // Check conditions similar to the R logic
   if (p_val_each.is_empty() || rho.is_empty()) {
     error_code = 2;
@@ -1564,6 +1563,13 @@ void get_SKAT_pvalue_cpp(arma::vec& Score,
     Pvalue_SKAT = p_val_each[pos00];
     Pvalue_Burden = p_val_each[pos01];
     SE_Burden = std::abs(BETA_Burden / R::qnorm(p_val_each[pos01] / 2, 0, 1, true, false));
+  }
+}else if(r_corr.n_elem == 1){
+    if(r_corr[0] == 0){	
+	Pvalue_SKAT = p_value;
+    }else if(r_corr[0] == 1){
+	Pvalue_Burden = p_value;
+    }
   }
 }
 

@@ -49,13 +49,13 @@ SAIGE.Admixed = function(mu,
   n = length(mu) #sample size
 
   r.corr = 0
-  out.method = SKAT:::SKAT_Check_Method(method = "optimal.adj", r.corr = 0)
-  method = out.method$method
-  r.corr = out.method$r.corr
-
+  #out.method = SKAT:::SKAT_Check_Method(method = "optimal.adj", r.corr = 0)
+  #method = out.method$method
+  #r.corr = out.method$r.corr
+  method = "optimal.adj" 
   cat("r.corr\n")
   print(r.corr)
-  regionTestType = "SKAT-O"
+  regionTestType = "SKAT"
 
   region_list = checkGroupFile(groupFile)
   nRegions = region_list$nRegions

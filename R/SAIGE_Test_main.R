@@ -219,7 +219,8 @@ SPAGMMATtest = function(bgenFile = "",
 				#DosageCutoff_for_UltraRarePresence,
 
      if(is_admixed){
-	r.corr = c(0, 0.1^2, 0.2^2, 0.3^2, 0.5^2, 0.5, 1)
+        r.corr=c(0)
+	#r.corr = c(0, 0.1^2, 0.2^2, 0.3^2, 0.5^2, 0.5, 1)
      }	
       setRegion_GlobalVarsInCPP(
 				maxMAF_in_groupTest,

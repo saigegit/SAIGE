@@ -2312,7 +2312,7 @@ if(iswriteOutput){
                                 p_new,
                                 Scorevec,
                                 VarMat_sub,
-                                "SKAT-O",
+                                "SKAT",
 				scaleFactor);
 
    }
@@ -2332,16 +2332,17 @@ if(iswriteOutput){
     double P_cct_admixed = CCT_cpp(pvecforcct);
 
 
-    OutFile << "\t";
+    /*OutFile << "\t";
     OutFile << Pvalue_SKATO;
     OutFile << "\t";
     OutFile << Pvalue_Burden;
+    */
     OutFile << "\t";
     OutFile << Pvalue_SKAT;
-    OutFile << "\t";
-    OutFile << BETA_Burden;
-    OutFile << "\t";
-    OutFile << SE_Burden;
+    //OutFile << "\t";
+    //OutFile << BETA_Burden;
+    //OutFile << "\t";
+    //OutFile << SE_Burden;
     OutFile << "\t";
     OutFile << P_het_admixed;
     OutFile << "\t";
@@ -2393,16 +2394,19 @@ if(iswriteOutput){
     double P_cct_admixed_cond = CCT_cpp(pvecforcct_cond);
 
 
-    OutFile << "\t";
+    /*OutFile << "\t";
     OutFile << Pvalue_SKATO_cond;
     OutFile << "\t";
     OutFile << Pvalue_Burden_cond;
+    */
     OutFile << "\t";
     OutFile << Pvalue_SKAT_cond;
+    /*
     OutFile << "\t";
     OutFile << BETA_Burden_cond;
     OutFile << "\t";
     OutFile << SE_Burden_cond;
+    */
     OutFile << "\t";
     OutFile << P_het_admixed_cond;
     OutFile << "\t";
@@ -2417,6 +2421,7 @@ OutFile_singleInGroup.close();
  }
 }
 
+/*
 OutList.push_back(iswriteOutput, "iswriteOutput");
 
  if(t_isOutputMarkerList){
@@ -2432,7 +2437,7 @@ OutList.push_back(iswriteOutput, "iswriteOutput");
  if(t_regionTestType != "BURDEN" || t_isOutputMarkerList){
   OutList.push_back(annoMAFIndicatorMat, "annoMAFIndicatorMat");
  }
-
+*/
 
 
   return OutList;
@@ -3549,34 +3554,41 @@ bool openOutfile_single_admixed(std::string t_traitType, bool t_isCondition, boo
 	}//if(pvalVec.at(k) != "NA"){
 
 	}//for(unsigned int k = 0; k < pvalVec.size(); k++)
-
+/*
 		t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << "Pvalue_SKATO";
                 t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << "Pvalue_Burden";
-                t_OutFile_singleInGroup << "\t";
+*/
+		t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << "Pvalue_SKAT";
-                t_OutFile_singleInGroup << "\t";
+/*
+		t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << "BETA_Burden";
 		t_OutFile_singleInGroup << "\t";
-                t_OutFile_singleInGroup << "SE_SKATO";
-                t_OutFile_singleInGroup << "\t";
+                t_OutFile_singleInGroup << "SE_Burden";
+ */ 
+  		t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << "P_het_admixed";
                 t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << "P_hom_admixed";
                 t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << "P_cct_admixed";
  	if(t_isCondition){
+/*
 		t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << "Pvalue_SKATO_c";
                 t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << "Pvalue_Burden_c";
-                t_OutFile_singleInGroup << "\t";
+*/
+		t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << "Pvalue_SKAT_c";
-                t_OutFile_singleInGroup << "\t";
+/*
+		t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << "BETA_Burden_c";
 		t_OutFile_singleInGroup << "\t";
-                t_OutFile_singleInGroup << "SE_SKATO_c";
+                t_OutFile_singleInGroup << "SE_Burden_c";
+*/		
                 t_OutFile_singleInGroup << "\t";
                 t_OutFile_singleInGroup << "P_het_admixed_c";
                 t_OutFile_singleInGroup << "\t";
@@ -4321,11 +4333,11 @@ void mainAdmixedInCPP_inner(
                                 p_new,
                                 Scorevec,
                                 VarMat_sub,
-                                "SKAT-O",
+                                "SKAT",
                                 scaleFactor);
 
    }
-   std::string regionTestType = "SKAT-O";
+   std::string regionTestType = "SKAT";
 
     get_SKAT_pvalue_cpp(Scorevec,
                 VarMat_sub,
@@ -4338,20 +4350,23 @@ void mainAdmixedInCPP_inner(
                 error_code
                 );
     double P_het_admixed = get_jointScore_pvalue(Scorevec, VarMat_sub);
-    arma::vec pvecforcct = {Pvalue_SKATO, P_het_admixed, P_hom_admixed};
+    arma::vec pvecforcct = {Pvalue_SKAT, P_het_admixed, P_hom_admixed};
     double P_cct_admixed = CCT_cpp(pvecforcct);
 
-
+/*
     OutFile << "\t";
     OutFile << Pvalue_SKATO;
     OutFile << "\t";
     OutFile << Pvalue_Burden;
-    OutFile << "\t";
+*/
+   OutFile << "\t";
     OutFile << Pvalue_SKAT;
+/*
     OutFile << "\t";
     OutFile << BETA_Burden;
     OutFile << "\t";
     OutFile << SE_Burden;
+*/
     OutFile << "\t";
     OutFile << P_het_admixed;
     OutFile << "\t";
@@ -4401,17 +4416,20 @@ void mainAdmixedInCPP_inner(
         arma::vec pvecforcct_cond = {Pvalue_SKATO_cond, P_het_admixed_cond, P_hom_admixed_cond};
     double P_cct_admixed_cond = CCT_cpp(pvecforcct_cond);
 
-
+/*
     OutFile << "\t";
     OutFile << Pvalue_SKATO_cond;
     OutFile << "\t";
     OutFile << Pvalue_Burden_cond;
+*/
     OutFile << "\t";
     OutFile << Pvalue_SKAT_cond;
+/*    
     OutFile << "\t";
     OutFile << BETA_Burden_cond;
     OutFile << "\t";
     OutFile << SE_Burden_cond;
+*/
     OutFile << "\t";
     OutFile << P_het_admixed_cond;
     OutFile << "\t";
