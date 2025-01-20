@@ -97,14 +97,14 @@ checkGenoInput = function(bgenFile = "",
     
     cat("dosageFile type is ", dosageFileType, "\n")
 
-    if(dosageFileType == "vcf"){
-        #if (chrom == "") {
-        #    stop("ERROR! chrom needs to be specified for the vcf file\n")
-        #}
-	if(vcfField != "DS" & vcfField != "GT"){
-	    stop("vcfField has to be DS or GT\n")	
-	}
-    }
+    #if(dosageFileType == "vcf"){
+    #    #if (chrom == "") {
+    #    #    stop("ERROR! chrom needs to be specified for the vcf file\n")
+    #    #}
+#	if(vcfField != "DS" & vcfField != "GT"){
+#	    stop("vcfField has to be DS or GT\n")	
+#	}
+#    }
 
     return(dosageFileType)
 }	

@@ -160,6 +160,8 @@ bool imputeGenoAndFlip_fakeflip(arma::vec& t_GVec,
     t_altFreq = 1 - t_altFreq;
   }
 */
+
+/*
 if(nMissing > 0){
 
 switch(string_to_case.at(t_impute_method)) {
@@ -204,6 +206,7 @@ if(t_altFreq <= 0.5){
         //t_altCount = 2 * t_altFreq * dosagesSize;
      }
   //}
+*/
 
  for(unsigned int i = 0; i < dosagesSize; i++){
         if(t_GVec(i) == 0){
@@ -279,4 +282,14 @@ double add_logp(double p1, double p2)
         double  minp = std::min(p1,p2);
         double result = maxp+std::log(1+std::exp(minp-maxp));
         return(result);
+}
+
+
+std::string convertDoubletoStringPval(double t_pval){
+    char pValueBuf[100];
+    bool t_islogp;
+        sprintf(pValueBuf, "%.6E", t_pval);
+        t_islogp = false;
+    std::string buffAsStdStr = pValueBuf;
+    return(buffAsStdStr);    	
 }

@@ -153,6 +153,18 @@ mainAdmixedInCPP <- function(RegionList, t_genoType, t_outputFile, t_traitType, 
     invisible(.Call('_SAIGE_mainAdmixedInCPP', PACKAGE = 'SAIGE', RegionList, t_genoType, t_outputFile, t_traitType, t_n, t_regionTestType, t_weight_cond, t_isImputation, t_isFastTest, t_isMoreOutput, t_isWriteHeader))
 }
 
+Unified_getOneMarker_Admixed <- function(t_genoType, t_gIndex_prev, t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero, t_GVec, t_isImputation, t_vcfField) {
+    .Call('_SAIGE_Unified_getOneMarker_Admixed', PACKAGE = 'SAIGE', t_genoType, t_gIndex_prev, t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero, t_GVec, t_isImputation, t_vcfField)
+}
+
+mainMarkerAdmixedInCPP <- function(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth, t_NumberofANC) {
+    invisible(.Call('_SAIGE_mainMarkerAdmixedInCPP', PACKAGE = 'SAIGE', t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth, t_NumberofANC))
+}
+
+openOutfile_single_admixed_new <- function(t_traitType, t_isImputation, isappend, t_isMoreOutput, t_NumberofANC) {
+    .Call('_SAIGE_openOutfile_single_admixed_new', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend, t_isMoreOutput, t_NumberofANC)
+}
+
 closeGenoFile_plink <- function() {
     invisible(.Call('_SAIGE_closeGenoFile_plink', PACKAGE = 'SAIGE'))
 }

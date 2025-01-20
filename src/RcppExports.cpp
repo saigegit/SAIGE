@@ -558,6 +558,67 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// Unified_getOneMarker_Admixed
+bool Unified_getOneMarker_Admixed(std::string& t_genoType, uint64_t& t_gIndex_prev, uint64_t& t_gIndex, std::string& t_ref, std::string& t_alt, std::string& t_marker, uint32_t& t_pd, std::string& t_chr, double& t_altFreq, double& t_altCounts, double& t_missingRate, double& t_imputeInfo, bool& t_isOutputIndexForMissing, std::vector<uint>& t_indexForMissing, bool& t_isOnlyOutputNonZero, std::vector<uint>& t_indexForNonZero, arma::vec& t_GVec, bool t_isImputation, std::string t_vcfField);
+RcppExport SEXP _SAIGE_Unified_getOneMarker_Admixed(SEXP t_genoTypeSEXP, SEXP t_gIndex_prevSEXP, SEXP t_gIndexSEXP, SEXP t_refSEXP, SEXP t_altSEXP, SEXP t_markerSEXP, SEXP t_pdSEXP, SEXP t_chrSEXP, SEXP t_altFreqSEXP, SEXP t_altCountsSEXP, SEXP t_missingRateSEXP, SEXP t_imputeInfoSEXP, SEXP t_isOutputIndexForMissingSEXP, SEXP t_indexForMissingSEXP, SEXP t_isOnlyOutputNonZeroSEXP, SEXP t_indexForNonZeroSEXP, SEXP t_GVecSEXP, SEXP t_isImputationSEXP, SEXP t_vcfFieldSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string& >::type t_genoType(t_genoTypeSEXP);
+    Rcpp::traits::input_parameter< uint64_t& >::type t_gIndex_prev(t_gIndex_prevSEXP);
+    Rcpp::traits::input_parameter< uint64_t& >::type t_gIndex(t_gIndexSEXP);
+    Rcpp::traits::input_parameter< std::string& >::type t_ref(t_refSEXP);
+    Rcpp::traits::input_parameter< std::string& >::type t_alt(t_altSEXP);
+    Rcpp::traits::input_parameter< std::string& >::type t_marker(t_markerSEXP);
+    Rcpp::traits::input_parameter< uint32_t& >::type t_pd(t_pdSEXP);
+    Rcpp::traits::input_parameter< std::string& >::type t_chr(t_chrSEXP);
+    Rcpp::traits::input_parameter< double& >::type t_altFreq(t_altFreqSEXP);
+    Rcpp::traits::input_parameter< double& >::type t_altCounts(t_altCountsSEXP);
+    Rcpp::traits::input_parameter< double& >::type t_missingRate(t_missingRateSEXP);
+    Rcpp::traits::input_parameter< double& >::type t_imputeInfo(t_imputeInfoSEXP);
+    Rcpp::traits::input_parameter< bool& >::type t_isOutputIndexForMissing(t_isOutputIndexForMissingSEXP);
+    Rcpp::traits::input_parameter< std::vector<uint>& >::type t_indexForMissing(t_indexForMissingSEXP);
+    Rcpp::traits::input_parameter< bool& >::type t_isOnlyOutputNonZero(t_isOnlyOutputNonZeroSEXP);
+    Rcpp::traits::input_parameter< std::vector<uint>& >::type t_indexForNonZero(t_indexForNonZeroSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type t_GVec(t_GVecSEXP);
+    Rcpp::traits::input_parameter< bool >::type t_isImputation(t_isImputationSEXP);
+    Rcpp::traits::input_parameter< std::string >::type t_vcfField(t_vcfFieldSEXP);
+    rcpp_result_gen = Rcpp::wrap(Unified_getOneMarker_Admixed(t_genoType, t_gIndex_prev, t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero, t_GVec, t_isImputation, t_vcfField));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mainMarkerAdmixedInCPP
+void mainMarkerAdmixedInCPP(std::string& t_genoType, std::string& t_traitType, std::vector<std::string>& t_genoIndex_prev, std::vector<std::string>& t_genoIndex, bool& t_isMoreOutput, bool& t_isImputation, bool& t_isFirth, int t_NumberofANC);
+RcppExport SEXP _SAIGE_mainMarkerAdmixedInCPP(SEXP t_genoTypeSEXP, SEXP t_traitTypeSEXP, SEXP t_genoIndex_prevSEXP, SEXP t_genoIndexSEXP, SEXP t_isMoreOutputSEXP, SEXP t_isImputationSEXP, SEXP t_isFirthSEXP, SEXP t_NumberofANCSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string& >::type t_genoType(t_genoTypeSEXP);
+    Rcpp::traits::input_parameter< std::string& >::type t_traitType(t_traitTypeSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string>& >::type t_genoIndex_prev(t_genoIndex_prevSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string>& >::type t_genoIndex(t_genoIndexSEXP);
+    Rcpp::traits::input_parameter< bool& >::type t_isMoreOutput(t_isMoreOutputSEXP);
+    Rcpp::traits::input_parameter< bool& >::type t_isImputation(t_isImputationSEXP);
+    Rcpp::traits::input_parameter< bool& >::type t_isFirth(t_isFirthSEXP);
+    Rcpp::traits::input_parameter< int >::type t_NumberofANC(t_NumberofANCSEXP);
+    mainMarkerAdmixedInCPP(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth, t_NumberofANC);
+    return R_NilValue;
+END_RCPP
+}
+// openOutfile_single_admixed_new
+bool openOutfile_single_admixed_new(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput, int t_NumberofANC);
+RcppExport SEXP _SAIGE_openOutfile_single_admixed_new(SEXP t_traitTypeSEXP, SEXP t_isImputationSEXP, SEXP isappendSEXP, SEXP t_isMoreOutputSEXP, SEXP t_NumberofANCSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type t_traitType(t_traitTypeSEXP);
+    Rcpp::traits::input_parameter< bool >::type t_isImputation(t_isImputationSEXP);
+    Rcpp::traits::input_parameter< bool >::type isappend(isappendSEXP);
+    Rcpp::traits::input_parameter< bool >::type t_isMoreOutput(t_isMoreOutputSEXP);
+    Rcpp::traits::input_parameter< int >::type t_NumberofANC(t_NumberofANCSEXP);
+    rcpp_result_gen = Rcpp::wrap(openOutfile_single_admixed_new(t_traitType, t_isImputation, isappend, t_isMoreOutput, t_NumberofANC));
+    return rcpp_result_gen;
+END_RCPP
+}
 // closeGenoFile_plink
 void closeGenoFile_plink();
 RcppExport SEXP _SAIGE_closeGenoFile_plink() {
@@ -3252,6 +3313,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_set_flagSparseGRM_cur_SAIGE_org", (DL_FUNC) &_SAIGE_set_flagSparseGRM_cur_SAIGE_org, 0},
     {"_SAIGE_copy_singleInGroup", (DL_FUNC) &_SAIGE_copy_singleInGroup, 0},
     {"_SAIGE_mainAdmixedInCPP", (DL_FUNC) &_SAIGE_mainAdmixedInCPP, 11},
+    {"_SAIGE_Unified_getOneMarker_Admixed", (DL_FUNC) &_SAIGE_Unified_getOneMarker_Admixed, 19},
+    {"_SAIGE_mainMarkerAdmixedInCPP", (DL_FUNC) &_SAIGE_mainMarkerAdmixedInCPP, 8},
+    {"_SAIGE_openOutfile_single_admixed_new", (DL_FUNC) &_SAIGE_openOutfile_single_admixed_new, 5},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
     {"_SAIGE_getAlleleFreqVec", (DL_FUNC) &_SAIGE_getAlleleFreqVec, 0},

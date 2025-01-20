@@ -44,6 +44,7 @@ namespace VCF {
 
    //savvy::variant_group_iterator m_it_;
    std::string m_fmtField;
+   std::string m_fmtField_2;
    savvy::reader m_marker_file{""};
    variant_group_iterator m_it_;
 

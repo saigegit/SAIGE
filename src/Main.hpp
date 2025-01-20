@@ -447,4 +447,62 @@ void mainAdmixedInCPP(
 	bool t_isWriteHeader);
 
 
+void mainMarkerAdmixedInCPP(
+                           std::string & t_genoType,     // "PLINK", "BGEN"
+                           std::string & t_traitType,
+                           std::vector<std::string> & t_genoIndex_prev,
+                           std::vector<std::string> & t_genoIndex,
+                           bool & t_isMoreOutput,
+                           bool & t_isImputation,
+                           bool & t_isFirth,
+                           int t_NumberofANC);
+
+void writeOutfile_single_admixed_new(bool t_isMoreOutput,
+                        bool t_isImputation,
+                        bool t_isCondition,
+                        bool t_isFirth,
+                         int mFirth,
+                         int mFirthConverge,
+                        std::string t_traitType,
+                        std::vector<std::string> & chrVec,
+                        std::vector<std::string> & posVec,
+                        std::vector<std::string> & markerVec,
+                        std::vector<std::string> & refVec,
+                        std::vector<std::string> & altVec,
+                        std::vector<double> & altCountsVec,
+                        std::vector<double> & altFreqVec,
+                        std::vector<double> & imputationInfoVec,
+                        std::vector<double> & missingRateVec,
+                        std::vector<double> & BetaVec,
+                        std::vector<double> & seBetaVec,
+                        std::vector<double> & TstatVec,
+                        std::vector<double> & varTVec,
+                        std::vector<std::string> & pvalVec,
+                        std::vector<std::string> & pvalNAVec,
+                        std::vector<bool>  & isSPAConvergeVec,
+                        std::vector<double> & Beta_cVec,
+                        std::vector<double> & seBeta_cVec,
+                        std::vector<double> & Tstat_cVec,
+                        std::vector<double> & varT_cVec,
+                        std::vector<std::string> & pval_cVec,
+                        std::vector<std::string> & pvalNA_cVec,
+                        std::vector<double> & AF_caseVec,
+                        std::vector<double> & AF_ctrlVec,
+                        std::vector<uint32_t> & N_caseVec,
+                        std::vector<uint32_t> & N_ctrlVec,
+                        std::vector<double>  & N_case_homVec,
+                        std::vector<double>  & N_ctrl_hetVec,
+                        std::vector<double>  & N_case_hetVec,
+                        std::vector<double>  & N_ctrl_homVec,
+                        std::vector<uint32_t> & N_Vec,
+  std::vector<std::string> & pvalHet_Vec,
+  std::vector<std::string> & pvalHom_Vec,
+  std::vector<std::string> & pvalAdmixed_Vec,
+  std::vector<std::string> & pvalHet_cVec,
+  std::vector<std::string> & pvalHom_cVec,
+  std::vector<std::string> & pvalAdmixed_cVec,
+  int t_NumberofANC
+);
+
+bool openOutfile_single_admixed_new(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput, int t_NumberofANC);
 #endif
