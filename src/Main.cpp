@@ -4658,8 +4658,8 @@ void mainMarkerAdmixedInCPP(
    std::string pval, pval_noSPA, pval_c, pval_noSPA_c;
    int nanc = 0;
    if(j < t_NumberofANC){
-   //std::string vcfFieldtoRead = "ANC" + std::to_string(j+1);
-   std::string vcfFieldtoRead = "ANC" + std::to_string(2-j);
+   std::string vcfFieldtoRead = "ANC" + std::to_string(j+1);
+   //std::string vcfFieldtoRead = "ANC" + std::to_string(2-j);
    bool isReadMarker = Unified_getOneMarker_Admixed(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
