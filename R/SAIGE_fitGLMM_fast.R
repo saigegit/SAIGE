@@ -108,7 +108,6 @@ GetLambda0<-function(lin.pred,inC)
   {
     j = inC$timedata$newIndexWithTies[i]
     lambda0 = sum(demonVec[which(inC$caseIndexwithTies <= j)])
-    #cat("i: ", i, " j: ", j, " lambda0: ", lambda0, "\n")
     Lambda0[inC$timedata$orgIndex[i]] = lambda0
   }
   return(Lambda0)
@@ -135,6 +134,7 @@ Get_Coef = function(y, X, tau, family, alpha0, eta0,  offset, maxiterPCG, tolPCG
     eta = eta0	
   }
 
+
   for(i in 1:maxiter){
     if(!is.null(inC)){
       Lambda0 = GetLambda0(eta, inC)
@@ -142,7 +142,9 @@ Get_Coef = function(y, X, tau, family, alpha0, eta0,  offset, maxiterPCG, tolPCG
       Y = eta + (y - mu)/mu
       W = as.vector(mu)
     }
-    
+
+
+
     re.coef = getCoefficients(Y, X, W, tau, maxiter=maxiterPCG, tol=tolPCG)
     alpha = re.coef$alpha
     eta = re.coef$eta + offset
@@ -1270,6 +1272,19 @@ fitNULLGLMM = function(plinkFile = "",
 
         dataMerge = merge(mmat_nomissing, sampleListwithGeno, 
             by.x = "IID", by.y = "IIDgeno")
+
+        if(eventTimeCol != ""){
+            pheVec = dataMerge[,which(colnames(dataMerge) == phenoCol)]
+            minTime = min(dataMerge[which(pheVec == 1),eventTimeCol])
+            rmCensor = which(pheVec == 0 & dataMerge[,eventTimeCol] < minTime)
+            if(length(rmCensor) > 0){
+                dataMerge = dataMerge[-rmCensor,]
+		cat("After subsetting to samples with genotypes avaialble, ")
+                cat(length(rmCensor)," individuals that are censored before the first event is removed\n")
+            }
+        }
+
+
         dataMerge_sort = dataMerge[with(dataMerge, order(IndexGeno)), 
             ]
 
@@ -1458,6 +1473,7 @@ fitNULLGLMM = function(plinkFile = "",
 
         cat("glm:\n")
         print(fit0)
+	print(summary(fit0))
 
         obj.noK = NULL
         if (!skipModelFitting) {
