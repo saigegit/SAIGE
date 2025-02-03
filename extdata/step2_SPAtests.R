@@ -317,7 +317,7 @@ if(packageVersion("SAIGE")=="1.4.1"){
 )
 
 
-}else if(packageVersion("SAIGE")=="1.4.2"){
+}else if(packageVersion("SAIGE")>="1.4.2"){
   SPAGMMATtest(vcfFile=opt$vcfFile,
              vcfFileIndex=opt$vcfFileIndex,
              vcfField=opt$vcfField,
