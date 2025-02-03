@@ -395,12 +395,10 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   //for test
   //arma::vec timeoutput3 = getTime();
   if(!isScoreFast){
-	//std::cout << "scoreTest " << std::endl;  
   	is_gtilde = true;
   	scoreTest(t_GVec, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq, t_Tstat, t_var1, t_var2, t_gtilde, t_P2Vec, t_gy, is_region, iIndex);
   }else{
   	is_gtilde = false;
-	//std::cout << "scoreTestFast "  << std::endl;  
         scoreTestFast(t_GVec, iIndex, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq, t_Tstat, t_var1, t_var2);
   }
 
@@ -426,7 +424,6 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 
   double gmuNB;
 
-//std::cout << "ok1" << std::endl;
 
 
 if((StdStat > m_SPA_Cutoff || std::isnan(StdStat)) && m_traitType != "quantitative" && t_isER){
@@ -435,10 +432,8 @@ if((StdStat > m_SPA_Cutoff || std::isnan(StdStat)) && m_traitType != "quantitati
 	t_isER = false;
 }
 
-//std::cout << "ok2" << std::endl;
 
 if(!t_isER){
-
 
   if(!std::isnan(StdStat) && (StdStat > m_SPA_Cutoff) && m_traitType != "quantitative"){
 
@@ -609,13 +604,15 @@ if(!t_isER){
    }
 
 }else{ //if(!t_isER){
-
+double t_GVecMAC = arma::accu(t_GVec); 
     arma::mat Z_er(t_GVec.n_elem, 1);
     Z_er.col(0) = t_GVec;
     arma::vec res_er = m_res;
     arma::vec pi1_er = m_mu;
     arma::vec resout_er = m_resout;
-    double pval_ER =  SKATExactBin_Work(Z_er, res_er, pi1_er, m_n_case, iIndex, iIndexComVec, resout_er, 2e+6, 1e+4, 1e-6, 1);
+    //double pval_ER =  SKATExactBin_Work(Z_er, res_er, pi1_er, m_n_case, iIndex, iIndexComVec, resout_er, 2e+6, 1e+4, 1e-6, 1);
+    //std::cout << "t_GVecMAC " << t_GVecMAC << std::endl;
+    double pval_ER = 1.0;
     char pValueBuf_ER[100];
     sprintf(pValueBuf_ER, "%.6E", pval_ER);
     std::string buffAsStdStr_ER = pValueBuf_ER;
@@ -798,7 +795,6 @@ if(!t_isER){
     gNB.clear();
 
 
-//std::cout << "ok3" << std::endl;
 
     if(is_region && !is_gtilde){
 	getadjGFast(t_GVec, t_gtilde, iIndex);

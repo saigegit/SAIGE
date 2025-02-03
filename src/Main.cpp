@@ -4597,6 +4597,8 @@ void mainMarkerAdmixedInCPP(
 
 
   for(int i = 0; i < q; i++){
+    arma::ivec includeTestANCvec(t_NumberofANC+1, arma::fill::zeros);
+     
     if((i+1) % g_marker_chunksize == 0){
       std::cout << "Completed " << (i+1) << "/" << q << " markers in the chunk." << std::endl;
     }
@@ -4680,7 +4682,6 @@ void mainMarkerAdmixedInCPP(
    //arma::vec timeoutput2 = getTime();
    //printTime(timeoutput1, timeoutput2, "Unified_getOneMarker");
    t_GVecHom = t_GVecHom + t_GVec;
-
    altCounts = arma::accu(t_GVec);
    altFreq = altCounts/double(nanc);
 
@@ -4756,7 +4757,7 @@ if(j == 0){
 
     // Quality Control (QC) based on missing rate, MAF, and MAC
     if((missingRate > g_missingRate_cutoff) || (MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff || imputeInfo < g_marker_minINFO_cutoff)){
-
+	includeTestANCvec(j) = 1;
       continue;
     }else{
     // Check UTIL.cpp
@@ -4780,9 +4781,6 @@ if(j == 0){
         continue;
    }else{
 
-   if(j < t_NumberofANC){
-	numancresults = numancresults + 1;
-   } 
 
     //arma::vec timeoutput4 = getTime();
     //printTime(timeoutput3, timeoutput4, "imputeGenoAndFlip");
@@ -4826,21 +4824,31 @@ if(j == 0){
     bool is_region = true;
 
     if(MAC > g_MACCutoffforER){
+   	if(j < t_NumberofANC){
+		numancresults = numancresults + 1;
+   	}	 
       Unified_getMarkerPval(
                     t_GVec,
                           false, // bool t_isOnlyOutputNonZero,
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA,  Tstat, gy, varT,
                           altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false);
     }else{
-      Unified_getMarkerPval(
+    	if(t_traitType != "quantitative"){
+    		includeTestANCvec(j) = 1;
+		continue;
+    }
+      /*Unified_getMarkerPval(
                     t_GVec,
                           false, // bool t_isOnlyOutputNonZero,
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,
                           altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true);
+			  */
     }
 
-    double pval_num;
 
+    if(includeTestANCvec(j) == 0){
+    double pval_num;
+    
     try {
         pval_num = std::stod(pval);
     } catch (const std::invalid_argument&) {
@@ -4850,7 +4858,7 @@ if(j == 0){
         std::cerr << "Argument is out of range for a double\n";
         pval_num = 0;
     }
-
+/*
     if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest)){
       ptr_gSAIGEobj->set_flagSparseGRM_cur(true);
 
@@ -4873,11 +4881,10 @@ if(j == 0){
                           false, // bool t_isOnlyOutputNonZero,
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,
                           altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true);
-
-
      }
      }
-
+*/
+     
   if(j < t_NumberofANC){
    P1Mat.row(j) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*gtildeVec.t();
    P2Mat.col(j) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*t_P2Vec;
@@ -4903,7 +4910,6 @@ if(j == 0){
 
    indexNonZeroVec_arma.clear();
    indexZeroVec_arma.clear();
-   //std::cout << "isSPAConverge " << isSPAConverge << std::endl;
     BetaVec.at(k) = Beta * (1 - 2*flip);  // Beta if flip = false, -1*Beta is flip = true
     seBetaVec.at(k) = seBeta;
     pvalVec.at(k) = pval;
@@ -4956,6 +4962,8 @@ if(j == 0){
         N_Vec.at(k) = nanc;
       }
 
+       }//if(includeTestANCvec(j) == 0){
+     
      }// if((MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff)){
 
      } //    if((missingRate > g_missingRate_cutoff) || (MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff || imputeInfo < g_marker_minINFO_cutoff)){
