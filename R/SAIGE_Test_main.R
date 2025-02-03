@@ -116,7 +116,7 @@ SPAGMMATtest = function(bgenFile = "",
 		 is_output_markerList_in_groupTest = FALSE,
 		 is_fastTest = FALSE,
 		 is_admixed = FALSE,
-		 NumberofANC = 2,
+		 number_of_ancestry=2,
 		 pval_cutoff_for_fastTest = 0.05, 
 		 max_MAC_use_ER = 4, 
 		 subSampleFile = ""
@@ -529,7 +529,7 @@ SPAGMMATtest = function(bgenFile = "",
                    isCondition,
                    is_overwrite_output,
                    objGeno$anyInclude, 
-		   NumberofANC)
+		   number_of_ancestry)
 	
      }
 
