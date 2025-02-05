@@ -1,5 +1,8 @@
 SAIGE.Marker = function(traitType,
 			genoType,
+			bgenFileIndex,
+                        idstoIncludeFile,
+                        rangestoIncludeFile,
 			genoIndex_prev,
                         genoIndex,
 			CHROM,
@@ -36,7 +39,7 @@ SAIGE.Marker = function(traitType,
   }
 
   ## set up an object for genotype
-  if(genoType != "vcf"){
+  if(genoType == "plink"){
       #markerInfo = objGeno$markerInfo
     if(LOCO){
       genoIndex = genoIndex[which(CHROM == chrom)]
@@ -72,7 +75,7 @@ SAIGE.Marker = function(traitType,
       i = outIndex    
     }
     
-  }else{
+  }else if(genoType == "vcf"){
    if(!isAnyInclude){	  
     if(chrom == ""){
       stop("chrom needs to be specified for single-variant assoc tests when using VCF as input\n")
@@ -95,9 +98,172 @@ SAIGE.Marker = function(traitType,
 	is_marker_test = FALSE    
 	stop("No markers are left in VCF")
     }
-  }
+  }else if(genoType == "bgen"){
+    IDsToInclude=NULL
+    RangesToInclude=NULL
 
-  chrom = "InitialChunk"
+    db_con <- RSQLite::dbConnect(RSQLite::SQLite(), bgenFileIndex)
+    on.exit(RSQLite::dbDisconnect(db_con), add = TRUE)
+
+   anyInclude=FALSE
+   if(idstoIncludeFile != ""){
+    IDsToInclude = data.table::fread(idstoIncludeFile, header = F, colClasses = c("character"), data.table=F)
+    if(ncol(IDsToInclude) != 1){
+      stop("'idstoIncludeFile' of ", idstoIncludeFile, " should only include one column.")
+    }else{
+      IDsToInclude = IDsToInclude[,1]
+      cat(length(IDsToInclude), " marker IDs are found in the idstoIncludeFile file\n")
+      anyInclude=TRUE  
+    }
+   }
+  if(rangestoIncludeFile != ""){
+    RangesToInclude = data.table::fread(rangestoIncludeFile, header = F, colClasses = c("character", "numeric", "numeric"), data.table=F)
+    if(ncol(RangesToInclude) != 3){
+      stop("rangestoIncludeFile should only include three columns.")
+    }else{
+      cat(nrow(RangesToInclude), " ranges are in rangestoIncludeFile\n")
+    }
+    anyInclude=TRUE
+    colnames(RangesToInclude) = c("CHROM", "START", "END")
+    if(nrow(RangesToInclude) > 1){cat("WARNING, only the first line of ",rangestoIncludeFile, " will be used\n")}
+  } 
+
+if(FALSE){
+    if(LOCO | chrom != ""){
+
+	if(!anyInclude){
+   		query <- "SELECT chromosome, position, file_start_position, size_in_bytes
+             		FROM Variant
+                       		WHERE chromosome = ?"
+   	}else{
+        	if(!is.null(IDsToInclude) > 0){
+           		id_list <- paste0("'", IDsToInclude, "'", collapse = ", ")
+        		query <- paste("
+  				SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+  				FROM Variant
+  				WHERE chromosome = ?
+    				AND (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")", sep = "")
+        	}else if(!is.null(RangesToInclude)){
+			CHROM=RangesToInclude$CHROM[1]
+			START=RangesToInclude$START[1]
+			END=RangesToInclude$END[1]
+			query <- paste("
+                                SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                                FROM Variant
+                                WHERE chromosome = ?
+                                AND  chromosome =", CHROM, 
+                		"AND position >= ", START, 
+                		"AND position <= ", END)
+		}
+   	}	
+    }else{
+
+       if(!anyInclude){
+                query <- "SELECT chromosome, position, file_start_position, size_in_bytes
+                        FROM Variant"
+        }else{
+                if(!is.null(IDsToInclude) > 0){
+                        id_list <- paste0("'", IDsToInclude, "'", collapse = ", ")
+                        query <- paste("
+                                SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                                FROM Variant
+                                WHERE (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")", sep = "")
+                }else if(!is.null(RangesToInclude)){
+                        CHROM=RangesToInclude$CHROM[1]
+                        START=RangesToInclude$START[1]
+                        END=RangesToInclude$END[1]
+                        query <- paste("
+                                SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                                FROM Variant
+                                WHERE  chromosome =", CHROM,
+                                "AND position >= ", START,
+                                "AND position <= ", END)
+                }
+        }
+    }
+   
+}
+
+   if(LOCO | chrom != ""){
+
+        if(!anyInclude){
+                query <- "SELECT COUNT(*) AS total_variants
+                        FROM Variant
+                                WHERE chromosome = ?"
+        }else{
+                if(!is.null(IDsToInclude)){
+                        id_list <- paste0("'", IDsToInclude, "'", collapse = ", ")
+                        query <- paste("SELECT COUNT(*) AS total_variants
+                                FROM Variant
+                                WHERE chromosome = ?
+                                AND (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")", sep = "")
+
+                }else if(!is.null(RangesToInclude)){
+                        CHROM=RangesToInclude$CHROM[1]
+                        START=RangesToInclude$START[1]
+                        END=RangesToInclude$END[1]
+                        query <- paste("
+				  SELECT COUNT(*) AS total_variants
+                                FROM Variant
+                                WHERE chromosome = ?
+                                AND  chromosome =", CHROM,
+                                "AND position >= ", START,
+                                "AND position <= ", END)
+                }
+        }
+       count_result <- RSQLite::dbGetQuery(db_con, query, params = list(chrom))
+    }else{
+
+       if(!anyInclude){
+                query <- "  SELECT COUNT(*) AS total_variants
+                        FROM Variant"
+        }else{
+                if(!is.null(IDsToInclude)){
+                        id_list <- paste0("'", IDsToInclude, "'", collapse = ", ")
+                        query <- paste("SELECT COUNT(*) AS total_variants
+                                FROM Variant
+                                WHERE (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")", sep = "")
+                }else if(!is.null(RangesToInclude)){
+                        CHROM=RangesToInclude$CHROM[1]
+                        START=RangesToInclude$START[1]
+                        END=RangesToInclude$END[1]
+                        query <- paste("
+				  SELECT COUNT(*) AS total_variants
+                                FROM Variant
+                                WHERE  chromosome =", CHROM,
+                                "AND position >= ", START,
+                                "AND position <= ", END)
+                }
+        }
+	count_result <- RSQLite::dbGetQuery(db_con, query)
+    } 
+
+    total_variants <- count_result$total_variants
+    cat("total_variants ", total_variants, "\n")
+    nChunks = ceiling(total_variants / nMarkersEachChunk)
+
+    if(nChunks == 0){
+          stop("No markers on chrom ", chrom, " are found\n")
+    }
+
+
+    cat("Number of all markers to test:\t", total_variants, "\n")
+    cat("Number of markers in each chunk:\t", nMarkersEachChunk, "\n")
+    cat("Number of chunks for all markers:\t", nChunks, "\n")
+    if(outIndex > nChunks){
+      cat("The analysis has been finished! Please delete ", OutputFileIndex, " if the analysis needs to be run again or set --is_overwrite_output=TRUE\n")
+      is_marker_test = FALSE
+    }else{
+      is_marker_test = TRUE
+      i = outIndex
+    }
+
+    offset <- 0
+    if(nChunks == 1){
+	nMarkersEachChunk = total_variants 
+    }
+  }
+  #chrom = "InitialChunk"
   #set_flagSparseGRM_cur_SAIGE_org()
   while(is_marker_test){
   #for(i in outIndex:nChunks)
@@ -105,7 +271,7 @@ SAIGE.Marker = function(traitType,
 #time_left = system.time({
 
 
-    if(genoType != "vcf"){	
+    if(genoType == "plink"){	
       tempList = genoIndexList[[i]]
       genoIndex = as.character(format(tempList$genoIndex, scientific = FALSE))
       tempChrom = tempList$chrom
@@ -116,6 +282,84 @@ SAIGE.Marker = function(traitType,
       }
     }
 
+
+
+    if(genoType == "bgen"){
+
+    if(LOCO | chrom != ""){
+	chrom = "01"
+        if(!anyInclude){
+                #query <-  paste("SELECT chromosome, position, file_start_position, size_in_bytes
+                 #       FROM Variant
+                 #               WHERE chromosome = ?
+	#			LIMIT", nMarkersEachChunk, "OFFSET", offset)
+                query <-  paste("SELECT chromosome, position, file_start_position, size_in_bytes
+                        FROM Variant
+			WHERE chromosome= ?
+				LIMIT", nMarkersEachChunk, "OFFSET", offset)
+
+        }else{
+                if(!is.null(IDsToInclude)){
+                        id_list <- paste0("'", IDsToInclude, "'", collapse = ", ")
+                        query <- paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                                FROM Variant
+                                WHERE chromosome = ?
+                                AND (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")
+				LIMIT", nMarkersEachChunk, "OFFSET", offset, sep = " ")
+                }else if(!is.null(RangesToInclude)){
+                        CHROM=RangesToInclude$CHROM[1]
+                        START=RangesToInclude$START[1]
+                        END=RangesToInclude$END[1]
+                        query <- paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                                FROM Variant
+                                WHERE chromosome = ?
+                                AND  chromosome =", CHROM,
+                                "AND position >= ", START,
+                                "AND position <= ", END,
+				"LIMIT", nMarkersEachChunk, "OFFSET", offset)
+                }
+        }
+	query_result <- RSQLite::dbGetQuery(db_con, query, params = list(chrom))
+	#query_result <- RSQLite::dbGetQuery(db_con, query)
+    }else{
+
+       if(!anyInclude){
+                query <- paste("SELECT chromosome, position, file_start_position, size_in_bytes
+                        FROM Variant
+			LIMIT", nMarkersEachChunk, "OFFSET", offset)
+        }else{
+                if(!is.null(IDsToInclude) > 0){
+                        id_list <- paste0("'", IDsToInclude, "'", collapse = ", ")
+                        query <- paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                                FROM Variant
+                                WHERE (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")
+				LIMIT", nMarkersEachChunk, "OFFSET", offset, sep = " ")
+                }else if(!is.null(RangesToInclude)){
+                        CHROM=RangesToInclude$CHROM[1]
+                        START=RangesToInclude$START[1]
+                        END=RangesToInclude$END[1]
+                        query <- paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                                FROM Variant
+                                WHERE  chromosome =", CHROM,
+                                "AND position >= ", START,
+                                "AND position <= ", END,
+				"LIMIT", nMarkersEachChunk, "OFFSET", offse)	
+                }
+        }
+	query_result <- RSQLite::dbGetQuery(db_con, query)
+    }
+
+	print(head(query_result))
+	#markerInfo <- RSQLite::fetch(query_result, n = -1)
+	markerInfo=query_result
+	genoIndex_prev = as.character(markerInfo$file_start_position + markerInfo$size_in_bytes)
+	genoIndex = as.character(markerInfo$file_start_position)
+
+	print(length(genoIndex))
+	print(length(genoIndex_prev))
+	offset <- offset + nMarkersEachChunk
+	#RSQLite::dbClearResult(query_result)
+    }
     #print("tempList")
     #print(tempList)
     #print(tempList$genoIndex)
@@ -197,6 +441,9 @@ SAIGE.Marker = function(traitType,
 	  
   } #while(is_marker_test){
 
+  if(genoType == "bgen"){
+    RSQLite::dbDisconnect(db_con)
+  }
   # information to users
   output = paste0("Analysis done! The results have been saved to '", OutputFile,"'.")
 
