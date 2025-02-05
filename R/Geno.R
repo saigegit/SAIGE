@@ -174,31 +174,16 @@ setGenoInput = function(bgenFile = "",
     #markerInfo is a data.table 
     if(AlleleOrder == "alt-first")
       names(markerInfo) = c("CHROM", "ID", "POS", "ALT", "REF")
-      #markerInfo = markerInfo[,c(1,2,3,5,4)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
     if(AlleleOrder == "ref-first")
       names(markerInfo) = c("CHROM", "ID", "POS", "REF", "ALT")
-      #markerInfo = markerInfo[,c(1,2,3,4,5)]  # https://www.cog-genomics.org/plink/2.0/formats#bim
-    #colnames(markerInfo) = c("CHROM", "ID", "POS", "REF", "ALT")
-    #colnames(markerInfo) = c("CHROM", "POS", "ID", "REF", "ALT")
-    #markerInfo$ID = paste0(markerInfo$CHROM,":",markerInfo$POS, "_", markerInfo$REF,"/", markerInfo$ALT)
-    markerInfo$genoIndex = 1:nrow(markerInfo) - 1  # -1 is to convert 'R' to 'C++' 
-    markerInfo$genoIndex_prev = rep(0, length(markerInfo$genoIndex))
+      markerInfo$genoIndex = 1:nrow(markerInfo) - 1  # -1 is to convert 'R' to 'C++' 
+      markerInfo$genoIndex_prev = rep(0, length(markerInfo$genoIndex))
     if(chrom != ""){
       markerInfo = markerInfo[which(markerInfo[,1] == chrom), ]
     }
-    #markerInfo$ID2 = lapply(markerInfo$ID, splitreformatMarkerIDinBgen)    
-    #markerInfo$ID2 = paste0(markerInfo$CHROM,":",markerInfo$POS, ":", markerInfo$REF,":", markerInfo$ALT)
-#    markerInfo[,POS:=NULL]
-    #print(is.data.table(markerInfo))
     markerInfo[,REF:=NULL]
     markerInfo[,ALT:=NULL]
-    #setkeyv(markerInfo, c("ID","ID2"))
     setkeyv(markerInfo, c("ID"))
-    #markerInfo$genoIndex_prev = NULL
-    #sampleInfo = data.table::fread(famFile, select = c(2), data.table=F)
-    #samplesInGeno = sampleInfo[,1]
-    #SampleIDs = updateSampleIDs(SampleIDs, samplesInGeno)
-    #markerInfo$ID = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$REF, "/", markerInfo$ALT) 
     setPLINKobjInCPP(bimFile, famFile, bedFile, sampleInModel, AlleleOrder)
   }
   
@@ -237,7 +222,6 @@ setGenoInput = function(bgenFile = "",
 	}
     }else{
 	samplesInGeno = getSampleIDsFromBGEN(bgenFile)
- 	#print(samplesInGeno[1:100])		    
     } 
 
       #time_geno_1a = proc.time()
@@ -245,7 +229,7 @@ setGenoInput = function(bgenFile = "",
         #cat("time_geno_1a - time_geno_1\n")
 	  #print(time_geno_1a - time_geno_1)
 
-
+if(FALSE){
     db_con <- RSQLite::dbConnect(RSQLite::SQLite(), bgenFileIndex)
     on.exit(RSQLite::dbDisconnect(db_con), add = TRUE)
         #time_geno_1a2 = proc.time()
@@ -355,6 +339,9 @@ if(chrom != ""){
 
     #setkeyv(markerInfo, c("ID","ID2"))
     #markerInfo$ID2 = paste0(markerInfo$CHROM,":", markerInfo$POS ,"_", markerInfo$ALT, "/", markerInfo$REF)
+
+}#if FALSE
+        markerInfo = NULL
     setBGENobjInCPP(bgenFile, bgenFileIndex, t_SampleInBgen = samplesInGeno, t_SampleInModel = sampleInModel, AlleleOrder)
   }
  
@@ -392,7 +379,7 @@ if(chrom != ""){
       cat(length(IDsToInclude), " marker IDs are found in the idstoIncludeFile file\n")
     }
 
-  if(dosageFileType != "vcf"){
+  if(dosageFileType == "plink"){
     if(!is.null(markerInfo$ID2)){
 
     	posRows = which((markerInfo$ID %in% IDsToInclude) | (markerInfo$ID2 %in% IDsToInclude))
@@ -419,7 +406,7 @@ if(chrom != ""){
     }
 
     colnames(RangesToInclude) = c("CHROM", "START", "END")
- if(dosageFileType != "vcf"){ 
+ if(dosageFileType == "vcf"){ 
    if(nrow(RangesToInclude) > 0){
     for(i in 1:nrow(RangesToInclude)){
       CHROM1 = RangesToInclude$CHROM[i]
@@ -479,7 +466,7 @@ if(FALSE){
   #cat("Based on the 'GenoFile' and 'GenoFileIndex',", genoType, "format is used for genotype data.\n")
 
   if(anyInclude){
-   if(dosageFileType != "vcf"){	  
+   if(dosageFileType == "plink"){	  
     markerInfo = subset(markerInfo, ID %in% markersInclude)
    }
   }

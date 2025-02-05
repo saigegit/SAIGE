@@ -1127,7 +1127,11 @@ fitNULLGLMM = function(plinkFile = "",
         for (i in c(phenoCol, covarColList, sampleIDColinphenoFile)) {
             if (!(i %in% colnames(data))) {
                 stop("ERROR! column for ", i, " does not exist in the phenoFile \n")
-            }else{
+            }
+	}    
+	
+	
+	#}else{
 		if(eventTimeCol != ""){
                     if(!(eventTimeCol %in% colnames(data))){
                         stop("ERROR! eventTimeCol does not exsit in the phenoFile \n")
@@ -1136,16 +1140,20 @@ fitNULLGLMM = function(plinkFile = "",
                     if(!is.null(eventTimeBinSize)){
                         cat("eventTimeBinSize is specified, so event time will be grouped by bins with size ", eventTimeBinSize, "\n")
                         minEventTime = min(data[,eventTimeCol])
+			cat("minEventTime ", minEventTime, "\n")
                         data$eventTimeNew = (data[,eventTimeCol] - minEventTime) %/% eventTimeBinSize + 1
                         data$eventTimeOrg = data[,eventTimeCol]
                         data[,eventTimeCol] = data$eventTimeNew
                     }
-                }
+		    data = data[,which(colnames(data) %in% c(phenoCol, covarColList, sampleIDColinphenoFile, eventTimeCol)), drop=F]	
+                }else{
+		    data = data[,which(colnames(data) %in% c(phenoCol, covarColList, sampleIDColinphenoFile)), drop=F]	
 
-		data = data[,which(colnames(data) %in% c(phenoCol, covarColList, sampleIDColinphenoFile, eventTimeCol)), drop=F]	
+		}
+
 		data = data[complete.cases(data),,drop=F]
-	    }		    
-        }
+	    #}		    
+        #}
 
 	if(SampleIDIncludeFile != ""){
 		if(!file.exists(SampleIDIncludeFile)){
@@ -1554,13 +1562,17 @@ fitNULLGLMM = function(plinkFile = "",
 
 	    }
 
+	if(!is.null(eventTime)){
+	   modglmm$minEventTime = minEventTime
+	   modglmm$eventTimeBinSize = eventTimeBinSize
+	}
 
             modglmm$useSparseGRMtoFitNULL = useSparseGRMtoFitNULL 
             #save(modglmm, file = modelOut)
             tau = modglmm$theta
       
 	    alpha0 = modglmm$coefficients
-
+	 
   	    if(!is.null(out.transform) & is.null(fit0$offset)){
 		coef.alpha<-Covariate_Transform_Back(alpha0, out.transform$Param.transform)
 	    	modglmm$coefficients = coef.alpha
@@ -1598,6 +1610,10 @@ fitNULLGLMM = function(plinkFile = "",
                 #save(modglmm, file = modelOut)
                 set_Diagof_StdGeno_LOCO()
 		modglmm$LOCOResult = list()
+
+
+
+
                 for(j in 1:22){
                         startIndex = chromosomeStartIndexVec[j]
                         endIndex = chromosomeEndIndexVec[j]
@@ -2896,3 +2912,4 @@ extractVarianceRatio = function(obj.glmm.null,
   print(data)
 
 }
+
