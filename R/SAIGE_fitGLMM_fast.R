@@ -1127,7 +1127,8 @@ fitNULLGLMM = function(plinkFile = "",
         for (i in c(phenoCol, covarColList, sampleIDColinphenoFile)) {
             if (!(i %in% colnames(data))) {
                 stop("ERROR! column for ", i, " does not exist in the phenoFile \n")
-            }else{
+            }
+	}    
 		if(eventTimeCol != ""){
                     if(!(eventTimeCol %in% colnames(data))){
                         stop("ERROR! eventTimeCol does not exsit in the phenoFile \n")
@@ -1140,12 +1141,12 @@ fitNULLGLMM = function(plinkFile = "",
                         data$eventTimeOrg = data[,eventTimeCol]
                         data[,eventTimeCol] = data$eventTimeNew
                     }
-                }
+		   data = data[,which(colnames(data) %in% c(phenoCol, covarColList, sampleIDColinphenoFile, eventTimeCol)), drop=F]	
+                }else{
+		   data = data[,which(colnames(data) %in% c(phenoCol, covarColList, sampleIDColinphenoFile)), drop=F]	
+		}
 
-		data = data[,which(colnames(data) %in% c(phenoCol, covarColList, sampleIDColinphenoFile, eventTimeCol)), drop=F]	
 		data = data[complete.cases(data),,drop=F]
-	    }		    
-        }
 
 	if(SampleIDIncludeFile != ""){
 		if(!file.exists(SampleIDIncludeFile)){
@@ -1566,7 +1567,11 @@ fitNULLGLMM = function(plinkFile = "",
 	    	modglmm$coefficients = coef.alpha
   	    }
 
-            
+
+	    if(eventTimeCol != ""){
+		modglmm$minEventTime = minEventTime
+		modglmm$eventTimeBinSize = eventTimeBinSize	
+            }
 
             if(LOCO & isLowMemLOCO){
                 modglmm$LOCOResult = NULL
