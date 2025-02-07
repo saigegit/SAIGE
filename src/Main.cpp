@@ -4702,7 +4702,7 @@ void mainMarkerAdmixedInCPP(
     nanc = 2*n;
   }
 
-   //std::cout << "t_GVec0.size()) " << t_GVec0.size() << std::endl;
+   //std::cout << "t_GVec.size()) " << t_GVec.size() << std::endl;
    //arma::vec t_GVec(t_GVec0.size());
    //arma::vec t_GVec = arma::conv_to< arma::colvec >::from(t_GVec0);
 
@@ -4744,20 +4744,20 @@ if(j == 0){
     // MAF and MAC are for Quality Control (QC)
     double MAF = std::min(altFreq, 1 - altFreq);
     double MAC = MAF * nanc * (1 - missingRate);
-    /*
-   std::cout << "k " << k << std::endl;  
-   std::cout << "missingRate " << missingRate << std::endl;
-   std::cout << "MAF " << MAF << std::endl;
-   std::cout << "MAC " << MAC << std::endl;
-   std::cout << "altFreq " << altFreq << std::endl;
-   std::cout << "altCounts " << altCounts << std::endl;
-   std::cout << "n " << n << std::endl;
-   */
+    
+   //std::cout << "k " << k << std::endl;  
+   //std::cout << "missingRate " << missingRate << std::endl;
+   //std::cout << "MAF " << MAF << std::endl;
+   //std::cout << "MAC " << MAC << std::endl;
+   //std::cout << "altFreq " << altFreq << std::endl;
+   //std::cout << "altCounts " << altCounts << std::endl;
+   //std::cout << "n " << n << std::endl;
+   
 
 
     // Quality Control (QC) based on missing rate, MAF, and MAC
     if((missingRate > g_missingRate_cutoff) || (MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff || imputeInfo < g_marker_minINFO_cutoff)){
-	includeTestANCvec(j) = 1;
+      includeTestANCvec(j) = 1;
       continue;
     }else{
     // Check UTIL.cpp
@@ -4778,7 +4778,8 @@ if(j == 0){
     MAF = std::min(altFreq, 1 - altFreq);
 
    if((MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff)){
-        continue;
+        includeTestANCvec(j) = 1;
+   	continue;
    }else{
 
 
@@ -4833,10 +4834,10 @@ if(j == 0){
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA,  Tstat, gy, varT,
                           altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false);
     }else{
-    	if(t_traitType != "quantitative"){
+    	//if(t_traitType != "quantitative"){
     		includeTestANCvec(j) = 1;
 		continue;
-    }
+    	//}
       /*Unified_getMarkerPval(
                     t_GVec,
                           false, // bool t_isOnlyOutputNonZero,
