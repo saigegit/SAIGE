@@ -3,7 +3,7 @@
 #options(stringsAsFactors=F, scipen = 999)
 options(stringsAsFactors=F)
 #library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/GATE_SAIGE/install/SAIGE_GATE")
-library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/GATE_SAIGE/install_1.4.1")
+library(SAIGE)
 BLASctl_installed <- require(RhpcBLASctl)
 library(optparse)
 library(data.table)
