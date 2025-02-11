@@ -128,6 +128,7 @@ SAIGE.Marker = function(traitType,
     if(nrow(RangesToInclude) > 1){cat("WARNING, only the first line of ",rangestoIncludeFile, " will be used\n")}
   } 
 
+
 if(FALSE){
     if(LOCO | chrom != ""){
 
@@ -184,7 +185,7 @@ if(FALSE){
    
 }
 
-   if(LOCO | chrom != ""){
+   if(LOCO){
 
         if(!anyInclude){
                 query <- "SELECT COUNT(*) AS total_variants
@@ -196,14 +197,17 @@ if(FALSE){
                         query <- paste("SELECT COUNT(*) AS total_variants
                                 FROM Variant
                                 WHERE chromosome = ?
-                                AND (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")", sep = "")
+                                AND (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")", 
+				"OR (CONCAT(chromosome, ':', position, ':', allele2, ':', allele1)) IN (", id_list, ")", 
+				"OR (rsid) IN (", id_list, ")",
+				sep = "")
 
                 }else if(!is.null(RangesToInclude)){
                         CHROM=RangesToInclude$CHROM[1]
                         START=RangesToInclude$START[1]
                         END=RangesToInclude$END[1]
                         query <- paste("
-				  SELECT COUNT(*) AS total_variants
+				SELECT COUNT(*) AS total_variants
                                 FROM Variant
                                 WHERE chromosome = ?
                                 AND  chromosome =", CHROM,
@@ -213,16 +217,23 @@ if(FALSE){
         }
        count_result <- RSQLite::dbGetQuery(db_con, query, params = list(chrom))
     }else{
-
        if(!anyInclude){
                 query <- "  SELECT COUNT(*) AS total_variants
                         FROM Variant"
         }else{
                 if(!is.null(IDsToInclude)){
                         id_list <- paste0("'", IDsToInclude, "'", collapse = ", ")
-                        query <- paste("SELECT COUNT(*) AS total_variants
+
+		   query <- paste("SELECT COUNT(*) AS total_variants
                                 FROM Variant
-                                WHERE (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")", sep = "")
+                                WHERE (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")",
+                                "OR (CONCAT(chromosome, ':', position, ':', allele2, ':', allele1)) IN (", id_list, ")",
+                                "OR (rsid) IN (", id_list, ")",
+                                sep = "")	
+
+                        #query <- paste("SELECT COUNT(*) AS total_variants
+                        #        FROM Variant
+                        #        WHERE (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")", sep = "")
                 }else if(!is.null(RangesToInclude)){
                         CHROM=RangesToInclude$CHROM[1]
                         START=RangesToInclude$START[1]
@@ -285,9 +296,10 @@ if(FALSE){
 
 
     if(genoType == "bgen"){
-
+	print("chrom")
+	print(chrom)
     if(LOCO | chrom != ""){
-	chrom = "01"
+	#chrom = "01"
         if(!anyInclude){
                 #query <-  paste("SELECT chromosome, position, file_start_position, size_in_bytes
                  #       FROM Variant
@@ -301,11 +313,22 @@ if(FALSE){
         }else{
                 if(!is.null(IDsToInclude)){
                         id_list <- paste0("'", IDsToInclude, "'", collapse = ", ")
-                        query <- paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+
+                  
+		query <- paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
                                 FROM Variant
                                 WHERE chromosome = ?
-                                AND (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")
-				LIMIT", nMarkersEachChunk, "OFFSET", offset, sep = " ")
+                                AND (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")",
+                                "OR (CONCAT(chromosome, ':', position, ':', allele2, ':', allele1)) IN (", id_list, ")",
+                                "OR (rsid) IN (", id_list, ")",
+                                sep = "")
+
+
+                        #query <- paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                         #       FROM Variant
+                         #       WHERE chromosome = ?
+                         #       AND (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")
+			#	LIMIT", nMarkersEachChunk, "OFFSET", offset, sep = " ")
                 }else if(!is.null(RangesToInclude)){
                         CHROM=RangesToInclude$CHROM[1]
                         START=RangesToInclude$START[1]
@@ -330,10 +353,19 @@ if(FALSE){
         }else{
                 if(!is.null(IDsToInclude) > 0){
                         id_list <- paste0("'", IDsToInclude, "'", collapse = ", ")
-                        query <- paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                        #query <- paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                         #       FROM Variant
+                         #       WHERE (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")
+			#	LIMIT", nMarkersEachChunk, "OFFSET", offset, sep = " ")
+
+                query <- paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
                                 FROM Variant
-                                WHERE (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")
-				LIMIT", nMarkersEachChunk, "OFFSET", offset, sep = " ")
+                                WHERE (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")",
+                                "OR (CONCAT(chromosome, ':', position, ':', allele2, ':', allele1)) IN (", id_list, ")",
+                                "OR (rsid) IN (", id_list, ")
+				LIMIT", nMarkersEachChunk, "OFFSET", offset, sep = " ")			
+
+
                 }else if(!is.null(RangesToInclude)){
                         CHROM=RangesToInclude$CHROM[1]
                         START=RangesToInclude$START[1]
@@ -343,20 +375,20 @@ if(FALSE){
                                 WHERE  chromosome =", CHROM,
                                 "AND position >= ", START,
                                 "AND position <= ", END,
-				"LIMIT", nMarkersEachChunk, "OFFSET", offse)	
+				"LIMIT", nMarkersEachChunk, "OFFSET", offset)	
                 }
         }
 	query_result <- RSQLite::dbGetQuery(db_con, query)
     }
 
-	print(head(query_result))
+	#print(head(query_result))
 	#markerInfo <- RSQLite::fetch(query_result, n = -1)
 	markerInfo=query_result
 	genoIndex_prev = as.character(markerInfo$file_start_position + markerInfo$size_in_bytes)
 	genoIndex = as.character(markerInfo$file_start_position)
 
-	print(length(genoIndex))
-	print(length(genoIndex_prev))
+	#print(length(genoIndex))
+	#print(length(genoIndex_prev))
 	offset <- offset + nMarkersEachChunk
 	#RSQLite::dbClearResult(query_result)
     }
