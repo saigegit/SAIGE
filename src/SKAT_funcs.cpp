@@ -285,7 +285,8 @@ arma::vec Get_Liu_PVal_MOD_Lambda(arma::vec& Q_all, arma::vec& lambda, arma::ive
   for (size_t i = 0; i < Q_all.n_elem; ++i) {
     boost::math::non_central_chi_squared dist(l, d);
     if(Q_norm1(i) > 0){
-    	p_value(i) = 1 - boost::math::cdf(dist, Q_norm1(i));
+
+    	p_value(i) = boost::math::cdf(boost::math::complement(dist, Q_norm1(i));
     }else{
 	p_value(i) = 1;
     }
@@ -312,7 +313,7 @@ std::string Get_Liu_PVal_MOD_Lambda_Zero(double Q, double muQ, double muX, doubl
   for (size_t i = 0; i < temp.n_elem; ++i) {
     //R::pchisq(x, df, ncp, lower_tail, log_p)
     if(temp(i) > 0){
-    	out(i) = 1 - boost::math::cdf(dist, temp(i)); // Lower tail = FALSE
+    	out(i) = boost::math::cdf(boost::math::complement(dist, temp(i))); // Lower tail = FALSE
     }else{
 	out(i) = 1;
     }
@@ -377,7 +378,7 @@ double daviesPValue(arma::vec& eigenvalues, double q, double tol) {
         if (lambda <= 0) continue;
 
         boost::math::chi_squared chi2(1.0); 
-        double contrib = 1.0 - boost::math::cdf(chi2, q / lambda);
+        double contrib = boost::math::cdf(boost::math::complement(chi2, q / lambda));
         cumulative += contrib;
         if (cumulative >= 1.0 - tol) {
             break; 
@@ -641,7 +642,7 @@ Rcpp::List SKAT_Optimal_Each_Q(Rcpp::List &param_m, arma::mat &Q_all, arma::vec 
     //std::cout << "SKAT_Optimal_Each_Q 02" << std::endl;
     for (size_t j = 0; j < Q_norm.n_elem; ++j) {
       if(Q_norm(j) > 0){
-        pval(j,i) = 1 - boost::math::cdf(dist, Q_norm(j));
+        pval(j,i) = boost::math::cdf(boost::math::complement(dist, Q_norm(j)));
       }else{
         pval(j,i) = 1;
       }
@@ -1491,7 +1492,7 @@ Rcpp::List Get_Liu_PVal( arma::vec& Q,  arma::mat& W,  arma::mat& Q_resampling) 
 
 
     for (size_t i = 0; i < Q_Norm1.n_elem; i++) {
-        p_values(i) = 1 - boost::math::cdf(dist, Q_Norm1(i)); // pchisq with lower.tail=FALSE
+        p_values(i) = boost::math::cdf(boost::math::complement(dist, Q_Norm1(i))); // pchisq with lower.tail=FALSE
     }
 
     // Extract primary and resampling p-values
@@ -1585,7 +1586,7 @@ double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi) {
     // Debugging print statements (optional, remove in production)
     //Rcpp::Rcout << "Score:" << std::endl << Score << std::endl;
     //Rcpp::Rcout << "Phi:" << std::endl << Phi << std::endl;
-    //Rcpp::Rcout << "Teststat: " << Teststat << std::endl;
+    Rcpp::Rcout << "Teststat: " << Teststat << std::endl;
     //Rcpp::Rcout << "df: " << df << std::endl;
     
     // Create central chi-squared distribution
@@ -1594,7 +1595,9 @@ double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi) {
     // Compute the p-value
     double p_value;
     if (Teststat > 0) {
-        p_value = 1 - boost::math::cdf(chi2, Teststat); // 1 - CDF for upper-tail probability
+    	p_value = boost::math::cdf(boost::math::complement(chi2, Teststat));
+
+        //p_value = 1 - boost::math::cdf(chi2, Teststat); // 1 - CDF for upper-tail probability
     } else {
         p_value = 1.0;
     }    
