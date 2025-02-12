@@ -2,11 +2,14 @@
 
 #options(stringsAsFactors=F, scipen = 999)
 options(stringsAsFactors=F)
+#library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/GATE_SAIGE/install/SAIGE_GATE")
+#library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/GATE_SAIGE/install_1.4.1")
 library(SAIGE)
 BLASctl_installed <- require(RhpcBLASctl)
 library(optparse)
 library(data.table)
 library(methods)
+library(parallel)
 print(sessionInfo())
 
 option_list <- list(
@@ -130,7 +133,8 @@ mean, p-value based on traditional score test is returned. Default value is 2.")
     help="Whether to use the fast mode for tests"),
   make_option("--max_MAC_for_ER", type="numeric", default=4,
     help="p-values of genetic variants with MAC <= max_MAC_for_ER will be calculated via efficient resampling. [default=4]"),
-
+  make_option("--nThreads", type="integer", default=1,
+    help="Optional. Number of threads (CPUs) to use [default=1]."),
  make_option("--subSampleFile", type="character",default="",
     help="Path to the file that contains one column for IDs of samples that are included in Step 1 and will be also included in Step 2. This option is used when any sample included in Step 1 but does not have dosages/genotypes for Step 2. Please make sure it contains one column of sample IDs that will be used for subsetting samples from the Step 1 results for Step 2 jobs. Note: Thi option has not been fully evaluated. If more than 5% of the samples in Step 1 are missing in Step 2, please consider re-run Step 1. ")
 )
@@ -187,67 +191,8 @@ if (BLASctl_installed){
 print("opt$r.corr")
 print(opt$r.corr)
 
-if(packageVersion("SAIGE")<"1.1.3"){
-
-
-  SPAGMMATtest(vcfFile=opt$vcfFile,
-             vcfFileIndex=opt$vcfFileIndex,
-             vcfField=opt$vcfField,
-             savFile=opt$savFile,
-             savFileIndex=opt$savFileIndex,
-             bgenFile=opt$bgenFile,
-             bgenFileIndex=opt$bgenFileIndex,
-             sampleFile=opt$sampleFile,
-	     bedFile=opt$bedFile,
-	     bimFile=opt$bimFile,
-	     famFile=opt$famFile,
-	     AlleleOrder=opt$AlleleOrder,
-	     idstoIncludeFile = opt$idstoIncludeFile,
-	     rangestoIncludeFile = opt$rangestoIncludeFile,
-	     chrom=opt$chrom,
-             is_imputed_data=opt$is_imputed_data,
-             min_MAF = opt$minMAF,
-             min_MAC = opt$minMAC,
-             min_Info = opt$minInfo,
-             max_missing = opt$maxMissing,	
-	     impute_method = opt$impute_method,
-	     LOCO=opt$LOCO,
-             GMMATmodelFile=opt$GMMATmodelFile,
-             varianceRatioFile=opt$varianceRatioFile,
-             SAIGEOutputFile=opt$SAIGEOutputFile,	
-	     markers_per_chunk=opt$markers_per_chunk,
-	     groups_per_chunk=opt$groups_per_chunk,
-             markers_per_chunk_in_groupTest=opt$markers_per_chunk_in_groupTest,
-	     is_output_moreDetails =opt$is_output_moreDetails,
-	     is_overwrite_output = opt$is_overwrite_output,
-	     maxMAF_in_groupTest = maxMAF_in_groupTest,
-	     maxMAC_in_groupTest = maxMAC_in_groupTest,
-	     minGroupMAC_in_BurdenTest = opt$minGroupMAC_in_BurdenTest,
-	     annotation_in_groupTest = annotation_in_groupTest,
-	     groupFile = opt$groupFile,
-	     sparseGRMFile=opt$sparseGRMFile,
-             sparseGRMSampleIDFile=opt$sparseGRMSampleIDFile,
-	     relatednessCutoff=opt$relatednessCutoff,	
-	     MACCutoff_to_CollapseUltraRare = opt$MACCutoff_to_CollapseUltraRare,	
-	     cateVarRatioMinMACVecExclude = cateVarRatioMinMACVecExclude,
-             cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
-	     weights.beta = weights.beta,
-	     r.corr = opt$r.corr,
-	     condition = opt$condition,
-	     weights_for_condition = weights_for_condition, 
-	     SPAcutoff = opt$SPAcutoff,
-	     dosage_zerod_cutoff = opt$dosage_zerod_cutoff,
-	     dosage_zerod_MAC_cutoff = opt$dosage_zerod_MAC_cutoff,
-	     is_Firth_beta = opt$is_Firth_beta,
-	     pCutoffforFirth = opt$pCutoffforFirth,
-	     is_single_in_groupTest = opt$is_single_in_groupTest,
-             is_no_weight_in_groupTest = opt$is_no_weight_in_groupTest,
-	     is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
-	     is_fastTest = opt$is_fastTest
-)
-}else{
-
-if(packageVersion("SAIGE")>"1.1.4"){	
+nThreads = opt$nThreads
+if(nThreads == 1){
   SPAGMMATtest(vcfFile=opt$vcfFile,
              vcfFileIndex=opt$vcfFileIndex,
              vcfField=opt$vcfField,
@@ -306,11 +251,30 @@ if(packageVersion("SAIGE")>"1.1.4"){
              is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
              is_fastTest = opt$is_fastTest,
 	     max_MAC_use_ER = opt$max_MAC_for_ER,
-	     subSampleFile = opt$subSampleFile
-)
-  }else{
+	     subSampleFile = opt$subSampleFile)
 
-	SPAGMMATtest(vcfFile=opt$vcfFile,
+
+}else{ #if(nThreads == 1)
+  if(opt$idstoIncludeFile != ""){
+    Check_File_Exist(opt$idstoIncludeFile, "idstoIncludeFile")
+    total_lines <- as.numeric(system(paste("wc -l < ", opt$idstoIncludeFile), intern = TRUE))
+    lines_per_chunk <- total_lines %/% opt$nThreads
+    # Calculate the number of digits needed for the suffix
+    num_digits <- ceiling(log10(nThreads))  # Calculate the required number of digits
+    # Create the split command with dynamic numeric suffixes
+    file_name <- basename(opt$idstoIncludeFile)
+    dir_path <- dirname(opt$SAIGEOutputFile)
+    split_command <- paste("split -l", lines_per_chunk, paste("-a", num_digits, sep=""), "-d", opt$idstoIncludeFile, paste(dir_path, "/", file_name,"_", sep = ""))
+    print(split_command)
+    # Execute the command
+    system(split_command)
+    split_files <- list.files(path = dir_path, pattern = paste("^", file_name, "_", sep = ""), full.names = TRUE)
+    suffixes <- sapply(basename(split_files), function(file) {
+  	sub("^.*_(.*)$", "\\1", file)  # Extract the suffix part after the last underscore
+    })
+
+    output_files = paste0(opt$SAIGEOutputFile, suffixes) 
+    fixed_params <- list(vcfFile=opt$vcfFile,
              vcfFileIndex=opt$vcfFileIndex,
              vcfField=opt$vcfField,
              savFile=opt$savFile,
@@ -322,7 +286,6 @@ if(packageVersion("SAIGE")>"1.1.4"){
              bimFile=opt$bimFile,
              famFile=opt$famFile,
              AlleleOrder=opt$AlleleOrder,
-             idstoIncludeFile = opt$idstoIncludeFile,
              rangestoIncludeFile = opt$rangestoIncludeFile,
              chrom=opt$chrom,
              is_imputed_data=opt$is_imputed_data,
@@ -334,7 +297,6 @@ if(packageVersion("SAIGE")>"1.1.4"){
              LOCO=opt$LOCO,
              GMMATmodelFile=opt$GMMATmodelFile,
              varianceRatioFile=opt$varianceRatioFile,
-             SAIGEOutputFile=opt$SAIGEOutputFile,
              markers_per_chunk=opt$markers_per_chunk,
              groups_per_chunk=opt$groups_per_chunk,
              markers_per_chunk_in_groupTest=opt$markers_per_chunk_in_groupTest,
@@ -348,6 +310,9 @@ if(packageVersion("SAIGE")>"1.1.4"){
              sparseGRMFile=opt$sparseGRMFile,
              sparseGRMSampleIDFile=opt$sparseGRMSampleIDFile,
              relatednessCutoff=opt$relatednessCutoff,
+             sampleFile_male=opt$sampleFile_male,
+             is_rewrite_XnonPAR_forMales=opt$is_rewrite_XnonPAR_forMales,
+             X_PARregion=opt$X_PARregion,
              MACCutoff_to_CollapseUltraRare = opt$MACCutoff_to_CollapseUltraRare,
              cateVarRatioMinMACVecExclude = cateVarRatioMinMACVecExclude,
              cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
@@ -364,14 +329,32 @@ if(packageVersion("SAIGE")>"1.1.4"){
              is_no_weight_in_groupTest = opt$is_no_weight_in_groupTest,
              is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
              is_fastTest = opt$is_fastTest,
-             max_MAC_use_ER = opt$max_MAC_for_ER
-)
+             max_MAC_use_ER = opt$max_MAC_for_ER,
+             subSampleFile = opt$subSampleFile)
+
+
+	param_list <- mapply(function(SAIGEOutputFile, idstoIncludeFile) {
+  	c(fixed_params, list(SAIGEOutputFile = SAIGEOutputFile, idstoIncludeFile = idstoIncludeFile))  # Combine fixed and variable params
+	}, output_files, split_files, SIMPLIFY = FALSE)
+
+	mclapply(param_list, function(params) {
+  	do.call(SPAGMMATtest, params)  # Unpack the parameters and call the function
+	}, mc.cores = nThreads)
+
+	
+	sorted_files <- sort(output_files)
+        system(paste0("cat ", sorted_files[1], " > ", opt$SAIGEOutputFile))
+	for(i in 2:length(sorted_files)){
+		 system(paste0("tail -n +2 ", sorted_files[i], ">> ", opt$SAIGEOutputFile))
+	}
+	} # if(opt$idstoIncludeFile != ""){
+
+  }
 
 
 
-}	
 
-}	
+
 if(BLASctl_installed){
   # Restore originally configured BLAS thread count
   blas_set_num_threads(original_num_threads)

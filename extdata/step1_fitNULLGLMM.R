@@ -3,7 +3,7 @@
 options(stringsAsFactors=F)
 
 ## load R libraries
-library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/GATE_SAIGE/install_1.4.1/")
+library(SAIGE)
 require(optparse) #install.packages("optparse")
 
 print(sessionInfo())
