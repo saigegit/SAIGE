@@ -123,7 +123,8 @@ SAIGE.Region = function(mu,
                         chrom,
                         is_fastTest,
                         pval_cutoff_for_fastTest,
-                        is_output_moreDetails) {
+                        is_output_moreDetails,
+			pval_cutoff_for_SKATOandCauchy) {
 
     if(genoType == "bgen"){
         print("chrom")
@@ -583,7 +584,7 @@ SAIGE.Region = function(mu,
                       Phi = re_phi$val
 
                     }
-                    groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType)
+                    groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType, pval_cutoff_for_SKATOandCauchy)
                     resultDF = data.frame(
                       Region = regionName,
                       Group = AnnoName,
@@ -620,7 +621,8 @@ SAIGE.Region = function(mu,
                       groupOutList_cond = get_SKAT_pvalue(Score_cond,
                                                           Phi_cond,
                                                           r.corr,
-                                                          regionTestType)
+                                                          regionTestType,
+							  pval_cutoff_for_SKATOandCauchy)
                       
                       
                       resultDF$Pvalue_cond = groupOutList_cond$Pvalue_SKATO
@@ -886,7 +888,7 @@ SAIGE.Region = function(mu,
                                                           regionTestType)
                           Phi = re_phi$val
                         }
-                        groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType)
+                        groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType, pval_cutoff_for_SKATOandCauchy)
                         
                         resultDF = data.frame(
                           Region = regionName,
@@ -923,7 +925,8 @@ SAIGE.Region = function(mu,
                           groupOutList_cond = get_SKAT_pvalue(Score_cond,
                                                               Phi_cond,
                                                               r.corr,
-                                                              regionTestType)
+                                                              regionTestType,
+							      pval_cutoff_for_SKATOandCauchy)
                           
                           resultDF$Pvalue_cond = groupOutList_cond$Pvalue_SKATO
                           resultDF$Pvalue_Burden_cond = groupOutList_cond$Pvalue_Burden

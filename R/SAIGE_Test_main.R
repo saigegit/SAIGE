@@ -117,7 +117,8 @@ SPAGMMATtest = function(bgenFile = "",
 		 is_fastTest = FALSE,
 		 pval_cutoff_for_fastTest = 0.05, 
 		 max_MAC_use_ER = 4, 
-		 subSampleFile = ""
+		 subSampleFile = "",
+		 pval_cutoff_for_SKATOandCauchy = 0.01
 ){
 
 
@@ -553,7 +554,8 @@ SPAGMMATtest = function(bgenFile = "",
 		     chrom,
 		     is_fastTest,
 		     pval_cutoff_for_fastTest,
-		     is_output_moreDetails)
+		     is_output_moreDetails,
+		     pval_cutoff_for_SKATOandCauchy)
 
 
     }	    

@@ -1,18 +1,18 @@
 Package: SAIGE
 Type: Package
 Title: Efficiently controlling for case-control imbalance and sample relatedness in single-variant assoc tests (SAIGE) and controlling for sample relatedness in region-based assoc tests in large cohorts and biobanks (SAIGE-GENE+) 
-Version: 1.4.2
-Date: 2025-02-10
+Version: 1.4.2.1
+Date: 2025-02-18
 Author: Wei Zhou, Zhangchen Zhao, Wenjian Bi, Seunggeun Lee, Cristen Willer
 Maintainer: SAIGE team <saige.genetics@gmail.com> 
 Description:an R package that implements the Scalable and Accurate Implementation of Generalized mixed model that uses the saddlepoint approximation (SPA)(mhof, J. P. , 1961; Kuonen, D. 1999; Dey, R. et.al 2017) and large scale optimization techniques to calibrate case-control ratios in logistic mixed model score tests (Chen, H. et al. 2016) in large PheWAS. It conducts both single-variant association tests and set-based tests for rare variants.  
 License: GPL (>= 2)
 Imports: Rcpp (>= 1.0.7), RcppParallel, Matrix, data.table, RcppArmadillo (>= 0.10.7.5)
 LinkingTo: Rcpp, RcppArmadillo (>= 0.10.7.5), RcppParallel, data.table, SPAtest (== 3.1.2),
-        RcppEigen, Matrix, methods, BH, optparse, SKAT, MetaSKAT, qlcMatrix, RhpcBLASctl, RSQLite, dplyr, lintools
+        RcppEigen, Matrix, methods, BH, optparse, SKAT(>= 2.3.1), MetaSKAT, qlcMatrix, RhpcBLASctl, RSQLite, dplyr, lintools
 Depends: R (>= 3.5.0)
 SystemRequirements: GNU make
 RoxygenNote: 7.1.2
 NeedsCompilation: yes
 Encoding: UTF-8
-Packaged: 2025-02-10 EST
+Packaged: 2025-02-18 EST
