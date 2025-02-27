@@ -125,6 +125,8 @@ SAIGE.Marker = function(traitType,
     }
     anyInclude=TRUE
     colnames(RangesToInclude) = c("CHROM", "START", "END")
+    #print("RangesToInclude")
+    #print(RangesToInclude)
     if(nrow(RangesToInclude) > 1){cat("WARNING, only the first line of ",rangestoIncludeFile, " will be used\n")}
   } 
 
@@ -206,13 +208,16 @@ if(FALSE){
                         CHROM=RangesToInclude$CHROM[1]
                         START=RangesToInclude$START[1]
                         END=RangesToInclude$END[1]
-                        query <- paste("
-				SELECT COUNT(*) AS total_variants
-                                FROM Variant
-                                WHERE chromosome = ?
-                                AND  chromosome =", CHROM,
-                                "AND position >= ", START,
-                                "AND position <= ", END)
+
+			query <- paste0(
+  			"SELECT COUNT(*) AS total_variants
+   			FROM Variant
+   			WHERE chromosome = ? 
+   			AND chromosome = '", CHROM, "' 
+   			AND position >= ", START, "
+   			AND position <= ", END
+			)
+
                 }
         }
        count_result <- RSQLite::dbGetQuery(db_con, query, params = list(chrom))
@@ -235,15 +240,22 @@ if(FALSE){
                         #        FROM Variant
                         #        WHERE (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")", sep = "")
                 }else if(!is.null(RangesToInclude)){
+
+
                         CHROM=RangesToInclude$CHROM[1]
                         START=RangesToInclude$START[1]
                         END=RangesToInclude$END[1]
-                        query <- paste("
-				  SELECT COUNT(*) AS total_variants
-                                FROM Variant
-                                WHERE  chromosome =", CHROM,
-                                "AND position >= ", START,
-                                "AND position <= ", END)
+		
+			# Construct the SQL query
+			query <- paste0("
+    			SELECT COUNT(*) AS total_variants
+    			FROM Variant
+    			WHERE chromosome = '", CHROM, "'
+			AND position >= ", START, "
+    			AND position <= ", END
+			)
+
+
                 }
         }
 	count_result <- RSQLite::dbGetQuery(db_con, query)
@@ -333,13 +345,16 @@ if(FALSE){
                         CHROM=RangesToInclude$CHROM[1]
                         START=RangesToInclude$START[1]
                         END=RangesToInclude$END[1]
-                        query <- paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
-                                FROM Variant
-                                WHERE chromosome = ?
-                                AND  chromosome =", CHROM,
-                                "AND position >= ", START,
-                                "AND position <= ", END,
-				"LIMIT", nMarkersEachChunk, "OFFSET", offset)
+
+query <- paste0("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                 FROM Variant
+                 WHERE chromosome = ?
+		 AND chromosome = '", CHROM, "'
+                 AND position >= ", START, "
+                 AND position <= ", END, "
+                 LIMIT ", nMarkersEachChunk, " 
+                 OFFSET ", offset)
+
                 }
         }
 	query_result <- RSQLite::dbGetQuery(db_con, query, params = list(chrom))
@@ -370,12 +385,15 @@ if(FALSE){
                         CHROM=RangesToInclude$CHROM[1]
                         START=RangesToInclude$START[1]
                         END=RangesToInclude$END[1]
-                        query <- paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
-                                FROM Variant
-                                WHERE  chromosome =", CHROM,
-                                "AND position >= ", START,
-                                "AND position <= ", END,
-				"LIMIT", nMarkersEachChunk, "OFFSET", offset)	
+
+query <- paste0("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                 FROM Variant
+                 WHERE chromosome = '", CHROM, "' 
+                 AND position >= ", START, "
+                 AND position <= ", END, "
+                 LIMIT ", nMarkersEachChunk, " 
+                 OFFSET ", offset)
+
                 }
         }
 	query_result <- RSQLite::dbGetQuery(db_con, query)
