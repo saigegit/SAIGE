@@ -138,7 +138,9 @@ mean, p-value based on traditional score test is returned. Default value is 2.")
  make_option("--subSampleFile", type="character",default="",
     help="Path to the file that contains one column for IDs of samples that are included in Step 1 and will be also included in Step 2. This option is used when any sample included in Step 1 but does not have dosages/genotypes for Step 2. Please make sure it contains one column of sample IDs that will be used for subsetting samples from the Step 1 results for Step 2 jobs. Note: Thi option has not been fully evaluated. If more than 5% of the samples in Step 1 are missing in Step 2, please consider re-run Step 1. "),
   make_option("--pCutoffforSKATOandCauchy", type="numeric", default=0.01,
-    help="p-value cutoff to conduct SKATO. A hybrid approach is used to combine Burden and SKAT tests. First Cauchy combination is used. If p-value < pCutoffforSKATOandCauchy, SKAT-O will be conducted[default=0.01]") )
+    help="p-value cutoff to conduct SKATO. A hybrid approach is used to combine Burden and SKAT tests. First Cauchy combination is used. If p-value < pCutoffforSKATOandCauchy, SKAT-O will be conducted[default=0.01]") 
+    
+    )
 
 
 parser <- OptionParser(usage="%prog [options]", option_list=option_list)

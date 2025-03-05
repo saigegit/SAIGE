@@ -15,10 +15,10 @@ for (pack in req_packages) {
     }
 }
 
-github_packages <- c("leeshawn/MetaSKAT", "cysouw/qlcMatrix")
+github_packages <- c("leeshawn/MetaSKAT", "cysouw/qlcMatrix", "leelabsg/SKAT")
 for (pack in github_packages) {
     if(!require(pack, character.only = TRUE)) {
-        devtools::install_github(pack)
+        devtools::install_github(pack, INSTALL_opts = "--no-lock")
     }
 }
 
