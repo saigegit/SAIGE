@@ -230,12 +230,13 @@ double SPA_pval(arma::vec & mu, arma::vec & g, double q, double qinv, double pva
           outuni2 = getroot_K1_Poi(0, mu, g, qinv, tol);
         }
 
-/*
+
         double outuni1root = outuni1["root"];
         double outuni2root = outuni2["root"];
         bool Isconverge1 = outuni1["Isconverge"];
         bool Isconverge2 = outuni2["Isconverge"];
 
+/*
         std::cout << "outuni1root" << outuni1root << std::endl;
         std::cout << "outuni2root" << outuni2root << std::endl;
         std::cout << "Isconverge1" << Isconverge1 << std::endl;
@@ -274,13 +275,14 @@ double SPA_pval(arma::vec & mu, arma::vec & g, double q, double qinv, double pva
                                 p2 = pval_noadj/2;
                         }
                 }
-
+		//std::cout << "p1 " << p1 << " p2 " << p2 << std::endl;
                 if(logp)
                 {
                         pval = add_logp(p1,p2);
                 } else {
                         pval = std::abs(p1)+std::abs(p2);
                 }
+		//std::cout << "pval " << pval << std::endl;
                 //Isconverge=true;
         }else {
                         //std::cout << "Error_Converge" << std::endl;
