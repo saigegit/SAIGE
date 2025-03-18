@@ -493,7 +493,7 @@ SAIGE.Region = function(mu,
         if ((sum(outList$NumUltraRare_GroupVec) + sum(outList$NumRare_GroupVec)) > 0) {
           if (regionTestType != "BURDEN") {
             #ta0 = proc.time()
-            if (traitType == "binary") {
+            if (traitType == "binary" | traitType == "survival") {
               outList$gyVec = outList$gyVec[noNAIndices]
             }
             
@@ -567,19 +567,21 @@ SAIGE.Region = function(mu,
                     annoMAFIndVec = c(annoMAFIndVec, jm)
                     Phi = wadjVarSMat[tempPos, tempPos, drop = F]
                     Score = wStatVec[tempPos]
-                    if (traitType == "binary") {
+                    if (traitType == "binary" | traitType == "survival") {
                       p.new = adjPVec[tempPos]
                       g.sum = outList$genoSumMat[, jm]
                       q.sum <- sum(outList$gyVec[tempPos] * AnnoWeights[tempPos])
                       mu.a = mu
                       
-                      re_phi = get_newPhi_scaleFactor(q.sum,
+                      #re_phi = get_newPhi_scaleFactor(q.sum,
+                      re_phi = get_newPhi_scaleFactor_traitType(q.sum,
                                                       mu.a,
                                                       g.sum,
                                                       p.new,
                                                       Score,
                                                       Phi,
-                                                      regionTestType)
+                                                      regionTestType,
+						      traitType)
                       Phi = re_phi$val
 
                     }
@@ -596,7 +598,7 @@ SAIGE.Region = function(mu,
                     )
 
                     if (isCondition) {
-                      if (traitType == "binary") {
+                      if (traitType == "binary" | traitType == "survival") {
                         G1tilde_P_G2tilde_Mat_scaled = t(t((
                           outList$G1tilde_P_G2tilde_Weighted_Mat[tempPos, , drop = F]
                         ) * sqrt(as.vector(
@@ -661,7 +663,7 @@ SAIGE.Region = function(mu,
             
             if (length(annoMAFIndVec) > 0) {
               pval.Region$MAC = outList$MAC_GroupVec[annoMAFIndVec]
-              if (traitType == "binary") {
+              if (traitType == "binary" | traitType == "survival") {
                 pval.Region$MAC_case = outList$MACCase_GroupVec[annoMAFIndVec]
                 pval.Region$MAC_control = outList$MACCtrl_GroupVec[annoMAFIndVec]
               }
@@ -711,7 +713,7 @@ SAIGE.Region = function(mu,
                 }
               }
               cctVec = c(cctVec, NA)
-              if (traitType == "binary") {
+              if (traitType == "binary" | traitType == "survival") {
                 cctVec = c(cctVec, NA, NA)
               }
               cctVec = c(cctVec, NA, NA)
@@ -800,7 +802,7 @@ SAIGE.Region = function(mu,
                   }
                 }
                 
-                if (traitType == "binary") {
+                if (traitType == "binary" | traitType == "survival") {
                   outList$gyVec = outList$gyVec[noNAIndices]
                 }
                 
@@ -872,18 +874,20 @@ SAIGE.Region = function(mu,
                         annoMAFIndVec = c(annoMAFIndVec, jm)
                         Phi = wadjVarSMat[tempPos, tempPos, drop = F]
                         Score = wStatVec[tempPos]
-                        if (traitType == "binary") {
+                        if (traitType == "binary" | traitType == "survival") {
                           p.new = adjPVec[tempPos]
                           g.sum = outList$genoSumMat[, jm]
                           q.sum <- sum(outList$gyVec[tempPos] * AnnoWeights[tempPos])
                           mu.a = mu
-                          re_phi = get_newPhi_scaleFactor(q.sum,
+                          #re_phi = get_newPhi_scaleFactor(q.sum,
+                          re_phi = get_newPhi_scaleFactor_traitType(q.sum,
                                                           mu.a,
                                                           g.sum,
                                                           p.new,
                                                           Score,
                                                           Phi,
-                                                          regionTestType)
+                                                          regionTestType,
+							  traitType)
                           Phi = re_phi$val
                         }
                         groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType)
@@ -899,7 +903,7 @@ SAIGE.Region = function(mu,
                           SE_Burden = groupOutList$SE_Burden
                         )
                         if (isCondition) {
-                          if (traitType == "binary") {
+                          if (traitType == "binary" | traitType == "survival") {
                             G1tilde_P_G2tilde_Mat_scaled = t(t((
                               outList$G1tilde_P_G2tilde_Weighted_Mat[tempPos, , drop = F]
                             ) * sqrt(as.vector(
@@ -962,7 +966,7 @@ SAIGE.Region = function(mu,
                 
                 if (length(annoMAFIndVec) > 0) {
                   pval.Region$MAC = outList$MAC_GroupVec[annoMAFIndVec]
-                  if (traitType == "binary") {
+                  if (traitType == "binary" | traitType == "survival") {
                     pval.Region$MAC_case = outList$MACCase_GroupVec[annoMAFIndVec]
                     pval.Region$MAC_control = outList$MACCtrl_GroupVec[annoMAFIndVec]
                   }
@@ -1011,7 +1015,7 @@ SAIGE.Region = function(mu,
                     }
                   }
                   cctVec = c(cctVec, NA)
-                  if (traitType == "binary") {
+                  if (traitType == "binary" | traitType == "survival") {
                     cctVec = c(cctVec, NA, NA)
                   }
                   cctVec = c(cctVec, NA, NA)

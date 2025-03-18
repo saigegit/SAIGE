@@ -1252,8 +1252,6 @@ Rcpp::List mainRegionInCPP(
       if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){ //perform single-variant assoc tests 
  
         indexZeroVec_arma = arma::conv_to<arma::uvec>::from(indexZeroVec);
-
-        //set_varianceRatio(MAC, isSingleVarianceRatio);
         if(MAC > g_MACCutoffforER){	
           Unified_getMarkerPval(
                     GVec,

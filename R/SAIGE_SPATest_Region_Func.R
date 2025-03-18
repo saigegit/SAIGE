@@ -247,7 +247,6 @@ SPA_ER_kernel_related_Phiadj_fast_new<-function(p.new, Score, Phi, p.value_burde
 	}
         	VarQ = sum(G2_adj_n)
         	Q_b=sum(zscore.all_1)^2
-
         	VarQ_2=Q_b/qchisq(p.value_burden, df=1, ncp = 0, lower.tail = FALSE, log.p = TRUE)
         	if (VarQ_2== 0) {
                 	r=1
@@ -280,7 +279,6 @@ get_newPhi_scaleFactor = function(q.sum, mu.a, g.sum, p.new, Score, Phi, regionT
 	qinv = -sign(q.sum - m1) * abs(q.sum - m1) + m1
 	pval_noadj <- pchisq((q.sum - m1)^2/var1, lower.tail = FALSE, df = 1, log.p = TRUE)
 	isSPAConverge = TRUE
-	##cat("pval_noadj ", pval_noadj, "\n")
 	if(abs(q.sum - m1)/sqrt(var1) < 2){
 		p.value_burden = pval_noadj
 	}else{
@@ -291,6 +289,33 @@ get_newPhi_scaleFactor = function(q.sum, mu.a, g.sum, p.new, Score, Phi, regionT
         re_phi= SPA_ER_kernel_related_Phiadj_fast_new(p.new, Score, Phi, p.value_burden, regionTestType)
 	return(re_phi)
 }
+
+
+
+get_newPhi_scaleFactor_traitType = function(q.sum, mu.a, g.sum, p.new, Score, Phi, regionTestType, traitType){
+        m1 <- sum(mu.a * g.sum)
+	if(traitType == "binary"){
+        	var1 <- sum(mu.a * (1 - mu.a) * g.sum^2)
+        	qinv = -sign(q.sum - m1) * abs(q.sum - m1) + m1
+	}else if(traitType == "survival"){
+		var1 <- sum(mu.a * g.sum^2)
+		q = q.sum - m1
+	        qinv = -q	
+	}
+        pval_noadj <- pchisq((q.sum - m1)^2/var1, lower.tail = FALSE, df = 1, log.p = TRUE)
+        isSPAConverge = TRUE
+        if(abs(q.sum - m1)/sqrt(var1) < 2){
+                p.value_burden = pval_noadj
+        }else{
+                p.value_burden = SPA_pval(mu.a, g.sum, q.sum, qinv, pval_noadj, .Machine$double.eps^0.25, TRUE, traitType,  isSPAConverge)
+        }
+
+        re_phi= SPA_ER_kernel_related_Phiadj_fast_new(p.new, Score, Phi, p.value_burden, regionTestType)
+        return(re_phi)
+}
+
+
+
 
 get_SKAT_pvalue = function(Score, Phi, r.corr, regionTestType){
 
