@@ -1,17 +1,37 @@
-PKG_CPPFLAGS = \
+MPI_CPPFLAGS = $(shell mpic++ -showme:compile)
+MPI_LDFLAGS = $(shell mpic++ -showme:link)
+
+NVCC = nvcc
+CUDA_LIBS = -L/sw/summit/cuda/11.0.2/lib64 -lcudart -lcublas -Wl,-rpath=-L/sw/summit/cuda/11.0.2/lib64
+
+PKG_CPPFLAGS = $(MPI_CPPFLAGS)
+PKG_CPPFLAGS += \
 -I ../thirdParty/cget/include \
 -I ../thirdParty/cget/lib \
 -I ../thirdParty/cget/lib64 \
--D SQLITE_ENABLE_COLUMN_METADATA -O3 -fpic -Wall -Wextra -pedantic  -DARMA_64BIT_WORD=1 -D__STDC_FORMAT_MACROS
+-D SQLITE_ENABLE_COLUMN_METADATA -O3 -fpic -Wall -Wextra -pedantic  -DARMA_64BIT_WORD=1 -D__STDC_FORMAT_MACROS \
+-fsigned-char \
+-fopenmp \
+-DUSE_pbdMPI \
+-DUSE_GPU
 
 CXX_STD = CXX11 
 
-PKG_LIBS = $(ZLIB_LIB) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -L../thirdParty/cget/lib/ -L../thirdParty/cget/lib64/ -lsuperlu -lzstd -L../lib64 -llapack
-PKG_LIBS += $(shell ${R_HOME}/bin/Rscript -e "RcppParallel::RcppParallelLibs()")
+# Replace -llapack with openblas.
 
+PKG_LIBS = $(ZLIB_LIB) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -L../thirdParty/cget/lib/ -L../thirdParty/cget/lib64/ -lsuperlu -lzstd -L../lib64
+#PKG_LIBS += $(shell ${R_HOME}/bin/Rscript -e "RcppParallel::RcppParallelLibs()")
+PKG_LIBS += -L/sw/summit/spack-envs/base/opt/linux-rhel8-ppc64le/gcc-9.1.0/openblas-0.3.17-ehvho6jt4ooly45nfunnwqq3kp476x5h/lib -lopenblas
+PKG_LIBS += $(MPI_LDFLAGS)
+PKG_LIBS += $(CUDA_LIBS)
 
 #OBJECTS = RcppExports.o SAIGE_fitGLMM_fast.o getMem.o VCF.o BGEN.o PLINK.o SAIGE_test.o SPA_binary.o SPA.o SPA_survival.o UTIL.o Main.o test.o CCT.o 
-OBJECTS = RcppExports.o SAIGE_fitGLMM_fast.o getMem.o VCF.o BGEN.o PLINK.o SAIGE_test.o SPA_binary.o SPA.o SPA_survival.o UTIL.o Main.o test.o CCT.o Binary_HyperGeo.o Binary_ComputeExact.o Binary_global.o Binary_ComputeExactSKATO.o Binary_resampling.o Binary_Permu_SKAT.o ER_binary_func.o LDmat.o 
+OBJECTS = gpuSymMatMult.o RcppExports.o SAIGE_fitGLMM_fast.o getMem.o VCF.o BGEN.o PLINK.o SAIGE_test.o SPA_binary.o SPA.o SPA_survival.o UTIL.o Main.o test.o CCT.o Binary_HyperGeo.o Binary_ComputeExact.o Binary_global.o Binary_ComputeExactSKATO.o Binary_resampling.o Binary_Permu_SKAT.o ER_binary_func.o LDmat.o 
+
+%.o: %.cu
+	$(NVCC) -O2 -x cu -c -arch=sm_70 -Xcompiler "-fPIC" $< -o $@
 
 all: $(SHLIB)
 $(SHLIB): ${OBJECTS} Makevars
+SAIGE_fitGLMM_fast.o: gpuSymMatMult.hpp
+gpuSymMatMult.o: gpuSymMatMult.hpp

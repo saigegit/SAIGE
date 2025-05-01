@@ -1,9 +1,14 @@
 #define ARMA_USE_SUPERLU 1
+#define PERF_TIMING 1
 //[[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
+#if defined(USE_RcppParallel)
 //[[Rcpp::depends(RcppParallel)]]
+#include <RcppParallel.h>
+#endif
 #include <RcppParallel.h> 
 #include <omp.h>
+#include <mpi.h>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -13,10 +18,19 @@
 #include <cassert>
 #include <boost/date_time.hpp> // for gettimeofday and timeval
 #include "getMem.hpp"
+
+#if defined(USE_GPU)
+#include "gpuSymMatMult.hpp"
+#endif
+
 using namespace Rcpp;
 using namespace std;
+#if defined(USE_RcppParallel)
 using namespace RcppParallel;
+#endif
 
+#pragma omp declare reduction(+: arma::fvec: omp_out += omp_in) initializer(omp_priv = omp_orig)
+#pragma omp declare reduction(merge: std::vector<std::pair<int,int>>: omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
 
 float minMAFtoConstructGRM = 0;
 //This is a class with attritbutes about the genotype informaiton 
@@ -84,7 +98,16 @@ public:
         float relatednessCutoff;
 	float maxMissingRate;
 
+#if defined(USE_RcppParallel)
 	tbb::concurrent_vector< std::pair<int, int> > indiceVec;
+#else
+	std::vector< std::pair<int,int> > indiceVec;
+#endif
+
+#if defined(USE_GPU)
+	gpuSymMatMult gpuSNPMatrix;
+#endif
+
 	arma::ivec xout;
         arma::ivec yout;
 	//int Mmafge1perc;
@@ -1417,6 +1440,7 @@ void Get_MultiMarkersBySample_StdGeno(arma::fvec& markerIndexVec, std::vector<fl
 }
 
 
+#if defined(USE_RcppParallel)
 //http://gallery.rcpp.org/articles/parallel-inner-product/
 struct CorssProd : public Worker
 {   
@@ -1476,9 +1500,9 @@ struct CorssProd : public Worker
 		Msub_mafge1perc += rhs.Msub_mafge1perc; 
   	}
 };
+#endif
 
-
-
+#if defined(USE_RcppParallel)
 //http://gallery.rcpp.org/articles/parallel-inner-product/
 struct CorssProd_LOCO : public Worker
 {
@@ -1545,15 +1569,106 @@ struct CorssProd_LOCO : public Worker
 	m_Msub_mafge1perc += rhs.m_Msub_mafge1perc;	
         }
 };
+#endif
 
 
 
+arma::fvec parallelCrossProdOpenMP(int startIndex, int endIndex, arma::fcolvec &bVec, int &count)
+{
+	int N = geno.getNnomissing();
+	int Msub_mafge1perc = 0;
+	arma::fvec bOut(N, arma::fill::zeros);
+
+	#pragma omp parallel for reduction(+: bOut, Msub_mafge1perc)
+	for (int i=startIndex; i<endIndex; i++) {
+		arma::fvec vec;
+		float val1;
+
+//		if(geno.alleleFreqVec[i] >= minMAFtoConstructGRM &&
+//		   geno.alleleFreqVec[i] <= 1-minMAFtoConstructGRM){
+			geno.Get_OneSNP_StdGeno(i, &vec);
+			val1 = dot(vec, bVec);
+			bOut += val1*vec;
+			Msub_mafge1perc += 1;
+//		}
+	}
+
+	count = Msub_mafge1perc;
+	return bOut;
+}
+
+#if defined(USE_GPU)
+arma::fvec gpuParallelCrossProd_range(int startIndex, int endIndex, arma::fcolvec &bVec) {
+	int N = geno.getNnomissing();
+	int rank;
+
+#if defined(PERF_TIMING)
+    std::chrono::steady_clock::time_point begin, end;
+#endif
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	arma::fvec crossProdVec(N, arma::fill::zeros);
+	arma::fvec local_crossProdVec(N, arma::fill::zeros);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+#if defined(PERF_TIMING)
+    begin = std::chrono::steady_clock::now();
+#endif
+	geno.gpuSNPMatrix.sym_sgemv_range(rank, (size_t)startIndex, (size_t)endIndex, (size_t)bVec.n_elem, bVec.memptr(), local_crossProdVec.memptr());
+	MPI_Allreduce(local_crossProdVec.memptr(), crossProdVec.memptr(), N,
+	              MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
+#if defined(PERF_TIMING)
+    end = std::chrono::steady_clock::now();
+    if (rank == 0) {
+        std::cout << "[" << rank << "] "
+                  << "sym_sgemv (secs) = "
+                  << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count())/1000000.0
+                  << std::endl;
+    }
+#endif
+
+	return crossProdVec;
+}
 
 
+arma::fvec gpuParallelCrossProd(arma::fcolvec &bVec) {
+	int N = geno.getNnomissing();
+	int rank;
+#if defined(PERF_TIMING)
+    std::chrono::steady_clock::time_point begin, end;
+#endif
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	arma::fvec crossProdVec(N, arma::fill::zeros);
+	arma::fvec local_crossProdVec(N, arma::fill::zeros);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+#if defined(PERF_TIMING)
+    begin = std::chrono::steady_clock::now();
+#endif
+	geno.gpuSNPMatrix.sym_sgemv(rank, (size_t)bVec.n_elem, bVec.memptr(), local_crossProdVec.memptr());
+	MPI_Allreduce(local_crossProdVec.memptr(), crossProdVec.memptr(), N,
+	              MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
+#if defined(PERF_TIMING)
+    end = std::chrono::steady_clock::now();
+    if (rank == 0) {
+        std::cout << "[" << rank << "] "
+                  << "sym_sgemv (secs) = "
+                  << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count())/1000000.0
+                  << std::endl;
+    }
+#endif
+
+	return crossProdVec;
+}
+#endif
 
 // [[Rcpp::export]]
 arma::fvec parallelCrossProd(arma::fcolvec & bVec) {
-  
+
+#if defined(USE_RcppParallel)
   // declare the InnerProduct instance that takes a pointer to the vector data
   	//int M = geno.getM();
  	//int Msub_mafge1perc = geno.getMmafge1perc();
@@ -1575,6 +1690,21 @@ arma::fvec parallelCrossProd(arma::fcolvec & bVec) {
 	//std::cout << "number of markers with maf ge " << minMAFtoConstructGRM << " is " << CorssProd.Msub_mafge1perc << std::endl;
   	return CorssProd.m_bout/(CorssProd.Msub_mafge1perc);
   	//return CorssProd.m_bout;
+#else
+	static int count = 0;
+    int ret_Msub = 0;
+	int Msub_mafge1perc = geno.getnumberofMarkerswithMAFge_minMAFtoConstructGRM();
+	arma::fvec bOut;
+
+# if defined(USE_GPU)
+	bOut = gpuParallelCrossProd(bVec);
+	Msub_mafge1perc = geno.gpuSNPMatrix.m_global_cols;
+# else
+	bOut = parallelCrossProdOpenMP(0, Msub_mafge1perc, bVec, ret_Msub);
+# endif
+
+	return bOut/Msub_mafge1perc;
+#endif
 }
 
 // [[Rcpp::export]]
@@ -1615,6 +1745,7 @@ arma::fvec parallelCrossProd_LOCO_2(arma::fcolvec & bVec) {
 // [[Rcpp::export]]
 arma::fvec parallelCrossProd_full(arma::fcolvec & bVec, int & markerNum) {
 
+#if defined(USE_RcppParallel)
   // declare the InnerProduct instance that takes a pointer to the vector data
         //int M = geno.getM();
 	//
@@ -1639,12 +1770,25 @@ arma::fvec parallelCrossProd_full(arma::fcolvec & bVec, int & markerNum) {
         //std::cout << "number of markers with maf ge " << minMAFtoConstructGRM << " is " << CorssProd.Msub_mafge1perc << std::endl;
         return CorssProd.m_bout;
         //return CorssProd.m_bout;
+#else
+	arma::fvec bOut;
+
+# if defined(USE_GPU)
+    bOut = gpuParallelCrossProd(bVec);
+    markerNum = geno.gpuSNPMatrix.m_global_cols;
+# else
+    int Msub_mafge1perc = geno.getnumberofMarkerswithMAFge_minMAFtoConstructGRM();
+	bOut = parallelCrossProdOpenMP(0, Msub_mafge1perc, bVec, markerNum);
+# endif
+
+	return bOut;
+#endif
 }
 
 
 // [[Rcpp::export]]
 arma::fvec parallelCrossProd_LOCO(arma::fcolvec & bVec) {
-
+#if defined(USE_RcppParallel)
   // declare the InnerProduct instance that takes a pointer to the vector data
         //int Msub = geno.getMsub();
 	//int M = geno.getM();
@@ -1683,6 +1827,27 @@ arma::fvec parallelCrossProd_LOCO(arma::fcolvec & bVec) {
         //return CorssProd_LOCO.m_bout/Msub;
         //return CorssProd_LOCO.m_bout/(CorssProd_LOCO.m_Msub_mafge1perc);
 	return outvec/markerNum;
+#else
+	int numberMarker_full = 0;
+    arma::fvec outvec, bout;
+
+    outvec = parallelCrossProd_full(bVec, numberMarker_full);
+
+    int startIndex = geno.getStartIndex();
+    int endIndex = geno.getEndIndex();
+    int Msub_mafge1perc = 0;
+
+# if defined(USE_GPU)
+    bout = gpuParallelCrossProd_range(startIndex, endIndex+1, bVec);
+    Msub_mafge1perc = endIndex-startIndex+1;
+# else
+	bout =  parallelCrossProdOpenMP(startIndex, endIndex+1, bVec, Msub_mafge1perc);
+# endif
+	outvec = outvec - bout;
+
+	int markerNum = numberMarker_full - Msub_mafge1perc;
+	return outvec/markerNum;
+#endif
 }
 
 
@@ -1725,6 +1890,64 @@ bool isUseSparseSigmaforInitTau = false;
 bool isUseSparseSigmaforModelFitting = false;
 
 
+int gpuDistributeSNPs()
+{
+    int Msub_mafge1perc = geno.getnumberofMarkerswithMAFge_minMAFtoConstructGRM();
+    int N = geno.getNnomissing();
+    int rank, size;
+    pid_t pid;
+
+#if defined(PERF_TIMING)
+    std::chrono::steady_clock::time_point begin, end;
+#endif
+
+    pid = getpid();
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // Distribute SNPs into multiple GPUs.
+    // set_matrix() stores matrix A in its GPU memory.
+    int max_per_mpi = (Msub_mafge1perc-1)/size + 1;
+    int start_index = rank*max_per_mpi;
+    int end_index = min(Msub_mafge1perc, (rank+1)*max_per_mpi);
+    int n_cols = end_index - start_index;
+
+    arma::fmat A(N, n_cols, arma::fill::zeros);
+    arma::fvec vec;
+
+    int Aj = 0;
+    for (int i=start_index; i<end_index; i++) {
+        geno.Get_OneSNP_StdGeno(i, &vec);
+        A.col(Aj) = vec;
+        Aj++;
+    }
+    std::cout << "[" << rank << "] "
+              << "Aj = " << Aj << " n_rows = " << A.n_rows << " n_cols = " << A.n_cols << std::endl;
+    std::cout << "[" << rank << "] "
+              << "A.memptr() in gcc = " << A.memptr() << " pid = " << pid << std::endl;
+#if defined(PERF_TIMING)
+    begin = std::chrono::steady_clock::now();
+#endif
+    geno.gpuSNPMatrix.set_matrix(rank, (size_t)start_index, (size_t)A.n_rows, (size_t)A.n_cols, A.memptr());
+#if defined(PERF_TIMING)
+    end = std::chrono::steady_clock::now();
+    std::cout << "[" << rank << "] "
+              << "set_matrix (secs) = "
+              << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count())/1000000.0
+              << std::endl;
+#endif
+
+    int n_global_cols = 0;
+    MPI_Allreduce(&n_cols, &n_global_cols, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    geno.gpuSNPMatrix.m_global_cols = (size_t)n_global_cols;
+
+    if (n_global_cols != Msub_mafge1perc) {
+        std::cerr << "Error: size mismatch: n_global_cols(" << n_global_cols
+                  << ") != Msub_mafge1perc(" << Msub_mafge1perc << ")" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    return EXIT_SUCCESS;
+}
 
 // [[Rcpp::export]]
 arma::fvec getCrossprodMatAndKin(arma::fcolvec& bVec){
@@ -1746,9 +1969,14 @@ if(isUseSparseSigmaforInitTau | isUseSparseSigmaforModelFitting){
 
     crossProdVec = arma::conv_to<arma::fvec>::from(x);
 
-}else{ 
-  	crossProdVec = parallelCrossProd(bVec) ;
-}  
+}else{
+#if defined(USE_GPU)
+	if (!geno.gpuSNPMatrix.is_loaded()) {
+        gpuDistributeSNPs();
+	}
+#endif
+  	crossProdVec = parallelCrossProd(bVec);
+}
   	return(crossProdVec);
 }
 
@@ -1759,7 +1987,11 @@ if(isUseSparseSigmaforInitTau | isUseSparseSigmaforModelFitting){
 
 // [[Rcpp::export]]
 arma::fvec getCrossprodMatAndKin_LOCO(arma::fcolvec& bVec){
-
+#if defined(USE_GPU)
+    if (!geno.gpuSNPMatrix.is_loaded()) {
+        gpuDistributeSNPs();
+    }
+#endif
         arma::fvec crossProdVec = parallelCrossProd_LOCO(bVec) ;
         //arma::fvec crossProdVec_2 = parallelCrossProd_LOCO_2(bVec) ;
 
@@ -1773,7 +2005,7 @@ arma::fvec getCrossprodMatAndKin_LOCO(arma::fcolvec& bVec){
         return(crossProdVec);
 }
 
-
+#if defined(USE_RcppParallel)
 // [[Rcpp::depends(RcppParallel)]]
 // [[Rcpp::plugins(cpp11)]]
 struct indicesRelatedSamples : public RcppParallel::Worker {
@@ -1804,7 +2036,7 @@ struct indicesRelatedSamples : public RcppParallel::Worker {
   }
 
 };
-
+#endif
 
 // [[Rcpp::export]]
 void printComb(int N){
@@ -1827,8 +2059,8 @@ void printComb(int N){
 
 // [[Rcpp::export]]
 void findIndiceRelatedSample(){
-
-  int Ntotal = geno.getNnomissing(); 
+#if defined(USE_RcppParallel)
+  int Ntotal = geno.getNnomissing();
 //  tbb::concurrent_vector< std::pair<float, float> > output;
 
 //  indicesRelatedSamples indicesRelatedSamples(Ntotal,output);
@@ -1868,10 +2100,47 @@ void findIndiceRelatedSample(){
 */
 
 //  return(xout);
+#else
+	int Ntotal = geno.getNnomissing();
+  	std::vector< std::pair<int,int> > &output = geno.indiceVec;
+
+	long int Ntotal2 = (long int)Ntotal;
+
+	long int totalCombination = Ntotal2*(Ntotal2-1)/2 - 1;
+	std::cout << "Ntotal: " << Ntotal << std::endl;
+	std::cout << std::numeric_limits<int>::max() << std::endl;
+	std::cout << std::numeric_limits<long int>::max() << std::endl;
+	std::cout << std::numeric_limits<long long int>::max() << std::endl;
+	std::cout << "totalCombination: " << totalCombination << std::endl;
+	long int x = 1000001;
+	int b = (int)(x / Ntotal);
+	int a = (int)(x % Ntotal);
+	std::cout << "a " << a << std::endl;
+	std::cout << "b " << b << std::endl;
+
+	#pragma omp parallel for reduction(merge: output)
+	for (int k=0; k<totalCombination; k++) {
+		int M_Submarker = getSubMarkerNum();
+	    int i = (int)(k / Ntotal);
+      	int j = (int)(k % Ntotal);
+
+      	if ((j <= i)){
+        	i = Ntotal - i - 2;
+            j = Ntotal - j - 1;
+      	}
+      	//std::cout << "i,j,k debug: " << i << " " << j << " " << k << std::endl;
+	    float kinValueTemp = arma::dot((geno.stdGenoMultiMarkersMat).col(i), (geno.stdGenoMultiMarkersMat).col(j));
+	    kinValueTemp = kinValueTemp/M_Submarker;
+
+      	if(kinValueTemp >=  geno.relatednessCutoff) {
+	        output.push_back( std::pair<int, int>(i, j) );
+    	}
+	}
+#endif
 }
 
 
-
+#if defined(USE_RcppParallel)
 struct sparseGRMUsingOneMarker : public Worker {
    // input matrix to read from
   // arma::imat & iMat;
@@ -1912,12 +2181,13 @@ struct sparseGRMUsingOneMarker : public Worker {
       }
    }
 };
+#endif
 
 //void parallelcalsparseGRM(arma::imat & iMat, arma::fvec &GRMvec) {
 
 // [[Rcpp::export]]
 void parallelcalsparseGRM(arma::fvec &GRMvec) {
-
+#if defined(USE_RcppParallel)
 //  int n1 = geno.indiceVec.size();
   // allocate the output matrix
   //GRMvec.set_size(n1);
@@ -1934,9 +2204,19 @@ void parallelcalsparseGRM(arma::fvec &GRMvec) {
 
   // return the output matrix
   // return GRMvec;
+#else
+	#pragma omp parallel for
+	for (std::size_t i=0; i<(geno.indiceVec).size(); i++) {
+		int iint = (geno.indiceVec)[i].first;
+		int jint = (geno.indiceVec)[i].second;
+	    int ival = geno.m_OneSNP_Geno(iint);
+	    int jval = geno.m_OneSNP_Geno(jint);
+	    GRMvec(i) = geno.sKinLookUpArr[ival][jval];
+	}
+#endif
 }
 
-
+#if defined(USE_RcppParallel)
 struct sumTwoVec : public Worker
 {   
    // source vectors
@@ -1959,10 +2239,11 @@ struct sumTwoVec : public Worker
    }
    
 };
+#endif
 
 // [[Rcpp::export]]
 void  parallelsumTwoVec(arma::fvec &x) {
-
+#if defined(USE_RcppParallel)
   int n1 = x.n_elem;
   // allocate the output matrix
   arma::fvec sumVec;
@@ -1972,7 +2253,12 @@ void  parallelsumTwoVec(arma::fvec &x) {
 
   // call parallelFor to do the work
   parallelFor(0, x.n_elem, sumTwoVec);
-
+#else
+	#pragma omp parallel for
+	for (std::size_t i=0; i<x.n_elem; i++) {
+		(geno.kinValueVecFinal)[i] = x(i) + (geno.kinValueVecFinal)[i];
+	}
+#endif
 }
 
 
@@ -2752,9 +3038,14 @@ arma::fvec getPCG1ofSigmaAndVector_LOCO(arma::fvec& wVec,  arma::fvec& tauVec, a
 //http://thecoatlessprofessor.com/programming/set_rs_seed_in_rcpp_sequential_case/
 // [[Rcpp::export]]
 void set_seed(unsigned int seed) {
+#if defined(USE_pbdMPI)
+	Rcpp::Environment base_env("package:pbdMPI");
+  	Rcpp::Function set_seed_r = base_env["comm.set.seed"];
+  	set_seed_r(seed);
+#else
 	Rcpp::Environment base_env("package:base");
   	Rcpp::Function set_seed_r = base_env["set.seed"];
-  	set_seed_r(seed);  
+#endif
 }
 
 // [[Rcpp::export]]
@@ -3371,7 +3662,7 @@ int nrun, int maxiterPCG, float tolPCG, float tol, float traceCVcutoff){
 }
 
 
-
+#if defined(USE_RcppParallel)
 //http://gallery.rcpp.org/articles/parallel-inner-product/
 struct CorssProd_usingSubMarker : public Worker
 {
@@ -3427,11 +3718,11 @@ struct CorssProd_usingSubMarker : public Worker
         m_bout += rhs.m_bout;
         }
 };
-
+#endif
 
 // [[Rcpp::export]]
 arma::fvec parallelCrossProd_usingSubMarker(arma::fcolvec & bVec) {
-
+#if defined(USE_RcppParallel)
   // declare the InnerProduct instance that takes a pointer to the vector data
         int m_M_Submarker = getSubMarkerNum();
 
@@ -3452,6 +3743,24 @@ arma::fvec parallelCrossProd_usingSubMarker(arma::fcolvec & bVec) {
 
 //	cout << (CorssProd_usingSubMarker.m_bout).n_elem << endl;
         return CorssProd_usingSubMarker.m_bout/m_M_Submarker;
+#else
+	int M_Submarker = getSubMarkerNum();
+	int N = geno.getNnomissing();
+	arma::ivec subMarkerIndex = getSubMarkerIndex();
+	arma::fvec bOut(N, arma::fill::zeros);
+
+	#pragma omp parallel for reduction(+: bOut)
+	for (int i=0; i<M_Submarker; i++) {
+		arma::fvec vec;
+		float val1;
+		int j = subMarkerIndex[i];
+
+		geno.Get_OneSNP_StdGeno(j, &vec);
+		val1 = dot(vec, bVec);
+		bOut += val1*(vec);
+	}
+	return bOut/M_Submarker;
+#endif
 }
 
 
@@ -3490,7 +3799,7 @@ arma::fvec getCrossprodMatAndKin_usingSubMarker(arma::fcolvec& bVec){
 
 
 
-
+#if defined(USE_RcppParallel)
 //The code below is from http://gallery.rcpp.org/articles/parallel-inner-product/
 struct InnerProduct : public Worker
 {
@@ -3520,11 +3829,11 @@ struct InnerProduct : public Worker
      product += rhs.product;
    }
 };
-
+#endif
 
 // [[Rcpp::export]]
 float parallelInnerProduct(std::vector<float> &x, std::vector<float> &y) {
-
+#if defined(USE_RcppParallel)
    int xsize = x.size();
    // declare the InnerProduct instance that takes a pointer to the vector data
    InnerProduct innerProduct(x, y);
@@ -3534,6 +3843,15 @@ float parallelInnerProduct(std::vector<float> &x, std::vector<float> &y) {
 
    // return the computed product
    return innerProduct.product/xsize;
+#else
+   float product = 0;
+
+   #pragma omp parallel for reduction(+: product)
+   for (std::size_t i=0; i<x.size(); i++) {
+	   product += x[i]*y[i];
+   }
+   return product/x.size();
+#endif
 }
 
 
@@ -4059,7 +4377,7 @@ arma::fvec get_DiagofKin(){
 
 
 
-
+#if defined(USE_RcppParallel)
 //The code below is modified from http://gallery.rcpp.org/articles/parallel-inner-product/
 struct stdgenoVectorScalorProduct : public Worker
 {
@@ -4091,11 +4409,13 @@ struct stdgenoVectorScalorProduct : public Worker
 
 
 };
+#endif
 
 
 // [[Rcpp::export]]
 void getstdgenoVectorScalorProduct(int jth, float y, arma::fvec & prodVec) {
 
+#if defined(USE_RcppParallel)
 
    stdgenoVectorScalorProduct stdgenoVectorScalorProduct(jth, y, prodVec);
 
@@ -4104,12 +4424,23 @@ void getstdgenoVectorScalorProduct(int jth, float y, arma::fvec & prodVec) {
    parallelFor(0, m_N, stdgenoVectorScalorProduct);
 
    // return the computed product
+#else
+	unsigned int N = geno.getNnomissing();
+	arma::fvec vec;
+
+    geno.Get_OneSNP_StdGeno(jth, &vec);
+
+	#pragma omp parallel for
+	for (unsigned int i=0; i<N; i++) {
+		prodVec[i] = prodVec[i] + vec[i] * y;
+	}
+#endif
 }
 
 
 
 
-
+#if defined(USE_RcppParallel)
 struct getP_mailman : public Worker
 {
         // source vectors
@@ -4141,7 +4472,7 @@ struct getP_mailman : public Worker
      }
 
 };
-
+#endif
 
 int computePindex(arma::ivec &ithGeno){
 	int a = ithGeno.n_elem;
@@ -4154,7 +4485,7 @@ int computePindex(arma::ivec &ithGeno){
 	return(q);
 }
 
-
+#if defined(USE_RcppParallel)
 struct getP_mailman_NbyM : public Worker
 {
         // source vectors
@@ -4191,7 +4522,7 @@ struct getP_mailman_NbyM : public Worker
      }
 
 };
-
+#endif
 
 
 // // [[Rcpp::export]]
@@ -4336,7 +4667,7 @@ void mmGetPb_MbyN(unsigned int cthchunk, unsigned int mmchunksize, arma::fvec & 
 
 // [[Rcpp::export]]
 void mmGetPb_NbyM(unsigned int cthchunk, unsigned int mmchunksize, arma::fvec & bvec, arma::fvec & Pbvec) {
-
+#if defined(USE_RcppParallel)
         int M = geno.getM();
         int N = geno.getNnomissing();
         int k = pow(3,mmchunksize);
@@ -4349,6 +4680,31 @@ void mmGetPb_NbyM(unsigned int cthchunk, unsigned int mmchunksize, arma::fvec & 
 	for (int i = 0; i < M; i++){
 		Pbvec[Pvec[i]] = Pbvec[Pvec[i]] + bvec[i];
 	}
+#else
+	int M = geno.getM();
+	int N = geno.getNnomissing();
+	int k = pow(3,mmchunksize);
+	arma::ivec Pvec;
+	Pvec.zeros(M);
+	Pbvec.zeros(k);
+
+	arma::ivec ithGeno;
+	arma::ivec ithGenosub;
+	unsigned int jthIndvStart = cthchunk * mmchunksize;
+	unsigned int jthIndvEnd = (cthchunk+1) * mmchunksize - 1;
+	arma::uvec indvIndex = arma::linspace<arma::uvec>(jthIndvStart, jthIndvEnd);
+
+	#pragma omp parallel for
+	for (unsigned int i=0; i<M; i++) {
+		ithGeno = Get_OneSNP_Geno(i);
+		ithGenosub = ithGeno.elem(indvIndex);
+		Pvec[i] = computePindex(ithGenosub);
+	}
+
+	for (int i=0; i<M; i++) {
+		Pbvec[Pvec[i]] = Pbvec[Pvec[i]] + bvec[i];
+	}
+#endif
 }
 
 

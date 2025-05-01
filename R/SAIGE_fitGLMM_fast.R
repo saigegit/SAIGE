@@ -713,7 +713,11 @@ fitNULLGLMM = function(plinkFile = "",
        if(LOCO & isLowMemLOCO){	   
 	  modelOut = paste(c(outputPrefix,"_noLOCO.rda"), collapse="")	
 	}
-       file.create(modelOut, showWarnings = TRUE)
+       barrier(comm=0)
+       if (comm.rank(comm=0) == 0) {
+           file.create(modelOut, showWarnings = TRUE)
+       }
+       barrier(comm=0)
     }
 
     if(plinkFile != ""){
@@ -738,7 +742,11 @@ fitNULLGLMM = function(plinkFile = "",
     	varRatioFile = paste0(outputPrefix_varRatio, ".varianceRatio.txt")
 
     	if (!file.exists(varRatioFile)) {
-            file.create(varRatioFile, showWarnings = TRUE)
+	    barrier(comm=0)
+	    if (comm.rank(comm=0) == 0) {
+                file.create(varRatioFile, showWarnings = TRUE)
+	    }
+	    barrier(comm=0)
     	}else {
             if (!IsOverwriteVarianceRatioFile) {
             stop("WARNING: The variance ratio file ", varRatioFile, 
@@ -778,8 +786,7 @@ fitNULLGLMM = function(plinkFile = "",
 
 
     if (nThreads > 1) {
-        RcppParallel:::setThreadOptions(numThreads = nThreads)
-        cat(nThreads, " threads will be used ", "\n")
+        stop("setting threads via RcppParallel is not allowed")
     }
 
     if (FemaleOnly & MaleOnly) {
@@ -1206,7 +1213,11 @@ fitNULLGLMM = function(plinkFile = "",
 		modglmm$chromosomeStartIndexVec = NULL
 		modglmm$chromosomeEndIndexVec = NULL
 		modelOut = paste(c(outputPrefix,"_noLOCO.rda"), collapse="")
-                save(modglmm, file = modelOut)
+                barrier(comm=0)
+                if (comm.rank(comm=0) == 0) {
+  		    save(modglmm, file = modelOut)
+		}
+		barrier(comm=0)
 		modglmm$LOCO = TRUE
 	        modglmm$Y = NULL
 		eta0 = modglmm$linear.predictors
@@ -1267,8 +1278,12 @@ fitNULLGLMM = function(plinkFile = "",
 					for(j1 in (j+1):22){
 						modglmm$LOCOResult[[j1]] = list(NULL) 
 					}	
-				}	
-                                save(modglmm, file = modelOutbychr)
+				}
+                                barrier(comm=0)
+		                if (comm.rank(comm=0) == 0) {
+                                    save(modglmm, file = modelOutbychr)
+				}
+				barrier(comm=0)
                                 modglmm$LOCOResult[[j]] = list(NULL)
                                 gc()
                         }else{
@@ -1279,7 +1294,11 @@ fitNULLGLMM = function(plinkFile = "",
                 gc()
                 #modelOut_nonauto = paste(c(outputPrefix,"_noLOCO.rda"), collapse="")
            }else{
-            save(modglmm, file = modelOut)
+            barrier(comm=0)
+	    if (comm.rank(comm=0) == 0) {
+                save(modglmm, file = modelOut)
+	    }
+	    barrier(comm=0)
            }
 
 	    gc()
@@ -1441,7 +1460,11 @@ fitNULLGLMM = function(plinkFile = "",
                 modglmm$chromosomeStartIndexVec = NULL
                 modglmm$chromosomeEndIndexVec = NULL
 		modelOut = paste(c(outputPrefix,"_noLOCO.rda"), collapse="")
-                save(modglmm, file = modelOut)
+		barrier(comm=0)
+		if (comm.rank(comm=0) == 0) {
+                    save(modglmm, file = modelOut)
+                }
+		barrier(comm=0)
                 modglmm$LOCO = TRUE
                 modglmm$Y = NULL
 		eta0 = modglmm$linear.predictor
@@ -1500,7 +1523,11 @@ fitNULLGLMM = function(plinkFile = "",
                                                 modglmm$LOCOResult[[j1]] = list(NULL)
                                         }
                                 }
-				save(modglmm, file = modelOutbychr)
+				barrier(comm=0)
+				if (comm.rank(comm=0) == 0) {
+ 				    save(modglmm, file = modelOutbychr)
+				}
+				barrier(comm=0)
 				modglmm$LOCOResult[[j]] = list(NULL)
                           	gc()
      		 	}else{
@@ -1511,7 +1538,11 @@ fitNULLGLMM = function(plinkFile = "",
                 gc()
                 #modelOut_nonauto = paste(c(outputPrefix,"_noLOCO.rda"), collapse="")
            }else{
-            save(modglmm, file = modelOut)
+            barrier(comm=0)
+	    if (comm.rank(comm=0) == 0) {
+                save(modglmm, file = modelOut)
+	    }
+	    barrier(comm=0)
            }
 
 
@@ -2147,7 +2178,11 @@ extractVarianceRatio = function(obj.glmm.null,
                                                     includeNonautoMarkersforVarRatio){
 
   obj.noK = obj.glmm.null$obj.noK
-  if(file.exists(testOut)){file.remove(testOut)}
+  barrier(comm=0)
+  if (comm.rank(comm=0) == 0) {
+      if(file.exists(testOut)){file.remove(testOut)}
+  }
+  barrier(comm=0)
   bimPlink = data.frame(data.table:::fread(bimFile, header=F))
   if(sum(sapply(bimPlink[,1], is.numeric)) != nrow(bimPlink)){
     stop("ERROR: chromosome column in plink bim file is no numeric!\n")
@@ -2377,7 +2412,11 @@ extractVarianceRatio = function(obj.glmm.null,
   }
 
 } #for(k in 1:length(listOfMarkersForVarRatio)){
-  write.table(varRatioTable, varRatioOutFile, quote=F, col.names=F, row.names=F)
+  barrier(comm=0)
+  if (comm.rank(comm=0) == 0) {
+      write.table(varRatioTable, varRatioOutFile, quote=F, col.names=F, row.names=F)
+  }
+  barrier(comm=0)
   data = read.table(varRatioOutFile, header=F)
   print(data)
 

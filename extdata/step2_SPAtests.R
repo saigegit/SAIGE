@@ -2,8 +2,8 @@
 
 #options(stringsAsFactors=F, scipen = 999)
 options(stringsAsFactors=F)
+.libPaths(c(.libPaths(), "/gpfs/alpine/proj-shared/med112/task0101113/tools/R-2/R-4.0.3/library/"))
 library(SAIGE)
-#library(SAIGE, lib.loc="/humgen/atgu1/fin/wzhou/tools/SAIGE/install_v1.3.1/")
 BLASctl_installed <- require(RhpcBLASctl)
 library(optparse)
 library(data.table)
