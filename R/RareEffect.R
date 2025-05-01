@@ -235,7 +235,7 @@ mom_estimator_marginal <- function(G, y) {
     c2 <- sum(y^2)
     b <- matrix(c(c1, c2), ncol = 1)
     var_comp <- solve(A) %*% b
-    print(var_comp)
+    # print(var_comp)
     # h2_mom_marginal <- var_comp[1, 1] / sum(var_comp)
     return (var_comp)
 }
@@ -278,7 +278,7 @@ mom_estimator_joint <- function(G1, G2, G3, y) {
     b <- matrix(c(c1, c2, c3, c4), ncol = 1)
 
     var_comp <- solve(A) %*% b
-    print(var_comp)
+    # print(var_comp)
     #  h2_mom_joint <- c(var_comp[1, 1], var_comp[2, 1], var_comp[3, 1]) / sum(var_comp)
     return (var_comp)
 }
@@ -302,7 +302,81 @@ calculate_joint_blup <- function(G1, G2, G3, tau1, tau2, tau3, Sigma1, Sigma2, S
     return (beta)
 }
 
-run_RareEffect <- function(rdaFile, chrom, geneName, groupFile, traitType, bedFile, bimFile, famFile, macThreshold, collapseLoF, collapsemis, collapsesyn, outputPrefix) {
+weight_cal <- function(beta_k, delta = 10^(-5), gamma = 2, q = 0, factor2 = 1, n_lof, n_mis, n_syn){
+	# delta=10^(-5); gamma=2; q=0
+	p <- length(beta_k)
+    p1 <- n_lof
+    p2 <- n_mis
+    p3 <- n_syn
+	w_out = rep(0, p)
+	idx_null = NULL
+	idx<-which(abs(beta_k) <= delta)
+	if(length(idx)> 0){
+		beta_k1<-beta_k[idx]
+		b_delta = abs(beta_k1/delta)^{gamma}
+		logw1 = (q-2) * log(delta) + (q-2)/gamma* log(1+ b_delta)
+		w_out[idx]<-exp(logw1 * factor2)
+		idx_null = idx
+	}
+	idx<-which(abs(beta_k) > delta)
+	if(length(idx)> 0){
+		beta_k1<-beta_k[idx]
+		b_delta_inv = abs(delta/beta_k1)^{gamma}
+		logw2 = (q-2) * log(abs(beta_k1)) + (q-2)/gamma* log(1+ b_delta_inv)
+		w_out[idx]<-exp(logw2)
+	}
+
+	# make sum of all to be p
+	a1 = 1/w_out
+	a1_out = a1/sum(a1)*p
+	w_out = 1/a1_out
+
+	return(list(w_out=w_out))
+}
+
+adaptive_ridge <- function(X, y, lambda, q = 0, delta = 1e-5, gamma = 2, max_iter = 100, tol = 0.01, sigma_sq = 1, n_lof, n_mis, n_syn) {
+    w <- rep(1, ncol(X))     # Initialize weights
+    beta <- rep(0, ncol(X))  # Initialize beta
+    beta_all<-NULL
+    w_all<-NULL
+    idx_set<-1:length(w)
+
+    # save to reduce redundant computation
+    Xy = t(X) %*% y
+    XX = t(X) %*% X
+    for (k in 1:max_iter) {
+        W <- diag(w)
+        # using solve is better than calculating inverse matrix first...
+        beta_new <- solve(XX + lambda * W, Xy)  # Ridge regression for initial estimate
+
+        # Update weights
+        w_new_re <- weight_cal(beta_new, delta=delta, gamma=gamma, q=q, n_lof=n_lof, n_mis=n_mis, n_syn=n_syn)
+        w_new = w_new_re$w_out
+
+        # print(sqrt(sum((beta_new - beta)^2)))
+        if (sqrt(sum((beta_new - beta)^2)) < sum(beta^2)*tol) {
+            # print(paste0("Converged at iteration: ", k))
+            break
+        }
+
+        beta <- beta_new
+        w <- w_new
+        w_all<-cbind(w_all, w)
+        beta_all<-cbind(beta_all, beta)
+    }
+
+    A <- XX
+    diag(A) <- diag(A) + lambda * w
+    L <- chol(A)
+    A_inv <- chol2inv(L)
+
+    cov_beta <- as.numeric(sigma_sq) * (A_inv %*% XX %*% A_inv)
+    se_beta <- sqrt(diag(cov_beta))
+
+    list(beta = beta, weights = w, iterations = k, beta_all=beta_all, w_all=w_all, se_beta = se_beta)
+}
+
+run_RareEffect <- function(rdaFile, chrom, geneName, groupFile, traitType, bedFile, bimFile, famFile, macThreshold, collapseLoF, collapsemis, collapsesyn, apply_AR, outputPrefix) {
     # Load SAIGE step 1 results
     load(rdaFile)
 
@@ -359,7 +433,7 @@ run_RareEffect <- function(rdaFile, chrom, geneName, groupFile, traitType, bedFi
     for (i in 1:3) {
         var_by_func_anno[[i]] <- var_by_func_anno[[i]][which(var_by_func_anno[[i]] %in% objGeno$markerInfo$ID)]
     }
-    print(str(var_by_func_anno))
+    # print(str(var_by_func_anno))
 
     # Read genotype matrix
     if (collapseLoF) {
@@ -402,8 +476,8 @@ run_RareEffect <- function(rdaFile, chrom, geneName, groupFile, traitType, bedFi
     mis_ncol <- ncol(mis_mat_collapsed)
     syn_ncol <- ncol(syn_mat_collapsed)
 
-    print("Dimension of G")
-    print(dim(G))
+    # print("Dimension of G")
+    # print(dim(G))
 
     # Obtain residual vector and genotype matrix with the same order
     y_tilde <- cbind(modglmm$sampleID, modglmm$residuals)
@@ -414,8 +488,8 @@ run_RareEffect <- function(rdaFile, chrom, geneName, groupFile, traitType, bedFi
         vG_reordered <- as.vector(sqrt(v)) * G_reordered    # Sigma_e^(-1/2) G
     }
     n_samples <- nrow(G_reordered)
-    print("Dimension of G_reordered")
-    print(dim(G_reordered))
+    # print("Dimension of G_reordered")
+    # print(dim(G_reordered))
 
     post_beta_lof <- NULL
     post_beta_mis <- NULL
@@ -572,29 +646,53 @@ run_RareEffect <- function(rdaFile, chrom, geneName, groupFile, traitType, bedFi
 
     post_beta <- as.vector(post_beta)
 
-    # Obtain prediction error variance (PEV)
-    if (lof_ncol > 0) {
-        diag(GtG_lof) <- diag(GtG_lof) + as.numeric(sigma_sq) / tau_lof_adj
-        PEV_lof <- diag(solve(GtG_lof))
-    } else {
-        PEV_lof <- NULL
+    if (apply_AR == TRUE) {
+        tau1 = tau_lof_adj
+        tau2 = tau_mis_adj
+        tau3 = tau_syn_adj
+        Sigma1 = rep(1, ncol(lof_mat))
+        Sigma2 = rep(1, ncol(mis_mat))
+        Sigma3 = rep(1, ncol(syn_mat))
+        psi = as.numeric(sigma_sq)
+        lambda <- psi / c(tau1 * Sigma1, tau2 * Sigma2, tau3 * Sigma3)
+        result_AR <- adaptive_ridge(G_reordered, as.numeric(y_tilde[,2]), lambda, q = 0, delta = 1e-5, gamma = 2, max_iter = 5, tol = 0.01, sigma_sq = sigma_sq, n_lof = lof_ncol, n_mis = mis_ncol, n_syn = syn_ncol)
+        post_beta <- as.vector(result_AR$beta)
+        se_beta <- (as.vector(result_AR$se_beta))
     }
 
-    if (mis_ncol > 0) {
-        diag(GtG_mis) <- diag(GtG_mis) + as.numeric(sigma_sq) / tau_mis_adj
-        PEV_mis <- diag(solve(GtG_mis))
-    } else {
-        PEV_mis <- NULL
-    }
+    if (apply_AR == FALSE) {
+        # Obtain prediction error variance (PEV)
+        if (lof_ncol > 0) {
+            # diag(GtG_lof) <- diag(GtG_lof) + as.numeric(sigma_sq) / tau_lof_adj
+            GtG_lof <- GtG_lof / as.numeric(sigma_sq)
+            diag(GtG_lof) <- diag(GtG_lof) + 1 / tau_lof_adj
+            PEV_lof <- diag(solve(GtG_lof))
+        } else {
+            PEV_lof <- NULL
+        }
 
-    if (syn_ncol > 0) {
-        diag(GtG_syn) <- diag(GtG_syn) + as.numeric(sigma_sq) / tau_syn_adj
-        PEV_syn <- diag(solve(GtG_syn))
-    } else {
-        PEV_syn <- NULL
-    }
+        if (mis_ncol > 0) {
+            # diag(GtG_mis) <- diag(GtG_mis) + as.numeric(sigma_sq) / tau_mis_adj
+            GtG_mis <- GtG_mis / as.numeric(sigma_sq)
+            diag(GtG_mis) <- diag(GtG_mis) + 1 / tau_mis_adj
+            PEV_mis <- diag(solve(GtG_mis))
+        } else {
+            PEV_mis <- NULL
+        }
 
-    PEV <- c(PEV_lof, PEV_mis, PEV_syn)
+        if (syn_ncol > 0) {
+            # diag(GtG_syn) <- diag(GtG_syn) + as.numeric(sigma_sq) / tau_syn_adj
+            GtG_syn <- GtG_syn / as.numeric(sigma_sq)
+            diag(GtG_syn) <- diag(GtG_syn) + 1 / tau_syn_adj
+            PEV_syn <- diag(solve(GtG_syn))
+        } else {
+            PEV_syn <- NULL
+        }
+
+        PEV <- abs(c(PEV_lof, PEV_mis, PEV_syn))
+    } else {
+        PEV <- se_beta^2
+    }
 
     # Apply Firth bias correction for binary phenotype
     if (traitType == "binary") {
@@ -607,19 +705,19 @@ run_RareEffect <- function(rdaFile, chrom, geneName, groupFile, traitType, bedFi
         G.lof.sp <- as(G_reordered[,c(1:lof_ncol), drop = F], "sparseMatrix")
         nMarker.lof <- ncol(G.lof.sp)
         out_single_wL2_lof_sparse <- Run_Firth_MultiVar_Single(G.lof.sp, modglmm$obj.noK, as.numeric(y_binary[,2]), offset1, nMarker.lof, l2.var=1/(2*tau_lof_adj), Is.Fast=FALSE, Is.Sparse=TRUE)[,2]
-        print(out_single_wL2_lof_sparse)
+        # print(out_single_wL2_lof_sparse)
 
         # mis
         G.mis.sp <- as(G_reordered[,c((lof_ncol + 1):(lof_ncol + mis_ncol)), drop = F], "sparseMatrix")
         nMarker.mis <- ncol(G.mis.sp)
         out_single_wL2_mis_sparse <- Run_Firth_MultiVar_Single(G.mis.sp, modglmm$obj.noK, as.numeric(y_binary[,2]), offset1, nMarker.mis, l2.var=1/(2*tau_mis_adj), Is.Fast=FALSE, Is.Sparse=TRUE)[,2]
-        print(out_single_wL2_mis_sparse)
+        # print(out_single_wL2_mis_sparse)
 
         # syn
         G.syn.sp <- as(G_reordered[,c((lof_ncol + mis_ncol + 1):(lof_ncol + mis_ncol + syn_ncol)), drop = F], "sparseMatrix")
         nMarker.syn <- ncol(G.syn.sp)
         out_single_wL2_syn_sparse <- Run_Firth_MultiVar_Single(G.syn.sp, modglmm$obj.noK, as.numeric(y_binary[,2]), offset1, nMarker.syn, l2.var=1/(2*tau_syn_adj), Is.Fast=FALSE, Is.Sparse=TRUE)[,2]
-        print(out_single_wL2_syn_sparse)
+        # print(out_single_wL2_syn_sparse)
 
         beta_firth <- c(out_single_wL2_lof_sparse, out_single_wL2_mis_sparse, out_single_wL2_syn_sparse)
         effect <- ifelse(abs(post_beta) < log(2), post_beta, beta_firth)
@@ -634,21 +732,17 @@ run_RareEffect <- function(rdaFile, chrom, geneName, groupFile, traitType, bedFi
     if (lof_ncol == 1) {
         sgn <- sign(post_beta[1])
     } else if (lof_ncol == 0) {
-        sgn <- 1
-        print("LoF variant does not exist, so the sign of the effect size is set to 1.")
+        print("LoF variant does not exist, so the sign of the effect size is calculated by the sign of other groups.")
+        MAC <- colSums(G_reordered)
+        sgn <- sign(sum(MAC * post_beta))
     } else {
-        MAC <- colSums(G_reordered[,c(1:(lof_ncol - 1)), drop = F])
-        sgn <- sign(sum(MAC * post_beta[c(1:(lof_ncol - 1))]))
+        MAC <- colSums(G_reordered[,c(1:(lof_ncol)), drop = F])
+        sgn <- sign(sum(MAC * post_beta[c(1:(lof_ncol))]))
     }
 
     h2_all <- sum(h2_lof_adj, h2_mis_adj, h2_syn_adj) * sgn
     h2 <- c(h2_lof_adj, h2_mis_adj, h2_syn_adj, h2_all)
     group <- c("LoF", "mis", "syn", "all")
-
-    # tau_lof_out <- c(tau_lof, as.numeric(tau_lof_mom_marginal[1, 1]), as.numeric(tau_mom_joint[1, 1]))
-    # tau_mis_out <- c(tau_mis, as.numeric(tau_mis_mom_marginal[1, 1]), as.numeric(tau_mom_joint[2, 1]))
-    # tau_syn_out <- c(tau_syn, as.numeric(tau_syn_mom_marginal[1, 1]), as.numeric(tau_mom_joint[3, 1]))
-    # tau_out <- rbind(tau_lof_out, tau_mis_out, tau_syn_out)
 
     effect_out <- as.data.frame(cbind(variant, effect, PEV))
     effect_out$effect <- as.numeric(effect_out$effect)
@@ -662,13 +756,11 @@ run_RareEffect <- function(rdaFile, chrom, geneName, groupFile, traitType, bedFi
 
     effect_outname <- paste0(outputPrefix, "_effect.txt")
     h2_outname <- paste0(outputPrefix, "_h2.txt")
-    # tau_outname <- paste0(outputPrefix, "_tau.txt")
 
-    print(effect_out)
-    print(h2_out)
+    # print(effect_out)
+    # print(h2_out)
     write.table(effect_out, effect_outname, row.names=F, quote=F)
     write.table(h2_out, h2_outname, row.names=F, col.names=F, quote=F)
-    # write.table(tau_out, tau_outname, row.names=F, col.names=F, quote=F)
 
     print("Analysis completed.")
 }
