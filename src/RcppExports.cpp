@@ -1377,6 +1377,16 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// setisUsePCGwithSparseSigma
+void setisUsePCGwithSparseSigma(bool isUsePCGwithSparseSigma0);
+RcppExport SEXP _SAIGE_setisUsePCGwithSparseSigma(SEXP isUsePCGwithSparseSigma0SEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< bool >::type isUsePCGwithSparseSigma0(isUsePCGwithSparseSigma0SEXP);
+    setisUsePCGwithSparseSigma(isUsePCGwithSparseSigma0);
+    return R_NilValue;
+END_RCPP
+}
 // getPCG1ofSigmaAndVector
 arma::fvec getPCG1ofSigmaAndVector(arma::fvec& wVec, arma::fvec& tauVec, arma::fvec& bVec, int maxiterPCG, float tolPCG);
 RcppExport SEXP _SAIGE_getPCG1ofSigmaAndVector(SEXP wVecSEXP, SEXP tauVecSEXP, SEXP bVecSEXP, SEXP maxiterPCGSEXP, SEXP tolPCGSEXP) {
@@ -3121,6 +3131,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setisUsePrecondM", (DL_FUNC) &_SAIGE_setisUsePrecondM, 1},
     {"_SAIGE_setisUseSparseSigmaforInitTau", (DL_FUNC) &_SAIGE_setisUseSparseSigmaforInitTau, 1},
     {"_SAIGE_setisUseSparseSigmaforNullModelFitting", (DL_FUNC) &_SAIGE_setisUseSparseSigmaforNullModelFitting, 1},
+    {"_SAIGE_setisUsePCGwithSparseSigma", (DL_FUNC) &_SAIGE_setisUsePCGwithSparseSigma, 1},
     {"_SAIGE_getPCG1ofSigmaAndVector", (DL_FUNC) &_SAIGE_getPCG1ofSigmaAndVector, 5},
     {"_SAIGE_getPCG1ofSigmaAndVector_Surv", (DL_FUNC) &_SAIGE_getPCG1ofSigmaAndVector_Surv, 9},
     {"_SAIGE_getPCG1ofSigmaAndVector_old", (DL_FUNC) &_SAIGE_getPCG1ofSigmaAndVector_old, 5},

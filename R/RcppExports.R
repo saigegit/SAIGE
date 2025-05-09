@@ -417,6 +417,10 @@ setisUseSparseSigmaforNullModelFitting <- function(isUseSparseSigmaforModelFitti
     invisible(.Call('_SAIGE_setisUseSparseSigmaforNullModelFitting', PACKAGE = 'SAIGE', isUseSparseSigmaforModelFitting0))
 }
 
+setisUsePCGwithSparseSigma <- function(isUsePCGwithSparseSigma0) {
+    invisible(.Call('_SAIGE_setisUsePCGwithSparseSigma', PACKAGE = 'SAIGE', isUsePCGwithSparseSigma0))
+}
+
 getPCG1ofSigmaAndVector <- function(wVec, tauVec, bVec, maxiterPCG, tolPCG) {
     .Call('_SAIGE_getPCG1ofSigmaAndVector', PACKAGE = 'SAIGE', wVec, tauVec, bVec, maxiterPCG, tolPCG)
 }
