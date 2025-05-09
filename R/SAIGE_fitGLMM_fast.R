@@ -890,6 +890,7 @@ solveSpMatrixUsingArma = function(sparseGRMtest){
 #' @param isCovariateTransform logical. Whether use qr transformation on non-genetic covariates. By default, TRUE
 #' @param isDiagofKinSetAsOne logical. Whether to set the diagnal elements in GRM to be 1. By default, FALSE
 #' @param useSparseGRMtoFitNULL logical. Whether to use sparse GRM to fit the null model. By default, FALSE
+#' @param usePCGwithSparseGRM logical. Whether to use PCG for inverse of the sparse GRM, if useSparseGRMtoFitNULL is TRUE. By default, FALSE
 #' @param useSparseGRMforVarRatio logical. Whether to use sparse GRM to estimate the variance Ratios. If TRUE, the variance ratios will be estimated using the full GRM (numerator) and the sparse GRM (denominator). By default, FALSE
 #' @param minCovariateCount integer. If binary covariates have a count less than this, they will be excluded from the model to avoid convergence issues. By default, -1 (no covariates will be excluded)
 #' @param minMAFforGRM numeric. Minimum MAF for markers (in the Plink file) used for construcing the sparse GRM. By default, 0.01
@@ -947,6 +948,7 @@ fitNULLGLMM = function(plinkFile = "",
 		minMAFforGRM = 0.01,
 		maxMissingRateforGRM = 0.15,
 		useSparseGRMtoFitNULL=FALSE,
+		usePCGwithSparseGRM=FALSE,
 		useSparseGRMforVarRatio=FALSE,
 		includeNonautoMarkersforVarRatio = FALSE,
 		sexCol = "",
@@ -1489,6 +1491,10 @@ fitNULLGLMM = function(plinkFile = "",
         obj.noK = NULL
         if (!skipModelFitting) {
             setisUseSparseSigmaforNullModelFitting(useSparseGRMtoFitNULL)
+	    if(useSparseGRMtoFitNULL){
+	    	cat("usePCGwithSparseGRM: ", usePCGwithSparseGRM, "\n")
+	    	setisUsePCGwithSparseSigma(usePCGwithSparseGRM)
+	    }
             cat("Start fitting the NULL GLMM\n")
             t_begin = proc.time()
             print(t_begin)
@@ -1719,6 +1725,9 @@ fitNULLGLMM = function(plinkFile = "",
             setgeno(bedFile, bimFile, famFile, dataMerge_sort$IndexGeno, indicatorGenoSamplesWithPheno, memoryChunk,
                 isDiagofKinSetAsOne)
             setisUseSparseSigmaforNullModelFitting(useSparseGRMtoFitNULL)
+            if(useSparseGRMtoFitNULL){
+                setisUsePCGwithSparseSigma(usePCGwithSparseGRM)
+            }
 
         }
 
@@ -1784,6 +1793,9 @@ fitNULLGLMM = function(plinkFile = "",
             t_begin = proc.time()
             print(t_begin)
             setisUseSparseSigmaforNullModelFitting(useSparseGRMtoFitNULL)
+            if(useSparseGRMtoFitNULL){
+                setisUsePCGwithSparseSigma(usePCGwithSparseGRM)
+            }
             cat("Start fitting the NULL GLMM\n")
             system.time(modglmm <- glmmkin.ai_PCG_Rcpp_Quantitative(bedFile, bimFile, famFile, Xorig, isCovariateOffset, 
                 fit0, tau = c(0, 0), fixtau = c(0, 0), maxiter = maxiter, 
@@ -1961,6 +1973,9 @@ fitNULLGLMM = function(plinkFile = "",
             setgeno(bedFile, bimFile, famFile, dataMerge_sort$IndexGeno, indicatorGenoSamplesWithPheno, memoryChunk, 
                 isDiagofKinSetAsOne)
             setisUseSparseSigmaforNullModelFitting(useSparseGRMtoFitNULL)
+            if(useSparseGRMtoFitNULL){
+                setisUsePCGwithSparseSigma(usePCGwithSparseGRM)
+            }
 
         }
         if (!skipVarianceRatioEstimation) {
@@ -2684,7 +2699,8 @@ extractVarianceRatio = function(obj.glmm.null,
 
 
   ##randomize the marker orders to be tested
-  if(useSparseGRMtoFitNULL | useSparseGRMforVarRatio){
+  #if(useSparseGRMtoFitNULL | useSparseGRMforVarRatio){
+  if(useSparseGRMforVarRatio){
     sparseSigma = getSparseSigma(bedFile = bedFile, bimFile = bimFile, famFile = famFile,
                 outputPrefix=varRatioOutFile,
                 sparseGRMFile=sparseGRMFile,
@@ -2849,6 +2865,7 @@ extractVarianceRatio = function(obj.glmm.null,
            varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
         }
     }else{
+        if(useSparseGRMforVarRatio){
 	  #varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, 1)
 	  pcginvSigma = solve(sparseSigma, g, sparse=T)
 	  var2_a = t(g) %*% pcginvSigma
@@ -2856,6 +2873,7 @@ extractVarianceRatio = function(obj.glmm.null,
 	  x=t(G)%*%Sigma_iG/AC
 	  #cat(" x ", x, " var2 ", var2sparseGRM , "\n")
 	  varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
+	}  
     }
 
     if(obj.glmm.null$traitType == "binary"){
