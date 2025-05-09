@@ -22,13 +22,15 @@ option_list <- list(
     make_option(c("--famFile"), type="character", default="",
         help="Path to fam file containing rare variants"),
     make_option(c("--macThreshold"), type="integer", default=10,
-        help="MAC threshold for ultra-rare variant collapsing"),
+        help="MAC threshold for ultra-rare variant collapsing (default: 10)"),
     make_option(c("--collapseLoF"), type="logical", default=FALSE,
         help="Collapse LoF variants into one super-variant (default: FALSE)"),
     make_option(c("--collapsemis"), type="logical", default=FALSE,
         help="Collapse missense variants into one super-variant (default: FALSE)"),
     make_option(c("--collapsesyn"), type="logical", default=FALSE,
         help="Collapse synonymous variants into one super-variant (default: FALSE)"),
+    make_option(c("--apply_AR"), type="logical", default=FALSE,
+        help="Apply adaptive ridge (approximated L0-regularization) when estimating effect size (defualt: FALSE)"),
     make_option(c("--outputPrefix"), type="character", default="",
         help="Path to save output (without extension and gene name)")
 )
@@ -51,5 +53,6 @@ run_RareEffect(
     collapseLoF = args$collapseLoF,
     collapsemis = args$collapsemis,
     collapsesyn = args$collapsesyn,
+    apply_AR = args$apply_AR,
     outputPrefix = args$outputPrefix
 )
