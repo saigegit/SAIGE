@@ -5058,11 +5058,13 @@ if(t_traitType == "binary" || "survival"){
 		double P_hom_admixed = std::stod(pval);
 		std::string P_hom_admixed_str = convertDoubletoStringPval(P_hom_admixed);
 		pvalHom_Vec.at(i) = P_hom_admixed_str;
+		pvalHet_Vec.at(i) = P_hom_admixed_str;
 		pvalAdmixed_Vec.at(i) = P_hom_admixed_str;
 		if(isCondition){
 			double P_hom_admixed_cond = std::stod(pval_c);
 			std::string P_hom_admixed_cond_str = convertDoubletoStringPval(P_hom_admixed_cond);
 			pvalHom_cVec.at(i) = P_hom_admixed_cond_str;
+			pvalHet_cVec.at(i) = P_hom_admixed_cond_str;
 			pvalAdmixed_cVec.at(i) = P_hom_admixed_cond_str;
 		}
 	}
