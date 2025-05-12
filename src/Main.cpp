@@ -4590,6 +4590,7 @@ void mainMarkerAdmixedInCPP(
   arma::mat P1Mat = arma::zeros<arma::mat>(t_NumberofANC, n);
   arma::mat P2Mat = arma::zeros<arma::mat>(n, t_NumberofANC);
   arma::vec Scorevec = arma::zeros<arma::vec>(t_NumberofANC);
+  arma::vec PvalvecallAnc = arma::zeros<arma::vec>(t_NumberofANC);
   arma::vec Scorevec_c = arma::zeros<arma::vec>(t_NumberofANC);
   arma::mat G1tilde_P_G2tilde_Mat(t_NumberofANC, ptr_gSAIGEobj->m_numMarker_cond);
 
@@ -4602,9 +4603,10 @@ void mainMarkerAdmixedInCPP(
     if((i+1) % g_marker_chunksize == 0){
       std::cout << "Completed " << (i+1) << "/" << q << " markers in the chunk." << std::endl;
     }
+    bool isSPAjoint = false;
     t_GVecHom.zeros();
-
     Scorevec.fill(arma::datum::nan);
+    PvalvecallAnc.fill(arma::datum::nan);
     Scorevec_c.fill(arma::datum::nan);
     //Scorevec.zeros();
     //Scorevec_c.zeros();
@@ -4612,6 +4614,7 @@ void mainMarkerAdmixedInCPP(
     P2Mat.zeros();
     G1tilde_P_G2tilde_Mat.zeros();
     numancresults = 0;
+ double nanc_case, nanc_ctrl;
 
     for(int j = 0; j < (t_NumberofANC+1); j++){   
     // information of marker
@@ -4668,6 +4671,12 @@ void mainMarkerAdmixedInCPP(
                                           isOnlyOutputNonZero, // bool t_isOnlyOutputNonZero,
                                           indexNonZeroVec, t_GVec, t_isImputation, vcfFieldtoRead);
    nanc = arma::accu(t_GVec);
+ if(t_traitType == "binary" || t_traitType == "survival"){
+        arma::vec dosage_case = t_GVec.elem(ptr_gSAIGEobj->m_case_indices);
+	nanc_case = arma::accu(dosage_case);
+        arma::vec dosage_ctrl = t_GVec.elem(ptr_gSAIGEobj->m_ctrl_indices);
+	nanc_ctrl = arma::accu(dosage_ctrl);
+}
 
    t_GVec.zeros();
    indexZeroVec.clear();
@@ -4684,6 +4693,7 @@ void mainMarkerAdmixedInCPP(
    t_GVecHom = t_GVecHom + t_GVec;
    altCounts = arma::accu(t_GVec);
    altFreq = altCounts/double(nanc);
+
 
 
    if(!isReadMarker){
@@ -4753,10 +4763,45 @@ if(j == 0){
    //std::cout << "altCounts " << altCounts << std::endl;
    //std::cout << "n " << n << std::endl;
    
+    if(t_traitType == "binary" || t_traitType == "survival"){
+        arma::vec dosage_case = t_GVec.elem(ptr_gSAIGEobj->m_case_indices);
+        arma::vec dosage_ctrl = t_GVec.elem(ptr_gSAIGEobj->m_ctrl_indices);
+        AF_case = arma::accu(dosage_case) /nanc_case;
+        AF_ctrl = arma::accu(dosage_ctrl) /nanc_ctrl;
+        //N_case = dosage_case.n_elem;
+        //N_ctrl = dosage_ctrl.n_elem;
+        //if(flip){
+        //   AF_case = 1-AF_case;
+        //   AF_ctrl = 1-AF_ctrl;
+        //}
+        AF_caseVec.at(k) = AF_case;
+        AF_ctrlVec.at(k) = AF_ctrl;
+        N_caseVec.at(k) = nanc_case;
+        N_ctrlVec.at(k) = nanc_ctrl;
+
+        arma::uvec N_case_ctrl_het_hom0;
+        if(t_isMoreOutput){
+          N_case_ctrl_het_hom0 = arma::find(dosage_case <= 2 && dosage_case >=1.5);
+          N_case_homVec.at(k)  = N_case_ctrl_het_hom0.n_elem;
+          N_case_ctrl_het_hom0 = arma::find(dosage_case < 1.5 && dosage_case >= 0.5);
+          N_case_hetVec.at(k) = N_case_ctrl_het_hom0.n_elem;
+          N_case_ctrl_het_hom0 = arma::find(dosage_ctrl <= 2 && dosage_ctrl >=1.5);
+          N_ctrl_homVec.at(k) = N_case_ctrl_het_hom0.n_elem;
+          N_case_ctrl_het_hom0 = arma::find(dosage_ctrl < 1.5 && dosage_ctrl >= 0.5);
+          N_ctrl_hetVec.at(k) = N_case_ctrl_het_hom0.n_elem;
+          //if(flip){
+          //      N_case_homVec.at(k) = N_case - N_case_hetVec.at(k) -  N_case_homVec.at(k);
+          //      N_ctrl_homVec.at(k) = N_ctrl - N_ctrl_hetVec.at(k) - N_ctrl_homVec.at(k);
+          //}
+        }
+      }else if(t_traitType == "quantitative"){
+        N_Vec.at(k) = nanc;
+      }
 
 
     // Quality Control (QC) based on missing rate, MAF, and MAC
     if((missingRate > g_missingRate_cutoff) || (MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff || imputeInfo < g_marker_minINFO_cutoff)){
+
       includeTestANCvec(j) = 1;
       continue;
     }else{
@@ -4833,6 +4878,7 @@ if(j == 0){
                           false, // bool t_isOnlyOutputNonZero,
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA,  Tstat, gy, varT,
                           altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false);
+	if(isSPAConverge){isSPAjoint = true;}		  
     }else{
     	//if(t_traitType != "quantitative"){
     		includeTestANCvec(j) = 1;
@@ -4885,11 +4931,14 @@ if(j == 0){
      }
      }
 */
-     
+if(t_traitType == "binary" || "survival"){
+        isSPAConvergeVec.at(k) = isSPAConverge;
+}     
   if(j < t_NumberofANC){
    P1Mat.row(j) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*gtildeVec.t();
    P2Mat.col(j) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*t_P2Vec;
    Scorevec(j) = Tstat;
+   PvalvecallAnc(j) = pval_num;
 
    if(isCondition){
 	G1tilde_P_G2tilde_Mat.row(i) = G1tilde_P_G2tilde_Vec;
@@ -4927,41 +4976,6 @@ if(j == 0){
         varT_cVec.at(k) = varT_c;
     }
 
-    if(t_traitType == "binary" || t_traitType == "survival"){
-        arma::vec dosage_case = t_GVec.elem(ptr_gSAIGEobj->m_case_indices);
-        arma::vec dosage_ctrl = t_GVec.elem(ptr_gSAIGEobj->m_ctrl_indices);
-        AF_case = arma::mean(dosage_case) /2;
-        AF_ctrl = arma::mean(dosage_ctrl) /2;
-        N_case = dosage_case.n_elem;
-        N_ctrl = dosage_ctrl.n_elem;
-        if(flip){
-           AF_case = 1-AF_case;
-           AF_ctrl = 1-AF_ctrl;
-        }
-        isSPAConvergeVec.at(k) = isSPAConverge;
-        AF_caseVec.at(k) = AF_case;
-        AF_ctrlVec.at(k) = AF_ctrl;
-        N_caseVec.at(k) = N_case;
-        N_ctrlVec.at(k) = N_ctrl;
-
-        arma::uvec N_case_ctrl_het_hom0;
-        if(t_isMoreOutput){
-          N_case_ctrl_het_hom0 = arma::find(dosage_case <= 2 && dosage_case >=1.5);
-          N_case_homVec.at(k)  = N_case_ctrl_het_hom0.n_elem;
-          N_case_ctrl_het_hom0 = arma::find(dosage_case < 1.5 && dosage_case >= 0.5);
-          N_case_hetVec.at(k) = N_case_ctrl_het_hom0.n_elem;
-          N_case_ctrl_het_hom0 = arma::find(dosage_ctrl <= 2 && dosage_ctrl >=1.5);
-          N_ctrl_homVec.at(k) = N_case_ctrl_het_hom0.n_elem;
-          N_case_ctrl_het_hom0 = arma::find(dosage_ctrl < 1.5 && dosage_ctrl >= 0.5);
-          N_ctrl_hetVec.at(k) = N_case_ctrl_het_hom0.n_elem;
-          if(flip){
-                N_case_homVec.at(k) = N_case - N_case_hetVec.at(k) -  N_case_homVec.at(k);
-                N_ctrl_homVec.at(k) = N_ctrl - N_ctrl_hetVec.at(k) - N_ctrl_homVec.at(k);
-          }
-        }
-      }else if(t_traitType == "quantitative"){
-        N_Vec.at(k) = nanc;
-      }
 
        }//if(includeTestANCvec(j) == 0){
      
@@ -4974,8 +4988,10 @@ if(j == 0){
    
     if(j == t_NumberofANC && numancresults > 1){
 
+	double P_hom_admixed = std::stod(pval);
 
- 	arma::vec Scorevecsub;
+ 	arma::vec Scorevecsub, scaleFactor;
+ 	arma::vec PvalvecallAncsub;
  	arma::mat VarMat;
 	if(numancresults < t_NumberofANC){
 		arma::uvec not_nan_indices = arma::find_finite(Scorevec);
@@ -4983,13 +4999,24 @@ if(j == 0){
 		arma::mat P1Matsub = P1Mat.rows(not_nan_indices);
 		arma::mat P2Matsub = P2Mat.cols(not_nan_indices);
 		VarMat = P1Matsub * P2Matsub;
+		PvalvecallAncsub = PvalvecallAnc.elem(not_nan_indices);
 	}else{
 		Scorevecsub = Scorevec;
+		PvalvecallAncsub = PvalvecallAnc;
 		VarMat = P1Mat * P2Mat;
 	}
+
+	if(t_traitType == "binary" && isSPAjoint){
+		SPA_ER_kernel_related_Phiadj_fast_new_cpp(PvalvecallAncsub, 
+							Scorevecsub,
+							VarMat,
+							P_hom_admixed,
+							"SKAT",
+							scaleFactor);	
+	}
+
    	//arma::mat VarMat = P1Mat * P2Mat;
 	double P_het_admixed = get_jointScore_pvalue(Scorevecsub, VarMat);
-	double P_hom_admixed = std::stod(pval);
 	arma::vec pvecforcct = {P_het_admixed, P_hom_admixed};
     	double P_cct_admixed = CCT_cpp(pvecforcct);
 	std::string P_het_admixed_str = convertDoubletoStringPval(P_het_admixed);

@@ -286,7 +286,7 @@ arma::vec Get_Liu_PVal_MOD_Lambda(arma::vec& Q_all, arma::vec& lambda, arma::ive
     boost::math::non_central_chi_squared dist(l, d);
     if(Q_norm1(i) > 0){
 
-    	p_value(i) = boost::math::cdf(boost::math::complement(dist, Q_norm1(i));
+    	p_value(i) = boost::math::cdf(boost::math::complement(dist, Q_norm1(i)));
     }else{
 	p_value(i) = 1;
     }
@@ -1586,7 +1586,7 @@ double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi) {
     // Debugging print statements (optional, remove in production)
     //Rcpp::Rcout << "Score:" << std::endl << Score << std::endl;
     //Rcpp::Rcout << "Phi:" << std::endl << Phi << std::endl;
-    Rcpp::Rcout << "Teststat: " << Teststat << std::endl;
+    //Rcpp::Rcout << "Teststat: " << Teststat << std::endl;
     //Rcpp::Rcout << "df: " << df << std::endl;
     
     // Create central chi-squared distribution
@@ -1626,13 +1626,17 @@ void SPA_ER_kernel_related_Phiadj_fast_new_cpp(arma::vec& p_new,
 
     arma::vec VarS = arma::square(zscore_all_0) / 500.0;
 
-    
+    double df = 1.0;
+    boost::math::chi_squared dist(df);
+   //boost::math::quantile(complement(dist, p)) 
+   
     if (!idx_p0.is_empty()) {
-        double df = 1.0;
     	for (size_t i = 0; i < idx_p0.n_elem; i++) {
 		unsigned int idx_p0_i = idx_p0(i);
 		double p_new_i = p_new(idx_p0_i);
-		VarS(idx_p0_i) = std::pow(zscore_all_0(idx_p0_i),2) / qchisq_log(p_new_i, df);
+		double zscore = zscore_all_0(idx_p0_i);
+		double qval = boost::math::quantile(boost::math::complement(dist,p_new_i));
+		VarS(idx_p0_i) = std::pow(zscore,2) / qval;
     	}
     }
     arma::uvec vars_inf = arma::find(VarS == arma::datum::inf);
@@ -1650,7 +1654,6 @@ void SPA_ER_kernel_related_Phiadj_fast_new_cpp(arma::vec& p_new,
             Phi(vars_inf).zeros();
         }
     }
-
     scaleFactor = arma::sqrt(VarS / VarS_org);
     zscore_all_1 = zscore_all_0;
 
@@ -1658,8 +1661,9 @@ void SPA_ER_kernel_related_Phiadj_fast_new_cpp(arma::vec& p_new,
 
     arma::mat G2_adj_n;
     if (regionTestType != "BURDEN") {
-        arma::mat PhiVarS = (Phi % arma::sqrt(VarStoorg)).t();
-        G2_adj_n = (PhiVarS % arma::sqrt(VarStoorg)).t();
+	arma::mat sqrt_Var = arma::sqrt(VarStoorg);
+	arma::mat PhiVarS = Phi.each_col() % sqrt_Var;
+        G2_adj_n = PhiVarS.each_col() % sqrt_Var;
     } else {
         G2_adj_n = Phi % VarStoorg;
     }
@@ -1667,14 +1671,14 @@ void SPA_ER_kernel_related_Phiadj_fast_new_cpp(arma::vec& p_new,
     double VarQ = arma::accu(G2_adj_n);
     double Q_b = std::pow(arma::accu(zscore_all_1), 2);
 
-    double VarQ_2 = Q_b / qchisq_log(p_value_burden, 1);
+    double qval_Q_b = boost::math::quantile(boost::math::complement(dist,p_value_burden));
+    double VarQ_2 = Q_b / qval_Q_b;
     double r = (VarQ_2 == 0) ? 1.0 : VarQ / VarQ_2;
     r = std::min(r, 1.0);
 
     //arma::mat Phi_ccadj;
     Phi = G2_adj_n / r;
     scaleFactor /= std::sqrt(r);
-
 }
 
 
