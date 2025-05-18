@@ -162,9 +162,6 @@ SAIGE.Region = function(mu,
     
     }
 
-
-
->>>>>>> main
   OutputFileIndex = NULL
   if (is.null(OutputFileIndex))
     OutputFileIndex = paste0(OutputFile, ".index")
