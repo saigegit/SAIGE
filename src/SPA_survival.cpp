@@ -159,18 +159,20 @@ Rcpp::List Get_Saddle_Prob_Poi(double zeta,  arma::vec & mu, arma::vec & g, doub
 		std::cout << "v: " << v << std::endl;
 		std::cout << "Ztest: " << Ztest << std::endl;
 */
-   		boost::math::normal norm_dist(0,1);
+   		//boost::math::normal norm_dist(0,1);
 		double pval0;
 		
 
 		if(Ztest > 0){
-			pval0 = boost::math::cdf(complement(norm_dist,Ztest));
+			//pval0 = boost::math::cdf(complement(norm_dist,Ztest));
+			pval0 = R::pnorm(Ztest,0,1,false,logp);
 			pval= pval0;
 			//if(logp){
 			//	pval = std::log(pval);
 			//}	
 		} else {
-			pval0 = boost::math::cdf(norm_dist,Ztest);
+			//pval0 = boost::math::cdf(norm_dist,Ztest);
+			pval0 = R::pnorm(Ztest,0,1,true,logp);
 			pval= -1*pval0;
 			
 			//	-Rcpp::pnorm( Ztest, mean = 0.0, sd = 1.0, lower = true, log = logp );
@@ -405,15 +407,15 @@ Rcpp::List Get_Saddle_Prob_fast_Poi(double zeta,  arma::vec & mu, arma::vec & g,
 		boost::math::normal norm_dist(0,1);
                 double pval0;
 		if(Ztest > 0){
-			pval0 = boost::math::cdf(complement(norm_dist,Ztest));
-
+			//pval0 = boost::math::cdf(complement(norm_dist,Ztest));
+			pval0 = R::pnorm(Ztest,0,1,false,logp);
 			pval=pval0;
 			//if(logp){
 			//	pval = std::log(pval);
 			//}	
 		} else {
-			pval0 = boost::math::cdf(norm_dist,Ztest);
-
+			//pval0 = boost::math::cdf(norm_dist,Ztest);
+			pval0 = R::pnorm(Ztest,0,1,true,logp);
 			pval= -pval0;
 			
 			//	-Rcpp::pnorm( Ztest, mean = 0.0, sd = 1.0, lower = true, log = logp );

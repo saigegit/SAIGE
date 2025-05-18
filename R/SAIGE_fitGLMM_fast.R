@@ -108,7 +108,6 @@ GetLambda0<-function(lin.pred,inC)
   {
     j = inC$timedata$newIndexWithTies[i]
     lambda0 = sum(demonVec[which(inC$caseIndexwithTies <= j)])
-    #cat("i: ", i, " j: ", j, " lambda0: ", lambda0, "\n")
     Lambda0[inC$timedata$orgIndex[i]] = lambda0
   }
   return(Lambda0)
@@ -135,6 +134,7 @@ Get_Coef = function(y, X, tau, family, alpha0, eta0,  offset, maxiterPCG, tolPCG
     eta = eta0	
   }
 
+
   for(i in 1:maxiter){
     if(!is.null(inC)){
       Lambda0 = GetLambda0(eta, inC)
@@ -142,7 +142,9 @@ Get_Coef = function(y, X, tau, family, alpha0, eta0,  offset, maxiterPCG, tolPCG
       Y = eta + (y - mu)/mu
       W = as.vector(mu)
     }
-    
+
+
+
     re.coef = getCoefficients(Y, X, W, tau, maxiter=maxiterPCG, tol=tolPCG)
     alpha = re.coef$alpha
     eta = re.coef$eta + offset
@@ -640,6 +642,8 @@ glmmkin.ai_PCG_Rcpp_Quantitative = function(bedFile, bimFile, famFile, Xorig, is
 
 #    cat("tau0_after_fit: ", tau0,"\n")
 #    print(fit)
+
+   if(tau[1]!=0){
     tau = as.numeric(fit$tau)
     cov = re.coef$cov
     alpha = re.coef$alpha
@@ -675,6 +679,10 @@ glmmkin.ai_PCG_Rcpp_Quantitative = function(bedFile, bimFile, famFile, Xorig, is
       warning("Large variance estimate observed in the iterations, model not converged...", call. = FALSE)
       i = maxiter
       break
+    }
+
+   }else{#if(tau[1]!=0){
+     break
     }
   }
 
@@ -882,6 +890,7 @@ solveSpMatrixUsingArma = function(sparseGRMtest){
 #' @param isCovariateTransform logical. Whether use qr transformation on non-genetic covariates. By default, TRUE
 #' @param isDiagofKinSetAsOne logical. Whether to set the diagnal elements in GRM to be 1. By default, FALSE
 #' @param useSparseGRMtoFitNULL logical. Whether to use sparse GRM to fit the null model. By default, FALSE
+#' @param usePCGwithSparseGRM logical. Whether to use PCG for inverse of the sparse GRM, if useSparseGRMtoFitNULL is TRUE. By default, FALSE
 #' @param useSparseGRMforVarRatio logical. Whether to use sparse GRM to estimate the variance Ratios. If TRUE, the variance ratios will be estimated using the full GRM (numerator) and the sparse GRM (denominator). By default, FALSE
 #' @param minCovariateCount integer. If binary covariates have a count less than this, they will be excluded from the model to avoid convergence issues. By default, -1 (no covariates will be excluded)
 #' @param minMAFforGRM numeric. Minimum MAF for markers (in the Plink file) used for construcing the sparse GRM. By default, 0.01
@@ -939,6 +948,7 @@ fitNULLGLMM = function(plinkFile = "",
 		minMAFforGRM = 0.01,
 		maxMissingRateforGRM = 0.15,
 		useSparseGRMtoFitNULL=FALSE,
+		usePCGwithSparseGRM=FALSE,
 		useSparseGRMforVarRatio=FALSE,
 		includeNonautoMarkersforVarRatio = FALSE,
 		sexCol = "",
@@ -1125,7 +1135,10 @@ fitNULLGLMM = function(plinkFile = "",
         for (i in c(phenoCol, covarColList, sampleIDColinphenoFile)) {
             if (!(i %in% colnames(data))) {
                 stop("ERROR! column for ", i, " does not exist in the phenoFile \n")
-            }else{
+            }
+	}    
+	
+	
 		if(eventTimeCol != ""){
                     if(!(eventTimeCol %in% colnames(data))){
                         stop("ERROR! eventTimeCol does not exsit in the phenoFile \n")
@@ -1134,16 +1147,18 @@ fitNULLGLMM = function(plinkFile = "",
                     if(!is.null(eventTimeBinSize)){
                         cat("eventTimeBinSize is specified, so event time will be grouped by bins with size ", eventTimeBinSize, "\n")
                         minEventTime = min(data[,eventTimeCol])
+			cat("minEventTime ", minEventTime, "\n")
                         data$eventTimeNew = (data[,eventTimeCol] - minEventTime) %/% eventTimeBinSize + 1
                         data$eventTimeOrg = data[,eventTimeCol]
                         data[,eventTimeCol] = data$eventTimeNew
                     }
-                }
+		    data = data[,which(colnames(data) %in% c(phenoCol, covarColList, sampleIDColinphenoFile, eventTimeCol)), drop=F]	
+                }else{
+		    data = data[,which(colnames(data) %in% c(phenoCol, covarColList, sampleIDColinphenoFile)), drop=F]	
 
-		data = data[,which(colnames(data) %in% c(phenoCol, covarColList, sampleIDColinphenoFile, eventTimeCol)), drop=F]	
+		}
+
 		data = data[complete.cases(data),,drop=F]
-	    }		    
-        }
 
 	if(SampleIDIncludeFile != ""){
 		if(!file.exists(SampleIDIncludeFile)){
@@ -1270,6 +1285,19 @@ fitNULLGLMM = function(plinkFile = "",
 
         dataMerge = merge(mmat_nomissing, sampleListwithGeno, 
             by.x = "IID", by.y = "IIDgeno")
+
+        if(eventTimeCol != ""){
+            pheVec = dataMerge[,which(colnames(dataMerge) == phenoCol)]
+            minTime = min(dataMerge[which(pheVec == 1),eventTimeCol])
+            rmCensor = which(pheVec == 0 & dataMerge[,eventTimeCol] < minTime)
+            if(length(rmCensor) > 0){
+                dataMerge = dataMerge[-rmCensor,]
+		cat("After subsetting to samples with genotypes avaialble, ")
+                cat(length(rmCensor)," individuals that are censored before the first event is removed\n")
+            }
+        }
+
+
         dataMerge_sort = dataMerge[with(dataMerge, order(IndexGeno)), 
             ]
 
@@ -1458,10 +1486,15 @@ fitNULLGLMM = function(plinkFile = "",
 
         cat("glm:\n")
         print(fit0)
+	print(summary(fit0))
 
         obj.noK = NULL
         if (!skipModelFitting) {
             setisUseSparseSigmaforNullModelFitting(useSparseGRMtoFitNULL)
+	    if(useSparseGRMtoFitNULL){
+	    	cat("usePCGwithSparseGRM: ", usePCGwithSparseGRM, "\n")
+	    	setisUsePCGwithSparseSigma(usePCGwithSparseGRM)
+	    }
             cat("Start fitting the NULL GLMM\n")
             t_begin = proc.time()
             print(t_begin)
@@ -1538,19 +1571,27 @@ fitNULLGLMM = function(plinkFile = "",
 
 	    }
 
+	if(!is.null(eventTime)){
+	   modglmm$minEventTime = minEventTime
+	   modglmm$eventTimeBinSize = eventTimeBinSize
+	}
 
             modglmm$useSparseGRMtoFitNULL = useSparseGRMtoFitNULL 
             #save(modglmm, file = modelOut)
             tau = modglmm$theta
       
 	    alpha0 = modglmm$coefficients
-
+	 
   	    if(!is.null(out.transform) & is.null(fit0$offset)){
 		coef.alpha<-Covariate_Transform_Back(alpha0, out.transform$Param.transform)
 	    	modglmm$coefficients = coef.alpha
   	    }
 
-            
+
+	    if(eventTimeCol != ""){
+		modglmm$minEventTime = minEventTime
+		modglmm$eventTimeBinSize = eventTimeBinSize	
+            }
 
             if(LOCO & isLowMemLOCO){
                 modglmm$LOCOResult = NULL
@@ -1582,6 +1623,10 @@ fitNULLGLMM = function(plinkFile = "",
                 #save(modglmm, file = modelOut)
                 set_Diagof_StdGeno_LOCO()
 		modglmm$LOCOResult = list()
+
+
+
+
                 for(j in 1:22){
                         startIndex = chromosomeStartIndexVec[j]
                         endIndex = chromosomeEndIndexVec[j]
@@ -1680,6 +1725,9 @@ fitNULLGLMM = function(plinkFile = "",
             setgeno(bedFile, bimFile, famFile, dataMerge_sort$IndexGeno, indicatorGenoSamplesWithPheno, memoryChunk,
                 isDiagofKinSetAsOne)
             setisUseSparseSigmaforNullModelFitting(useSparseGRMtoFitNULL)
+            if(useSparseGRMtoFitNULL){
+                setisUsePCGwithSparseSigma(usePCGwithSparseGRM)
+            }
 
         }
 
@@ -1745,6 +1793,9 @@ fitNULLGLMM = function(plinkFile = "",
             t_begin = proc.time()
             print(t_begin)
             setisUseSparseSigmaforNullModelFitting(useSparseGRMtoFitNULL)
+            if(useSparseGRMtoFitNULL){
+                setisUsePCGwithSparseSigma(usePCGwithSparseGRM)
+            }
             cat("Start fitting the NULL GLMM\n")
             system.time(modglmm <- glmmkin.ai_PCG_Rcpp_Quantitative(bedFile, bimFile, famFile, Xorig, isCovariateOffset, 
                 fit0, tau = c(0, 0), fixtau = c(0, 0), maxiter = maxiter, 
@@ -1922,6 +1973,9 @@ fitNULLGLMM = function(plinkFile = "",
             setgeno(bedFile, bimFile, famFile, dataMerge_sort$IndexGeno, indicatorGenoSamplesWithPheno, memoryChunk, 
                 isDiagofKinSetAsOne)
             setisUseSparseSigmaforNullModelFitting(useSparseGRMtoFitNULL)
+            if(useSparseGRMtoFitNULL){
+                setisUsePCGwithSparseSigma(usePCGwithSparseGRM)
+            }
 
         }
         if (!skipVarianceRatioEstimation) {
@@ -2645,7 +2699,8 @@ extractVarianceRatio = function(obj.glmm.null,
 
 
   ##randomize the marker orders to be tested
-  if(useSparseGRMtoFitNULL | useSparseGRMforVarRatio){
+  #if(useSparseGRMtoFitNULL | useSparseGRMforVarRatio){
+  if(useSparseGRMforVarRatio){
     sparseSigma = getSparseSigma(bedFile = bedFile, bimFile = bimFile, famFile = famFile,
                 outputPrefix=varRatioOutFile,
                 sparseGRMFile=sparseGRMFile,
@@ -2810,6 +2865,7 @@ extractVarianceRatio = function(obj.glmm.null,
            varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
         }
     }else{
+        if(useSparseGRMforVarRatio){
 	  #varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, 1)
 	  pcginvSigma = solve(sparseSigma, g, sparse=T)
 	  var2_a = t(g) %*% pcginvSigma
@@ -2817,6 +2873,7 @@ extractVarianceRatio = function(obj.glmm.null,
 	  x=t(G)%*%Sigma_iG/AC
 	  #cat(" x ", x, " var2 ", var2sparseGRM , "\n")
 	  varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
+	}  
     }
 
     if(obj.glmm.null$traitType == "binary"){
@@ -2880,3 +2937,4 @@ extractVarianceRatio = function(obj.glmm.null,
   print(data)
 
 }
+

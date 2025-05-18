@@ -39,7 +39,55 @@ static VCF::VcfClass* ptr_gVCFobj = NULL;
 static SAIGE::SAIGEClass* ptr_gSAIGEobj = NULL;
 //single, SAIGE
 //Region, SAIGE-GENE+
+/*
+static std::vector<std::unique_ptr<PLINK::PlinkClass>> plinkObjects;
+static std::vector<std::unique_ptr<BGEN::BgenClass>> bgenObjects;
+static std::vector<std::unique_ptr<VCF::VcfClass>> vcfObjects;
+int g_num_threads = 1;
 
+// [[Rcpp::export]]
+void createPLINKObjects(
+			std::string t_bimFile,
+                      std::string t_famFile,
+                      std::string t_bedFile,
+                      std::vector<std::string> & t_SampleInModel,
+                      std::string t_AlleleOrder) {
+    plinkObjects.clear();
+    for (int i = 0; i < g_num_threads; ++i) {
+	plinkObjects.push_back(std::make_unique<PLINK::PlinkClass>(bimFile, famFile, bedFile, alleleOrder, i + 1));
+	plinkObjects[i]->setPosSampleInPlink(t_SampleInModel);
+    }
+}
+
+// [[Rcpp::export]]
+void createBGENObjects(std::string t_bgenFileName,
+                     std::string t_bgenFileIndex,
+                     std::vector<std::string> & t_SampleInBgen,
+                     std::vector<std::string> & t_SampleInModel,
+                     std::string t_AlleleOrder)
+{
+  std::cout << "t_SampleInBgen " << t_SampleInBgen.size() << std::endl;
+  bgenObjects.clear();
+  //int n = ptr_gBGENobj->getN();
+    for (int i = 0; i < g_num_threads; ++i) {
+        bgenObjects.push_back(std::make_unique<BGEN::BgenClass>(t_bgenFileName, t_bgenFileIndex, t_SampleInBgen, t_SampleInModel, false, false, t_AlleleOrder, i + 1));
+    }
+}
+
+
+// [[Rcpp::export]]
+void createVCFObjects(std::string t_vcfFileName,
+            std::string t_vcfFileIndex,
+            std::string t_vcfField,
+            std::vector<std::string> & t_SampleInModel)
+{
+    vcfObjects.clear();
+  //int n = ptr_gBGENobj->getN();
+    for (int i = 0; i < g_num_threads; ++i) {
+        vcfObjects.push_back(std::make_unique<VCF::VcfClass>(t_vcfFileName, t_vcfFileIndex, t_vcfField, false, t_SampleInModel, i + 1));
+    }
+}
+*/
 
 // global variables for analysis
 std::string g_impute_method;      // "mean", "minor", or "drop", //drop is not allowed
@@ -287,7 +335,7 @@ void mainMarkerInCPP(
         }else if(t_genoType == "plink"){
             t_genoIndex_prev_str = t_genoIndex.at(i-1);
         }
-        gIndex_prev = std::strtoull( t_genoIndex_prev_str.c_str(), &end_prev,10 );
+        gIndex_prev = std::strtoull(t_genoIndex_prev_str.c_str(), &end_prev,10 );
         std::remove(end_prev);
     }
 
@@ -1236,8 +1284,6 @@ Rcpp::List mainRegionInCPP(
       if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){ //perform single-variant assoc tests 
  
         indexZeroVec_arma = arma::conv_to<arma::uvec>::from(indexZeroVec);
-
-        //set_varianceRatio(MAC, isSingleVarianceRatio);
         if(MAC > g_MACCutoffforER){	
           Unified_getMarkerPval(
                     GVec,

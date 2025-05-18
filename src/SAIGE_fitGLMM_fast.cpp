@@ -1723,6 +1723,7 @@ void setupSparseGRM(int r, arma::umat & locationMatinR, arma::vec & valueVecinR)
 bool isUsePrecondM = false;
 bool isUseSparseSigmaforInitTau = false;
 bool isUseSparseSigmaforModelFitting = false;
+bool isUsePCGwithSparseSigma = false;
 
 
 
@@ -1730,7 +1731,7 @@ bool isUseSparseSigmaforModelFitting = false;
 arma::fvec getCrossprodMatAndKin(arma::fcolvec& bVec){
        arma::fvec crossProdVec;
 
-if(isUseSparseSigmaforInitTau | isUseSparseSigmaforModelFitting){
+    if(isUseSparseSigmaforInitTau | isUseSparseSigmaforModelFitting){
         //cout << "use sparse kinship to estimate initial tau and for getCrossprodMatAndKin" <<  endl;
 
 
@@ -1746,9 +1747,9 @@ if(isUseSparseSigmaforInitTau | isUseSparseSigmaforModelFitting){
 
     crossProdVec = arma::conv_to<arma::fvec>::from(x);
 
-}else{ 
+   }else{ 
   	crossProdVec = parallelCrossProd(bVec) ;
-}  
+   }  
   	return(crossProdVec);
 }
 
@@ -3677,6 +3678,11 @@ void setisUseSparseSigmaforNullModelFitting(bool isUseSparseSigmaforModelFitting
         isUseSparseSigmaforModelFitting = isUseSparseSigmaforModelFitting0;
 }
 
+// [[Rcpp::export]]
+void setisUsePCGwithSparseSigma(bool isUsePCGwithSparseSigma0){
+         isUsePCGwithSparseSigma = isUsePCGwithSparseSigma0;
+}
+
 
 //Modified on 11-28-2018 to allow for a preconditioner for CG (the sparse Sigma)                                                                                                                                     //Sigma = tau[1] * diag(1/W) + tau[2] * kins
 //This function needs the function getDiagOfSigma and function getCrossprod
@@ -3696,7 +3702,8 @@ arma::fvec getPCG1ofSigmaAndVector(arma::fvec& wVec,  arma::fvec& tauVec, arma::
 if(isUseSparseSigmaforInitTau){
 	cout << "use sparse kinship to estimate initial tau " <<  endl;
 	xVec = gen_spsolve_v4(wVec, tauVec, bVec);
-}else if(isUseSparseSigmaforModelFitting){
+}else if(isUseSparseSigmaforModelFitting && !isUsePCGwithSparseSigma){
+	std::cout << "isUsePCGwithSparseSigma " << isUsePCGwithSparseSigma << std::endl;
 	cout << "use sparse kinship to fit the model " << endl;
         xVec = gen_spsolve_v4(wVec, tauVec, bVec);
 }else{
@@ -3705,9 +3712,11 @@ if(isUseSparseSigmaforInitTau){
         //cout << "HELLOb: "  << endl;
         //int Nnomissing = geno.getNnomissing();
         //cout << "HELL1: "  << endl;
-
-        arma::fvec crossProdVec(Nnomissing);
-
+	//if(!isUseSparseSigmaforModelFitting){
+        //  arma::fvec crossProdVec(Nnomissing);
+        //}else{
+	  
+	//}
         //arma::SpMat<float> precondM = sparseGRMinC;
         arma::fvec zVec(Nnomissing);
         arma::fvec minvVec(Nnomissing);

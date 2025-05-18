@@ -109,6 +109,7 @@ SAIGE.Region = function(mu,
                         markers_per_chunk_in_groupTest,
                         genoType,
                         markerInfo,
+			bgenFileIndex,
                         traitType,
                         isImputation,
                         isCondition,
@@ -124,6 +125,46 @@ SAIGE.Region = function(mu,
                         pval_cutoff_for_fastTest,
                         is_output_moreDetails, 
 			is_admixed) {
+
+    if(genoType == "bgen"){
+        print("chrom")
+        print(chrom)
+	    db_con <- RSQLite::dbConnect(RSQLite::SQLite(), bgenFileIndex)
+	        on.exit(RSQLite::dbDisconnect(db_con), add = TRUE)
+        if(chrom != ""){
+                query <-  paste("SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
+                        FROM Variant
+                        WHERE chromosome= ?")
+
+        	query_result <- RSQLite::dbGetQuery(db_con, query, params = list(chrom))
+    	}else{
+
+                query <- paste("SELECT chromosome, position, allele1, allele2, file_start_position, size_in_bytes
+                        FROM Variant ")
+        	query_result <- RSQLite::dbGetQuery(db_con, query)
+	}
+        markerInfo=query_result
+
+        markerInfo$genoIndex_prev = as.character(markerInfo$file_start_position + markerInfo$size_in_bytes)
+        markerInfo$genoIndex = as.character(markerInfo$file_start_position)
+	markerInfo$ID2 = paste0(markerInfo$chromosome,":", markerInfo$position ,":", markerInfo$allele1, ":", markerInfo$allele2)
+	markerInfo$ID = paste0(markerInfo$chromosome,":", markerInfo$position ,":", markerInfo$allele2, ":", markerInfo$allele1)
+	colnames(markerInfo)[which(colnames(markerInfo) == "chromosome")] = "CHROM" 
+	colnames(markerInfo)[which(colnames(markerInfo) == "position")] = "POS" 
+	markerInfo$allele1 = NULL
+	markerInfo$allele2 = NULL
+	setDT(markerInfo)
+       	#markerInfo[,chromosome:=NULL]
+    	#markerInfo[,position:=NULL]
+       	#markerInfo[,allele1:=NULL]
+    	#markerInfo[,allele2:=NULL]
+    	setkeyv(markerInfo, c("ID", "ID2")) 
+    
+    }
+
+
+
+>>>>>>> main
   OutputFileIndex = NULL
   if (is.null(OutputFileIndex))
     OutputFileIndex = paste0(OutputFile, ".index")
@@ -474,7 +515,7 @@ SAIGE.Region = function(mu,
         if ((sum(outList$NumUltraRare_GroupVec) + sum(outList$NumRare_GroupVec)) > 0) {
           if (regionTestType != "BURDEN") {
             #ta0 = proc.time()
-            if (traitType == "binary") {
+            if (traitType == "binary" | traitType == "survival") {
               outList$gyVec = outList$gyVec[noNAIndices]
             }
             
@@ -551,19 +592,21 @@ SAIGE.Region = function(mu,
                     annoMAFIndVec = c(annoMAFIndVec, jm)
                     Phi = wadjVarSMat[tempPos, tempPos, drop = F]
                     Score = wStatVec[tempPos]
-                    if (traitType == "binary") {
+                    if (traitType == "binary" | traitType == "survival") {
                       p.new = adjPVec[tempPos]
                       g.sum = outList$genoSumMat[, jm]
                       q.sum <- sum(outList$gyVec[tempPos] * AnnoWeights[tempPos])
                       mu.a = mu
                       
-                      re_phi = get_newPhi_scaleFactor(q.sum,
+                      #re_phi = get_newPhi_scaleFactor(q.sum,
+                      re_phi = get_newPhi_scaleFactor_traitType(q.sum,
                                                       mu.a,
                                                       g.sum,
                                                       p.new,
                                                       Score,
                                                       Phi,
-                                                      regionTestType)
+                                                      regionTestType,
+						      traitType)
                       Phi = re_phi$val
 
                     }
@@ -589,7 +632,7 @@ SAIGE.Region = function(mu,
 
 
                     if (isCondition) {
-                      if (traitType == "binary") {
+                      if (traitType == "binary" | traitType == "survival") {
                         G1tilde_P_G2tilde_Mat_scaled = t(t((
                           outList$G1tilde_P_G2tilde_Weighted_Mat[tempPos, , drop = F]
                         ) * sqrt(as.vector(
@@ -664,7 +707,7 @@ SAIGE.Region = function(mu,
             
             if (length(annoMAFIndVec) > 0) {
               pval.Region$MAC = outList$MAC_GroupVec[annoMAFIndVec]
-              if (traitType == "binary") {
+              if (traitType == "binary" | traitType == "survival") {
                 pval.Region$MAC_case = outList$MACCase_GroupVec[annoMAFIndVec]
                 pval.Region$MAC_control = outList$MACCtrl_GroupVec[annoMAFIndVec]
               }
@@ -714,7 +757,7 @@ SAIGE.Region = function(mu,
                 }
               }
               cctVec = c(cctVec, NA)
-              if (traitType == "binary") {
+              if (traitType == "binary" | traitType == "survival") {
                 cctVec = c(cctVec, NA, NA)
               }
               cctVec = c(cctVec, NA, NA)
@@ -803,7 +846,7 @@ SAIGE.Region = function(mu,
                   }
                 }
                 
-                if (traitType == "binary") {
+                if (traitType == "binary" | traitType == "survival") {
                   outList$gyVec = outList$gyVec[noNAIndices]
                 }
                 
@@ -874,18 +917,20 @@ SAIGE.Region = function(mu,
                         annoMAFIndVec = c(annoMAFIndVec, jm)
                         Phi = wadjVarSMat[tempPos, tempPos, drop = F]
                         Score = wStatVec[tempPos]
-                        if (traitType == "binary") {
+                        if (traitType == "binary" | traitType == "survival") {
                           p.new = adjPVec[tempPos]
                           g.sum = outList$genoSumMat[, jm]
                           q.sum <- sum(outList$gyVec[tempPos] * AnnoWeights[tempPos])
                           mu.a = mu
-                          re_phi = get_newPhi_scaleFactor(q.sum,
+                          #re_phi = get_newPhi_scaleFactor(q.sum,
+                          re_phi = get_newPhi_scaleFactor_traitType(q.sum,
                                                           mu.a,
                                                           g.sum,
                                                           p.new,
                                                           Score,
                                                           Phi,
-                                                          regionTestType)
+                                                          regionTestType,
+							  traitType)
                           Phi = re_phi$val
                         }
                         groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType)
@@ -908,7 +953,7 @@ SAIGE.Region = function(mu,
                                 resultDF$P_hom_admixed = P_hom_admixed
 			}
                         if (isCondition) {
-                          if (traitType == "binary") {
+                          if (traitType == "binary" | traitType == "survival") {
                             G1tilde_P_G2tilde_Mat_scaled = t(t((
                               outList$G1tilde_P_G2tilde_Weighted_Mat[tempPos, , drop = F]
                             ) * sqrt(as.vector(
@@ -980,7 +1025,7 @@ SAIGE.Region = function(mu,
                 
                 if (length(annoMAFIndVec) > 0) {
                   pval.Region$MAC = outList$MAC_GroupVec[annoMAFIndVec]
-                  if (traitType == "binary") {
+                  if (traitType == "binary" | traitType == "survival") {
                     pval.Region$MAC_case = outList$MACCase_GroupVec[annoMAFIndVec]
                     pval.Region$MAC_control = outList$MACCtrl_GroupVec[annoMAFIndVec]
                   }
@@ -1029,7 +1074,7 @@ SAIGE.Region = function(mu,
                     }
                   }
                   cctVec = c(cctVec, NA)
-                  if (traitType == "binary") {
+                  if (traitType == "binary" | traitType == "survival") {
                     cctVec = c(cctVec, NA, NA)
                   }
                   cctVec = c(cctVec, NA, NA)
