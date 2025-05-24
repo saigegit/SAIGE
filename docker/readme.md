@@ -1,5 +1,5 @@
 ```
-docker build -t "saige1.4.4.1" -f Dockerfile ..
-docker tag saige1.4.4.1  wzhou88/saige:1.4.4.1
-docker push wzhou88/saige:1.4.4.1
+docker build -t "saigetractor1.4.6.1" -f Dockerfile ..
+docker tag saigetractor1.4.6.1  wzhou88/saigetractor:1.4.6.1
+docker push wzhou88/saigetractor:1.4.6.1
 ```
