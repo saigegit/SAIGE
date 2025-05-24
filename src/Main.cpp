@@ -1162,8 +1162,8 @@ Rcpp::List mainRegionInCPP(
   unsigned int i2 = 0;    // index of Markers (Ultra-Rare Variants, URV)
   unsigned int jm; 
 
-  double cctpval;
-  double cctpval_cond;
+  std::string cctpval;
+  std::string cctpval_cond;
     
 
   arma::mat AdjCondMat, VarMatAdjCond;
@@ -2069,10 +2069,10 @@ if(t_regionTestType == "BURDEN"){
 	  double burden_p, burden_p_cond;
 	  for(unsigned int i = 0; i < BURDEN_pval_Vec.size(); i++){
 		if(BURDEN_pval_Vec.at(i) != "NA"){
-	  		burden_p = std::stod(BURDEN_pval_Vec.at(i));
+	  		burden_p = convertStringtoDoublePval(BURDEN_pval_Vec.at(i));
 			nonMissingPvalVec_std.push_back(burden_p);
 			if(isCondition){
-				burden_p_cond = std::stod(BURDEN_pval_cVec.at(i));
+				burden_p_cond = convertStringtoDoublePval(BURDEN_pval_cVec.at(i));
 				nonMissingPvalVec_c_std.push_back(burden_p_cond);
 			}
 		}	
@@ -2095,7 +2095,8 @@ if(t_regionTestType == "BURDEN"){
 		if(ptr_gSAIGEobj->m_flagSparseGRM_cur){
 			iswriteOutput = true;
 		}else{
-		  if(cctpval >= 0.1){
+		  double cctpval_double = convertStringtoDoublePval(cctpval); 
+		  if(cctpval_double >= 0.1){
 			iswriteOutput = true;
 		  } 	
 		}
@@ -2330,7 +2331,7 @@ if(iswriteOutput){
 
 
   if(numofAnc > 0){
-    double P_hom_admixed = std::stod(pvalVec[pvalVec.size()-1]);
+    double P_hom_admixed = convertStringtoDoublePval(pvalVec[pvalVec.size()-1]);
     arma::uvec nonNAIndexVec_arma =  arma::conv_to<arma::uvec>::from(nonNAIndexVec);
     arma::vec TstatVec_arma = arma::conv_to<arma::vec>::from(TstatVec);
     arma::vec Scorevec = TstatVec_arma(nonNAIndexVec_arma);
@@ -2345,7 +2346,7 @@ if(iswriteOutput){
         arma::vec gyVec_arma(nonNAIndexVec_arma.n_elem);
         for(unsigned int k = 0; k < nonNAIndexVec_arma.n_elem; k++){
                 std::string pvalstr = pvalVec[nonNAIndexVec_arma(k)];
-                p_new(k) = std::stod(pvalstr);
+                p_new(k) = convertStringtoDoublePval(pvalstr);
                 gyVec_arma(k) = gyVec[nonNAIndexVec_arma(k)];
         }
         double q_sum = arma::accu(gyVec_arma);
@@ -2373,9 +2374,12 @@ if(iswriteOutput){
                 SE_Burden,
                 error_code
                 );
-    double P_het_admixed = get_jointScore_pvalue(Scorevec, VarMat);
+    std::string P_het_admixed_str = get_jointScore_pvalue(Scorevec, VarMat);
+    double P_het_admixed = convertStringtoDoublePval(P_het_admixed_str);
+
     arma::vec pvecforcct = {Pvalue_SKATO, P_het_admixed, P_hom_admixed};
-    double P_cct_admixed = CCT_cpp(pvecforcct);
+    //double P_cct_admixed = CCT_cpp(pvecforcct);
+    std::string P_cct_admixed_str = CCT_cpp(pvecforcct);
 
 
     /*OutFile << "\t";
@@ -2390,15 +2394,17 @@ if(iswriteOutput){
     //OutFile << "\t";
     //OutFile << SE_Burden;
     OutFile << "\t";
-    OutFile << P_het_admixed;
+    OutFile << P_het_admixed_str;
     OutFile << "\t";
     OutFile << P_hom_admixed;
     OutFile << "\t";
-    OutFile << P_cct_admixed;
+    //OutFile << P_cct_admixed;
+    OutFile << P_cct_admixed_str;
 
 
     if(isCondition){
-        double P_hom_admixed_cond = std::stod(pval_cVec[pval_cVec.size()-1]);
+        double P_hom_admixed_cond = convertStringtoDoublePval(pval_cVec[pval_cVec.size()-1]);
+	std::string P_hom_admixed_cond_str = pval_cVec[pval_cVec.size()-1];
   	arma::mat VarMatAdjCond_sub = VarMatAdjCond(nonNAIndexVec_arma, nonNAIndexVec_arma); 
 	arma::vec TstatAdjCond_sub = TstatAdjCond(nonNAIndexVec_arma);
 	arma::mat G1tilde_P_G2tilde_Weighted_Mat_sub = G1tilde_P_G2tilde_Weighted_Mat(nonNAIndexVec_arma, nonNAIndexVec_arma);
@@ -2435,30 +2441,27 @@ if(iswriteOutput){
                 SE_Burden_cond,
                 error_code
                 );
-        double P_het_admixed_cond = get_jointScore_pvalue(Score_cond, Phi_cond);
+        std::string P_het_admixed_cond_str = get_jointScore_pvalue(Score_cond, Phi_cond);
+	double P_het_admixed_cond = convertStringtoDoublePval(P_het_admixed_cond_str); 
 	arma::vec pvecforcct_cond = {Pvalue_SKATO_cond, P_het_admixed_cond, P_hom_admixed_cond};
-    double P_cct_admixed_cond = CCT_cpp(pvecforcct_cond);
+        //double P_cct_admixed_cond = CCT_cpp(pvecforcct_cond);
+	std::string Pvalue_SKATO_cond_str = convertDoubletoStringPval(Pvalue_SKATO_cond); 
+	std::vector<std::string> pvecforcct_cond_str = {Pvalue_SKATO_cond_str, P_het_admixed_cond_str, P_hom_admixed_cond_str}; 
+        std::string P_cct_admixed_cond_str = CCT_cpp(pvecforcct_cond);
+	if(P_cct_admixed_cond_str == "0"){
+		arma::uvec between0and1Indice = arma::find(pvecforcct_cond == 0.0);
+		P_cct_admixed_cond_str = pvecforcct_cond_str.at(between0and1Indice[0]);
+	}
 
 
-    /*OutFile << "\t";
-    OutFile << Pvalue_SKATO_cond;
-    OutFile << "\t";
-    OutFile << Pvalue_Burden_cond;
-    */
     OutFile << "\t";
     OutFile << Pvalue_SKAT_cond;
-    /*
     OutFile << "\t";
-    OutFile << BETA_Burden_cond;
-    OutFile << "\t";
-    OutFile << SE_Burden_cond;
-    */
-    OutFile << "\t";
-    OutFile << P_het_admixed_cond;
+    OutFile << P_het_admixed_cond_str;
     OutFile << "\t";
     OutFile << P_hom_admixed_cond;
     OutFile << "\t";
-    OutFile << P_cct_admixed_cond;
+    OutFile << P_cct_admixed_cond_str;
 
     }//if(isCondition){
     OutFile << "\n";
@@ -3136,8 +3139,8 @@ void writeOutfile_BURDEN(std::string regionName,
 			arma::vec & MACControl_GroupVec,
 			arma::vec & NumRare_GroupVec,
 			arma::vec & NumUltraRare_GroupVec,
-			double cctpval,
-			double cctpval_cond,
+			std::string cctpval,
+			std::string cctpval_cond,
 			unsigned int q_anno,
 			unsigned int q_maf,
 			bool isCondition,
@@ -3912,8 +3915,8 @@ void mainAdmixedInCPP_inner(
   unsigned int i2 = 0;    // index of Markers (Ultra-Rare Variants, URV)
   unsigned int jm;
 
-  double cctpval;
-  double cctpval_cond;
+  std::string cctpval;
+  std::string cctpval_cond;
   // cycle for q0 markers
  arma::mat AdjCondMat, VarMatAdjCond;
      arma::vec TstatAdjCond;
@@ -4342,7 +4345,8 @@ void mainAdmixedInCPP_inner(
       );
   if(numofAnc > 0){
 
-    double P_hom_admixed = std::stod(pvalVec[pvalVec.size()-1]);
+    double P_hom_admixed = convertStringtoDoublePval(pvalVec[pvalVec.size()-1]);
+    std::string P_hom_admixed_str = pvalVec[pvalVec.size()-1];
     arma::uvec nonNAIndexVec_arma =  arma::conv_to<arma::uvec>::from(nonNAIndexVec);
     arma::vec TstatVec_arma = arma::conv_to<arma::vec>::from(TstatVec);
     arma::vec Scorevec = TstatVec_arma(nonNAIndexVec_arma);
@@ -4366,7 +4370,7 @@ void mainAdmixedInCPP_inner(
         arma::vec gyVec_arma(nonNAIndexVec_arma.n_elem);
         for(unsigned int k = 0; k < nonNAIndexVec_arma.n_elem; k++){
                 std::string pvalstr = pvalVec[nonNAIndexVec_arma(k)];
-                p_new(k) = std::stod(pvalstr);
+                p_new(k) = convertStringtoDoublePval(pvalstr);
                 gyVec_arma(k) = gyVec[nonNAIndexVec_arma(k)];
         }
         double q_sum = arma::accu(gyVec_arma);
@@ -4395,9 +4399,12 @@ void mainAdmixedInCPP_inner(
                 SE_Burden,
                 error_code
                 );
-    double P_het_admixed = get_jointScore_pvalue(Scorevec, VarMat_sub);
+    std::string P_het_admixed_str = get_jointScore_pvalue(Scorevec, VarMat_sub);
+    //double P_het_admixed = get_jointScore_pvalue(Scorevec, VarMat_sub);
+    double P_het_admixed = convertStringtoDoublePval(P_het_admixed_str); 
     arma::vec pvecforcct = {Pvalue_SKAT, P_het_admixed, P_hom_admixed};
-    double P_cct_admixed = CCT_cpp(pvecforcct);
+    //double P_cct_admixed = CCT_cpp(pvecforcct);
+    std::string P_cct_admixed_str = CCT_cpp(pvecforcct);
 
 /*
     OutFile << "\t";
@@ -4414,14 +4421,15 @@ void mainAdmixedInCPP_inner(
     OutFile << SE_Burden;
 */
     OutFile << "\t";
-    OutFile << P_het_admixed;
+    OutFile << P_het_admixed_str;
     OutFile << "\t";
-    OutFile << P_hom_admixed;
+    OutFile << P_hom_admixed_str;
     OutFile << "\t";
-    OutFile << P_cct_admixed;
+    //OutFile << P_cct_admixed;
+    OutFile << P_cct_admixed_str;
 
     if(isCondition){
-        double P_hom_admixed_cond = std::stod(pval_cVec[pval_cVec.size()-1]);
+        double P_hom_admixed_cond = convertStringtoDoublePval(pval_cVec[pval_cVec.size()-1]);
         arma::mat VarMatAdjCond_sub = VarMatAdjCond(nonNAIndexVec_arma, nonNAIndexVec_arma);
         arma::vec TstatAdjCond_sub = TstatAdjCond(nonNAIndexVec_arma);
         arma::mat G1tilde_P_G2tilde_Weighted_Mat_sub = G1tilde_P_G2tilde_Weighted_Mat(nonNAIndexVec_arma, nonNAIndexVec_arma);
@@ -4458,9 +4466,10 @@ void mainAdmixedInCPP_inner(
                 SE_Burden_cond,
                 error_code
                 );
-        double P_het_admixed_cond = get_jointScore_pvalue(Score_cond, Phi_cond);
+        std::string P_het_admixed_cond_str = get_jointScore_pvalue(Score_cond, Phi_cond);
+        double P_het_admixed_cond = convertStringtoDoublePval(P_het_admixed_cond_str);
         arma::vec pvecforcct_cond = {Pvalue_SKATO_cond, P_het_admixed_cond, P_hom_admixed_cond};
-    double P_cct_admixed_cond = CCT_cpp(pvecforcct_cond);
+    std::string P_cct_admixed_cond_str = CCT_cpp(pvecforcct_cond);
 
 /*
     OutFile << "\t";
@@ -4477,11 +4486,12 @@ void mainAdmixedInCPP_inner(
     OutFile << SE_Burden_cond;
 */
     OutFile << "\t";
-    OutFile << P_het_admixed_cond;
+    OutFile << P_het_admixed_cond_str;
     OutFile << "\t";
     OutFile << P_hom_admixed_cond;
     OutFile << "\t";
-    OutFile << P_cct_admixed_cond;
+    //OutFile << P_cct_admixed_cond;
+    OutFile << P_cct_admixed_cond_str;
 
     }//if(isCondition){
     OutFile << "\n";
@@ -5034,7 +5044,8 @@ if(t_traitType == "binary" || "survival"){
    
     if(j == t_NumberofANC && numancresults > 1){
 
-	double P_hom_admixed = std::stod(pval);
+	double P_hom_admixed = convertStringtoDoublePval(pval);
+	std::string P_hom_admixed_str = pval;
 
  	arma::vec Scorevecsub, scaleFactor;
  	arma::vec PvalvecallAncsub;
@@ -5062,14 +5073,24 @@ if(t_traitType == "binary" || "survival"){
 	}
 
    	//arma::mat VarMat = P1Mat * P2Mat;
-	double P_het_admixed = get_jointScore_pvalue(Scorevecsub, VarMat);
+	std::string P_het_admixed_str = get_jointScore_pvalue(Scorevecsub, VarMat);
+	double P_het_admixed = convertStringtoDoublePval(P_het_admixed_str);
 	arma::vec pvecforcct = {P_het_admixed, P_hom_admixed};
-    	double P_cct_admixed = CCT_cpp(pvecforcct);
-	std::string P_het_admixed_str = convertDoubletoStringPval(P_het_admixed);
-	std::string P_hom_admixed_str = convertDoubletoStringPval(P_hom_admixed);
-	std::string P_cct_admixed_str = convertDoubletoStringPval(P_cct_admixed);
+    	//double P_cct_admixed = CCT_cpp(pvecforcct);
+    	std::string P_cct_admixed_str = CCT_cpp(pvecforcct);
+	if(P_cct_admixed_str == "0"){
+	   if(P_hom_admixed == 0){
+	   	P_cct_admixed_str = P_hom_admixed_str;
+	   }else{
+		P_cct_admixed_str = P_het_admixed_str;
+	   } 	
+	}
+
+	//std::string P_het_admixed_str = convertDoubletoStringPval(P_het_admixed);
+	//std::string P_hom_admixed_str = convertDoubletoStringPval(P_hom_admixed);
+	//std::string P_cct_admixed_str = convertDoubletoStringPval(P_cct_admixed);
 	pvalHet_Vec.at(i) = P_het_admixed_str;
-	pvalHom_Vec.at(i) = P_hom_admixed_str;
+	pvalHom_Vec.at(i) = pval;
 	pvalAdmixed_Vec.at(i) = P_cct_admixed_str;
 
 	if(isCondition){
@@ -5087,13 +5108,24 @@ if(t_traitType == "binary" || "survival"){
             arma::vec TstatAdjCond = AdjCondMat * (ptr_gSAIGEobj->m_Tstat_cond);
 	    arma::vec Scorevec_cond = Scorevecsub - TstatAdjCond;
 	    arma::mat VarMat_cond = VarMat - VarMatAdjCond;
-	    double P_het_admixed_cond = get_jointScore_pvalue(Scorevec_cond, VarMat_cond);	
-	    double P_hom_admixed_cond = std::stod(pval_c);	
+	    //double P_het_admixed_cond = get_jointScore_pvalue(Scorevec_cond, VarMat_cond);	
+	    std::string P_het_admixed_cond_str = get_jointScore_pvalue(Scorevec_cond, VarMat_cond);
+	    double P_het_admixed_cond = convertStringtoDoublePval(P_het_admixed_cond_str);
+	    double P_hom_admixed_cond = convertStringtoDoublePval(pval_c);
+	    std::string P_hom_admixed_cond_str = pval_c;
 	    arma::vec pvecforcct_cond = {P_het_admixed_cond, P_hom_admixed_cond};
-            double P_cct_admixed_cond = CCT_cpp(pvecforcct_cond);
-	    std::string P_het_admixed_cond_str = convertDoubletoStringPval(P_het_admixed_cond);
-            std::string P_hom_admixed_cond_str = convertDoubletoStringPval(P_hom_admixed_cond);
-            std::string P_cct_admixed_cond_str = convertDoubletoStringPval(P_cct_admixed_cond);
+            //double P_cct_admixed_cond = CCT_cpp(pvecforcct_cond);
+            std::string P_cct_admixed_cond_str = CCT_cpp(pvecforcct_cond);
+	    //std::string P_het_admixed_cond_str = convertDoubletoStringPval(P_het_admixed_cond);
+            //std::string P_hom_admixed_cond_str = convertDoubletoStringPval(P_hom_admixed_cond);
+            //std::string P_cct_admixed_cond_str = convertDoubletoStringPval(P_cct_admixed_cond);
+	    if(P_cct_admixed_cond_str == "0"){
+           	if(P_hom_admixed_cond == 0){
+                	P_cct_admixed_cond_str = P_hom_admixed_cond_str;
+           	}else{
+                	P_cct_admixed_cond_str = P_het_admixed_cond_str;
+           	}
+            } 
             pvalHet_cVec.at(i) = P_het_admixed_cond_str;
             pvalHom_cVec.at(i) = P_hom_admixed_cond_str;
             pvalAdmixed_cVec.at(i) = P_cct_admixed_cond_str; 
@@ -5101,14 +5133,15 @@ if(t_traitType == "binary" || "survival"){
 	}	
     }else{
 	if(numancresults == 1){
-		double P_hom_admixed = std::stod(pval);
-		std::string P_hom_admixed_str = convertDoubletoStringPval(P_hom_admixed);
+		double P_hom_admixed = convertStringtoDoublePval(pval);
+		std::string P_hom_admixed_str = pval;
+		
 		pvalHom_Vec.at(i) = P_hom_admixed_str;
 		pvalHet_Vec.at(i) = P_hom_admixed_str;
 		pvalAdmixed_Vec.at(i) = P_hom_admixed_str;
 		if(isCondition){
-			double P_hom_admixed_cond = std::stod(pval_c);
-			std::string P_hom_admixed_cond_str = convertDoubletoStringPval(P_hom_admixed_cond);
+			//double P_hom_admixed_cond = convertStringtoDoublePval(pval_c);
+			std::string P_hom_admixed_cond_str = pval_c;
 			pvalHom_cVec.at(i) = P_hom_admixed_cond_str;
 			pvalHet_cVec.at(i) = P_hom_admixed_cond_str;
 			pvalAdmixed_cVec.at(i) = P_hom_admixed_cond_str;

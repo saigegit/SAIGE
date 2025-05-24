@@ -293,3 +293,18 @@ std::string convertDoubletoStringPval(double t_pval){
     std::string buffAsStdStr = pValueBuf;
     return(buffAsStdStr);    	
 }
+
+double convertStringtoDoublePval(std::string pval){
+    double pval_num;
+    try {
+        pval_num = std::stod(pval);
+    } catch (const std::invalid_argument&) {
+        std::cerr << "Argument is invalid\n";
+        pval_num = 0;
+    } catch (const std::out_of_range&) {
+        std::cerr << "Argument is out of range for a double\n";
+        pval_num = 0;
+    }
+    return(pval_num);
+}
+

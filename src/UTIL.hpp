@@ -72,5 +72,7 @@ double sum_arma1(arma::vec& X);
 double add_logp(double p1, double p2);
 
 std::string convertDoubletoStringPval(double t_pval);
+
+double convertStringtoDoublePval(std::string pval);
 #endif
 

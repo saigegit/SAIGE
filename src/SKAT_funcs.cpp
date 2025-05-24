@@ -1576,7 +1576,7 @@ if(r_corr.n_elem > 1){
 
 
 // [[Rcpp::export]]
-double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi) {
+std::string get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi) {
     arma::mat Phi_inv = arma::inv(Phi); // Inverse of Phi
     double Teststat = arma::as_scalar(Score.t() * Phi_inv * Score);
     
@@ -1594,15 +1594,43 @@ double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi) {
 
     // Compute the p-value
     double p_value;
+    std::string p_value_str;
     if (Teststat > 0) {
-    	p_value = boost::math::cdf(boost::math::complement(chi2, Teststat));
-
-        //p_value = 1 - boost::math::cdf(chi2, Teststat); // 1 - CDF for upper-tail probability
+      if(!std::isnan(Teststat) && std::isfinite(Teststat)){
+          //boost::math::chi_squared chisq_dist(1);
+          //t_pval = boost::math::cdf(complement(chisq_dist, stat));
+    	  p_value = boost::math::cdf(boost::math::complement(chi2, Teststat));
+      }else{
+          p_value = 1.0;
+          Teststat = 0.0;
+      }	
     } else {
         p_value = 1.0;
     }    
-    
-    return p_value;
+
+    char pValueBuf[100];
+    bool t_islogp;		
+
+    if (p_value != 0){ 
+    	sprintf(pValueBuf, "%.6E", p_value);
+	t_islogp = false;
+    }else{
+	double logp =  R::pchisq(Teststat, df, false, true);
+	double log10p = logp/(log(10));
+        int exponent = floor(log10p);
+        double fraction = pow(10.0, log10p - exponent);
+        if (fraction >= 9.95) {
+          fraction = 1;
+           exponent++;
+        }
+        sprintf(pValueBuf, "%.1fE%d", fraction, exponent);
+        p_value = logp;
+        t_islogp = true;
+     }
+    std::string buffAsStdStr = pValueBuf;
+    p_value_str = buffAsStdStr;
+  
+    return p_value_str;
 }
 
 // [[Rcpp::export]]

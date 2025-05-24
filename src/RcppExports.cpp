@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // CCT_cpp
-double CCT_cpp(arma::vec& pval);
+std::string CCT_cpp(arma::vec& pval);
 RcppExport SEXP _SAIGE_CCT_cpp(SEXP pvalSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -2683,7 +2683,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // get_jointScore_pvalue
-double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi);
+std::string get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi);
 RcppExport SEXP _SAIGE_get_jointScore_pvalue(SEXP ScoreSEXP, SEXP PhiSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

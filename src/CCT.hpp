@@ -4,6 +4,6 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 
-double CCT_cpp(arma::vec & pval);
+std::string CCT_cpp(arma::vec & pval);
 
 #endif

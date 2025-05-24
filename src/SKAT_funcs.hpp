@@ -80,7 +80,7 @@ void get_newPhi_scaleFactor_cpp(double q_sum,
                                   arma::vec& scaleFactor);
 
 
-double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi);
+std::string get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi);
 
 double integrate_SKAT_Optimal_Liu(arma::vec &pmin_q, Rcpp::List &param_m, arma::vec &r_all, double lower, double upper, int subdivisions, double abs_tol);
 
