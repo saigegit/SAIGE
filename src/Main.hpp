@@ -93,7 +93,9 @@ void Unified_getMarkerPval(
 			   arma::rowvec & t_G1tilde_P_G2tilde_Vec,
 			    bool & t_isFirth,
 			   bool & t_isFirthConverge,
-			   bool t_isER);
+			   bool t_isER,
+                           bool t_isnoadjCov,
+                                bool t_isSparseGRM);
 
 
 Rcpp::List mainRegionInCPP(
@@ -163,13 +165,17 @@ void setSAIGEobjInCPP(arma::mat & t_XVX,
 	bool t_isFastTest,
 	double t_pval_cutoff_for_fastTest,
         arma::umat & t_locationMat,
-        arma::vec & t_valueVec,
+        arma::mat & t_valueVec,
         int t_dimNum,
         bool t_isCondition,
         std::vector<uint32_t> & t_condition_genoIndex,
 	bool t_is_Firth_beta,
         double t_pCutoffforFirth, 
-	arma::vec & t_offset);
+	arma::vec & t_offset,
+        arma::mat & t_resout,
+        arma::uvec & t_colXvec,
+        arma::uvec & t_sampleIndexLenVec,	
+	arma::umat & t_sampleIndexMat);
 
 void assign_conditionMarkers_factors(
                            std::string t_genoType,     // "plink", "bgen", "vcf"
@@ -218,7 +224,7 @@ void writeOutfile_single(bool t_isMoreOutput,
 			bool t_isFirth,
                          int mFirth,
                          int mFirthConverge,
-                        std::string t_traitType,
+			 std::vector<std::string> & t_traitType,
                         std::vector<std::string> & chrVec,
                         std::vector<std::string> & posVec,
                         std::vector<std::string> & markerVec,
@@ -249,7 +255,9 @@ void writeOutfile_single(bool t_isMoreOutput,
                         std::vector<double>  & N_ctrl_hetVec,
                         std::vector<double>  & N_case_hetVec,
                         std::vector<double>  & N_ctrl_homVec,
-                        std::vector<uint32_t> & N_Vec);
+                        std::vector<uint32_t> & N_Vec,
+			unsigned int itt,
+                        unsigned int nmarkers);
 
 
 
@@ -366,5 +374,15 @@ int writeOutfile_singleInGroup(bool t_isMoreOutput,
 
 uint32_t Unified_getSampleSizeinGeno(std::string & t_genoType);
 uint32_t Unified_getSampleSizeinAnalysis(std::string & t_genoType);
+
+void assign_conditionMarkers_factors_binary_region_multiTrait(
+                           arma::mat & scalefactor_G2_cond,
+			                              unsigned int oml);
+
+void assign_g_outputFilePrefix0( std::string t_outputFilePrefix);
+
+void removeOutfile_inSingle();
+
+void assign_g_outputFilePrefixSingle( std::string t_outputFilePrefixSingle);
 
 #endif

@@ -1,4 +1,5 @@
 SAIGE.Marker = function(traitType,
+			phenotype_name_vec,
 			genoType,
 			bgenFileIndex,
                         idstoIncludeFile,
@@ -16,12 +17,12 @@ SAIGE.Marker = function(traitType,
 			chrom,
 			isCondition,
 			isOverWriteOutput, 
-			isAnyInclude)
+			isAnyInclude,
+			isGbyE)
 {
-
-  if(is.null(OutputFileIndex))
+  if(is.null(OutputFileIndex)) {
     OutputFileIndex = paste0(OutputFile, ".index")
-  
+  }
   #genoType = objGeno$genoType
 
   outIndex = checkOutputFile(OutputFile, OutputFileIndex, "Marker", format(nMarkersEachChunk, scientific=F), isOverWriteOutput)    # this function is in 'Util.R'
@@ -32,11 +33,22 @@ SAIGE.Marker = function(traitType,
     isappend = TRUE
   }  
 
-  isOpenOutFile_single = openOutfile_single(traitType, isImputation, isappend, isMoreOutput)
-
-  if(!isOpenOutFile_single){
-    stop("Output file ", OutputFile, " can't be opened\n")
+  cat("traitType ", traitType, "\n")
+  assign_g_outputFilePrefix0(OutputFile)
+  for (itt in 1:length(traitType)) {
+    if (length(traitType) > 1) {
+      OutputFile_itt <- paste0(OutputFile, "_", phenotype_name_vec[itt])
+    } else {
+      OutputFile_itt <- OutputFile
+    }
+    assign_g_outputFilePrefixSingle(OutputFile_itt)
+    #isOpenOutFile_single <- openOutfile_single(traitType[itt], isImputation, isappend, isMoreOutput, isGbyE)
+    isOpenOutFile_single <- openOutfile_single(traitType[itt], isImputation, isappend, isMoreOutput, isGbyE)
+    if (!isOpenOutFile_single) {
+      stop("Output file ", OutputFile_itt, " can't be opened\n")
+    }
   }
+
 
   ## set up an object for genotype
   if(genoType == "plink"){
@@ -49,13 +61,6 @@ SAIGE.Marker = function(traitType,
       CHROM = CHROM[which(CHROM == chrom)]  
       #markerInfo = markerInfo[which(markerInfo$CHROM == chrom),]  
     }
-    #CHROM = markerInfo$CHROM
-    #genoIndex = markerInfo$genoIndex
-    ##only for one chrom
-    # all markers were split into multiple chunks,
-    #print(markerInfo[1:10,])
-    #print(genoIndex[1:10])    
-
     genoIndexList = splitMarker(genoIndex, genoIndex_prev, nMarkersEachChunk, CHROM);
     nChunks = length(genoIndexList)
 
@@ -130,62 +135,6 @@ SAIGE.Marker = function(traitType,
     if(nrow(RangesToInclude) > 1){cat("WARNING, only the first line of ",rangestoIncludeFile, " will be used\n")}
   } 
 
-
-if(FALSE){
-    if(LOCO | chrom != ""){
-
-	if(!anyInclude){
-   		query <- "SELECT chromosome, position, file_start_position, size_in_bytes
-             		FROM Variant
-                       		WHERE chromosome = ?"
-   	}else{
-        	if(!is.null(IDsToInclude) > 0){
-           		id_list <- paste0("'", IDsToInclude, "'", collapse = ", ")
-        		query <- paste("
-  				SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
-  				FROM Variant
-  				WHERE chromosome = ?
-    				AND (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")", sep = "")
-        	}else if(!is.null(RangesToInclude)){
-			CHROM=RangesToInclude$CHROM[1]
-			START=RangesToInclude$START[1]
-			END=RangesToInclude$END[1]
-			query <- paste("
-                                SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
-                                FROM Variant
-                                WHERE chromosome = ?
-                                AND  chromosome =", CHROM, 
-                		"AND position >= ", START, 
-                		"AND position <= ", END)
-		}
-   	}	
-    }else{
-
-       if(!anyInclude){
-                query <- "SELECT chromosome, position, file_start_position, size_in_bytes
-                        FROM Variant"
-        }else{
-                if(!is.null(IDsToInclude) > 0){
-                        id_list <- paste0("'", IDsToInclude, "'", collapse = ", ")
-                        query <- paste("
-                                SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
-                                FROM Variant
-                                WHERE (CONCAT(chromosome, ':', position, ':', allele1, ':', allele2)) IN (", id_list, ")", sep = "")
-                }else if(!is.null(RangesToInclude)){
-                        CHROM=RangesToInclude$CHROM[1]
-                        START=RangesToInclude$START[1]
-                        END=RangesToInclude$END[1]
-                        query <- paste("
-                                SELECT chromosome, position, rsid, allele1, allele2, file_start_position, size_in_bytes
-                                FROM Variant
-                                WHERE  chromosome =", CHROM,
-                                "AND position >= ", START,
-                                "AND position <= ", END)
-                }
-        }
-    }
-   
-}
 
    if(LOCO){
 
@@ -289,10 +238,6 @@ if(FALSE){
   #chrom = "InitialChunk"
   #set_flagSparseGRM_cur_SAIGE_org()
   while(is_marker_test){
-  #for(i in outIndex:nChunks)
-  #{
-#time_left = system.time({
-
 
     if(genoType == "plink"){	
       tempList = genoIndexList[[i]]
@@ -410,23 +355,6 @@ query <- paste0("SELECT chromosome, position, rsid, allele1, allele2, file_start
 	offset <- offset + nMarkersEachChunk
 	#RSQLite::dbClearResult(query_result)
     }
-    #print("tempList")
-    #print(tempList)
-    #print(tempList$genoIndex)
-#})
-#print("time_left")
-#print(time_left)
-    #print("genoIndex here")
-    #print(genoIndex)
-    # set up objects that do not change for different variants
-    #if(tempChrom != chrom){
-    #  setMarker("SAIGE", objNull, control, chrom, Group, ifOutGroup)
-    #  chrom = tempChrom
-    #}
-    #ptm <- proc.time()
-    #print(ptm)
-    #print("gc()")
-    #print(gc())
     if(genoType != "vcf"){
       cat(paste0("(",Sys.time(),") ---- Analyzing Chunk ", i, "/", nChunks, ": chrom ", chrom," ---- \n"))
     }else{
@@ -495,7 +423,22 @@ query <- paste0("SELECT chromosome, position, rsid, allele1, allele2, file_start
     RSQLite::dbDisconnect(db_con)
   }
   # information to users
-  output = paste0("Analysis done! The results have been saved to '", OutputFile,"'.")
+  #output = paste0("Analysis done! The results have been saved to '", OutputFile,"'.")
+
+  if (length(traitType) == 1) {
+    output <- paste0("Analysis done! The results have been saved to '", OutputFile, "'.")
+  } else {
+    output <- "Analysis done! The results have been saved to"
+    for (tt in 1:length(traitType)) {
+      OutputFile_tt <- paste0(OutputFile, "_", phenotype_name_vec[tt])
+      output <- paste0(output, "'", OutputFile_tt, "',")
+    }
+
+    assign_g_outputFilePrefix0(OutputFile)
+    removeOutfile_inSingle()
+  }
+
+
 
   return(output)
 }

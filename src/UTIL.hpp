@@ -58,5 +58,21 @@ double sum_arma1(arma::vec& X);
 
 double add_logp(double p1, double p2);
 
+
+bool imputeGenoAndFlip_sub(arma::vec& t_GVec,
+                       arma::vec& t_GVec_sub, // New parameter to store the subset
+                       double & t_altFreq,
+                       double & t_altCount,
+                       arma::uvec & t_indexForMissing_arma_sub,
+                       arma::uvec & t_indexForMissing_arma,
+                       std::string t_impute_method,
+                       double t_dosage_zerod_cutoff,
+                       double t_dosage_zerod_MAC_cutoff,
+                       double & t_MAC,
+                       arma::uvec & t_indexZero,
+                       arma::uvec & t_indexNonZero,
+                       arma::uvec & t_sampleSubIndices);
+
+
 #endif
 

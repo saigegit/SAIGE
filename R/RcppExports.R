@@ -81,8 +81,8 @@ setVCFobjInCPP <- function(t_vcfFileName, t_vcfFileIndex, t_vcfField, t_SampleIn
     invisible(.Call('_SAIGE_setVCFobjInCPP', PACKAGE = 'SAIGE', t_vcfFileName, t_vcfFileIndex, t_vcfField, t_SampleInModel))
 }
 
-setSAIGEobjInCPP <- function(t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout) {
-    invisible(.Call('_SAIGE_setSAIGEobjInCPP', PACKAGE = 'SAIGE', t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout))
+setSAIGEobjInCPP <- function(t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout, t_colXvec, t_sampleIndexLenVec, t_sampleIndexMat) {
+    invisible(.Call('_SAIGE_setSAIGEobjInCPP', PACKAGE = 'SAIGE', t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout, t_colXvec, t_sampleIndexLenVec, t_sampleIndexMat))
 }
 
 setSparseSigmaInCPP <- function(r, t_locationMatinR, t_valueVecinR) {
@@ -95,10 +95,6 @@ RegionSetUpConditional_binary_InCPP <- function(t_weight_cond) {
 
 mainRegionInCPP <- function(t_genoType, t_genoIndex_prev, t_genoIndex, annoIndicatorMat, maxMAFVec, t_outputFile, t_traitType, t_n, P1Mat, P2Mat, t_regionTestType, t_isImputation, t_weight, t_weight_cond, t_isSingleinGroupTest, t_isOutputMarkerList, annoStringVec, regionName, t_isFastTest, t_isMoreOutput) {
     .Call('_SAIGE_mainRegionInCPP', PACKAGE = 'SAIGE', t_genoType, t_genoIndex_prev, t_genoIndex, annoIndicatorMat, maxMAFVec, t_outputFile, t_traitType, t_n, P1Mat, P2Mat, t_regionTestType, t_isImputation, t_weight, t_weight_cond, t_isSingleinGroupTest, t_isOutputMarkerList, annoStringVec, regionName, t_isFastTest, t_isMoreOutput)
-}
-
-assign_conditionMarkers_factors <- function(t_genoType, t_genoIndex_prev, t_genoIndex, t_n, t_weight_cond) {
-    invisible(.Call('_SAIGE_assign_conditionMarkers_factors', PACKAGE = 'SAIGE', t_genoType, t_genoIndex_prev, t_genoIndex, t_n, t_weight_cond))
 }
 
 assign_conditionMarkers_factors_binary_region <- function(scalefactor_G2_cond) {
@@ -133,8 +129,8 @@ openOutfile_singleinGroup <- function(t_traitType, t_isImputation, isappend, t_i
     .Call('_SAIGE_openOutfile_singleinGroup', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend, t_isMoreOutput)
 }
 
-openOutfile_single <- function(t_traitType, t_isImputation, isappend, t_isMoreOutput) {
-    .Call('_SAIGE_openOutfile_single', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend, t_isMoreOutput)
+openOutfile_single <- function(t_traitType, t_isImputation, isappend, t_isMoreOutput, t_isGbyE) {
+    .Call('_SAIGE_openOutfile_single', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend, t_isMoreOutput, t_isGbyE)
 }
 
 set_flagSparseGRM_cur_SAIGE <- function(t_flagSparseGRM_cur) {
@@ -147,6 +143,26 @@ set_flagSparseGRM_cur_SAIGE_org <- function() {
 
 copy_singleInGroup <- function() {
     invisible(.Call('_SAIGE_copy_singleInGroup', PACKAGE = 'SAIGE'))
+}
+
+assign_conditionMarkers_factors_binary_region_multiTrait <- function(scalefactor_G2_cond, oml) {
+    invisible(.Call('_SAIGE_assign_conditionMarkers_factors_binary_region_multiTrait', PACKAGE = 'SAIGE', scalefactor_G2_cond, oml))
+}
+
+assign_conditionMarkers_factors <- function(t_genoType, t_genoIndex_prev, t_genoIndex, t_n, t_weight_cond, t_Beta_param, is_equal_weight_in_groupTest) {
+    invisible(.Call('_SAIGE_assign_conditionMarkers_factors', PACKAGE = 'SAIGE', t_genoType, t_genoIndex_prev, t_genoIndex, t_n, t_weight_cond, t_Beta_param, is_equal_weight_in_groupTest))
+}
+
+assign_g_outputFilePrefix0 <- function(t_outputFilePrefix) {
+    invisible(.Call('_SAIGE_assign_g_outputFilePrefix0', PACKAGE = 'SAIGE', t_outputFilePrefix))
+}
+
+removeOutfile_inSingle <- function() {
+    invisible(.Call('_SAIGE_removeOutfile_inSingle', PACKAGE = 'SAIGE'))
+}
+
+assign_g_outputFilePrefixSingle <- function(t_outputFilePrefixSingle) {
+    invisible(.Call('_SAIGE_assign_g_outputFilePrefixSingle', PACKAGE = 'SAIGE', t_outputFilePrefixSingle))
 }
 
 closeGenoFile_plink <- function() {

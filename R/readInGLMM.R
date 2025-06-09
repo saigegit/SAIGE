@@ -36,33 +36,18 @@ removeLOCOResult = function(chromList, obj.glmm.null){
 }	
 
 
-ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FALSE){
+ReadModel <- function(GMMATmodelFile = "", chrom = "", LOCO = TRUE, is_Firth_beta = FALSE, is_EmpSPA = FALSE, espa_nt = 9999, espa_range = c(-20, 20)) {
   # Check file existence
   Check_File_Exist(GMMATmodelFile, "GMMATmodelFile")
   if(!LOCO %in% c(TRUE, FALSE))
     stop("LOCO should be TRUE or FALSE.")
   # load GMMATmodelFile
   load(GMMATmodelFile)
-  #if(!modglmm$LOCO){
-  #     if(LOCO){
-  #             stop("LOCO is TRUE but the null model was not fit with LOCO=TRUE\n")
-  #             LOCO=FALSE
-  #     }
-  #}
-
   modglmm$Y = NULL
-  #modglmm$offset = modglmm$linear.predictors - modglmm$coefficients[1]
   modglmm$linear.predictors = NULL
   modglmm$coefficients = NULL
   modglmm$cov = NULL
-  #rm(modglmm)
   gc()
-  #traitType = modglmm$traitType
-  #y = modglmm$y
-  #X = modglmm$X
-  #N = length(y)
-  #tauVec = modglmm$theta
-  #indChromCheck = FALSE
   chrom_v3=NULL
 
   if(!LOCO) {
@@ -113,9 +98,11 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
   }
    gc()
 
-  }
+ }
 
  modglmm$mu = as.vector(modglmm$fitted.values)
+ modglmm$fitted.values <- NULL
+ gc()
  tau = modglmm$theta
  N = length(modglmm$mu)
      if(modglmm$traitType == "binary"){
@@ -458,4 +445,70 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
     return(list(ratioVec_sparse = ratioVec_sparse, ratioVec_null = ratioVec_null))
 }
 
+ReadModel_multiTrait <- function(GMMATmodelFileList = "", chrom = "", LOCO = TRUE, is_Firth_beta = FALSE, is_EmpSPA = FALSE, espa_nt = 9999, espa_range = c(-20, 20)) {
+  # Check file existence
+  GMMATmodelFileVec <- unlist(strsplit(GMMATmodelFileList, split = ","))
+  modglmmList <- list()
+  sampleIDList <- list()
+  if (require("furrr")) {
+    future::plan("multicore")
+    modglmmList <- furrr::future_map(GMMATmodelFileVec, function(GMMATmodelFile) {
+      ReadModel(GMMATmodelFile, chrom, LOCO, is_Firth_beta, is_EmpSPA, espa_nt, espa_range)
+    })
+    future::plan("sequential")
+  } else {
+    for (gm in 1:length(GMMATmodelFileVec)) {
+      GMMATmodelFile <- GMMATmodelFileVec[gm]
+      modglmmList[[gm]] <- ReadModel(GMMATmodelFile, chrom, LOCO, is_Firth_beta, is_EmpSPA, espa_nt, espa_range)
+    }
+  }
+  union_vector <- c()
 
+  for (gm in 1:length(GMMATmodelFileVec)) {
+    vec <- modglmmList[[gm]]$sampleID
+    union_vector <- unique(c(union_vector, vec))
+  }
+  nx = 0
+  upperx = 0
+  for (gm in 1:length(GMMATmodelFileVec)) {
+    vec <- modglmmList[[gm]]$sampleID 
+    modglmmList[[gm]]$sampleIndices <- match(vec, union_vector)
+    modglmmList[[gm]]$sampleID = NULL
+    nx = nx + (ncol(modglmmList[[gm]]$obj.noK$X1)+1)
+    upperx = max(upperx, (ncol(modglmmList[[gm]]$obj.noK$X1)+1))
+  cat("upperx ", upperx, "\n")
+  print(ncol(modglmmList[[gm]]$obj.noK$X1)+1)
+  }
+
+  cat("upperx ", upperx, "\n")
+
+  modglmmList[[1]]$sampleID = union_vector
+  modglmmList[[1]]$nx = nx
+  modglmmList[[1]]$upperx = upperx
+  gc()
+  return(modglmmList)
+}
+
+Get_Variance_Ratio_multiTrait <- function(varianceRatioFileList, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest, isSparseGRM, useSparseGRMtoFitNULL) {
+  varianceRatioFileVec <- unlist(strsplit(varianceRatioFileList, split = ","))
+  # varianceRatioList = list()
+  ratioVec_sparse <- NULL
+  ratioVec_null <- NULL
+  #ratioVec_null_sample <- NULL
+  ratioVec_null_noXadj <- NULL
+  #ratioVec_null_eg <- NULL
+  #ratioVec_sparse_eg <- NULL
+  for (vrl in 1:length(varianceRatioFileVec)) {
+    varianceRatioFile <- varianceRatioFileVec[vrl]
+    ratioVecList <- Get_Variance_Ratio(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest, isSparseGRM)
+    print(ratioVecList)
+    ratioVec_sparse <- cbind(ratioVec_sparse, ratioVecList$ratioVec_sparse)
+    ratioVec_null <- cbind(ratioVec_null, ratioVecList$ratioVec_null)
+    #ratioVec_null_sample <- cbind(ratioVec_null_sample, ratioVecList$ratioVec_null_sample)
+    ratioVec_null_noXadj <- cbind(ratioVec_null_noXadj, ratioVecList$ratioVec_null_noXadj)
+    #ratioVec_null_eg <- cbind(ratioVec_null_eg, ratioVecList$ratioVec_null_eg)
+    #ratioVec_sparse_eg <- cbind(ratioVec_sparse_eg, ratioVecList$ratioVec_sparse_eg)
+  }
+  #return(list(ratioVec_sparse = ratioVec_sparse, ratioVec_null = ratioVec_null, ratioVec_null_sample = ratioVec_null_sample, ratioVec_null_noXadj = ratioVec_null_noXadj, ratioVec_null_eg = ratioVec_null_eg, ratioVec_sparse_eg = ratioVec_sparse_eg))
+  return(list(ratioVec_sparse = ratioVec_sparse, ratioVec_null = ratioVec_null))
+}

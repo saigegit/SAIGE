@@ -196,3 +196,127 @@ double add_logp(double p1, double p2)
         double result = maxp+std::log(1+std::exp(minp-maxp));
         return(result);
 }
+
+
+bool imputeGenoAndFlip_sub(arma::vec& t_GVec,
+                       arma::vec& t_GVec_sub, // New parameter to store the subset
+                       double & t_altFreq,
+                       double & t_altCount,
+		       arma::uvec & t_indexForMissing_arma_sub,
+		       arma::uvec & t_indexForMissing_arma,
+                       std::string t_impute_method,
+                       double t_dosage_zerod_cutoff,
+                       double t_dosage_zerod_MAC_cutoff,
+                       double & t_MAC,
+                       arma::uvec & t_indexZero,
+                       arma::uvec & t_indexNonZero,
+                       arma::uvec & t_sampleSubIndices) // Parameter for subsetting indices
+{
+    bool flip = false;
+    bool ischange = false;
+    t_indexNonZero.clear();
+    t_indexZero.clear();
+    int nMissing = t_indexForMissing_arma.size();
+    //uint dosagesSize = t_GVec.size();
+    //double imputeG = 0;
+    //double t_altFreq_0 = t_altFreq;
+    if (t_altFreq > 0.5) {
+        flip = true;
+	ischange = true;
+        t_GVec = 2 - t_GVec; // Flip the subsetted vector
+        t_altFreq = 1 - t_altFreq;
+	t_altCount = 2*t_GVec.n_elem*t_altFreq;
+    }
+
+    // Subset t_GVec using t_sampleSubIndices and store in t_GVec_sub
+    if (!t_sampleSubIndices.is_empty()) {
+        t_GVec_sub = t_GVec.elem(t_sampleSubIndices); // Store subset in t_GVec_sub
+	ischange = true;
+    } else {
+        t_GVec_sub = t_GVec; // If no subsetting, copy the original vector
+    }
+       
+    arma::uvec m_indexForMissing_arma_sub;
+    double imputeG = 0;
+    if (nMissing > 0) {
+	if((!t_sampleSubIndices.is_empty())){
+    		for (size_t i = 0; i < t_sampleSubIndices.n_elem; i++) {
+        		if (arma::any(t_indexForMissing_arma == t_sampleSubIndices[i])) {
+            			m_indexForMissing_arma_sub.insert_rows(m_indexForMissing_arma_sub.n_elem, arma::uvec{static_cast<unsigned int>(i)});
+        		}
+    		}
+	}else{
+		m_indexForMissing_arma_sub = t_indexForMissing_arma; 		   }
+	if(m_indexForMissing_arma_sub.n_elem > 0){
+		ischange = true;
+    		arma::uvec valid_indices = arma::regspace<arma::uvec>(0, t_GVec_sub.n_elem - 1); // All indices
+    		valid_indices.shed_rows(m_indexForMissing_arma_sub); // Remove indices for missing elements
+    		arma::vec valid_elements = t_GVec_sub.elem(valid_indices); // Extract valid elements
+    		t_altFreq = arma::mean(valid_elements) / 2.0; // Compute mean and divide by 2
+
+            switch (string_to_case.at(t_impute_method)) {
+                case 1:
+                    imputeG = std::round(2 * t_altFreq);
+                    break;
+                case 2:
+                    imputeG = 2 * t_altFreq;
+                    break;
+                case 3:
+                    imputeG = 0;
+                    break;
+            }
+
+	    t_GVec_sub.elem(m_indexForMissing_arma_sub).fill(imputeG);
+	    if(imputeG != 0){
+		t_altCount = arma::accu(t_GVec_sub); 
+	    }
+        }//if(m_indexForMissing_arma_sub.n_elem > 0){
+     }//if (nMissing > 0) {	    
+
+     t_MAC = arma::min(arma::vec({t_altCount, 2*(t_GVec_sub.n_elem)-t_altCount}));	    
+
+    if (t_dosage_zerod_cutoff > 0) {
+        if (t_MAC <= t_dosage_zerod_MAC_cutoff) {
+            t_GVec_sub.clean(t_dosage_zerod_cutoff); // Clean the subsetted vector
+        // Update t_altCount and t_altFreq based on the subsetted vector
+            t_altCount = arma::sum(t_GVec_sub); // Sum of t_GVec_sub elements
+            t_altFreq = arma::mean(t_GVec_sub) / 2; // Mean of t_GVec_sub divided by 2
+	    ischange = true;
+        }
+    }
+
+    if (t_altFreq > 0.5) {
+        if(flip == true){
+		flip = false;
+	}else{
+		flip = true;
+	}
+        t_GVec_sub = 2 - t_GVec_sub; // Flip the subsetted vector
+        t_altFreq = 1 - t_altFreq;
+        t_altCount = 2 * t_GVec_sub.n_elem - t_altCount;
+	ischange = true;	
+/*
+    	if (t_dosage_zerod_cutoff > 0) {
+        	if (t_MAC <= t_dosage_zerod_MAC_cutoff) {
+    			t_MAC = arma::min(arma::vec({t_altCount, 2*(t_GVec_sub.n_elem)-t_altCount}));	
+    		}
+    	}
+*/
+    }
+    // Update t_indexZero and t_indexNonZero based on the subsetted vector
+    
+    /*
+    for (unsigned int i = 0; i < t_GVec_sub.size(); i++) {
+        if (t_GVec_sub(i) == 0) {
+            t_indexZero.push_back(i);
+        } else {
+            t_indexNonZero.push_back(i);
+        }
+    }*/
+    if(ischange){
+    	t_indexZero = arma::find(t_GVec_sub == 0);
+    	t_indexNonZero = arma::find(t_GVec_sub != 0);
+    }
+
+    return flip;
+}
