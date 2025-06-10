@@ -438,7 +438,7 @@ SPAGMMATtest = function(bgenFile = "",
     colXvec <- rep(0, length(obj.model.List))
     XVX <- matrix(0, obj.model.List[[1]]$upperx, obj.model.List[[1]]$nx)
     XXVX_inv <- matrix(0, length(obj.model.List[[1]]$sampleID), obj.model.List[[1]]$nx)
-    XV <- matrix(0, length(obj.model.List[[1]]$sampleID), obj.model.List[[1]]$nx)
+    XV <- matrix(0, obj.model.List[[1]]$nx, length(obj.model.List[[1]]$sampleID))
     XVX_inv_XV <- matrix(0, length(obj.model.List[[1]]$sampleID), obj.model.List[[1]]$nx)
     Sigma_iXXSigma_iX <- matrix(0, length(obj.model.List[[1]]$sampleID), obj.model.List[[1]]$nx)
     S_a <-  matrix(0, obj.model.List[[1]]$upperx, length(obj.model.List)) 
@@ -476,7 +476,7 @@ SPAGMMATtest = function(bgenFile = "",
        x_end = x_end + 1
       XVX[1:ncol(obj.model$obj.noK$XVX), x_start:x_end] = obj.model$obj.noK$XVX
       XXVX_inv[obj.model$sampleIndices, x_start:x_end] = obj.model$obj.noK$XXVX_inv
-      XV[obj.model$sampleIndices, x_start:x_end] = obj.model$obj.noK$XV
+      XV[x_start:x_end, obj.model$sampleIndices] = obj.model$obj.noK$XV
       XVX_inv_XV[obj.model$sampleIndices, x_start:x_end] = obj.model$obj.noK$XVX_inv_XV
       Sigma_iXXSigma_iX[obj.model$sampleIndices, x_start:x_end] = obj.model$Sigma_iXXSigma_iX
       print(length(obj.model$sampleIndices))

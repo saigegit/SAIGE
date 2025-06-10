@@ -124,7 +124,7 @@ arma::umat g_X_PARregion_mat;
 
 std::ofstream OutFile;
 std::ofstream OutFile_singleInGroup;
-std::ofstream OutFile_single;
+//std::ofstream OutFile_single;
 std::ofstream OutFile_singleInGroup_temp;
 
 
@@ -382,6 +382,11 @@ void mainMarkerInCPP(
    //arma::vec timeoutput2 = getTime();   
    //printTime(timeoutput1, timeoutput2, "Unified_getOneMarker"); 
 //
+std::cout << "altCounts " << altCounts << std::endl;
+std::cout << "missingRate " << missingRate << std::endl;
+std::cout << "indexForMissing.size() " << indexForMissing.size() << std::endl;
+std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
+
   std::cout << "mainMarker3" << std::endl;
    if(!isReadMarker){
       //std::cout << "isReadMarker " << isReadMarker << std::endl;
@@ -490,8 +495,8 @@ void mainMarkerInCPP(
 //printTime(timeoutput3, timeoutput4, "imputeGenoAndFlip");
     //altFreqVec.at(i) = altFreq;         // allele frequencies of ALT allele, this is not always < 0.5.
     //altCountsVec.at(i) = altCounts;         // allele frequencies of ALT allele, this is not always < 0.5.
-   //std::cout << "MAC " << MAC << std::endl; 
-   //std::cout << "altFreq after flip " << altFreq << std::endl; 
+     std::cout << "MAC " << MAC << std::endl; 
+     std::cout << "altFreq after flip " << altFreq << std::endl; 
    //std::cout << "info " << info << std::endl; 
     // analysis results for single-marker
     double Beta, seBeta, Tstat, varT, gy;
@@ -522,18 +527,20 @@ void mainMarkerInCPP(
    }
    bool is_region = false;
 
-
+    std::cout << "ptr_gSAIGEobj->m_isFastTest " << ptr_gSAIGEobj->m_isFastTest << std::endl;
     if(ptr_gSAIGEobj->m_isFastTest){
       ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
      
       if(isSingleVarianceRatio){
-        ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur);
+        ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur, false, false);
       }else{	
-        hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur);
+        hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur), false, false;
       }
     }else{
       if(!isSingleVarianceRatio){
-        hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur);
+        hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur, false, false);
+      }else{
+	ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur, false);
       }
     }
     //check 'Main.cpp'
@@ -574,7 +581,7 @@ void mainMarkerInCPP(
       if(!isSingleVarianceRatio){ 
         hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur);
       }else{ 
-        ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur);
+        ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur, false);
       }
 
 
@@ -628,9 +635,9 @@ void mainMarkerInCPP(
     }
 	
     if(t_traitType.at(i_mt0) == "binary" || t_traitType.at(i_mt0) == "survival"){
-       if(t_traitType.size() > 1){
-               ptr_gSAIGEobj->assign_for_itrait_binaryindices(i_mt0);
-       }	
+       //if(t_traitType.size() > 1){
+           ptr_gSAIGEobj->assign_for_itrait_binaryindices(i_mt0);
+       //}	
       arma::vec dosage_case = t_GVec.elem(ptr_gSAIGEobj->m_case_indices);
       arma::vec dosage_ctrl = t_GVec.elem(ptr_gSAIGEobj->m_ctrl_indices);
       AF_case = arma::mean(dosage_case) /2;
@@ -641,6 +648,7 @@ void mainMarkerInCPP(
          AF_case = 1-AF_case;
          AF_ctrl = 1-AF_ctrl;
       }
+      std::cout << "hERE" << std::endl;
       isSPAConvergeVec.at(j_mt0) = isSPAConverge;
       AF_caseVec.at(j_mt0) = AF_case;
       AF_ctrlVec.at(j_mt0) = AF_ctrl;
@@ -679,6 +687,8 @@ void mainMarkerInCPP(
 
     //t_GVec.clear();
   }
+
+std::cout << "end" << std::endl;
 
 for(unsigned int j_mt = 0; j_mt < t_traitType.size(); j_mt++){
   //output
@@ -2657,7 +2667,8 @@ bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, boo
 // [[Rcpp::export]]
 bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput, bool t_isGbyE){
       bool isopen;
-      if(!isappend){
+     std::ofstream OutFile_single;
+     if(!isappend){
         OutFile_single.open(g_outputFilePrefixSingle.c_str());
         isopen = OutFile_single.is_open();
         if(isopen){
@@ -2719,7 +2730,7 @@ bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isapp
         OutFile_single.open(g_outputFilePrefixSingle.c_str(), std::ofstream::out | std::ofstream::app);
         isopen = OutFile_single.is_open();
      }
-
+          OutFile_single_vec.push_back(std::move(OutFile_single));
      return(isopen);
 }
 
