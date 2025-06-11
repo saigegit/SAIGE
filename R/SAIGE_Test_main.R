@@ -354,6 +354,10 @@ SPAGMMATtest = function(bgenFile = "",
 
     ratioVecList <- Get_Variance_Ratio_multiTrait(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest, isSparseGRM) # readInGLMM.R
 
+    print("ratioVecList")
+    print(ratioVecList)
+
+
     #ratioVecList = Get_Variance_Ratio(varianceRatioFile, cateVarRatioMinMACVecExclude, cateVarRatioMaxMACVecInclude, isGroupTest, isSparseGRM) #readInGLMM.R
 
     #time_6 = proc.time()
@@ -629,7 +633,7 @@ setSAIGEobjInCPP(
   }
 
 
-    traitType = obj.model.List[[1]]$traitType #traitType should be the same for all phenotypes tested at the same time
+    #traitType = obj.model.List[[1]]$traitType #traitType should be the same for all phenotypes tested at the same time
     mu = obj.model.List[[1]]$mu  ##needs to be updated (length is used later)
     rm(obj.model.List)
     gc()

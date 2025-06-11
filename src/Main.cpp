@@ -422,7 +422,11 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
 
     std::string pds = std::to_string(pd); 
     std::string info = chr+":"+pds+":"+ref+":"+alt;
+
+    std::cout << "t_traitType.size() " << t_traitType.size() << std::endl;
    for(int i_mt0 = 0; i_mt0 < t_traitType.size(); i_mt0++){
+     std::cout << "i_mt0 " << i_mt0 << std::endl;
+     
      int j_mt0 = i_mt0*t_genoIndex.size()+i;
      chrVec.at(j_mt0) = chr;
      posVec.at(j_mt0) = pds;
@@ -528,6 +532,7 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
    bool is_region = false;
 
     std::cout << "ptr_gSAIGEobj->m_isFastTest " << ptr_gSAIGEobj->m_isFastTest << std::endl;
+      ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
     if(ptr_gSAIGEobj->m_isFastTest){
       ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
      
@@ -683,8 +688,8 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
     //arma::vec timeoutput3 = getTime();
     //printTime(timeoutput2, timeoutput3, "after Unified_getOneMarker");
  
+     std::cout << "i_mt0 " << i_mt0 << std::endl;
 }//loop through j_mt
-
     //t_GVec.clear();
   }
 

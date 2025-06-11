@@ -83,8 +83,8 @@ SAIGEClass::SAIGEClass(
     m_varRatio_sparse_mt = t_varRatio_sparse_mt;
     m_varRatio_null_mt = t_varRatio_null_mt;
     
-    //m_varRatio_null_mt.print("m_varRatio_null_mt");
-    //m_varRatio_sparse_mt.print("m_varRatio_sparse_mt");
+    m_varRatio_null_mt.print("m_varRatio_null_mt");
+    m_varRatio_sparse_mt.print("m_varRatio_sparse_mt");
     
     m_cateVarRatioMinMACVecExclude = t_cateVarRatioMinMACVecExclude;
     m_cateVarRatioMaxMACVecInclude = t_cateVarRatioMaxMACVecInclude;
@@ -200,7 +200,8 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
 
     m_flagSparseGRM_cur = false;
     if(!m_flagSparseGRM_cur){
-      t_P2Vec = t_gtilde % m_mu2 *(m_tauvec_mt(0,m_itrait));  
+      t_P2Vec = t_gtilde % m_mu2 *(m_tauvec_mt(0,m_itrait)); 
+
       var2m = dot(t_P2Vec , t_gtilde);
        std::cout << "!m_flagSparseGRM_cur" << std::endl;
     }else{
@@ -213,6 +214,8 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
              std::cout << "m_flagSparseGRM_cur" << std::endl;
     }	      
     var2 = var2m(0,0);
+	m_mu2.print("m_mu2");
+      std::cout << "m_tauvec_mt(0,m_itrait) " <<  m_tauvec_mt(0,m_itrait) << std::endl;
     std::cout << "var2 " << var2 << std::endl;	
     double var1 = var2 * m_varRatioVal;
     std::cout << "m_varRatioVal " << m_varRatioVal << std::endl;	
@@ -370,9 +373,19 @@ void SAIGEClass::getadjGFast(arma::vec & t_GVec, arma::vec & g, arma::uvec & iIn
   
   
   // To increase computational efficiency when lots of GVec elements are 0
- arma::vec m_XVG(m_XV_mt.n_rows, arma::fill::zeros);
 // std::cout << "m_p " << m_p << std::endl;
  arma::mat XV_submat = m_XV_mt.submat(m_ip, m_sampleindices_vec);
+	m_ip.print("m_ip");
+
+	std::cout << "m_XV_submat.n_cols " << XV_submat.n_cols << std::endl;
+  	std::cout << "m_XV_submat.n_rows " << XV_submat.n_rows << std::endl;
+
+std::cout << "XV_submat(0,0) " << XV_submat[0,0] << std::endl;
+std::cout << "XV_submat(0,1) " << XV_submat[0,1] << std::endl;
+std::cout << "XV_submat(1,0) " << XV_submat[1,0] << std::endl;
+std::cout << "XV_submat(1,1) " << XV_submat[1,1] << std::endl;
+
+ arma::vec m_XVG(XV_submat.n_rows, arma::fill::zeros);
   arma::mat m_XXVX_inv_submat = m_XXVX_inv_mt.submat(m_sampleindices_vec, m_ip);
   std::cout << "m_XXVX_inv_submat(0,0) " << m_XXVX_inv_submat[0,0] << std::endl;
   std::cout << "m_XXVX_inv_submat(0,1) " << m_XXVX_inv_submat[0,1] << std::endl;
@@ -1066,6 +1079,7 @@ void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR){
 
 void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR, bool isnoXadj){
     arma::rowvec m_varRatio;
+        std::cout << "issparseforVR i0 " << issparseforVR << std::endl;
     if(issparseforVR){
         m_varRatio = m_varRatio_sparse_mt.row(0);
     }else{
@@ -1082,6 +1096,7 @@ void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR, bool isnoXadj){
 
 void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR, bool isnoXadj, bool issample){
     arma::rowvec m_varRatio;
+    std::cout << "issparseforVR " << issparseforVR << std::endl;
     if(issparseforVR){
         m_varRatio = m_varRatio_sparse_mt.row(0);
     }else{
@@ -1095,8 +1110,8 @@ void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR, bool isnoXadj, bo
           }
         }
     }
-        std::cout << "assignSingleVarianceRatio" << std::endl;
-	    m_varRatio.print("m_varRatio");
+    std::cout << "assignSingleVarianceRatio" << std::endl;
+    m_varRatio.print("m_varRatio");
     m_varRatioVal = m_varRatio(m_itrait);
 }
 
@@ -1265,7 +1280,7 @@ void SAIGEClass::assign_for_itrait(unsigned int t_itrait){
 	if(t_itrait == 0){
 		m_startip = 0;
 	}else{
-		m_startip = arma::sum(m_colXvec.subvec(0, t_itrait - 1)) -1;
+		m_startip = arma::sum(m_colXvec.subvec(0, t_itrait - 1));
 	}
 	m_colXvec.print("m_colXvec");
         	m_p = m_colXvec(t_itrait);
