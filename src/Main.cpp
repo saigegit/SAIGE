@@ -443,6 +443,7 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
      arma::uvec indexForMissing_sub;
      double MAC, MAF;
   std::cout << "mainMarker4" << std::endl;
+  flip=false;
      flip = imputeGenoAndFlip_sub(t_GVec, t_GVec_sub, altFreq, altCounts, indexForMissing_sub, indexForMissing_all, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec_arma, indexNonZeroVec_arma, include_indices);
 
   std::cout << "mainMarker5" << std::endl;
@@ -989,7 +990,7 @@ void setSAIGEobjInCPP(arma::mat & t_XVX,
         arma::uvec & t_sampleIndexLenVec,
 	arma::umat & t_sampleIndexMat)
 {
-std::cout << "setSAIGEobjInCPP" << std::endl;
+  std::cout << "setSAIGEobjInCPP" << std::endl;
   // check SAIGE.cpp
   ptr_gSAIGEobj = new SAIGE::SAIGEClass(
 	t_XVX,

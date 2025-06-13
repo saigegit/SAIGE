@@ -471,24 +471,23 @@ SPAGMMATtest = function(bgenFile = "",
       #x_end = jx + ncol(obj.model$obj.noK$X1)
       x_end = jx + ncol(obj.model$X)
       #x_end_x = jx + ncol(obj.model$X)
-      cat("x_end is ", x_end, "\n")
+      #cat("x_end is ", x_end, "\n")
       colXvec[oml] = ncol(obj.model$X)
       X[obj.model$sampleIndices, x_start:x_end] = obj.model$X
       traitType <- c(traitType, obj.model$traitType)
-	print(ncol(obj.model$X))
-	print(dim(obj.model$obj.noK$XVX))
-	print(x_start)
-	print(x_end)
-	print(ncol(obj.model$obj.noK$XVX))
-       #x_end = x_end + 1
+	#print(ncol(obj.model$X))
+	#print(dim(obj.model$obj.noK$XVX))
+	#print(x_start)
+	#print(x_end)
+	#print(ncol(obj.model$obj.noK$XVX))
       XVX[1:ncol(obj.model$obj.noK$XVX), x_start:x_end] = obj.model$obj.noK$XVX
       XXVX_inv[obj.model$sampleIndices, x_start:x_end] = obj.model$obj.noK$XXVX_inv
       XV[x_start:x_end, obj.model$sampleIndices] = obj.model$obj.noK$XV
       XVX_inv_XV[obj.model$sampleIndices, x_start:x_end] = obj.model$obj.noK$XVX_inv_XV
       Sigma_iXXSigma_iX[obj.model$sampleIndices, x_start:x_end] = obj.model$Sigma_iXXSigma_iX
-      print(length(obj.model$sampleIndices))
-      print(length(obj.model$obj.noK$S_a))
-      print(dim(S_a)) 
+      #print(length(obj.model$sampleIndices))
+      #print(length(obj.model$obj.noK$S_a))
+      #print(dim(S_a)) 
       S_a[1:length(obj.model$obj.noK$S_a), oml] = obj.model$obj.noK$S_a 
       res[obj.model$sampleIndices, oml] = obj.model$residuals
       mu[obj.model$sampleIndices, oml] = obj.model$mu
@@ -508,8 +507,8 @@ SPAGMMATtest = function(bgenFile = "",
 
 # Call the updated setSAIGEobjInCPP function
 
-print("colXvec")
-print(colXvec)
+#print("colXvec")
+#print(colXvec)
 
 setSAIGEobjInCPP(
   t_XVX = XVX,
@@ -554,7 +553,7 @@ setSAIGEobjInCPP(
   rm(sparseSigmaRList)
   gc()
 
- print("OKOKOK") 
+  #print("OKOKOK") 
 
   #}
 
@@ -637,12 +636,12 @@ setSAIGEobjInCPP(
     condition_weights <- c(0)
   }
 
-print("Hereererere1")
+#print("Hereererere1")
     #traitType = obj.model.List[[1]]$traitType #traitType should be the same for all phenotypes tested at the same time
     mu = obj.model.List[[1]]$mu  ##needs to be updated (length is used later)
-print("Hereererere2")
+#print("Hereererere2")
     rm(obj.model.List)
-print("Hereererere3")
+#print("Hereererere3")
     #gc()
     #print(gc(v=T))
     #if(file.exists(SAIGEOutputFile)) {print("ok 0 file exist")} 
@@ -652,78 +651,17 @@ print("Hereererere3")
     #}
     #time_9 = proc.time()
 
-print("Hereererere4")
+#print("Hereererere4")
 
     if(!isGroupTest){
     OutputFile = SAIGEOutputFile
 
     #if(file.exists(SAIGEOutputFile)) {print("ok 2 file exist")}
-print("Hereererere5")
+#print("Hereererere5")
     if(!is.null(objGeno$markerInfo$CHROM)){
     	setorderv(objGeno$markerInfo,col=c("CHROM","POS"))
     }
 # Print every argument value
-print("traitType:")
-print(traitType)
-
-print("phenotype_name_vec:")
-print(phenotype_name_vec)
-
-print("genoType:")
-print(genoType)
-
-print("bgenFileIndex:")
-print(bgenFileIndex)
-
-print("idstoIncludeFile:")
-print(idstoIncludeFile)
-
-print("rangestoIncludeFile:")
-print(rangestoIncludeFile)
-
-print("objGeno$markerInfo$genoIndex_prev:")
-print(objGeno$markerInfo$genoIndex_prev)
-
-print("objGeno$markerInfo$genoIndex:")
-print(objGeno$markerInfo$genoIndex)
-
-print("objGeno$markerInfo$CHROM:")
-print(objGeno$markerInfo$CHROM)
-
-print("OutputFile:")
-print(OutputFile)
-
-print("OutputFileIndex:")
-print(OutputFileIndex)
-
-print("markers_per_chunk:")
-print(markers_per_chunk)
-
-print("is_output_moreDetails:")
-print(is_output_moreDetails)
-
-print("is_imputed_data:")
-print(is_imputed_data)
-
-print("is_Firth_beta:")
-print(is_Firth_beta)
-
-print("LOCO:")
-print(LOCO)
-
-print("chrom:")
-print(chrom)
-
-print("isCondition:")
-print(isCondition)
-
-print("is_overwrite_output:")
-print(is_overwrite_output)
-
-print("objGeno$anyInclude:")
-print(objGeno$anyInclude)
-
-        print("Hereererere")
         SAIGE.Marker(traitType,
                    phenotype_name_vec,
                    genoType,

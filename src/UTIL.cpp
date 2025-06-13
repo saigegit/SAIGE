@@ -277,8 +277,12 @@ bool imputeGenoAndFlip_sub(arma::vec& t_GVec,
         t_altCount = arma::accu(t_GVec_sub); 
         t_altFreq = t_altCount / (2 * (t_GVec_sub.n_elem));
         t_MAC = arma::min(arma::vec({t_altCount, 2*(t_GVec_sub.n_elem)-t_altCount}));	    
-     }else{//if (nMissing > 0) {	    
-        t_altFreq = t_altCount / (2 * (t_GVec_sub.n_elem));
+     }else{//if (nMissing > 0) {
+
+std::cout << "t_altCount inner " << t_altCount << std::endl;
+std::cout << "t_altFreq inner " << t_altFreq << std::endl;
+        t_altCount = arma::accu(t_GVec_sub);
+	t_altFreq = t_altCount / (2 * (t_GVec_sub.n_elem));
 	 if(t_altFreq > 0.5){
                 t_GVec_sub = 2 - t_GVec_sub;
                 t_altFreq = 1 - t_altFreq;
@@ -288,7 +292,13 @@ bool imputeGenoAndFlip_sub(arma::vec& t_GVec,
         t_altCount = arma::accu(t_GVec_sub); 
         t_altFreq = t_altCount / (2 * (t_GVec_sub.n_elem));
         t_MAC = arma::min(arma::vec({t_altCount, 2*(t_GVec_sub.n_elem)-t_altCount}));	
-	
+
+std::cout << "t_altCount inner 2 " << t_altCount << std::endl;
+std::cout << "t_altFreq inner 2 " << t_altFreq << std::endl;
+
+std::cout << "flip " << flip << std::endl;
+
+
      }
     if (t_dosage_zerod_cutoff > 0) {
         if (t_MAC <= t_dosage_zerod_MAC_cutoff) {

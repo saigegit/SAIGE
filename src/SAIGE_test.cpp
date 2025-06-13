@@ -140,18 +140,18 @@ for(unsigned int j = 0; j < m_traitType_vec.size(); j++){
         m_valueVec_mt = t_valueVec_mt;
     }
     m_colXvec = t_colXvec;
-    m_colXvec.print("m_colXvec");
+    //m_colXvec.print("m_colXvec");
 //    std::cout << "m_traitType " << m_traitType << std::endl;
   //for(int i = 0; i < m_traitType_vec.size(); i++){
   //  if(m_traitType_vec.at(i) == "survival"){
 //	m_colXvec[i] = m_colXvec[i] + 1;
 //    }
 //  }
-    m_colXvec.print("m_colXvec");
+    //m_colXvec.print("m_colXvec");
     m_sampleIndexLenVec = t_sampleIndexLenVec;
-    std::cout << "m_sampleindices_mt 0 end" << std::endl;
+    //std::cout << "m_sampleindices_mt 0 end" << std::endl;
     m_sampleindices_mt = t_sampleIndexMat-1;
-    std::cout << "m_sampleindices_mt end" << std::endl;
+    //std::cout << "m_sampleindices_mt end" << std::endl;
 }
 
 // http://thecoatlessprofessor.com/programming/set_rs_seed_in_rcpp_sequential_case/
@@ -283,28 +283,28 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
     arma::vec mu21;
     arma::vec res1 = m_res.elem(t_indexForNonZero);
     arma::vec Z = A1.t() * g1;
-    std::cout << "e " << std::endl;
+    //std::cout << "e " << std::endl;
     arma::vec B = X1 * Z;
-    std::cout << "e " << std::endl;
+    //std::cout << "e " << std::endl;
     arma::vec g1_tilde = g1 - B;
     double var1, var2, S, S1, S2, g1tildemu2;
     arma::vec S_a2;
     double Bmu2;
-	std::cout << "m_XVX_mt " << m_XVX_mt.n_cols << " " << m_XVX_mt.n_rows << std::endl;
-	m_ip.print("m_ip");
-	std::cout << "m_p " << m_p << std::endl;
+	//std::cout << "m_XVX_mt " << m_XVX_mt.n_cols << " " << m_XVX_mt.n_rows << std::endl;
+	//m_ip.print("m_ip");
+	//std::cout << "m_p " << m_p << std::endl;
     arma::mat XVX_submat = m_XVX_mt.cols(m_ip);
 
     arma::mat XVX_submat2 = XVX_submat.rows(0, (m_p-1));
     //arma::mat  ZtXVXZ = Z.t() * m_XVX * Z;
-    std::cout << "e " << std::endl;
+    //std::cout << "e " << std::endl;
 
-	std::cout << "Z " << Z.n_cols << " " << Z.n_rows << std::endl;
-	std::cout << "XVX_submat2 " << XVX_submat2.n_cols << " " << XVX_submat2.n_rows << std::endl;
+	//std::cout << "Z " << Z.n_cols << " " << Z.n_rows << std::endl;
+	//std::cout << "XVX_submat2 " << XVX_submat2.n_cols << " " << XVX_submat2.n_rows << std::endl;
 
 
     arma::mat  ZtXVXZ = Z.t() * XVX_submat2 * Z;
-    std::cout << "e " << std::endl;
+    //std::cout << "e " << std::endl;
     if(m_traitType == "binary" || m_traitType == "survival"){
       mu21  = m_mu2.elem(t_indexForNonZero);
       g1tildemu2 = dot(square(g1_tilde), mu21);
@@ -392,18 +392,18 @@ void SAIGEClass::getadjG(arma::vec & t_GVec, arma::vec & g){
 
 void SAIGEClass::getadjGFast(arma::vec & t_GVec, arma::vec & g, arma::uvec & iIndex)
 {
-
+/*
   	std::cout << "m_XV.n_cols " << m_XV_mt.n_cols << std::endl;
   	std::cout << "m_XV.n_rows " << m_XV_mt.n_rows << std::endl;
   	std::cout << "m_XXVX_inv_mt.n_cols " << m_XXVX_inv_mt.n_cols << std::endl;
   	std::cout << "m_XXVX_inv_mt.n_rows " << m_XXVX_inv_mt.n_rows << std::endl;
  std::cout << "m_XXVX_inv(0,0) " << m_XXVX_inv_mt[0,0] << std::endl; 
-  
+*/  
   
   // To increase computational efficiency when lots of GVec elements are 0
 // std::cout << "m_p " << m_p << std::endl;
  arma::mat XV_submat = m_XV_mt.submat(m_ip, m_sampleindices_vec);
-	m_ip.print("m_ip");
+	/*m_ip.print("m_ip");
 
 	std::cout << "m_XV_submat.n_cols " << XV_submat.n_cols << std::endl;
   	std::cout << "m_XV_submat.n_rows " << XV_submat.n_rows << std::endl;
@@ -412,13 +412,13 @@ std::cout << "XV_submat(0,0) " << XV_submat[0,0] << std::endl;
 std::cout << "XV_submat(0,1) " << XV_submat[0,1] << std::endl;
 std::cout << "XV_submat(1,0) " << XV_submat[1,0] << std::endl;
 std::cout << "XV_submat(1,1) " << XV_submat[1,1] << std::endl;
-
+*/
  arma::vec m_XVG(XV_submat.n_rows, arma::fill::zeros);
   arma::mat m_XXVX_inv_submat = m_XXVX_inv_mt.submat(m_sampleindices_vec, m_ip);
-  std::cout << "m_XXVX_inv_submat(0,0) " << m_XXVX_inv_submat[0,0] << std::endl;
-  std::cout << "m_XXVX_inv_submat(0,1) " << m_XXVX_inv_submat[0,1] << std::endl;
-  std::cout << "m_XXVX_inv_submat(1,0) " << m_XXVX_inv_submat[1,0] << std::endl;
-  std::cout << "m_XXVX_inv_submat(1,1) " << m_XXVX_inv_submat[1,1] << std::endl;
+  //std::cout << "m_XXVX_inv_submat(0,0) " << m_XXVX_inv_submat[0,0] << std::endl;
+  //std::cout << "m_XXVX_inv_submat(0,1) " << m_XXVX_inv_submat[0,1] << std::endl;
+  //std::cout << "m_XXVX_inv_submat(1,0) " << m_XXVX_inv_submat[1,0] << std::endl;
+  //std::cout << "m_XXVX_inv_submat(1,1) " << m_XXVX_inv_submat[1,1] << std::endl;
 	
 	//std::cout << "XV_submat.n_cols " << XV_submat.n_cols << std::endl;
   	//std::cout << "XV_submat.n_rows " << XV_submat.n_rows << std::endl;
@@ -426,16 +426,15 @@ std::cout << "XV_submat(1,1) " << XV_submat[1,1] << std::endl;
   for(int i = 0; i < iIndex.n_elem; i++){
   	//std::cout << "i " << i << std::endl;
   	//std::cout << "iIndex(i) " << iIndex(i) << std::endl;
-  if(i == 0){
-        arma::vec temp =  XV_submat.col(iIndex(i));
-        temp.print("temp");
-        std::cout << "t_GVec(iIndex(i)) "
-<< t_GVec(iIndex(i)) << std::endl;
-  }	
+  //if(i == 0){
+  //      arma::vec temp =  XV_submat.col(iIndex(i));
+  //      temp.print("temp");
+  //      std::cout << "t_GVec(iIndex(i)) " << t_GVec(iIndex(i)) << std::endl;
+  //}	
 	m_XVG += XV_submat.col(iIndex(i)) *  t_GVec(iIndex(i));    
   }
   //g = t_GVec - m_XXVX_inv_mt.submat(m_sampleindices_vec, m_ip) * m_XVG; 
- m_XVG.print("m_XVG");
+// m_XVG.print("m_XVG");
  
  g = t_GVec - m_XXVX_inv_submat * m_XVG; 
 }
@@ -554,7 +553,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 
   double gmuNB;
 
-//std::cout << "ok1" << std::endl;
+std::cout << "ok1" << std::endl;
 
 
 if((StdStat > m_SPA_Cutoff || std::isnan(StdStat)) && m_traitType != "quantitative" && t_isER){
@@ -563,7 +562,7 @@ if((StdStat > m_SPA_Cutoff || std::isnan(StdStat)) && m_traitType != "quantitati
 	t_isER = false;
 }
 
-//std::cout << "ok2" << std::endl;
+std::cout << "ok2" << std::endl;
 
 if(!t_isER){
 
@@ -571,14 +570,17 @@ if(!t_isER){
   if(!std::isnan(StdStat) && (StdStat > m_SPA_Cutoff) && m_traitType != "quantitative"){
 
        if(!is_gtilde){
-          t_gtilde.resize(m_n);
+          //t_gtilde.resize(m_n);
           getadjGFast(t_GVec, t_gtilde, iIndex);
 	  is_gtilde = true;
        }
+       std::cout << "ok3" << std::endl;
 	//int t_gtilden = t_gtilde.n_elem;
         p_iIndexComVecSize = double(iIndexComVecSize)/m_n;
+	std::cout << m_mu.n_elem << std::endl;
+	std::cout << t_gtilde.n_elem << std::endl;
    	m1 = dot(m_mu, t_gtilde);
-
+	std::cout << "SPA 0" << std::endl;
 	if(p_iIndexComVecSize >= 0.5){
 		unsigned int j1 = 0;
 		unsigned int j2 = 0;
@@ -609,6 +611,7 @@ if(!t_isER){
 	gNA = t_gtilde(iIndexComVec);
    	muNB = m_mu(iIndex);
    	muNA = m_mu(iIndexComVec);
+	std::cout << "SPA 1" << std::endl;
 
 /*	
 	    std::cout << "gNA.n_elem 2 " << gNA.n_elem << std::endl;
@@ -619,7 +622,9 @@ if(!t_isER){
 
 
   	gmuNB = dot(gNB,muNB);	 
+	std::cout << "SPA 2" << std::endl;
    	NAmu= m1-gmuNB;
+	std::cout << "SPA 3" << std::endl;
 
    }
 	/*else{
@@ -659,6 +664,7 @@ if(!t_isER){
 	double tol0 = std::numeric_limits<double>::epsilon();
 	tol1 = std::pow(tol0, 0.25);
 	if(p_iIndexComVecSize >= 0.5 && !m_flagSparseGRM_cur){
+	std::cout << "SPA 3" << std::endl;
 		//std::cout << "SPA_fast" << std::endl;
         	SPA_fast(m_mu, t_gtilde, q, qinv, pval_noadj, ispvallog, gNA, gNB, muNA, muNB, NAmu, NAsigma, tol1, m_traitType, t_SPApval, t_isSPAConverge);
 	
@@ -1296,12 +1302,12 @@ void SAIGEClass::set_flagSparseGRM_cur(bool t_flagSparseGRM_cur){
 void SAIGEClass::assign_for_itrait(unsigned int t_itrait){
         m_itrait = t_itrait;
         m_traitType = m_traitType_vec.at(m_itrait);
-	std::cout << "assign_for_itrait0 " << std::endl;	
+	//std::cout << "assign_for_itrait0 " << std::endl;	
 	arma::uvec sampleindices_sub_vec = m_sampleindices_mt.col(t_itrait);
-	std::cout << "assign_for_itrait1 " << std::endl;
-	m_sampleIndexLenVec.print("m_sampleIndexLenVec");
+	//std::cout << "assign_for_itrait1 " << std::endl;
+	//m_sampleIndexLenVec.print("m_sampleIndexLenVec");
 	m_sampleindices_vec = sampleindices_sub_vec.subvec(0, (m_sampleIndexLenVec[t_itrait]-1));
-	std::cout << "assign_for_itrait2 " << std::endl;	
+	//std::cout << "assign_for_itrait2 " << std::endl;	
         //m_startin = m_itrait*m_n;
         //m_endin = m_startin + m_n - 1;
 
@@ -1310,48 +1316,49 @@ void SAIGEClass::assign_for_itrait(unsigned int t_itrait){
 	}else{
 		m_startip = arma::sum(m_colXvec.subvec(0, t_itrait - 1));
 	}
-	m_colXvec.print("m_colXvec");
+	//m_colXvec.print("m_colXvec");
         	m_p = m_colXvec(t_itrait);
 
-	std::cout << "m_startip " << m_startip << std::endl;
-	std::cout << "assign_for_itrait3 " << std::endl;	
+	//std::cout << "m_startip " << m_startip << std::endl;
+	//std::cout << "assign_for_itrait3 " << std::endl;	
 	
 	
 	m_endip =  m_startip + m_colXvec[t_itrait]-1;
-         m_colXvec.print("m_colXvec");
-            std::cout << "assign_for_itrait4 " << std::endl;	
+         //m_colXvec.print("m_colXvec");
+         //   std::cout << "assign_for_itrait4 " << std::endl;	
         
 	    m_ip.set_size(m_endip - m_startip + 1);
             unsigned int diff = m_endip - m_startip + 1;
 	    
-	    std::cout << "diff " << diff << std::endl;
-            std::cout << "m_ip.n_elem " << m_ip.n_elem << std::endl;
-            std::cout << "assign_for_itrait4b " << std::endl;
+	    //std::cout << "diff " << diff << std::endl;
+            //std::cout << "m_ip.n_elem " << m_ip.n_elem << std::endl;
+            //std::cout << "assign_for_itrait4b " << std::endl;
 
     // Populate m_ip with values from m_startip to m_endip
     for (unsigned int i = 0; i < m_ip.size(); ++i) {
         m_ip(i) = m_startip + i;
     }	
 	
-	//m_ip = arma::regspace<arma::uvec>(m_startip, m_endip);
-            std::cout << "assign_for_itrait5 " << std::endl;	
-            std::cout << "m_y_mt.n_cols " << m_y_mt.n_cols << " " << m_itrait <<std::endl;	
+            //std::cout << "assign_for_itrait5 " << std::endl;	
+            //std::cout << "m_y_mt.n_cols " << m_y_mt.n_cols << " " << m_itrait <<std::endl;	
 	
        arma::vec  m_y_sub = m_y_mt.col(m_itrait);
-            std::cout << "m_y_mt.n_cols " << m_y_mt.n_cols << " " << m_itrait <<std::endl;
-	m_sampleindices_vec.print("m_sampleindices_vec");
+            //std::cout << "m_y_mt.n_cols " << m_y_mt.n_cols << " " << m_itrait <<std::endl;
+	//m_sampleindices_vec.print("m_sampleindices_vec");
        m_y = m_y_sub.elem(m_sampleindices_vec);
-            std::cout << "assign_for_itrait5a " << std::endl;	
+            //std::cout << "assign_for_itrait5a " << std::endl;	
        arma::vec  m_res_sub = m_res_mt.col(m_itrait);
        m_res = m_res_sub.elem(m_sampleindices_vec);
-            std::cout << "assign_for_itrait5b " << std::endl;	
+            //std::cout << "assign_for_itrait5b " << std::endl;	
        arma::vec  m_mu2_sub = m_mu2_mt.col(m_itrait);
        m_mu2 = m_mu2_sub.elem(m_sampleindices_vec);
-       std::cout << "assign_for_itrait5c " << std::endl;	
+       arma::vec  m_mu_sub = m_mu_mt.col(m_itrait);
+       m_mu = m_mu_sub.elem(m_sampleindices_vec);
+       //std::cout << "assign_for_itrait5c " << std::endl;	
 
 	m_startic = m_itrait*m_numMarker_cond;
         m_endic = m_startic + m_numMarker_cond - 1;
-            std::cout << "assign_for_itrait6 " << std::endl;	
+            //std::cout << "assign_for_itrait6 " << std::endl;	
         //m_startip = m_itrait*m_p;
         //m_endip = m_startip + m_p - 1;
         //std::cout << "assign_for_itrait m_is_gxe " << m_is_gxe << std::endl;
