@@ -142,12 +142,11 @@ for(unsigned int j = 0; j < m_traitType_vec.size(); j++){
     m_colXvec = t_colXvec;
     m_colXvec.print("m_colXvec");
 //    std::cout << "m_traitType " << m_traitType << std::endl;
-  for(int i = 0; i < m_traitType_vec.size(); i++){
-    if(m_traitType_vec.at(i) == "survival"){
-	m_colXvec[i] = m_colXvec[i] + 1;
-//    
-    }
-}
+  //for(int i = 0; i < m_traitType_vec.size(); i++){
+  //  if(m_traitType_vec.at(i) == "survival"){
+//	m_colXvec[i] = m_colXvec[i] + 1;
+//    }
+//  }
     m_colXvec.print("m_colXvec");
     m_sampleIndexLenVec = t_sampleIndexLenVec;
     std::cout << "m_sampleindices_mt 0 end" << std::endl;

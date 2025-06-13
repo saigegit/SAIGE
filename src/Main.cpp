@@ -448,7 +448,8 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
   std::cout << "mainMarker5" << std::endl;
      //indexZeroVec_arma = arma::conv_to<arma::uvec>::from(indexZeroVec);
      //indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
-
+  std::cout << "MAC " << MAC << std::endl;
+  std::cout << "altFreq " << altFreq << std::endl;
     MAF = std::min(altFreq, 1 - altFreq);
     MAC = std::min(altCounts, 2*t_GVec_sub.n_elem-altCounts);
 
@@ -643,8 +644,8 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
        //if(t_traitType.size() > 1){
            ptr_gSAIGEobj->assign_for_itrait_binaryindices(i_mt0);
        //}	
-      arma::vec dosage_case = t_GVec.elem(ptr_gSAIGEobj->m_case_indices);
-      arma::vec dosage_ctrl = t_GVec.elem(ptr_gSAIGEobj->m_ctrl_indices);
+      arma::vec dosage_case = t_GVec_sub.elem(ptr_gSAIGEobj->m_case_indices);
+      arma::vec dosage_ctrl = t_GVec_sub.elem(ptr_gSAIGEobj->m_ctrl_indices);
       AF_case = arma::mean(dosage_case) /2;
       AF_ctrl = arma::mean(dosage_ctrl) /2;
       N_case = dosage_case.n_elem;

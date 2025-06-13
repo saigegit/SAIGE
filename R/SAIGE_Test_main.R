@@ -467,17 +467,20 @@ SPAGMMATtest = function(bgenFile = "",
     for (oml in 1:length(obj.model.List)) {
       obj.model <- obj.model.List[[oml]] 
       x_start = jx + 1
-      x_end = jx + ncol(obj.model$obj.noK$X1)
+      #x_start_x = jx + 1
+      #x_end = jx + ncol(obj.model$obj.noK$X1)
+      x_end = jx + ncol(obj.model$X)
+      #x_end_x = jx + ncol(obj.model$X)
       cat("x_end is ", x_end, "\n")
-      colXvec[oml] = ncol(obj.model$obj.noK$X1)
-      X[obj.model$sampleIndices, x_start:x_end] = obj.model$obj.noK$X1
+      colXvec[oml] = ncol(obj.model$X)
+      X[obj.model$sampleIndices, x_start:x_end] = obj.model$X
       traitType <- c(traitType, obj.model$traitType)
-	print(ncol(obj.model$obj.noK$X1))
+	print(ncol(obj.model$X))
 	print(dim(obj.model$obj.noK$XVX))
 	print(x_start)
 	print(x_end)
 	print(ncol(obj.model$obj.noK$XVX))
-       x_end = x_end + 1
+       #x_end = x_end + 1
       XVX[1:ncol(obj.model$obj.noK$XVX), x_start:x_end] = obj.model$obj.noK$XVX
       XXVX_inv[obj.model$sampleIndices, x_start:x_end] = obj.model$obj.noK$XXVX_inv
       XV[x_start:x_end, obj.model$sampleIndices] = obj.model$obj.noK$XV
@@ -505,6 +508,8 @@ SPAGMMATtest = function(bgenFile = "",
 
 # Call the updated setSAIGEobjInCPP function
 
+print("colXvec")
+print(colXvec)
 
 setSAIGEobjInCPP(
   t_XVX = XVX,
@@ -632,11 +637,13 @@ setSAIGEobjInCPP(
     condition_weights <- c(0)
   }
 
-
+print("Hereererere1")
     #traitType = obj.model.List[[1]]$traitType #traitType should be the same for all phenotypes tested at the same time
     mu = obj.model.List[[1]]$mu  ##needs to be updated (length is used later)
+print("Hereererere2")
     rm(obj.model.List)
-    gc()
+print("Hereererere3")
+    #gc()
     #print(gc(v=T))
     #if(file.exists(SAIGEOutputFile)) {print("ok 0 file exist")} 
     #cat("Number of all markers to test:\t", nrow(markerInfo), "\n")
@@ -645,21 +652,84 @@ setSAIGEobjInCPP(
     #}
     #time_9 = proc.time()
 
+print("Hereererere4")
 
     if(!isGroupTest){
     OutputFile = SAIGEOutputFile
 
     #if(file.exists(SAIGEOutputFile)) {print("ok 2 file exist")}
+print("Hereererere5")
     if(!is.null(objGeno$markerInfo$CHROM)){
     	setorderv(objGeno$markerInfo,col=c("CHROM","POS"))
     }
-	print("Hereererere")
+# Print every argument value
+print("traitType:")
+print(traitType)
+
+print("phenotype_name_vec:")
+print(phenotype_name_vec)
+
+print("genoType:")
+print(genoType)
+
+print("bgenFileIndex:")
+print(bgenFileIndex)
+
+print("idstoIncludeFile:")
+print(idstoIncludeFile)
+
+print("rangestoIncludeFile:")
+print(rangestoIncludeFile)
+
+print("objGeno$markerInfo$genoIndex_prev:")
+print(objGeno$markerInfo$genoIndex_prev)
+
+print("objGeno$markerInfo$genoIndex:")
+print(objGeno$markerInfo$genoIndex)
+
+print("objGeno$markerInfo$CHROM:")
+print(objGeno$markerInfo$CHROM)
+
+print("OutputFile:")
+print(OutputFile)
+
+print("OutputFileIndex:")
+print(OutputFileIndex)
+
+print("markers_per_chunk:")
+print(markers_per_chunk)
+
+print("is_output_moreDetails:")
+print(is_output_moreDetails)
+
+print("is_imputed_data:")
+print(is_imputed_data)
+
+print("is_Firth_beta:")
+print(is_Firth_beta)
+
+print("LOCO:")
+print(LOCO)
+
+print("chrom:")
+print(chrom)
+
+print("isCondition:")
+print(isCondition)
+
+print("is_overwrite_output:")
+print(is_overwrite_output)
+
+print("objGeno$anyInclude:")
+print(objGeno$anyInclude)
+
+        print("Hereererere")
         SAIGE.Marker(traitType,
-		   phenotype_name_vec,
-		   genoType,
-		   bgenFileIndex,
-		   idstoIncludeFile,
-		   rangestoIncludeFile,
+                   phenotype_name_vec,
+                   genoType,
+                   bgenFileIndex,
+                   idstoIncludeFile,
+                   rangestoIncludeFile,
                    objGeno$markerInfo$genoIndex_prev,
                    objGeno$markerInfo$genoIndex,
                    objGeno$markerInfo$CHROM,
@@ -667,14 +737,14 @@ setSAIGEobjInCPP(
                    OutputFileIndex,
                    markers_per_chunk,
                    is_output_moreDetails,
-		   is_imputed_data,
-		   is_Firth_beta,
+                   is_imputed_data,
+                   is_Firth_beta,
                    LOCO,
                    chrom,
-		   isCondition,
-		   is_overwrite_output,
-		   objGeno$anyInclude,
-		   FALSE)
+                   isCondition,
+                   is_overwrite_output,
+                   objGeno$anyInclude,
+                   FALSE)
 
 
     }else{

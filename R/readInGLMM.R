@@ -474,10 +474,12 @@ ReadModel_multiTrait <- function(GMMATmodelFileList = "", chrom = "", LOCO = TRU
     vec <- modglmmList[[gm]]$sampleID 
     modglmmList[[gm]]$sampleIndices <- match(vec, union_vector)
     modglmmList[[gm]]$sampleID = NULL
-    nx = nx + (ncol(modglmmList[[gm]]$obj.noK$X1)+1)
-    upperx = max(upperx, (ncol(modglmmList[[gm]]$obj.noK$X1)+1))
+    nx = nx + ncol(modglmmList[[gm]]$X)
+    upperx = max(upperx, ncol(modglmmList[[gm]]$X))
   cat("upperx ", upperx, "\n")
-  print(ncol(modglmmList[[gm]]$obj.noK$X1)+1)
+  #print(ncol(modglmmList[[gm]]$obj.noK$X1)+1)
+  print("ncol(modglmmList[[gm]]$X)")
+  print(ncol(modglmmList[[gm]]$X))
   }
 
   cat("upperx ", upperx, "\n")
