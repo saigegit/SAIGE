@@ -274,17 +274,37 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
                      double &t_var2){
 
     arma::vec g1 = t_GVec.elem(t_indexForNonZero);
-    arma::mat X1 = m_X.rows(t_indexForNonZero);
-    arma::mat A1 = m_XVX_inv_XV.rows(t_indexForNonZero);
+    arma::mat m_X_submat = m_X_mt.submat(m_sampleindices_vec, m_ip);
+        arma::mat X1 = m_X_submat.rows(t_indexForNonZero);
+    //arma::mat X1 = m_X.rows(t_indexForNonZero);
+    arma::mat m_XVX_inv_XV_submat = m_XVX_inv_XV_mt.submat(m_sampleindices_vec, m_ip);
+    arma::mat A1 = m_XVX_inv_XV_submat.rows(t_indexForNonZero);
+    //arma::mat A1 = m_XVX_inv_XV.rows(t_indexForNonZero);
     arma::vec mu21;
     arma::vec res1 = m_res.elem(t_indexForNonZero);
     arma::vec Z = A1.t() * g1;
+    std::cout << "e " << std::endl;
     arma::vec B = X1 * Z;
+    std::cout << "e " << std::endl;
     arma::vec g1_tilde = g1 - B;
     double var1, var2, S, S1, S2, g1tildemu2;
     arma::vec S_a2;
     double Bmu2;
-    arma::mat  ZtXVXZ = Z.t() * m_XVX * Z;
+	std::cout << "m_XVX_mt " << m_XVX_mt.n_cols << " " << m_XVX_mt.n_rows << std::endl;
+	m_ip.print("m_ip");
+	std::cout << "m_p " << m_p << std::endl;
+    arma::mat XVX_submat = m_XVX_mt.cols(m_ip);
+
+    arma::mat XVX_submat2 = XVX_submat.rows(0, (m_p-1));
+    //arma::mat  ZtXVXZ = Z.t() * m_XVX * Z;
+    std::cout << "e " << std::endl;
+
+	std::cout << "Z " << Z.n_cols << " " << Z.n_rows << std::endl;
+	std::cout << "XVX_submat2 " << XVX_submat2.n_cols << " " << XVX_submat2.n_rows << std::endl;
+
+
+    arma::mat  ZtXVXZ = Z.t() * XVX_submat2 * Z;
+    std::cout << "e " << std::endl;
     if(m_traitType == "binary" || m_traitType == "survival"){
       mu21  = m_mu2.elem(t_indexForNonZero);
       g1tildemu2 = dot(square(g1_tilde), mu21);
@@ -292,17 +312,26 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
       var2 = ZtXVXZ(0,0) - Bmu2 + g1tildemu2;
     }else if(m_traitType == "quantitative"){
       Bmu2 = dot(g1, B);
-      var2 = ZtXVXZ(0,0)*m_tauvec[0] +  dot(g1,g1) - 2*Bmu2;
+      var2 = ZtXVXZ(0,0)*(m_tauvec_mt(0,m_itrait)) +  dot(g1,g1) - 2*Bmu2;
+      //var2 = ZtXVXZ(0,0)*m_tauvec[0] +  dot(g1,g1) - 2*Bmu2;
     }
 
     var1 = var2 * m_varRatioVal;
     S1 = dot(res1, g1_tilde);
     arma::mat res1X1_temp = (res1.t()) * X1;
     arma::vec res1X1 = res1X1_temp.t();
-    S_a2 = m_S_a - res1X1;
+
+    arma::vec S_a_vec = m_S_a_mt.col(m_itrait);
+    //m_S_a = S_a_vec.subvec(0,m_p);
+
+    //S_a2 = m_S_a - res1X1;
+    //
+    //
+    S_a2 = S_a_vec.subvec(0,m_p-1) - res1X1;
     S2 = - arma::dot(S_a2,  Z);
     S = S1 + S2;
-    S = S/m_tauvec[0];
+    //S = S/m_tauvec[0];
+    S = S/(m_tauvec_mt(0,m_itrait));
 
     double stat = S*S/var1;
     if (var1 <= std::numeric_limits<double>::min()){
@@ -488,7 +517,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   //for test
   //arma::vec timeoutput3 = getTime();
   //
-  isScoreFast=false;
+  isScoreFast=true;
   if(!isScoreFast){
   std::cout << "score test 0" << std::endl;
 	//std::cout << "scoreTest " << std::endl;  
