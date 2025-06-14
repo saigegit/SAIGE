@@ -63,7 +63,7 @@ SAIGEClass::SAIGEClass(
 	arma::umat & t_sampleIndexMat) {
 
     std::cout << "SAIGEClass" << std::endl;
-    m_y_mt_vec = std::vector<arma::vec>();
+    m_res_mt_vec = std::vector<arma::vec>();
     m_XVX_mt = t_XVX_mt;
     m_XV_mt = t_XV_mt;
     m_XXVX_inv_mt = t_XXVX_inv_mt;
@@ -104,25 +104,12 @@ SAIGEClass::SAIGEClass(
     } else {
         m_numMarker_cond = 0;
     }
-/*
-if(m_traitType_vec.size() == 1){
-    if (m_traitType_vec.at(0) == "binary" || m_traitType_vec.at(0) == "survival") {
-       //for(unsigned int j = 0; j < m_y_mt.n_rows; j++){
-        	m_case_indices = arma::find(m_y_mt.col(0) == 1);
-        	m_ctrl_indices = arma::find(m_y_mt.col(0) == 0);
-        	m_n_case = m_case_indices.n_elem;
-        	m_n_ctrl = m_ctrl_indices.n_elem;
-        	m_is_Firth_beta = t_is_Firth_beta;
-        	m_pCutoffforFirth = t_pCutoffforFirth;
-        	m_offset_mt = t_offset_mt;
-       //}
-    }
-} 
+    m_colXvec = t_colXvec;
+    m_sampleIndexLenVec = t_sampleIndexLenVec;
+    m_sampleindices_mt = t_sampleIndexMat-1;
 
-*/
-
-bool isbinary=false;
-for(unsigned int j = 0; j < m_traitType_vec.size(); j++){
+    bool isbinary=false;
+    for(unsigned int j = 0; j < m_traitType_vec.size(); j++){
 	if(m_traitType_vec.at(j) == "binary"){
 		isbinary=true;	
 	}
@@ -131,7 +118,7 @@ for(unsigned int j = 0; j < m_traitType_vec.size(); j++){
                 m_pCutoffforFirth = t_pCutoffforFirth;
                 m_offset_mt = t_offset_mt;
 	}
-}
+    }
     m_dimNum = t_dimNum;
     m_flagSparseGRM = t_flagSparseGRM;
     m_isFastTest = t_isFastTest;
@@ -140,19 +127,29 @@ for(unsigned int j = 0; j < m_traitType_vec.size(); j++){
         m_locationMat_mt = t_locationMat_mt;
         m_valueVec_mt = t_valueVec_mt;
     }
-    m_colXvec = t_colXvec;
-    //m_colXvec.print("m_colXvec");
-//    std::cout << "m_traitType " << m_traitType << std::endl;
-  //for(int i = 0; i < m_traitType_vec.size(); i++){
-  //  if(m_traitType_vec.at(i) == "survival"){
-//	m_colXvec[i] = m_colXvec[i] + 1;
-//    }
-//  }
-    //m_colXvec.print("m_colXvec");
-    m_sampleIndexLenVec = t_sampleIndexLenVec;
-    //std::cout << "m_sampleindices_mt 0 end" << std::endl;
-    m_sampleindices_mt = t_sampleIndexMat-1;
-    //std::cout << "m_sampleindices_mt end" << std::endl;
+
+
+    unsigned int k_startip, k_endip, k_p;
+    arma::uvec k_ip;
+    for(unsigned int k_itrait = 0; k_itrait < m_traitType_vec.size(); k_itrait++){
+        arma::uvec sampleindices_sub_vec = m_sampleindices_mt.col(k_itrait);
+	arma::uvec k_sampleindices_vec = sampleindices_sub_vec.subvec(0, (m_sampleIndexLenVec[k_itrait]-1));
+	if(k_itrait == 0){
+                k_startip = 0;
+        }else{
+                k_startip = arma::sum(m_colXvec.subvec(0, k_itrait - 1));
+        }
+	k_p = m_colXvec(k_itrait);
+	k_endip =  k_startip + m_colXvec[k_itrait]-1;
+	k_ip.set_size(k_endip - k_startip + 1);
+	for (unsigned int i = 0; i < k_ip.size(); ++i) {
+		k_ip(i) = k_startip + i;
+	}
+	arma::vec  k_y_sub = m_y_mt.col(k_itrait);
+	arma::vec k_y = k_y_sub.elem(k_sampleindices_vec);
+        arma::vec  k_res_sub = m_res_mt.col(k_itrait);
+        arma::vec k_res = k_res_sub.elem(k_sampleindices_vec);
+    }
 }
 
 // http://thecoatlessprofessor.com/programming/set_rs_seed_in_rcpp_sequential_case/
@@ -1350,7 +1347,8 @@ void SAIGEClass::assign_for_itrait(unsigned int t_itrait){
             //std::cout << "assign_for_itrait5a " << std::endl;	
        arma::vec  m_res_sub = m_res_mt.col(m_itrait);
        m_res = m_res_sub.elem(m_sampleindices_vec);
-            //std::cout << "assign_for_itrait5b " << std::endl;	
+            //std::cout << "assign_for_itrait5b " << std::endl;
+
        arma::vec  m_mu2_sub = m_mu2_mt.col(m_itrait);
        m_mu2 = m_mu2_sub.elem(m_sampleindices_vec);
        arma::vec  m_mu_sub = m_mu_mt.col(m_itrait);
