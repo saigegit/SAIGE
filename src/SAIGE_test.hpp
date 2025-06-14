@@ -23,9 +23,16 @@ class SAIGEClass
       arma::vec  m_S_a;
       std::string m_traitType; 
       std::string m_impute_method;
-      	
+      std::vector<arma::vec> m_y_mt_vec;	
 
     public:
+        // Default constructor
+       SAIGEClass() {
+            // Initialize m_y_mt_vec as an empty vector
+            m_y_mt_vec = std::vector<arma::vec>();
+        }	
+
+
       std::vector<uint32_t> m_condition_genoIndex;
       arma::mat m_XXVX_inv;
       arma::mat m_XV;

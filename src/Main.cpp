@@ -36,6 +36,8 @@ static BGEN::BgenClass* ptr_gBGENobj = NULL;
 static VCF::VcfClass* ptr_gVCFobj = NULL;
 // global objects for different analysis methods
 static SAIGE::SAIGEClass* ptr_gSAIGEobj = NULL;
+
+
 //single, SAIGE
 //Region, SAIGE-GENE+
 /*

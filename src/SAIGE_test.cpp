@@ -63,6 +63,7 @@ SAIGEClass::SAIGEClass(
 	arma::umat & t_sampleIndexMat) {
 
     std::cout << "SAIGEClass" << std::endl;
+    m_y_mt_vec = std::vector<arma::vec>();
     m_XVX_mt = t_XVX_mt;
     m_XV_mt = t_XV_mt;
     m_XXVX_inv_mt = t_XXVX_inv_mt;
