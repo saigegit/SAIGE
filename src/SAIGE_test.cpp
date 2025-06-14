@@ -64,6 +64,9 @@ SAIGEClass::SAIGEClass(
 
     std::cout << "SAIGEClass" << std::endl;
     m_res_mt_vec = std::vector<arma::vec>();
+    //m_XV_mt_vec = std::vector<arma::mat>();
+    
+    
     m_XVX_mt = t_XVX_mt;
     m_XV_mt = t_XV_mt;
     m_XXVX_inv_mt = t_XXVX_inv_mt;
@@ -77,7 +80,7 @@ SAIGEClass::SAIGEClass(
     }
     m_X_mt = t_X_mt;
     m_S_a_mt = t_S_a_mt;
-    m_res_mt = t_res_mt;
+    //m_res_mt = t_res_mt;
     m_resout_mt = t_resout_mt;
     m_mu2_mt = t_mu2_mt;
     m_mu_mt = t_mu_mt;
@@ -147,10 +150,13 @@ SAIGEClass::SAIGEClass(
 	}
 	arma::vec  k_y_sub = m_y_mt.col(k_itrait);
 	arma::vec k_y = k_y_sub.elem(k_sampleindices_vec);
-        arma::vec  k_res_sub = m_res_mt.col(k_itrait);
+        arma::vec  k_res_sub = t_res_mt.col(k_itrait);
         arma::vec k_res = k_res_sub.elem(k_sampleindices_vec);
 	m_res_mt_vec.push_back(k_res);
+	//arma::mat k_XV_submat = m_XV_mt.submat(k_ip, k_sampleindices_vec);
+	//m_XV_mt_vec.push_back(k_XV_submat);
     }
+   // m_XV_mt.clear();
 }
 
 // http://thecoatlessprofessor.com/programming/set_rs_seed_in_rcpp_sequential_case/
@@ -413,24 +419,16 @@ std::cout << "XV_submat(0,1) " << XV_submat[0,1] << std::endl;
 std::cout << "XV_submat(1,0) " << XV_submat[1,0] << std::endl;
 std::cout << "XV_submat(1,1) " << XV_submat[1,1] << std::endl;
 */
- arma::vec m_XVG(XV_submat.n_rows, arma::fill::zeros);
+  arma::vec m_XVG(XV_submat.n_rows, arma::fill::zeros);
   arma::mat m_XXVX_inv_submat = m_XXVX_inv_mt.submat(m_sampleindices_vec, m_ip);
   //std::cout << "m_XXVX_inv_submat(0,0) " << m_XXVX_inv_submat[0,0] << std::endl;
   //std::cout << "m_XXVX_inv_submat(0,1) " << m_XXVX_inv_submat[0,1] << std::endl;
   //std::cout << "m_XXVX_inv_submat(1,0) " << m_XXVX_inv_submat[1,0] << std::endl;
-  //std::cout << "m_XXVX_inv_submat(1,1) " << m_XXVX_inv_submat[1,1] << std::endl;
-	
+  //std::cout << "m_XXVX_inv_submat(1,1) " << m_XXVX_inv_submat[1,1] << std::endl;	
 	//std::cout << "XV_submat.n_cols " << XV_submat.n_cols << std::endl;
   	//std::cout << "XV_submat.n_rows " << XV_submat.n_rows << std::endl;
 	
   for(int i = 0; i < iIndex.n_elem; i++){
-  	//std::cout << "i " << i << std::endl;
-  	//std::cout << "iIndex(i) " << iIndex(i) << std::endl;
-  //if(i == 0){
-  //      arma::vec temp =  XV_submat.col(iIndex(i));
-  //      temp.print("temp");
-  //      std::cout << "t_GVec(iIndex(i)) " << t_GVec(iIndex(i)) << std::endl;
-  //}	
 	m_XVG += XV_submat.col(iIndex(i)) *  t_GVec(iIndex(i));    
   }
   //g = t_GVec - m_XXVX_inv_mt.submat(m_sampleindices_vec, m_ip) * m_XVG; 

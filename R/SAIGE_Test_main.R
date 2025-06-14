@@ -551,7 +551,7 @@ setSAIGEobjInCPP(
 # Print all arguments
 
   rm(sparseSigmaRList)
-  gc()
+  print(gc(v=T))
 
   #print("OKOKOK") 
 
@@ -643,7 +643,7 @@ setSAIGEobjInCPP(
     rm(obj.model.List)
 #print("Hereererere3")
     #gc()
-    #print(gc(v=T))
+    print(gc(v=T))
     #if(file.exists(SAIGEOutputFile)) {print("ok 0 file exist")} 
     #cat("Number of all markers to test:\t", nrow(markerInfo), "\n")
     #cat("Number of markers in each chunk:\t", numLinesOutput, "\n")

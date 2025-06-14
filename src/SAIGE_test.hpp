@@ -24,12 +24,13 @@ class SAIGEClass
       std::string m_traitType; 
       std::string m_impute_method;
       std::vector<arma::vec> m_res_mt_vec;	
-
+      //std::vector<arma::mat> m_XV_mt_vec;
     public:
         // Default constructor
        SAIGEClass() {
             // Initialize m_res_mt_vec as an empty vector
             m_res_mt_vec = std::vector<arma::vec>();
+	    //m_XV_mt_vec = std::vector<arma::mat>();
         }	
 
 
