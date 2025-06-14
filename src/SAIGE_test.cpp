@@ -149,6 +149,7 @@ SAIGEClass::SAIGEClass(
 	arma::vec k_y = k_y_sub.elem(k_sampleindices_vec);
         arma::vec  k_res_sub = m_res_mt.col(k_itrait);
         arma::vec k_res = k_res_sub.elem(k_sampleindices_vec);
+	m_res_mt_vec.push_back(k_res);
     }
 }
 
@@ -176,20 +177,21 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
 		     arma::uvec & t_indexForNonZero){
     arma::vec Sm, var2m;
     double S, var2;
-    std::cout << "getadjGFast0 " << std::endl;
-    std::cout << "t_GVec.n_elem " << t_GVec.n_elem << std::endl;
-    std::cout << "t_indexForNonZero.n_elem " << t_indexForNonZero.n_elem << std::endl;
+    //std::cout << "getadjGFast0 " << std::endl;
+    //std::cout << "t_GVec.n_elem " << t_GVec.n_elem << std::endl;
+    //std::cout << "t_indexForNonZero.n_elem " << t_indexForNonZero.n_elem << std::endl;
     getadjGFast(t_GVec, t_gtilde, t_indexForNonZero);
-    t_gtilde.print("t_gtilde");
-    t_indexForNonZero.print("t_indexForNonZero");
-    std::cout << "getadjGFast1 " << std::endl;
+    //t_gtilde.print("t_gtilde");
+    //t_indexForNonZero.print("t_indexForNonZero");
+    //std::cout << "getadjGFast1 " << std::endl;
     //getadjG(t_GVec, t_gtilde);
 // arma::mat XV_submat = m_XV_mt.submat(m_sampleindices_vec, m_ip);
 
     if(t_is_region && m_traitType == "binary"){
       t_gy = dot(t_gtilde, m_y);
      }
-    S = dot(t_gtilde, m_res);
+    //S = dot(t_gtilde, m_res);
+    S = dot(t_gtilde, m_res_mt_vec.at(m_itrait));
     std::cout << "S " << S << std::endl;
     S = S/m_tauvec_mt(0,m_itrait);;
 
@@ -208,15 +210,15 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
       if(m_isVarPsadj){
 	var2m = var2m - t_gtilde.t() * m_Sigma_iXXSigma_iX * m_X.t() * t_P2Vec;	
       }
-             std::cout << "m_flagSparseGRM_cur" << std::endl;
+       std::cout << "m_flagSparseGRM_cur" << std::endl;
     }	      
     var2 = var2m(0,0);
-	m_mu2.print("m_mu2");
-      std::cout << "m_tauvec_mt(0,m_itrait) " <<  m_tauvec_mt(0,m_itrait) << std::endl;
-    std::cout << "var2 " << var2 << std::endl;	
+	//m_mu2.print("m_mu2");
+      //std::cout << "m_tauvec_mt(0,m_itrait) " <<  m_tauvec_mt(0,m_itrait) << std::endl;
+    //std::cout << "var2 " << var2 << std::endl;	
     double var1 = var2 * m_varRatioVal;
-    std::cout << "m_varRatioVal " << m_varRatioVal << std::endl;	
-    std::cout << "var1 " << var1 << std::endl;	
+    //std::cout << "m_varRatioVal " << m_varRatioVal << std::endl;	
+    //std::cout << "var1 " << var1 << std::endl;	
 
     double stat = S*S/var1;
     if (var1 <= std::numeric_limits<double>::min()){
@@ -514,7 +516,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   //for test
   //arma::vec timeoutput3 = getTime();
   //
-  isScoreFast=true;
+  isScoreFast=false;
   if(!isScoreFast){
   std::cout << "score test 0" << std::endl;
 	//std::cout << "scoreTest " << std::endl;  
@@ -1300,42 +1302,25 @@ void SAIGEClass::set_flagSparseGRM_cur(bool t_flagSparseGRM_cur){
 void SAIGEClass::assign_for_itrait(unsigned int t_itrait){
         m_itrait = t_itrait;
         m_traitType = m_traitType_vec.at(m_itrait);
-	//std::cout << "assign_for_itrait0 " << std::endl;	
 	arma::uvec sampleindices_sub_vec = m_sampleindices_mt.col(t_itrait);
-	//std::cout << "assign_for_itrait1 " << std::endl;
-	//m_sampleIndexLenVec.print("m_sampleIndexLenVec");
 	m_sampleindices_vec = sampleindices_sub_vec.subvec(0, (m_sampleIndexLenVec[t_itrait]-1));
-	//std::cout << "assign_for_itrait2 " << std::endl;	
-        //m_startin = m_itrait*m_n;
-        //m_endin = m_startin + m_n - 1;
 
 	if(t_itrait == 0){
 		m_startip = 0;
 	}else{
 		m_startip = arma::sum(m_colXvec.subvec(0, t_itrait - 1));
 	}
-	//m_colXvec.print("m_colXvec");
-        	m_p = m_colXvec(t_itrait);
-
-	//std::cout << "m_startip " << m_startip << std::endl;
-	//std::cout << "assign_for_itrait3 " << std::endl;	
-	
+        m_p = m_colXvec(t_itrait);
 	
 	m_endip =  m_startip + m_colXvec[t_itrait]-1;
-         //m_colXvec.print("m_colXvec");
-         //   std::cout << "assign_for_itrait4 " << std::endl;	
         
-	    m_ip.set_size(m_endip - m_startip + 1);
-            unsigned int diff = m_endip - m_startip + 1;
+	m_ip.set_size(m_endip - m_startip + 1);
+        unsigned int diff = m_endip - m_startip + 1;
 	    
-	    //std::cout << "diff " << diff << std::endl;
-            //std::cout << "m_ip.n_elem " << m_ip.n_elem << std::endl;
-            //std::cout << "assign_for_itrait4b " << std::endl;
-
-    // Populate m_ip with values from m_startip to m_endip
-    for (unsigned int i = 0; i < m_ip.size(); ++i) {
-        m_ip(i) = m_startip + i;
-    }	
+        // Populate m_ip with values from m_startip to m_endip
+        for (unsigned int i = 0; i < m_ip.size(); ++i) {
+            m_ip(i) = m_startip + i;
+        }	
 	
             //std::cout << "assign_for_itrait5 " << std::endl;	
             //std::cout << "m_y_mt.n_cols " << m_y_mt.n_cols << " " << m_itrait <<std::endl;	
@@ -1344,10 +1329,10 @@ void SAIGEClass::assign_for_itrait(unsigned int t_itrait){
             //std::cout << "m_y_mt.n_cols " << m_y_mt.n_cols << " " << m_itrait <<std::endl;
 	//m_sampleindices_vec.print("m_sampleindices_vec");
        m_y = m_y_sub.elem(m_sampleindices_vec);
-            //std::cout << "assign_for_itrait5a " << std::endl;	
-       arma::vec  m_res_sub = m_res_mt.col(m_itrait);
-       m_res = m_res_sub.elem(m_sampleindices_vec);
-            //std::cout << "assign_for_itrait5b " << std::endl;
+       //arma::vec  m_res_sub = m_res_mt.col(m_itrait);
+       //m_res = m_res_sub.elem(m_sampleindices_vec);
+       m_res = m_res_mt_vec.at(m_itrait);
+	//std::cout << "assign_for_itrait5b " << std::endl;
 
        arma::vec  m_mu2_sub = m_mu2_mt.col(m_itrait);
        m_mu2 = m_mu2_sub.elem(m_sampleindices_vec);
