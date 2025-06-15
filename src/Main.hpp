@@ -127,6 +127,11 @@ void setPLINKobjInCPP(std::string t_bimFile,
                       std::string t_AlleleOrder);
 
 
+void setPGENobjInCPP(std::string pgenFile,
+                     std::string psamFile,
+                     std::string pvarFile,
+                     std::vector<std::string> & sampleInModel);
+
 
 void setBGENobjInCPP(std::string t_bgenFileName,
                      std::string t_bgenFileIndex,
