@@ -51,9 +51,9 @@ private:
   const static unsigned char MISSING = 0x1;  // 0b01 ;
   
   // or use "arma::datum::nan"
-  // std::map<int8_t, int8_t> m_genoMaps = {{3, 0},{2, 1},{0, 2},{1, -1}};
-  std::map<int8_t, int8_t> m_genoMaps_alt_first = {{3, 0},{2, 1},{0, 2},{1, -1}};
-  std::map<int8_t, int8_t> m_genoMaps_ref_first = {{3, 2},{2, 1},{0, 0},{1, -1}};
+  std::vector<int8_t> m_genoMaps = {{2, -1, 1, 0}};
+  std::vector<int8_t> m_genoMaps_alt_first = {{2, -1, 1, 0}};
+  std::vector<int8_t> m_genoMaps_ref_first = {{0, -1, 1, 2}};
   
   // pipeline: OneMarkerG4 --> bufferG4 --> bufferG1 --> OneMarkerG1
   std::vector<unsigned char> m_OneMarkerG4;
@@ -63,8 +63,8 @@ private:
   void readFamFile();
   
   // extract geno (0,1,2,3) at specific pos (0,1,2,3) of address c (1 byte)  
-  void getGenotype(unsigned char* c, const int pos, int& geno) {
-    geno = ((*c) >> (pos << 1)) & 0x3;  // 0b11 = 0x3 
+  inline void getGenotype(const unsigned char c, const uint32_t pos, size_t& geno) {
+    geno = (c >> (pos << 1)) & 0x3;  // 0b11 = 0x3 
   }
   
 public:
