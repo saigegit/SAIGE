@@ -19,7 +19,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <zlib.h>
-
+#include <zstd.h>
 
 #include "UTIL.hpp"
 // #include <boost/iostreams/filter/zstd.hpp>
@@ -49,6 +49,8 @@ BgenClass::BgenClass(std::string t_bgenFileName,
   
   setIsSparseDosageInBgen(t_isSparseDosageInBgen);
   m_AlleleOrder = t_AlleleOrder;
+  allele0.resize(65536);
+  allele1.resize(65536);
 }
 
 
@@ -72,8 +74,10 @@ void BgenClass::setBgenObj(const std::string t_bgenFileName,
   uint32_t L_H; fread(&L_H, 4, 1, m_fin); //cout << "L_H: " << L_H << endl;
   
   
-  fread(&m_M0, 4, 1, m_fin); std::cout << "snpBlocks (Mbgen): " << m_M0 << std::endl;
-  assert(m_M0 != 0);
+  fread(&m_M0, 4, 1, m_fin);
+  std::cout << "snpBlocks (Mbgen): " << m_M0 << std::endl;
+  if(m_M0 == 0)
+    Rcpp::stop("No snpBlocks in BGEN file.");
   //unsigned int Nbgen; fread(&Nbgen, 4, 1, m_fin); std::cout << "samples (Nbgen): " << Nbgen << std::endl;
   fread(&m_N0, 4, 1, m_fin); std::cout << "samples (Nbgen): " << m_N0 << std::endl;
   unsigned int m_Nsample = t_SampleInBgen.size();
@@ -85,10 +89,15 @@ void BgenClass::setBgenObj(const std::string t_bgenFileName,
   char magic[5]; fread(magic, 1, 4, m_fin); magic[4] = '\0'; //cout << "magic bytes: " << string(magic) << endl;
   fseek(m_fin, L_H-20, SEEK_CUR); //cout << "skipping L_H-20 = " << L_H-20 << " bytes (free data area)" << endl;
   uint32_t flags; fread(&flags, 4, 1, m_fin); //cout << "flags: " << flags << endl;
-  uint32_t CompressedSNPBlocks = flags&3; std::cout << "CompressedSNPBlocks: " << CompressedSNPBlocks << std::endl;
-  assert(CompressedSNPBlocks==1); // REQUIRE CompressedSNPBlocks==1
+  CompressedSNPBlocks = flags&3;
+  std::cout << "CompressedSNPBlocks: " << CompressedSNPBlocks << std::endl;
+  if(CompressedSNPBlocks == COMPRESSION_ZLIB)
+    std::cout << "Warning: your bgen file uses zlib compression, which is slow.";
+  else if (CompressedSNPBlocks != COMPRESSION_ZSTD)
+    Rcpp::stop("Bgenreader only supports zlib or zstd compression.");
   uint32_t Layout = (flags>>2)&0xf; std::cout << "Layout: " << Layout << std::endl;
-  assert(Layout==1 || Layout==2); // REQUIRE Layout==1 or Layout==2
+  if(Layout!=1 && Layout!=2) // REQUIRE Layout==1 or Layout==2
+    Rcpp::stop("Bgenreader only supports Layout 1 or 2.");
   fseek(m_fin, offset+4, SEEK_SET);
 }
 
@@ -140,24 +149,34 @@ void BgenClass::Parse2(unsigned char *buf, uint bufLen, const unsigned char *zBu
   //  std::cerr << "ERROR: uncompress() failed" << std::endl;
   //  exit(1);
   //}
-    
-    z_stream strm = {};
-strm.next_in = const_cast<Bytef*>(zBuf); // Compressed input
-strm.avail_in = zBufLen;
-strm.next_out = buf; // Decompressed output
-strm.avail_out = bufLen;
+    if(CompressedSNPBlocks == COMPRESSION_ZLIB) {
+        z_stream strm = {};
+        strm.next_in = const_cast<Bytef*>(zBuf); // Compressed input
+        strm.avail_in = zBufLen;
+        strm.next_out = buf; // Decompressed output
+        strm.avail_out = bufLen;
 
-    if (inflateInit(&strm) != Z_OK) {
-        std::cerr << "inflateInit failed" << std::endl;
-        return;
+        if (inflateInit(&strm) != Z_OK) {
+            std::cerr << "inflateInit failed" << std::endl;
+            return;
+        }
+
+        int ret = inflate(&strm, Z_FINISH);
+        if (ret != Z_STREAM_END) {
+            std::cerr << "inflate failed with code " << ret << std::endl;
+        }
+
+        inflateEnd(&strm);
     }
-
-    int ret = inflate(&strm, Z_FINISH);
-    if (ret != Z_STREAM_END) {
-        std::cerr << "inflate failed with code " << ret << std::endl;
+    if(CompressedSNPBlocks == COMPRESSION_ZSTD) {
+        ZSTD_DCtx* dctx = ZSTD_createDCtx();
+        size_t actual_decompressed_size = ZSTD_decompressDCtx(dctx, buf, bufLen, zBuf, zBufLen);
+        if (ZSTD_isError(actual_decompressed_size)) {
+            std::cerr << "Decompression failed: " << ZSTD_getErrorName(actual_decompressed_size) << std::endl;
+            return;
+        }
+        ZSTD_freeDCtx(dctx);
     }
-
-    inflateEnd(&strm);
     //std::cout << "Decompressed size: " << strm.total_out << " bytes" << std::endl; 
  
  //arma::vec timeoutput0_uncompress = getTime();
@@ -443,10 +462,6 @@ void BgenClass::getOneMarker(uint64_t & t_gIndex_prev,
 
 
   char snpID[65536], rsID[65536], chrStr[65536];
-  unsigned int maxLA = 65536, maxLB = 65536;
-  char *allele1, *allele0;
-  allele1 = (char *) malloc(maxLA+1);
-  allele0 = (char *) malloc(maxLB+1);
   uint16_t LS; size_t numBoolRead = fread(&LS, 2, 1, m_fin); // cout << "LS: " << LS << " " << std::flush;
   // bool isBoolRead;  // BWJ (2021-02-28): I think it will not be used since we currently use t_gIndex to specify bytes position. This bool value can still be outputted through a reference. If we are sure it is not useful any more, we can remove it.
   //Rcpp::List result ;
@@ -472,23 +487,17 @@ void BgenClass::getOneMarker(uint64_t & t_gIndex_prev,
     //  exit(1);
    // }
     uint LA; fread(&LA, 4, 1, m_fin); // cout << "LA: " << LA << " " << std::flush;
-    if (LA > maxLA) {
-      maxLA = 2*LA;
-      free(allele1);
-      allele1 = (char *) malloc(maxLA+1);
+    if (LA >= allele1.size()) {
+      allele1.resize(2*LA);
     }
-    fread(allele1, 1, LA, m_fin); allele1[LA] = '\0';
-    first_allele = std::string(allele1);
-    free(allele1);
+    fread(allele1.data(), 1, LA, m_fin); allele1[LA] = '\0';
+    first_allele = std::string(allele1.data());
     uint LB; fread(&LB, 4, 1, m_fin); // cout << "LB: " << LB << " " << std::flush;
-    if (LB > maxLB) {
-      maxLB = 2*LB;
-      free(allele0);
-      allele0 = (char *) malloc(maxLB+1);
+    if (LB >= allele0.size()) {
+      allele0.resize(2*LB);
     }
-    fread(allele0, 1, LB, m_fin); allele0[LB] = '\0';
-    second_allele = std::string(allele0);
-    free(allele0);
+    fread(allele0.data(), 1, LB, m_fin); allele0[LB] = '\0';
+    second_allele = std::string(allele0.data());
     uint C; fread(&C, 4, 1, m_fin); //cout << "C: " << C << endl;
     if (C > m_zBuf.size()) m_zBuf.resize(C-4);
     //std::cout << "m_zBuf.size() " << m_zBuf.size() << std::endl;
