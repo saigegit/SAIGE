@@ -39,7 +39,7 @@ SAIGE.Marker = function(traitType,
   }
 
   ## set up an object for genotype
-  if(genoType == "plink"){
+  if(genoType == "plink" || genoType == "pgen"){
       #markerInfo = objGeno$markerInfo
     if(LOCO){
       genoIndex = genoIndex[which(CHROM == chrom)]
@@ -294,7 +294,7 @@ if(FALSE){
 #time_left = system.time({
 
 
-    if(genoType == "plink"){	
+    if(genoType == "plink" || genoType == "pgen"){	
       tempList = genoIndexList[[i]]
       genoIndex = as.character(format(tempList$genoIndex, scientific = FALSE))
       tempChrom = tempList$chrom
@@ -433,6 +433,7 @@ query <- paste0("SELECT chromosome, position, rsid, allele1, allele2, file_start
       cat(paste0("(",Sys.time(),") ---- Analyzing Chunk ", i, " :  chrom ", chrom," ---- \n"))
     }	    
     # main function to calculate summary statistics for markers in one chunk
+    if(i==2) break
    
    #resMarker = as.data.frame(mainMarkerInCPP(genoType, traitType, genoIndex_prev, genoIndex, isMoreOutput, isImputation)) 
    #resMarker = resMarker[which(!is.na(resMarker$BETA)), ]

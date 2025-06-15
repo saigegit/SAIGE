@@ -257,6 +257,19 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// setPGENobjInCPP
+void setPGENobjInCPP(std::string pgenFile, std::string psamFile, std::string pvarFile, std::vector<std::string>& sampleInModel);
+RcppExport SEXP _SAIGE_setPGENobjInCPP(SEXP pgenFileSEXP, SEXP psamFileSEXP, SEXP pvarFileSEXP, SEXP sampleInModelSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type pgenFile(pgenFileSEXP);
+    Rcpp::traits::input_parameter< std::string >::type psamFile(psamFileSEXP);
+    Rcpp::traits::input_parameter< std::string >::type pvarFile(pvarFileSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string>& >::type sampleInModel(sampleInModelSEXP);
+    setPGENobjInCPP(pgenFile, psamFile, pvarFile, sampleInModel);
+    return R_NilValue;
+END_RCPP
+}
 // setBGENobjInCPP
 void setBGENobjInCPP(std::string t_bgenFileName, std::string t_bgenFileIndex, std::vector<std::string>& t_SampleInBgen, std::vector<std::string>& t_SampleInModel, std::string t_AlleleOrder);
 RcppExport SEXP _SAIGE_setBGENobjInCPP(SEXP t_bgenFileNameSEXP, SEXP t_bgenFileIndexSEXP, SEXP t_SampleInBgenSEXP, SEXP t_SampleInModelSEXP, SEXP t_AlleleOrderSEXP) {
@@ -3045,6 +3058,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_Unified_getSampleSizeinGeno", (DL_FUNC) &_SAIGE_Unified_getSampleSizeinGeno, 1},
     {"_SAIGE_Unified_getSampleSizeinAnalysis", (DL_FUNC) &_SAIGE_Unified_getSampleSizeinAnalysis, 1},
     {"_SAIGE_setPLINKobjInCPP", (DL_FUNC) &_SAIGE_setPLINKobjInCPP, 5},
+    {"_SAIGE_setPGENobjInCPP", (DL_FUNC) &_SAIGE_setPGENobjInCPP, 4},
     {"_SAIGE_setBGENobjInCPP", (DL_FUNC) &_SAIGE_setBGENobjInCPP, 5},
     {"_SAIGE_setVCFobjInCPP", (DL_FUNC) &_SAIGE_setVCFobjInCPP, 4},
     {"_SAIGE_setSAIGEobjInCPP", (DL_FUNC) &_SAIGE_setSAIGEobjInCPP, 31},

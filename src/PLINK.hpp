@@ -51,7 +51,7 @@ private:
   const static unsigned char MISSING = 0x1;  // 0b01 ;
   
   // or use "arma::datum::nan"
-  std::vector<int8_t> m_genoMaps = {{2, -1, 1, 0}};
+  // std::vector<int8_t> m_genoMaps = {{2, -1, 1, 0}};
   std::vector<int8_t> m_genoMaps_alt_first = {{2, -1, 1, 0}};
   std::vector<int8_t> m_genoMaps_ref_first = {{0, -1, 1, 2}};
   

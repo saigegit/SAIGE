@@ -21,6 +21,6 @@ SAIGE-GENE (now known as SAIGE-GENE+) are new method extension in the R package 
 
 
 The package takes genotype file input in the following formats
-- PLINK (bed, bim, fam), BGEN, VCF, BCF, SAV
+- PLINK (bed, bim, fam), PGEN, BGEN, VCF, BCF, SAV
 
 
