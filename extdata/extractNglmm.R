@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+#!/usr/bin/env -S pixi run --manifest-path /app/pixi.toml Rscript
 
 options(stringsAsFactors=F)
 
