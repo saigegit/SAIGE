@@ -433,7 +433,6 @@ query <- paste0("SELECT chromosome, position, rsid, allele1, allele2, file_start
       cat(paste0("(",Sys.time(),") ---- Analyzing Chunk ", i, " :  chrom ", chrom," ---- \n"))
     }	    
     # main function to calculate summary statistics for markers in one chunk
-    if(i==2) break
    
    #resMarker = as.data.frame(mainMarkerInCPP(genoType, traitType, genoIndex_prev, genoIndex, isMoreOutput, isImputation)) 
    #resMarker = resMarker[which(!is.na(resMarker$BETA)), ]
