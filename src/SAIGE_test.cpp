@@ -136,6 +136,8 @@ SAIGEClass::SAIGEClass(
         m_valueVec_mt = t_valueVec_mt;
     }
 
+        m_res_sum_vec.set_size(m_traitType_vec.size());
+	    m_mu2_sum_vec.set_size(m_traitType_vec.size());
 
     unsigned int k_startip, k_endip, k_p;
     arma::uvec k_ip;
@@ -157,7 +159,13 @@ SAIGEClass::SAIGEClass(
 	arma::vec k_y = k_y_sub.elem(k_sampleindices_vec);
         arma::vec  k_res_sub = t_res_mt.col(k_itrait);
         arma::vec k_res = k_res_sub.elem(k_sampleindices_vec);
+        arma::vec  k_mu2_sub = t_mu2_mt.col(k_itrait);
+        arma::vec k_mu2 = k_mu2_sub.elem(k_sampleindices_vec);
+
 	m_res_mt_vec.push_back(k_res);
+ m_res_sum_vec(k_itrait) = arma::accu(k_res);
+        m_mu2_sum_vec(k_itrait) = arma::accu(k_mu2);
+
 	//arma::mat k_XV_submat = m_XV_mt.submat(k_ip, k_sampleindices_vec);
 	//m_XV_mt_vec.push_back(k_XV_submat);
     }
@@ -496,7 +504,9 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 			   	arma::rowvec & t_G1tilde_P_G2tilde, 
 				bool & t_isFirth,
 				bool & t_isFirthConverge, 
-				bool t_isER) 
+				bool t_isER,
+                                bool t_isnoadjCov,
+                                 bool t_isSparseGRM) 
 {
 
 
@@ -516,9 +526,26 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   double pval_noadj, pval, t_qval_Firth; //can be log or not raw
   bool ispvallog;
 
+if(!m_flagSparseGRM_cur && t_isnoadjCov){
+        is_gtilde = false;
+        isScoreFast = true;
+        scoreTestFast_noadjCov_multiTrait(t_GVec, iIndex, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq,t_Tstat, t_var1, t_var2);
+
+}else if(m_flagSparseGRM_cur){
+        is_gtilde = true;
+        isScoreFast = false;
+        scoreTest(t_GVec, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq, t_Tstat, t_var1, t_var2, t_gtilde, t_P2Vec, t_gy, is_region, iIndex);
+
+}else{
+        is_gtilde = false;
+        isScoreFast = true;
+        //std::cout << "scoreTestFast "  << std::endl;
+        scoreTestFast(t_GVec, iIndex, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq, t_Tstat, t_var1, t_var2);
+}
   //for test
   //arma::vec timeoutput3 = getTime();
   //
+/*
   isScoreFast=false;
   if(!isScoreFast){
   std::cout << "score test 0" << std::endl;
@@ -533,7 +560,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
         scoreTestFast(t_GVec, iIndex, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq, t_Tstat, t_var1, t_var2);
   std::cout << "score test 1b" << std::endl;
   }
-
+*/
   std::cout << "pval_noadj " << pval_noadj << std::endl;
   double StdStat = std::abs(t_Tstat) / sqrt(t_var1);
 
@@ -1131,6 +1158,10 @@ void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR, bool isnoXadj){
     m_varRatioVal = m_varRatio(m_itrait);
 }
 
+void SAIGEClass::set_isnoadjCov_cur(bool t_isnoadjCov_cur){
+        m_isnoadjCov_cur = t_isnoadjCov_cur;
+	}
+
 void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR, bool isnoXadj, bool issample){
     arma::rowvec m_varRatio;
     std::cout << "issparseforVR " << issparseforVR << std::endl;
@@ -1416,6 +1447,103 @@ void SAIGEClass::assign_for_itrait_binaryindices(unsigned int t_itrait){
         m_n_case = m_case_indices.n_elem;
         m_n_ctrl = m_ctrl_indices.n_elem;
 }
+
+
+void SAIGEClass::scoreTestFast_noadjCov_multiTrait(arma::vec & t_GVec,
+                     arma::uvec & t_indexForNonZero,
+                     double& t_Beta,
+                     double& t_seBeta,
+                     std::string& t_pval_str,
+                     double& t_pval,
+                     bool& t_islogp,
+                     double t_altFreq,
+                     double &t_Tstat,
+                     double &t_var1,
+                     double &t_var2){
+
+    //arma::vec t_GVec_center = t_GVec-arma::mean(t_GVec);
+    //double var2 = dot(m_mu2, pow(t_GVec_center,2));
+    //arma::vec Sm, var2m;
+      arma::vec g1 = t_GVec.elem(t_indexForNonZero);
+      arma::vec m_mu21 = m_mu2.elem(t_indexForNonZero);
+      //arma::vec g_res = m_res_mt_vec.at(m_itrait);
+      arma::vec m_res1 = m_res.elem(t_indexForNonZero);
+    double S, var2;
+    //getadjGFast(t_GVec, t_gtilde, t_indexForNonZero);
+    //getadjG(t_GVec, t_gtilde);
+
+
+    //if(t_is_region && m_traitType == "binary"){
+    //  t_gy = dot(t_gtilde, m_y);
+    // }
+    double var2_a = dot(m_mu21,pow(g1,2));
+    double var2_b = dot(m_mu21, 2*2*t_altFreq*g1);
+    double var2_c = m_mu2_sum_vec[m_itrait]*pow(2*t_altFreq, 2);
+    var2 = var2_a - var2_b + var2_c;
+
+    //arma::vec t_GVec_center = t_GVec-arma::mean(t_GVec);
+    //var2 = dot(m_mu2, pow(t_GVec_center,2));
+    //S = dot(t_GVec_center, m_res);
+    S = dot(g1, m_res1)  - m_res_sum_vec[m_itrait]*(2*t_altFreq);
+    //std::cout << "S " << S << std::endl;
+
+
+    double var1 = var2 * m_varRatioVal;
+    //std::cout << "var2 " << var2 << std::endl;
+    //std::cout << "var1 " << var1 << std::endl;
+
+
+    //double S = dot(m_res_mt_vec.at(m_itrait), t_GVec_center);
+    S = S/m_tauvec_mt(0,m_itrait);
+    double stat = S*S/var1;
+    //double t_pval;
+    //std::cout << "S " << S << std::endl;
+    //if (var1 <= std::pow(std::numeric_limits<double>::min(), 2)){
+    //
+    //
+    if (var1 <= std::numeric_limits<double>::min()){
+          t_pval = 1;
+    }else{
+      if(!std::isnan(stat) && std::isfinite(stat)){
+          boost::math::chi_squared chisq_dist(1);
+          t_pval = boost::math::cdf(complement(chisq_dist, stat));
+
+      }else{
+          t_pval = 1;
+          stat = 0.0;
+      }
+    }
+    char pValueBuf[100];
+    if (t_pval != 0){
+        sprintf(pValueBuf, "%.6E", t_pval);
+        t_islogp = false;
+    }else {
+        double logp = R::pchisq(stat,1,false,true);
+        double log10p = logp/(log(10));
+        int exponent = floor(log10p);
+        double fraction = pow(10.0, log10p - exponent);
+        if (fraction >= 9.95) {
+          fraction = 1;
+           exponent++;
+         }
+        sprintf(pValueBuf, "%.1fE%d", fraction, exponent);
+        t_pval = logp;
+        t_islogp = true;
+    }
+
+    std::string buffAsStdStr = pValueBuf;
+    t_pval_str = buffAsStdStr;
+    t_Beta = S/var1;
+    t_seBeta = fabs(t_Beta) / sqrt(fabs(stat));
+    t_Tstat = S;
+    t_var1 = var1;
+    t_var2 = var2;
+    //std::cout << "t_pval_str scoreTestFast " << t_pval_str << std::endl;
+    //std::cout << "end of scoreTestFast" << std::endl;
+}
+
+
+
 
 
 

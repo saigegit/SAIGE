@@ -545,7 +545,7 @@ setSAIGEobjInCPP(
   t_impute_method = impute_method, # String remains unchanged
   t_flagSparseGRM = isSparseGRM, # Boolean remains unchanged
   t_isFastTest = is_fastTest, # Boolean remains unchanged
-    t_isnoadjCov = is_noadjCov,
+  t_isnoadjCov = is_noadjCov,
   t_pval_cutoff_for_fastTest = pval_cutoff_for_fastTest, # Scalar remains unchanged
   t_locationMat = as.matrix(sparseSigmaRList$locations), # arma::umat remains unchanged
   t_valueVec = valueVec,

@@ -65,6 +65,7 @@ class SAIGEClass
       bool m_flagSparseGRM_cur;
       bool m_isFastTest;
               bool m_isnoadjCov;
+              bool m_isnoadjCov_cur;
       double m_pval_cutoff_for_fastTest; 
       double m_SPA_Cutoff;
       arma::umat m_locationMat;
@@ -107,8 +108,10 @@ arma::mat m_Sigma_iXXSigma_iX_mt;
 arma::mat m_X_mt;
 arma::mat m_S_a_mt;
 arma::mat m_res_mt;
+arma::vec m_res_sum_vec;
 arma::mat m_resout_mt;
 arma::mat m_mu2_mt;
+arma::vec m_mu2_sum_vec;
 arma::mat m_mu_mt;
 arma::mat m_varRatio_sparse_mt;
 arma::mat m_varRatio_null_mt;
@@ -235,7 +238,9 @@ void scoreTestFast(arma::vec & t_GVec,
                                 arma::rowvec & t_G1tilde_P_G2tilde,
 				bool & t_isFirth,
                                 bool & t_isFirthConverge, 
-				bool t_isER);
+				bool t_isER,
+                                bool t_isnoadjCov,
+                                 bool t_isSparseGRM);
 
 
     void getindices(arma::uvec & t_case_indices,
@@ -340,8 +345,19 @@ void assignSingleVarianceRatio(bool issparseforVR, bool isnoXadj);
     bool assignVarianceRatio(double MAC, bool issparseforVR, bool isnoXadj);
     bool assignVarianceRatio(double MAC, bool issparseforVR, bool isnoXadj, bool issample);
 
+void set_isnoadjCov_cur(bool t_isnoadjCov_cur);
 
-
+void scoreTestFast_noadjCov_multiTrait(arma::vec & t_GVec,
+                     arma::uvec & t_indexForNonZero,
+                     double& t_Beta,
+                     double& t_seBeta,
+                     std::string& t_pval_str,
+                     double& t_pval,
+                     bool& t_islogp,
+                     double t_altFreq,
+                     double &t_Tstat,
+                     double &t_var1,
+                     double &t_var2); 
 
 };
 
