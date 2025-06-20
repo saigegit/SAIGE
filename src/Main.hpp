@@ -94,8 +94,8 @@ void Unified_getMarkerPval(
 			    bool & t_isFirth,
 			   bool & t_isFirthConverge,
 			   bool t_isER,
-                           bool t_isnoadjCov,
-                                bool t_isSparseGRM);
+			  bool t_isnoadjCov,
+			  bool t_isSparseGRM);
 
 
 Rcpp::List mainRegionInCPP(
@@ -128,6 +128,11 @@ void setPLINKobjInCPP(std::string t_bimFile,
                       std::vector<std::string> & t_SampleInModel,
                       std::string t_AlleleOrder);
 
+
+void setPGENobjInCPP(std::string pgenFile,
+                     std::string psamFile,
+                     std::string pvarFile,
+                     std::vector<std::string> & sampleInModel);
 
 
 void setBGENobjInCPP(std::string t_bgenFileName,

@@ -479,9 +479,11 @@ Get_Variance_Ratio_old<-function(varianceRatioFile, cateVarRatioMinMACVecExclude
           cat("WARNING: Sparse GRM is specified. Please make sure the null model was fit using the same sparse GRM in Step 1.\n")
           ratioVec_sparse = c(1)
 	  ratioVec_null = c(-1)
+	  ratioVec_null_noXadj <- c(-1)
 	}else{
           ratioVec_sparse = c(-1)		
 	  ratioVec_null = c(1)
+	  ratioVec_null_noXadj <- c(1)  
 	}
     }else{
         varRatioData = data.frame(data.table:::fread(varianceRatioFile, header = F, stringsAsFactors = FALSE))
@@ -508,6 +510,19 @@ Get_Variance_Ratio_old<-function(varianceRatioFile, cateVarRatioMinMACVecExclude
 	    }else{
 		nrv = 1
 	    }
+
+            ratioVec_null_noXadj <- varRatioData[which(varRatioData[, 2] == "null_noXadj"), 1]
+            if(length(ratioVec_null_noXadj) > 0){
+                cat("variance Ratio null_noXadj is provided\n")
+            }else{
+                ratioVec_null_noXadj <- as.numeric(ratioVec_null_noXadj)
+                cat("variance Ratio null_noXadj is ", ratioVec_null_noXadj, "\n")
+                if(length(ratioVec_null_noXadj) == 1 & iscateVR){
+                        stop("categorical variance Ratio null_noXadj are needed\n")
+                }
+            }
+
+
 	}else{
 	    cat("Variance ratios were estimated with version < 1.0.6\n")	
 	    if(isSparseGRM){
@@ -551,7 +566,10 @@ Get_Variance_Ratio_old<-function(varianceRatioFile, cateVarRatioMinMACVecExclude
     print(ratioVec_sparse)
     print("ratioVec_null")
     print(ratioVec_null)
-    return(list(ratioVec_sparse = ratioVec_sparse, ratioVec_null = ratioVec_null))
+    print("ratioVec_null_noXadj")
+    print(ratioVec_null_noXadj)
+
+    return(list(ratioVec_sparse = ratioVec_sparse, ratioVec_null = ratioVec_null, ratioVec_null_noXadj = ratioVec_null_noXadj))
 }
 
 ReadModel_multiTrait <- function(GMMATmodelFileList = "", chrom = "", LOCO = TRUE, is_Firth_beta = FALSE, is_EmpSPA = FALSE, espa_nt = 9999, espa_range = c(-20, 20)) {

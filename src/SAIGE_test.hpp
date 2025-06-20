@@ -41,6 +41,7 @@ class SAIGEClass
       double m_varRatioVal;
       arma::vec m_varRatio_sparse;
       arma::vec m_varRatio_null;
+      arma::vec m_varRatio_null_noXadj;
       arma::vec m_y;
 
       std::vector<std::string> m_traitType_vec;
@@ -203,6 +204,19 @@ void scoreTestFast(arma::vec & t_GVec,
                      double &t_Tstat,
                      double &t_var1,
                      double &t_var2);
+
+void scoreTestFast_noadjCov(arma::vec & t_GVec,
+                arma::uvec & t_indexForNonZero,
+                     double& t_Beta,
+                     double& t_seBeta,
+                     std::string& t_pval_str,
+                     double& t_pval,
+                     bool& t_islogp,
+                     double t_altFreq,
+                     double &t_Tstat,
+                     double &t_var1,
+                     double &t_var2);
+
 
 
      void set_flagSparseGRM_cur(bool t_flagSparseGRM_cur);

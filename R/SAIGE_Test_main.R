@@ -11,6 +11,7 @@
 #' @param bedFile character. Path to bed file (PLINK)
 #' @param bimFile character. Path to bim file (PLINK)
 #' @param famFile character. Path to fam file (PLINK)
+#' @param pgenPrefix character. Path to the pgen file minus its file extension (PLINK2).
 #' @param AlleleOrder character. alt-first or ref-first for bgen or PLINK files. By default, alt-first
 #' @param idstoIncludeFile character. Path to a file containing variant ids to be included from the dosage file. The file does not have a header and each line is for a marker ID. Variant ids are in the format chr:pos_ref/alt
 #' @param rangestoIncludeFile character. Path to a file containing genome regions to be included from the dosage file. The file contains three columns for chromosome, start, and end respectively with no header. Note for vcf and sav files, only the first line in the file will be used.
@@ -70,6 +71,7 @@ SPAGMMATtest = function(bgenFile = "",
                  bedFile="",
                  bimFile="",
                  famFile="",
+                 pgenPrefix = "",
                  AlleleOrder = "alt-first", #new
                  idstoIncludeFile = "",
                  rangestoIncludeFile = "",
@@ -123,6 +125,8 @@ SPAGMMATtest = function(bgenFile = "",
 		 is_noadjCov = FALSE
 ){
 
+  cat("is_noadjCov ", is_noadjCov, "\n")
+  cat("is_fastTest ", is_fastTest, "\n")
 
   cat("is_noadjCov ", is_noadjCov, "\n")
     cat("is_fastTest ", is_fastTest, "\n")
@@ -370,13 +374,18 @@ SPAGMMATtest = function(bgenFile = "",
          is_fastTest = FALSE
 	 cat("No variance ratio file is specified, so is_fastTest is not working.\n")
       }
-    }
+      if(pval_cutoff_for_fastTest == 0){
+         is_fastTest = FALSE
+         cat("pval_cutoff_for_fastTest == 0, so is_fastTest is not working.\n")
+      }
 
+    }
 
     if(!isSparseGRM & !is_noadjCov){
         is_fastTest = FALSE
-        cat("isSparseGRM is FALSE and is_noadjCov is FALSE, so is_fastTest is not working.\n")
+        cat("isSparseGRM is FALSE and is_noadjCov is FALSE,, so is_fastTest is not working.\n")
     }
+
 
     if(is_fastTest){
       if(isSparseGRM){
@@ -411,6 +420,7 @@ SPAGMMATtest = function(bgenFile = "",
                  bedFile=bedFile,
                  bimFile=bimFile,
                  famFile=famFile,
+                 pgenPrefix = pgenPrefix,
                  idstoIncludeFile = idstoIncludeFile,
                  rangestoIncludeFile = rangestoIncludeFile,
                  chrom = chrom,

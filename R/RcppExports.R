@@ -73,6 +73,10 @@ setPLINKobjInCPP <- function(t_bimFile, t_famFile, t_bedFile, t_SampleInModel, t
     invisible(.Call('_SAIGE_setPLINKobjInCPP', PACKAGE = 'SAIGE', t_bimFile, t_famFile, t_bedFile, t_SampleInModel, t_AlleleOrder))
 }
 
+setPGENobjInCPP <- function(pgenFile, psamFile, pvarFile, sampleInModel) {
+    invisible(.Call('_SAIGE_setPGENobjInCPP', PACKAGE = 'SAIGE', pgenFile, psamFile, pvarFile, sampleInModel))
+}
+
 setBGENobjInCPP <- function(t_bgenFileName, t_bgenFileIndex, t_SampleInBgen, t_SampleInModel, t_AlleleOrder) {
     invisible(.Call('_SAIGE_setBGENobjInCPP', PACKAGE = 'SAIGE', t_bgenFileName, t_bgenFileIndex, t_SampleInBgen, t_SampleInModel, t_AlleleOrder))
 }

@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+#!/usr/bin/env -S pixi run --manifest-path /app/pixi.toml Rscript
 
 #options(stringsAsFactors=F, scipen = 999)
 options(stringsAsFactors=F)
@@ -33,6 +33,8 @@ option_list <- list(
     help="Path to bim file (PLINK)"),
   make_option("--famFile", type="character",default="",
     help="Path to fam file (PLINK)"),
+  make_option("--pgenPrefix", type="character",default="",
+    help="Path to the pgen file minus its file extension."),
   make_option("--AlleleOrder", type="character",default="alt-first",
     help="alt-first or ref-first for bgen or PLINK files"),
   make_option("--idstoIncludeFile", type="character",default="",
@@ -72,7 +74,7 @@ option_list <- list(
   make_option("--is_output_moreDetails", type="logical",default=FALSE,
     help="Whether to output heterozygous and homozygous counts in cases and controls. By default, FALSE. If True, the columns homN_Allele2_cases, hetN_Allelelogical2_cases, homN_Allele2_ctrls, hetN_Allele2_ctrls will be output [default=FALSE]"),
   make_option("--is_overwrite_output", type="logical",default=TRUE,
-    help="Whether to overwrite the output file if it exists. If FALSE, the program will continue the unfinished analysis instead of starting over from the beginining [default=TRUE]"),				
+    help="Whether to overwrite the output file if it exists. If FALSE, the program will continue the unfinished analysis instead of starting over from the beginining [default=TRUE]"),
   make_option("--maxMAF_in_groupTest", type="character",default="0.0001,0.001,0.01",
     help="Max MAF for markers tested in group test seperated by comma. e.g. 0.0001,0.001,0.01, [default=0.0001,0.001,0.01]"),
   make_option("--maxMAC_in_groupTest", type="character",default="0",
@@ -118,7 +120,7 @@ mean, p-value based on traditional score test is returned. Default value is 2.")
    help="If is_imputed_data = TRUE, For variants with MAC <= dosage_zerod_MAC_cutoff, dosages <= dosageZerodCutoff with be set to 0. [default=10]"),
 
   make_option("--is_single_in_groupTest", type="logical", default=FALSE,
-    help="Whether to output single-variant assoc test results when perform group tests. Note, single-variant assoc test results will always be output when SKAT and SKAT-O tests are conducted with --r.corr=0. This parameter should only be used when only Burden tests are condcuted with --r.corr=1, [default=TRUE]"), 
+    help="Whether to output single-variant assoc test results when perform group tests. Note, single-variant assoc test results will always be output when SKAT and SKAT-O tests are conducted with --r.corr=0. This parameter should only be used when only Burden tests are conducted with --r.corr=1, [default=TRUE]"),
   make_option("--is_no_weight_in_groupTest", type="logical", default=FALSE,
     help="Whether no weights are used in group Test. If FALSE, weights will be calcuated based on MAF from the Beta distribution with paraemters weights.beta or weights will be extracted from the group File if available [default=FALSE]"),
   make_option("--is_output_markerList_in_groupTest", type="logical", default=FALSE,
@@ -129,6 +131,8 @@ mean, p-value based on traditional score test is returned. Default value is 2.")
     help="p-value cutoff to use approx Firth to estiamte the effect sizes. Only for binary traits. The effect sizes of markers with p-value <= pCutoffforFirth will be estimated using approx Firth [default=0.01]"),
   make_option("--is_fastTest", type="logical", default=FALSE,
     help="Whether to use the fast mode for tests"),
+  make_option("--is_noadjCov", type="logical", default=TRUE,
+        help="Whether to regress out covariates from genotype"),
   make_option("--max_MAC_for_ER", type="numeric", default=4,
     help="p-values of genetic variants with MAC <= max_MAC_for_ER will be calculated via efficient resampling. [default=4]"),
   make_option("--nThreads", type="integer", default=1,
@@ -202,6 +206,7 @@ if(nThreads == 1){
              bedFile=opt$bedFile,
              bimFile=opt$bimFile,
              famFile=opt$famFile,
+             pgenPrefix=opt$pgenPrefix,
              AlleleOrder=opt$AlleleOrder,
              idstoIncludeFile = opt$idstoIncludeFile,
              rangestoIncludeFile = opt$rangestoIncludeFile,
@@ -249,7 +254,8 @@ if(nThreads == 1){
              is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
              is_fastTest = opt$is_fastTest,
 	     max_MAC_use_ER = opt$max_MAC_for_ER,
-	     subSampleFile = opt$subSampleFile)
+	     subSampleFile = opt$subSampleFile,
+	     is_noadjCov = opt$is_noadjCov)
 
 
 }else{ #if(nThreads == 1)
@@ -271,7 +277,7 @@ if(nThreads == 1){
   	sub("^.*_(.*)$", "\\1", file)  # Extract the suffix part after the last underscore
     })
 
-    output_files = paste0(opt$SAIGEOutputFile, suffixes) 
+    output_files = paste0(opt$SAIGEOutputFile, suffixes)
     fixed_params <- list(vcfFile=opt$vcfFile,
              vcfFileIndex=opt$vcfFileIndex,
              vcfField=opt$vcfField,
@@ -283,6 +289,7 @@ if(nThreads == 1){
              bedFile=opt$bedFile,
              bimFile=opt$bimFile,
              famFile=opt$famFile,
+             pgenPrefix=opt$pgenPrefix,
              AlleleOrder=opt$AlleleOrder,
              rangestoIncludeFile = opt$rangestoIncludeFile,
              chrom=opt$chrom,
@@ -328,7 +335,8 @@ if(nThreads == 1){
              is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
              is_fastTest = opt$is_fastTest,
              max_MAC_use_ER = opt$max_MAC_for_ER,
-             subSampleFile = opt$subSampleFile)
+             subSampleFile = opt$subSampleFile,
+	    is_noadjCov = opt$is_noadjCov)
 
 
 	param_list <- mapply(function(SAIGEOutputFile, idstoIncludeFile) {
