@@ -8,6 +8,9 @@
 
 namespace BGEN {
 
+static constexpr uint32_t COMPRESSION_ZLIB = 1;
+static constexpr uint32_t COMPRESSION_ZSTD = 2;
+
 class BgenClass{
 private:
 
@@ -23,6 +26,7 @@ private:
   std::vector <unsigned char> m_zBuf;
   uint m_zBufLens;
   uint m_bufLens; 
+  uint32_t CompressedSNPBlocks;
 
 
   std::vector<int32_t> m_posSampleInBgen;
@@ -39,6 +43,8 @@ private:
 
   double m_minMAF, m_maxMAF;
   double m_minInfo;
+
+  std::vector<char> allele0, allele1; // to avoid repeated memory allocations in getOneMarker
   
 public:
 
