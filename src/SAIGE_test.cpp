@@ -35,6 +35,7 @@ SAIGEClass::SAIGEClass(
         arma::mat & t_mu_mt,
         arma::mat & t_varRatio_sparse_mt,
         arma::mat & t_varRatio_null_mt,
+        arma::mat & t_varRatio_null_noXadj_mt,
 
         arma::vec & t_cateVarRatioMinMACVecExclude,
         arma::vec & t_cateVarRatioMaxMACVecInclude,
@@ -46,6 +47,7 @@ SAIGEClass::SAIGEClass(
         std::string t_impute_method,
         bool t_flagSparseGRM,
         bool t_isFastTest,
+	bool t_isnoadjCov,
         double t_pval_cutoff_for_fastTest,
         arma::umat & t_locationMat_mt,
         arma::mat & t_valueVec_mt,
@@ -86,9 +88,11 @@ SAIGEClass::SAIGEClass(
     m_mu_mt = t_mu_mt;
     m_varRatio_sparse_mt = t_varRatio_sparse_mt;
     m_varRatio_null_mt = t_varRatio_null_mt;
+    m_varRatio_null_noXadj_mt = t_varRatio_null_noXadj_mt;
     
     m_varRatio_null_mt.print("m_varRatio_null_mt");
     m_varRatio_sparse_mt.print("m_varRatio_sparse_mt");
+    m_varRatio_null_noXadj_mt.print("m_varRatio_null_noXadj_mt");
     
     m_cateVarRatioMinMACVecExclude = t_cateVarRatioMinMACVecExclude;
     m_cateVarRatioMaxMACVecInclude = t_cateVarRatioMaxMACVecInclude;
@@ -125,6 +129,7 @@ SAIGEClass::SAIGEClass(
     m_dimNum = t_dimNum;
     m_flagSparseGRM = t_flagSparseGRM;
     m_isFastTest = t_isFastTest;
+    m_isnoadjCov = t_isnoadjCov;
     m_pval_cutoff_for_fastTest = t_pval_cutoff_for_fastTest;
     if (m_dimNum != 0) {
         m_locationMat_mt = t_locationMat_mt;

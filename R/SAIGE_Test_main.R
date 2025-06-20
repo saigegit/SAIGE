@@ -119,9 +119,13 @@ SPAGMMATtest = function(bgenFile = "",
 		 is_fastTest = FALSE,
 		 pval_cutoff_for_fastTest = 0.05, 
 		 max_MAC_use_ER = 4, 
-		 subSampleFile = ""
+		 subSampleFile = "",
+		 is_noadjCov = FALSE
 ){
 
+
+  cat("is_noadjCov ", is_noadjCov, "\n")
+    cat("is_fastTest ", is_fastTest, "\n")
 
    #time_0 = proc.time()
 
@@ -369,18 +373,24 @@ SPAGMMATtest = function(bgenFile = "",
     }
 
 
+    if(!isSparseGRM & !is_noadjCov){
+        is_fastTest = FALSE
+        cat("isSparseGRM is FALSE and is_noadjCov is FALSE, so is_fastTest is not working.\n")
+    }
+
     if(is_fastTest){
       if(isSparseGRM){
-	cat("is_fastTest is TRUE.\n")
-	if(ratioVecList$ratioVec_null[1] == -1){
-	  stop("Variance ratios estimated without GRM are not found, so the fast tests can't be performed.\n Please set is_fastTest=FALSE or re-run the variance ratio estimation in Step 1 with --skipModelFitting=TRUE using the most recent version of the program.\n")
-	}else{
-	  cat("The fast tests will be performed (when p-values >= ", pval_cutoff_for_fastTest, ").\n")	
-	}
-      }else{
-          is_fastTest = FALSE
-	  cat("No sparse GRM is specified, so is_fastTest is not working.\n")
+        cat("is_fastTest is TRUE.\n")
+        if(ratioVecList$ratioVec_null[1] == -1){
+          stop("Variance ratios estimated without GRM are not found, so the fast tests can't be performed.\n Please set is_fastTest=FALSE or re-run the variance ratio estimation in Step 1 with --skipModelFitting=TRUE using the most recent version of the program.\n")
+        }else{
+          cat("The fast tests will be performed (when p-values >= ", pval_cutoff_for_fastTest, ").\n")
+        }
       }
+      #else{
+      #    is_fastTest = FALSE
+      #           cat("No sparse GRM is specified, so is_fastTest is not working.\n")
+      #}
     }
 
     nsample <- length(unique(obj.model.List[[1]]$sampleID))
@@ -510,6 +520,8 @@ SPAGMMATtest = function(bgenFile = "",
 #print("colXvec")
 #print(colXvec)
 
+print(ratioVecList$ratioVec_null_noXadj)
+
 setSAIGEobjInCPP(
   t_XVX = XVX,
   t_XXVX_inv = XXVX_inv,
@@ -523,6 +535,7 @@ setSAIGEobjInCPP(
   t_mu = mu,
   t_varRatio_sparse = as.matrix(ratioVecList$ratioVec_sparse),
   t_varRatio_null = as.matrix(ratioVecList$ratioVec_null),
+   t_varRatio_null_noXadj = as.matrix(ratioVecList$ratioVec_null_noXadj),
   t_cateVarRatioMinMACVecExclude = cateVarRatioMinMACVecExclude, # arma::vec remains unchanged
   t_cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude, # arma::vec remains unchanged
   t_SPA_Cutoff = SPAcutoff, # Scalar remains unchanged
@@ -532,6 +545,7 @@ setSAIGEobjInCPP(
   t_impute_method = impute_method, # String remains unchanged
   t_flagSparseGRM = isSparseGRM, # Boolean remains unchanged
   t_isFastTest = is_fastTest, # Boolean remains unchanged
+    t_isnoadjCov = is_noadjCov,
   t_pval_cutoff_for_fastTest = pval_cutoff_for_fastTest, # Scalar remains unchanged
   t_locationMat = as.matrix(sparseSigmaRList$locations), # arma::umat remains unchanged
   t_valueVec = valueVec,

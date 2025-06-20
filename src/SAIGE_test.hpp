@@ -64,6 +64,7 @@ class SAIGEClass
       bool m_flagSparseGRM;
       bool m_flagSparseGRM_cur;
       bool m_isFastTest;
+              bool m_isnoadjCov;
       double m_pval_cutoff_for_fastTest; 
       double m_SPA_Cutoff;
       arma::umat m_locationMat;
@@ -139,16 +140,19 @@ SAIGEClass(
         arma::mat & t_mu_mt,
         arma::mat & t_varRatio_sparse_mt,
         arma::mat & t_varRatio_null_mt,
+        arma::mat & t_varRatio_null_noXadj_mt,
 
         arma::vec & t_cateVarRatioMinMACVecExclude,
         arma::vec & t_cateVarRatioMaxMACVecInclude,
         double t_SPA_Cutoff,
         arma::mat & t_tauvec_mt,
-	std::vector<std::string> & t_traitType,
+        std::vector<std::string> & t_traitType,
+        //std::string t_traitType,
         arma::mat & t_y_mt,
         std::string t_impute_method,
         bool t_flagSparseGRM,
         bool t_isFastTest,
+	        bool t_isnoadjCov,
         double t_pval_cutoff_for_fastTest,
         arma::umat & t_locationMat_mt,
         arma::mat & t_valueVec_mt,
@@ -163,7 +167,8 @@ SAIGEClass(
         arma::mat & t_resout_mt,
         arma::uvec & t_colXvec,
         arma::uvec & t_sampleIndexLenVec,
-	arma::umat & t_sampleIndexMat); 
+        arma::umat & t_sampleIndexMat);
+
 
    void set_seed(unsigned int seed);
 
