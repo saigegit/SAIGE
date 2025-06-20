@@ -301,7 +301,7 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
 
 
 void SAIGEClass::scoreTestFast_noadjCov(arma::vec & t_GVec,
-		arma::uvec & t_indexForNonZero,
+		     arma::uvec & t_indexForNonZero,
                      double& t_Beta,
                      double& t_seBeta,
                      std::string& t_pval_str,
@@ -313,6 +313,9 @@ void SAIGEClass::scoreTestFast_noadjCov(arma::vec & t_GVec,
                      double &t_var2){
 
     //arma::vec Sm, var2m;
+      arma::vec g1 = t_GVec.elem(t_indexForNonZero);
+      arma::vec m_mu21 = m_mu2.elem(t_indexForNonZero);
+      arma::vec m_res1 = m_res.elem(t_indexForNonZero);
     double S, var2;
     //getadjGFast(t_GVec, t_gtilde, t_indexForNonZero);
     //getadjG(t_GVec, t_gtilde);
@@ -321,13 +324,19 @@ void SAIGEClass::scoreTestFast_noadjCov(arma::vec & t_GVec,
     //if(t_is_region && m_traitType == "binary"){
     //  t_gy = dot(t_gtilde, m_y);
     // }
-      arma::vec t_GVec_center = t_GVec-arma::mean(t_GVec);
-    var2 = dot(m_mu2, pow(t_GVec_center,2));  
-    S = dot(t_GVec_center, m_res);
-    std::cout << "S " << S << std::endl;
+    double var2_a = dot(m_mu21,pow(g1,2));
+    double var2_b = dot(m_mu21, 2*2*t_altFreq*g1);
+    double var2_c = arma::accu(m_mu2)*pow(2*t_altFreq, 2);
+    var2 = var2_a - var2_b + var2_c;
+
+    //arma::vec t_GVec_center = t_GVec-arma::mean(t_GVec);
+    //var2 = dot(m_mu2, pow(t_GVec_center,2));  
+    //S = dot(t_GVec_center, m_res);
+    S = dot(g1, m_res1)  - arma::accu(m_res)*(2*t_altFreq);
+    //std::cout << "S " << S << std::endl;
     S = S/m_tauvec[0];
 
-    std::cout << "S b " << S << std::endl;
+    //std::cout << "S b " << S << std::endl;
 
     //var2 = var2m(0,0);
     double var1 = var2 * m_varRatioVal;
