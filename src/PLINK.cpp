@@ -180,8 +180,6 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex_prev,
 				   arma::vec & OneMarkerG1)
 				   //std::vector<double>& OneMarkerG1)
 {		
-  int sum = 0;
-  int numMissing = 0;
   
   //std::vector<double> OneMarkerG1;
  //arma::vec timeoutput1 = getTime(); 
@@ -224,7 +222,8 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex_prev,
   t_pd = m_pd[t_gIndex];
   t_chr = m_chr[t_gIndex];
   
-  std::map<int8_t, int8_t> genoMaps;
+  //std::map<int8_t, int8_t> genoMaps;
+  std::vector<int8_t> genoMaps;
   
   if(m_AlleleOrder == "alt-first"){
     t_ref = m_ref[t_gIndex];
@@ -238,23 +237,22 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex_prev,
     genoMaps = m_genoMaps_ref_first;
   }
  //arma::vec timeoutput2 = getTime();
-  uint j = 0; 
+  uint j = 0;
+  int counts[] = {0, 0, 0, 0};
   for(uint32_t i = 0; i < m_N; i++)
   {
-    uint32_t ind = m_posSampleInPlink[i];             // C++ start from 0
+    auto ind = m_posSampleInPlink[i];             // C++ start from 0
     unsigned char bufferG4 = m_OneMarkerG4[ind/4];    // unsigned char: 1 byte for 4 genotypes (4 samples)
-    int bufferG1;                                     // int: 1 genotype (1 sample)
+    size_t bufferG1;                                     // int: 1 genotype (1 sample)
     
     // https://www.cog-genomics.org/plink/1.9/formats#bed
-    getGenotype(&bufferG4, ind%4, bufferG1);          // bufferG4 -> bufferG1
+    getGenotype(bufferG4, ind%4, bufferG1);          // bufferG4 -> bufferG1
     
-    switch(bufferG1){
-    case HOM_REF: break;
-    case HET: sum+=1; break;
-    case HOM_ALT: sum+=2; break;
-    case MISSING: numMissing++; if(t_isOutputIndexForMissing){t_indexForMissing.push_back(i);} break;  
+    counts[bufferG1]++;
+
+    if(bufferG1 == MISSING && t_isOutputIndexForMissing){
+      t_indexForMissing.push_back(i);
     }
-    
     
     
     if(t_isTrueGenotype)
@@ -267,18 +265,20 @@ void PlinkClass::getOneMarker(uint64_t & t_gIndex_prev,
     if(t_isOnlyOutputNonZero){
       if(bufferG1 > 0){
         OneMarkerG1[j] = bufferG1;
-	j = j + 1;
+	      j = j + 1;
       }
     }else{
       OneMarkerG1[i] = bufferG1;
     }
   }
+
+  int numMissing = counts[MISSING];
   
  //arma::vec timeoutput3 = getTime();
   int count = m_N - numMissing;
   t_missingRate = (double)numMissing / (double)m_N;
   t_imputeInfo = 1;
-  t_altCounts = (double)sum;
+  t_altCounts = (double)(counts[HET] + 2*counts[HOM_ALT]);
 
   if(count > 0){
         t_altFreq = t_altCounts/ (double)count / 2;
