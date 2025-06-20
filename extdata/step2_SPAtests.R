@@ -129,6 +129,8 @@ mean, p-value based on traditional score test is returned. Default value is 2.")
     help="p-value cutoff to use approx Firth to estiamte the effect sizes. Only for binary traits. The effect sizes of markers with p-value <= pCutoffforFirth will be estimated using approx Firth [default=0.01]"),
   make_option("--is_fastTest", type="logical", default=FALSE,
     help="Whether to use the fast mode for tests"),
+  make_option("--is_noadjCov", type="logical", default=TRUE,
+        help="Whether to regress out covariates from genotype"),
   make_option("--max_MAC_for_ER", type="numeric", default=4,
     help="p-values of genetic variants with MAC <= max_MAC_for_ER will be calculated via efficient resampling. [default=4]"),
   make_option("--nThreads", type="integer", default=1,
@@ -249,7 +251,8 @@ if(nThreads == 1){
              is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
              is_fastTest = opt$is_fastTest,
 	     max_MAC_use_ER = opt$max_MAC_for_ER,
-	     subSampleFile = opt$subSampleFile)
+	     subSampleFile = opt$subSampleFile, 
+	     is_noadjCov = opt$is_noadjCov)
 
 
 }else{ #if(nThreads == 1)
@@ -328,7 +331,8 @@ if(nThreads == 1){
              is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
              is_fastTest = opt$is_fastTest,
              max_MAC_use_ER = opt$max_MAC_for_ER,
-             subSampleFile = opt$subSampleFile)
+             subSampleFile = opt$subSampleFile, 
+	     is_noadjCov = opt$is_noadjCov)
 
 
 	param_list <- mapply(function(SAIGEOutputFile, idstoIncludeFile) {
