@@ -316,7 +316,7 @@ void mainMarkerInCPP(
   //}
   //
   //
-  std::cout << "mainMarker1" << std::endl;
+  //std::cout << "mainMarker1" << std::endl;
   if(ptr_gSAIGEobj->m_varRatio_null_mt.n_rows == 1){
         isSingleVarianceRatio = true;
   }else{
@@ -375,7 +375,7 @@ void mainMarkerInCPP(
    //t_GVec0.clear();
    //t_GVec.clear();
    //arma::vec timeoutput1 = getTime();
-  std::cout << "mainMarker2" << std::endl;
+//  std::cout << "mainMarker2" << std::endl;
    bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
@@ -383,14 +383,16 @@ void mainMarkerInCPP(
                                           indexNonZeroVec, t_GVec, t_isImputation);
    //arma::vec timeoutput2 = getTime();   
    //printTime(timeoutput1, timeoutput2, "Unified_getOneMarker"); 
-//
+/*
 std::cout << "altCounts " << altCounts << std::endl;
 std::cout << "missingRate " << missingRate << std::endl;
 std::cout << "indexForMissing.size() " << indexForMissing.size() << std::endl;
 std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
 
   std::cout << "mainMarker3" << std::endl;
-   if(!isReadMarker){
+*/
+
+if(!isReadMarker){
       //std::cout << "isReadMarker " << isReadMarker << std::endl;
       g_markerTestEnd = true;
       bool isEndFile = check_Vcf_end();
@@ -425,9 +427,9 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
     std::string pds = std::to_string(pd); 
     std::string info = chr+":"+pds+":"+ref+":"+alt;
 
-    std::cout << "t_traitType.size() " << t_traitType.size() << std::endl;
+     //std::cout << "t_traitType.size() " << t_traitType.size() << std::endl;
    for(int i_mt0 = 0; i_mt0 < t_traitType.size(); i_mt0++){
-     std::cout << "i_mt0 " << i_mt0 << std::endl;
+     //std::cout << "i_mt0 " << i_mt0 << std::endl;
      
      int j_mt0 = i_mt0*t_genoIndex.size()+i;
      chrVec.at(j_mt0) = chr;
@@ -444,15 +446,15 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
      arma::uvec indexZeroVec_arma, indexNonZeroVec_arma;
      arma::uvec indexForMissing_sub;
      double MAC, MAF;
-  std::cout << "mainMarker4" << std::endl;
+  //std::cout << "mainMarker4" << std::endl;
   flip=false;
      flip = imputeGenoAndFlip_sub(t_GVec, t_GVec_sub, altFreq, altCounts, indexForMissing_sub, indexForMissing_all, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec_arma, indexNonZeroVec_arma, include_indices);
 
-  std::cout << "mainMarker5" << std::endl;
+  //std::cout << "mainMarker5" << std::endl;
      //indexZeroVec_arma = arma::conv_to<arma::uvec>::from(indexZeroVec);
      //indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
-  std::cout << "MAC " << MAC << std::endl;
-  std::cout << "altFreq " << altFreq << std::endl;
+ // std::cout << "MAC " << MAC << std::endl;
+ // std::cout << "altFreq " << altFreq << std::endl;
     MAF = std::min(altFreq, 1 - altFreq);
     MAC = std::min(altCounts, 2*t_GVec_sub.n_elem-altCounts);
 
@@ -503,8 +505,8 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
 //printTime(timeoutput3, timeoutput4, "imputeGenoAndFlip");
     //altFreqVec.at(i) = altFreq;         // allele frequencies of ALT allele, this is not always < 0.5.
     //altCountsVec.at(i) = altCounts;         // allele frequencies of ALT allele, this is not always < 0.5.
-     std::cout << "MAC " << MAC << std::endl; 
-     std::cout << "altFreq after flip " << altFreq << std::endl; 
+     //std::cout << "MAC " << MAC << std::endl; 
+     //std::cout << "altFreq after flip " << altFreq << std::endl; 
    //std::cout << "info " << info << std::endl; 
     // analysis results for single-marker
     double Beta, seBeta, Tstat, varT, gy;
@@ -535,8 +537,8 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
    }
    bool is_region = false;
 
-   std::cout << "ptr_gSAIGEobj->m_isnoadjCov " << ptr_gSAIGEobj->m_isnoadjCov << std::endl;
-    std::cout << "ptr_gSAIGEobj->m_isFastTest " << ptr_gSAIGEobj->m_isFastTest << std::endl;
+    //std::cout << "ptr_gSAIGEobj->m_isnoadjCov " << ptr_gSAIGEobj->m_isnoadjCov << std::endl;
+    //std::cout << "ptr_gSAIGEobj->m_isFastTest " << ptr_gSAIGEobj->m_isFastTest << std::endl;
     
     /*if(ptr_gSAIGEobj->m_isFastTest){
       ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
@@ -573,13 +575,13 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
 
 
     if(MAC > g_MACCutoffforER){
-      std::cout << "mainMarker6" << std::endl;
+      //std::cout << "mainMarker6" << std::endl;
       Unified_getMarkerPval( 
 		    t_GVec_sub, 
                           false, // bool t_isOnlyOutputNonZero, 
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA,  Tstat, gy, varT,   
 			  altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false,  ptr_gSAIGEobj->m_isnoadjCov, ptr_gSAIGEobj->m_flagSparseGRM_cur);
-  std::cout << "mainMarker7" << std::endl;
+       //std::cout << "mainMarker7" << std::endl;
     }else{
       Unified_getMarkerPval( 
 		    t_GVec_sub, 
@@ -599,6 +601,7 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
         std::cerr << "Argument is out of range for a double\n";
 	pval_num = 0;
     }
+
 
     if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest)){
       //ptr_gSAIGEobj->set_flagSparseGRM_cur(true);
@@ -673,7 +676,7 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
          AF_case = 1-AF_case;
          AF_ctrl = 1-AF_ctrl;
       }
-      std::cout << "hERE" << std::endl;
+      //std::cout << "hERE" << std::endl;
       isSPAConvergeVec.at(j_mt0) = isSPAConverge;
       AF_caseVec.at(j_mt0) = AF_case;
       AF_ctrlVec.at(j_mt0) = AF_ctrl;
@@ -708,12 +711,12 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
     //arma::vec timeoutput3 = getTime();
     //printTime(timeoutput2, timeoutput3, "after Unified_getOneMarker");
  
-     std::cout << "i_mt0 " << i_mt0 << std::endl;
+     //std::cout << "i_mt0 " << i_mt0 << std::endl;
 }//loop through j_mt
     //t_GVec.clear();
   }
 
-std::cout << "end" << std::endl;
+//std::cout << "end" << std::endl;
 
 for(unsigned int j_mt = 0; j_mt < t_traitType.size(); j_mt++){
   //output

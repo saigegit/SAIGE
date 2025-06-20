@@ -561,7 +561,7 @@ if(!m_flagSparseGRM_cur && t_isnoadjCov){
   std::cout << "score test 1b" << std::endl;
   }
 */
-  std::cout << "pval_noadj " << pval_noadj << std::endl;
+ // std::cout << "pval_noadj " << pval_noadj << std::endl;
   double StdStat = std::abs(t_Tstat) / sqrt(t_var1);
 
   t_isSPAConverge = false;
@@ -583,7 +583,6 @@ if(!m_flagSparseGRM_cur && t_isnoadjCov){
 
   double gmuNB;
 
-std::cout << "ok1" << std::endl;
 
 
 if((StdStat > m_SPA_Cutoff || std::isnan(StdStat)) && m_traitType != "quantitative" && t_isER){
@@ -592,7 +591,7 @@ if((StdStat > m_SPA_Cutoff || std::isnan(StdStat)) && m_traitType != "quantitati
 	t_isER = false;
 }
 
-std::cout << "ok2" << std::endl;
+//std::cout << "ok2" << std::endl;
 
 if(!t_isER){
 
@@ -604,13 +603,13 @@ if(!t_isER){
           getadjGFast(t_GVec, t_gtilde, iIndex);
 	  is_gtilde = true;
        }
-       std::cout << "ok3" << std::endl;
+       //std::cout << "ok3" << std::endl;
 	//int t_gtilden = t_gtilde.n_elem;
         p_iIndexComVecSize = double(iIndexComVecSize)/m_n;
-	std::cout << m_mu.n_elem << std::endl;
-	std::cout << t_gtilde.n_elem << std::endl;
+	//std::cout << m_mu.n_elem << std::endl;
+	//std::cout << t_gtilde.n_elem << std::endl;
    	m1 = dot(m_mu, t_gtilde);
-	std::cout << "SPA 0" << std::endl;
+	//std::cout << "SPA 0" << std::endl;
 	if(p_iIndexComVecSize >= 0.5){
 		unsigned int j1 = 0;
 		unsigned int j2 = 0;
@@ -641,7 +640,7 @@ if(!t_isER){
 	gNA = t_gtilde(iIndexComVec);
    	muNB = m_mu(iIndex);
    	muNA = m_mu(iIndexComVec);
-	std::cout << "SPA 1" << std::endl;
+	//std::cout << "SPA 1" << std::endl;
 
 /*	
 	    std::cout << "gNA.n_elem 2 " << gNA.n_elem << std::endl;
@@ -652,9 +651,9 @@ if(!t_isER){
 
 
   	gmuNB = dot(gNB,muNB);	 
-	std::cout << "SPA 2" << std::endl;
+	//std::cout << "SPA 2" << std::endl;
    	NAmu= m1-gmuNB;
-	std::cout << "SPA 3" << std::endl;
+	//std::cout << "SPA 3" << std::endl;
 
    }
 	/*else{
@@ -694,7 +693,7 @@ if(!t_isER){
 	double tol0 = std::numeric_limits<double>::epsilon();
 	tol1 = std::pow(tol0, 0.25);
 	if(p_iIndexComVecSize >= 0.5 && !m_flagSparseGRM_cur){
-	std::cout << "SPA 3" << std::endl;
+	//std::cout << "SPA 3" << std::endl;
 		//std::cout << "SPA_fast" << std::endl;
         	SPA_fast(m_mu, t_gtilde, q, qinv, pval_noadj, ispvallog, gNA, gNB, muNA, muNB, NAmu, NAsigma, tol1, m_traitType, t_SPApval, t_isSPAConverge);
 	
@@ -962,7 +961,6 @@ if(!t_isER){
     gNB.clear();
 
 
-//std::cout << "ok3" << std::endl;
 
     if(is_region && !is_gtilde){
 	getadjGFast(t_GVec, t_gtilde, iIndex);
@@ -1143,7 +1141,7 @@ void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR){
 
 void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR, bool isnoXadj){
     arma::rowvec m_varRatio;
-        std::cout << "issparseforVR i0 " << issparseforVR << std::endl;
+        //std::cout << "issparseforVR i0 " << issparseforVR << std::endl;
     if(issparseforVR){
         m_varRatio = m_varRatio_sparse_mt.row(0);
     }else{
@@ -1153,8 +1151,8 @@ void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR, bool isnoXadj){
             m_varRatio = m_varRatio_null_mt.row(0);
         }
     }
-    std::cout << "assignSingleVarianceRatio" << std::endl;
-    m_varRatio.print("m_varRatio");
+    //std::cout << "assignSingleVarianceRatio" << std::endl;
+    //m_varRatio.print("m_varRatio");
     m_varRatioVal = m_varRatio(m_itrait);
 }
 
