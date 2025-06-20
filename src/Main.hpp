@@ -93,7 +93,9 @@ void Unified_getMarkerPval(
 			   arma::rowvec & t_G1tilde_P_G2tilde_Vec,
 			    bool & t_isFirth,
 			   bool & t_isFirthConverge,
-			   bool t_isER);
+			   bool t_isER,
+			  bool t_isnoadjCov,
+			  bool t_isSparseGRM);
 
 
 Rcpp::List mainRegionInCPP(
@@ -140,11 +142,11 @@ void setVCFobjInCPP(std::string t_vcfFileName,
             std::vector<std::string> & t_SampleInModel);
 
 
-
 void setSAIGEobjInCPP(arma::mat & t_XVX,
         arma::mat & t_XXVX_inv,
         arma::mat & t_XV,
         arma::mat & t_XVX_inv_XV,
+        arma::mat & t_Sigma_iXXSigma_iX,
         arma::mat & t_X,
         arma::vec &  t_S_a,
         arma::vec & t_res,
@@ -152,6 +154,7 @@ void setSAIGEobjInCPP(arma::mat & t_XVX,
         arma::vec & t_mu,
         arma::vec & t_varRatio_sparse,
         arma::vec & t_varRatio_null,
+        arma::vec & t_varRatio_null_noXadj,
         arma::vec & t_cateVarRatioMinMACVecExclude,
         arma::vec & t_cateVarRatioMaxMACVecInclude,
         double t_SPA_Cutoff,
@@ -160,16 +163,19 @@ void setSAIGEobjInCPP(arma::mat & t_XVX,
         arma::vec & t_y,
         std::string t_impute_method,
         bool t_flagSparseGRM,
-	bool t_isFastTest,
-	double t_pval_cutoff_for_fastTest,
+        bool t_isFastTest,
+        bool t_isnoadjCov,
+        double t_pval_cutoff_for_fastTest,
         arma::umat & t_locationMat,
         arma::vec & t_valueVec,
         int t_dimNum,
         bool t_isCondition,
         std::vector<uint32_t> & t_condition_genoIndex,
-	bool t_is_Firth_beta,
-        double t_pCutoffforFirth, 
-	arma::vec & t_offset);
+        bool t_is_Firth_beta,
+        double t_pCutoffforFirth,
+        arma::vec & t_offset,
+        arma::vec & t_resout);
+
 
 void assign_conditionMarkers_factors(
                            std::string t_genoType,     // "plink", "bgen", "vcf"
