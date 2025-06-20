@@ -1248,7 +1248,7 @@ void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR, bool isnoXadj, bo
     m_varRatioVal = m_varRatio(m_itrait);
 }
 
-
+/*
 void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR, bool isnoXadj){
     arma::rowvec m_varRatio;
     //std::cout << "issparseforVR i0 " << issparseforVR << std::endl;
@@ -1265,7 +1265,7 @@ void SAIGEClass::assignSingleVarianceRatio(bool issparseforVR, bool isnoXadj){
     //m_varRatio.print("m_varRatio");
     m_varRatioVal = m_varRatio(0);
 }
-
+*/
 
 
 void SAIGEClass::assignSingleVarianceRatio_withinput(double t_varRatioVal){
