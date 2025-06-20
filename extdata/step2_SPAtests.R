@@ -251,7 +251,7 @@ if(nThreads == 1){
              is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
              is_fastTest = opt$is_fastTest,
 	     max_MAC_use_ER = opt$max_MAC_for_ER,
-	     subSampleFile = opt$subSampleFile, 
+	     subSampleFile = opt$subSampleFile,
 	     is_noadjCov = opt$is_noadjCov)
 
 
@@ -331,8 +331,8 @@ if(nThreads == 1){
              is_output_markerList_in_groupTest = opt$is_output_markerList_in_groupTest,
              is_fastTest = opt$is_fastTest,
              max_MAC_use_ER = opt$max_MAC_for_ER,
-             subSampleFile = opt$subSampleFile, 
-	     is_noadjCov = opt$is_noadjCov)
+             subSampleFile = opt$subSampleFile,
+	    is_noadjCov = opt$is_noadjCov)
 
 
 	param_list <- mapply(function(SAIGEOutputFile, idstoIncludeFile) {
