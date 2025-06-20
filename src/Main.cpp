@@ -278,6 +278,7 @@ void mainMarkerInCPP(
   arma::vec t_GVec(n);
   arma::vec gtildeVec(n);
   arma::vec t_P2Vec;
+  /*
   if(ptr_gSAIGEobj->m_isFastTest){
     ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
     ptr_gSAIGEobj->set_isnoadjCov_cur(ptr_gSAIGEobj->m_isnoadjCov);
@@ -285,11 +286,11 @@ void mainMarkerInCPP(
     ptr_gSAIGEobj->set_flagSparseGRM_cur(ptr_gSAIGEobj->m_flagSparseGRM); 
     ptr_gSAIGEobj->set_isnoadjCov_cur(false);
   }
-
+*/
   bool hasVarRatio = true;;
   bool isSingleVarianceRatio = true;
   if((ptr_gSAIGEobj->m_varRatio_null).n_elem == 1){
-        ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur, ptr_gSAIGEobj->m_isnoadjCov_cur);
+        ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM, ptr_gSAIGEobj->m_isnoadjCov);
         //ptr_gSAIGEobj->assignSingleVarianceRatio(false);
   }else{		
 	isSingleVarianceRatio = false;
@@ -474,7 +475,7 @@ void mainMarkerInCPP(
       }
     }else{
       if(!isSingleVarianceRatio){
-        hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur, false);
+        hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM, ptr_gSAIGEobj->m_isnoadjCov);
       }
     }
     //check 'Main.cpp'
