@@ -4,7 +4,6 @@ Title: Efficiently controlling for case-control imbalance and sample relatedness
 Version: 1.4.8
 Date: 2025-06-20
 Author: Wei Zhou, Bram Gorissen, Zhangchen Zhao, Wenjian Bi, Seunggeun Lee, Cristen Willer
->>>>>>> 41210fd1b73ed2cf72f66b9df2eff84c4e3ae760
 Maintainer: SAIGE team <saige.genetics@gmail.com> 
 Description:an R package that implements the Scalable and Accurate Implementation of Generalized mixed model that uses the saddlepoint approximation (SPA)(mhof, J. P. , 1961; Kuonen, D. 1999; Dey, R. et.al 2017) and large scale optimization techniques to calibrate case-control ratios in logistic mixed model score tests (Chen, H. et al. 2016) in large PheWAS. It conducts both single-variant association tests and set-based tests for rare variants.  
 License: GPL (>= 2)
