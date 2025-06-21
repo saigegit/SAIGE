@@ -1031,7 +1031,7 @@ fitNULLGLMM = function(plinkFile = "",
 
 
     if (useSparseGRMtoFitNULL){
-        useSparseGRMforVarRatio = FALSE
+        #useSparseGRMforVarRatio = FALSE
         LOCO = FALSE
 	nThreads = 1
 	if(bedFile != ""){
@@ -2864,15 +2864,17 @@ extractVarianceRatio = function(obj.glmm.null,
            var2sparseGRM = var2_a[1,1]
            varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
         }
-    }else{
+   }else{
         if(useSparseGRMforVarRatio){
-	  #varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, 1)
-	  pcginvSigma = solve(sparseSigma, g, sparse=T)
+	  ##varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, 1)
+	  #pcginvSigma1 = solve(sparseSigma, g, sparse=T)
+	  #var2_a_1 = t(g) %*% pcginvSigma1
+	  pcginvSigma = Sigma_iG/sqrt(AC)
 	  var2_a = t(g) %*% pcginvSigma
+
 	  var2sparseGRM = var2_a[1,1]
-	  x=t(G)%*%Sigma_iG/AC
-	  #cat(" x ", x, " var2 ", var2sparseGRM , "\n")
-	  varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
+	  ##x=t(G)%*%Sigma_iG/AC
+	   varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, var1/var2sparseGRM)
 	}  
     }
 
