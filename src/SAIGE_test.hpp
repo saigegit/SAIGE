@@ -374,9 +374,11 @@ void scoreTestFast_noadjCov_multiTrait(arma::vec & t_GVec,
                      double &t_var1,
                      double &t_var2); 
 
+void assign_for_itrait_sampleIndices(unsigned int t_itrait);
+
+
 };
 
-void assign_for_itrait_sampleIndices(unsigned int t_itrait);
 
 }
 #endif
