@@ -520,6 +520,8 @@ void mainMarkerInCPP(
       if(MAC > ptr_gSAIGEobj->m_cateVarRatioMinMACVecExclude.back()){
 	ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
       }else{
+        std::cout << "MAC " << MAC << std::endl;
+        std::cout << "pval_num " << pval_num << std::endl;
         ptr_gSAIGEobj->set_flagSparseGRM_cur(ptr_gSAIGEobj->m_flagSparseGRM);
       }
       ptr_gSAIGEobj->set_isnoadjCov_cur(false);
@@ -538,6 +540,7 @@ void mainMarkerInCPP(
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,
                           altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false, ptr_gSAIGEobj->m_isnoadjCov_cur, ptr_gSAIGEobj->m_flagSparseGRM_cur);
      }else{
+      std::cout << "ER " << std::endl;
       Unified_getMarkerPval(
                     t_GVec,
                           false, // bool t_isOnlyOutputNonZero,
@@ -981,14 +984,14 @@ void setSAIGEobjInCPP(arma::mat & t_XVX,
 }
 
 
-
+/*
 // [[Rcpp::export]]
 void setSparseSigmaInCPP(int r, arma::umat & t_locationMatinR, arma::vec & t_valueVecinR)
 {
   ptr_gSAIGEobj->setupSparseMat(r, t_locationMatinR, t_valueVecinR);
   ptr_gSAIGEobj->m_flagSparseGRM = true;
 }
-
+*/
 
 // [[Rcpp::export]]
 Rcpp::List RegionSetUpConditional_binary_InCPP(arma::vec & t_weight_cond){

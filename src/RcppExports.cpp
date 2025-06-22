@@ -339,18 +339,6 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// setSparseSigmaInCPP
-void setSparseSigmaInCPP(int r, arma::umat& t_locationMatinR, arma::vec& t_valueVecinR);
-RcppExport SEXP _SAIGE_setSparseSigmaInCPP(SEXP rSEXP, SEXP t_locationMatinRSEXP, SEXP t_valueVecinRSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type r(rSEXP);
-    Rcpp::traits::input_parameter< arma::umat& >::type t_locationMatinR(t_locationMatinRSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type t_valueVecinR(t_valueVecinRSEXP);
-    setSparseSigmaInCPP(r, t_locationMatinR, t_valueVecinR);
-    return R_NilValue;
-END_RCPP
-}
 // RegionSetUpConditional_binary_InCPP
 Rcpp::List RegionSetUpConditional_binary_InCPP(arma::vec& t_weight_cond);
 RcppExport SEXP _SAIGE_RegionSetUpConditional_binary_InCPP(SEXP t_weight_condSEXP) {
@@ -3064,7 +3052,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setBGENobjInCPP", (DL_FUNC) &_SAIGE_setBGENobjInCPP, 5},
     {"_SAIGE_setVCFobjInCPP", (DL_FUNC) &_SAIGE_setVCFobjInCPP, 4},
     {"_SAIGE_setSAIGEobjInCPP", (DL_FUNC) &_SAIGE_setSAIGEobjInCPP, 33},
-    {"_SAIGE_setSparseSigmaInCPP", (DL_FUNC) &_SAIGE_setSparseSigmaInCPP, 3},
     {"_SAIGE_RegionSetUpConditional_binary_InCPP", (DL_FUNC) &_SAIGE_RegionSetUpConditional_binary_InCPP, 1},
     {"_SAIGE_mainRegionInCPP", (DL_FUNC) &_SAIGE_mainRegionInCPP, 20},
     {"_SAIGE_assign_conditionMarkers_factors", (DL_FUNC) &_SAIGE_assign_conditionMarkers_factors, 5},

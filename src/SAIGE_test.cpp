@@ -111,14 +111,16 @@ SAIGEClass::SAIGEClass(
 	m_offset = t_offset;
       //}
     }
-    m_dimNum = t_dimNum;
+    //m_dimNum = t_dimNum;
     m_flagSparseGRM = t_flagSparseGRM;
     m_isFastTest = t_isFastTest;
     m_isnoadjCov = t_isnoadjCov;
     m_pval_cutoff_for_fastTest = t_pval_cutoff_for_fastTest;
-    if(m_dimNum != 0){
-	m_locationMat = t_locationMat;
-    	m_valueVec = t_valueVec;
+    if(t_dimNum != 0){
+	//m_locationMat = t_locationMat;
+    	//m_valueVec = t_valueVec;
+        m_spSigmaMat = arma::sp_mat(t_locationMat, t_valueVec, t_dimNum, t_dimNum);
+	m_diagSigma = arma::vec(m_spSigmaMat.diag());
     }
 }    
 
@@ -165,8 +167,9 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
       var2m = dot(t_P2Vec , t_gtilde);
        //std::cout << "!m_flagSparseGRM_cur" << std::endl;
     }else{
-      arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
-      t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
+      //arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
+      //t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
+      t_P2Vec = getPCG1ofSigmaAndGtilde(t_gtilde, 100, 0.02); 
       var2m = dot(t_P2Vec , t_gtilde);
       if(m_isVarPsadj){
 	var2m = var2m - t_gtilde.t() * m_Sigma_iXXSigma_iX * m_X.t() * t_P2Vec;	
@@ -418,7 +421,7 @@ void SAIGEClass::getindices(arma::uvec & t_case_indices,
      t_ctrl_indices = m_ctrl_indices;
   }
 
-
+/*
 void SAIGEClass::setupSparseMat(int r, arma::umat & locationMatinR, arma::vec & valueVecinR) {
     m_locationMat = locationMatinR;
     m_valueVec = valueVecinR;
@@ -431,7 +434,7 @@ arma::sp_mat SAIGEClass::gen_sp_SigmaMat() {
     arma::sp_mat resultMat(m_locationMat, m_valueVec, m_dimNum, m_dimNum);
     return resultMat;
 }
-
+*/
 // revised
 // need to add sparse Sigma version 
 // This function only uses variance ratio and does not use sparse GRM
@@ -498,7 +501,7 @@ if(!m_flagSparseGRM_cur && t_isnoadjCov){
 	is_gtilde = true;
         isScoreFast = false;
         scoreTest(t_GVec, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq, t_Tstat, t_var1, t_var2, t_gtilde, t_P2Vec, t_gy, is_region, iIndex);
-
+	std::cout << "m_flagSparseGRM_cur " << m_flagSparseGRM_cur << std::endl;
 }else{
 	is_gtilde = false;
         isScoreFast = true;
@@ -913,8 +916,9 @@ if(!t_isER){
       if(!m_flagSparseGRM_cur){
         t_P2Vec = t_gtilde % m_mu2 *m_tauvec[0];
       }else{
-        arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
-        t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
+        //arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
+        //t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
+	t_P2Vec = getPCG1ofSigmaAndGtilde(t_gtilde, 100, 0.02);
       }
     }
 }
@@ -1186,7 +1190,43 @@ void SAIGEClass::set_isnoadjCov_cur(bool t_isnoadjCov_cur){
         m_isnoadjCov_cur = t_isnoadjCov_cur;
 }
 
+arma::vec SAIGEClass::getPCG1ofSigmaAndGtilde(arma::vec& bVec, int maxiterPCG, double tolPCG) {
+    int Nnomissing = m_spSigmaMat.n_rows;
+    arma::vec xVec(Nnomissing, arma::fill::zeros); // Initialize xVec to zeros
+    arma::vec rVec = bVec; // Residual vector
+    arma::vec zVec(Nnomissing);
+    //arma::vec minvVec = 1.0 / spsigma.diag(); // Preconditioner (reciprocal of diagonal elements)
+arma::vec minvVec = 1.0 / m_diagSigma; // Convert diagonal view to dense vector
+    zVec = minvVec % rVec; // Apply preconditioner
+    double sumr2 = arma::dot(rVec, rVec); // Initial residual norm
+    arma::vec pVec = zVec; // Search direction
 
+    int iter = 0;
+    while (sumr2 > tolPCG && iter < maxiterPCG) {
+        iter++;
+        arma::vec ApVec = m_spSigmaMat * pVec; // Sparse matrix-vector multiplication
+        double alpha = arma::dot(rVec, zVec) / arma::dot(pVec, ApVec); // Step size
+
+        xVec += alpha * pVec; // Update solution
+        arma::vec r1Vec = rVec - alpha * ApVec; // Update residual
+
+        arma::vec z1Vec = minvVec % r1Vec; // Apply preconditioner to new residual
+        double beta = arma::dot(z1Vec, r1Vec) / arma::dot(zVec, rVec); // Update beta
+
+        pVec = z1Vec + beta * pVec; // Update search direction
+        zVec = z1Vec; // Update preconditioned residual
+        rVec = r1Vec; // Update residual
+
+        sumr2 = arma::dot(rVec, rVec); // Update residual norm
+    }
+
+    if (iter >= maxiterPCG) {
+        std::cout << "PCG did not converge. You may increase maxiter number." << std::endl;
+    }
+
+    std::cout << "Iterations from getPCG1ofSigmaAndGtilde: " << iter << std::endl;
+    return xVec;
+}
 
 
 
