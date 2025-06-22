@@ -2869,7 +2869,7 @@ extractVarianceRatio = function(obj.glmm.null,
 	  #varRatio_sparseGRM_vec = c(varRatio_sparseGRM_vec, 1)
 	  #pcginvSigma = solve(sparseSigma, g, sparse=T)
 	  pcginvSigma = Sigma_iG/sqrt(AC)
-	  #var2_a = t(g) %*% pcginvSigma
+	  var2_a = t(g) %*% pcginvSigma
 	  var2sparseGRM = var2_a[1,1]
 	  #x=t(G)%*%Sigma_iG/AC
 	  #cat(" x ", x, " var2 ", var2sparseGRM , "\n")
