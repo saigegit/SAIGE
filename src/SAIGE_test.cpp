@@ -155,15 +155,15 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
       t_gy = dot(t_gtilde, m_y);
      }
     S = dot(t_gtilde, m_res);
-    std::cout << "S " << S << std::endl;
+    //std::cout << "S " << S << std::endl;
     S = S/m_tauvec[0];
 
-    std::cout << "S b " << S << std::endl;
+    //std::cout << "S b " << S << std::endl;
 
     if(!m_flagSparseGRM_cur){
       t_P2Vec = t_gtilde % m_mu2 *m_tauvec[0];  
       var2m = dot(t_P2Vec , t_gtilde);
-       std::cout << "!m_flagSparseGRM_cur" << std::endl;
+       //std::cout << "!m_flagSparseGRM_cur" << std::endl;
     }else{
       arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
       t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
@@ -171,7 +171,7 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
       if(m_isVarPsadj){
 	var2m = var2m - t_gtilde.t() * m_Sigma_iXXSigma_iX * m_X.t() * t_P2Vec;	
       }
-             std::cout << "m_flagSparseGRM_cur" << std::endl;
+             //std::cout << "m_flagSparseGRM_cur" << std::endl;
     }	      
     var2 = var2m(0,0);
     double var1 = var2 * m_varRatioVal;

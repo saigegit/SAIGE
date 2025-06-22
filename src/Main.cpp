@@ -470,16 +470,22 @@ void mainMarkerInCPP(
 
     if(ptr_gSAIGEobj->m_isFastTest){
       ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
+    }else{
+      ptr_gSAIGEobj->set_flagSparseGRM_cur(ptr_gSAIGEobj->m_flagSparseGRM);	
+    }
       if(isSingleVarianceRatio){
         ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur, ptr_gSAIGEobj->m_isnoadjCov);
       }else{	
         hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur, ptr_gSAIGEobj->m_isnoadjCov);
       }
-    }else{
-      if(!isSingleVarianceRatio){
-        hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM, ptr_gSAIGEobj->m_isnoadjCov);
-      }
-    }
+      
+    //}else{
+    //  if(!isSingleVarianceRatio){
+    //    hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM, ptr_gSAIGEobj->m_isnoadjCov);
+    //  }else{
+    //	ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM, ptr_gSAIGEobj->m_isnoadjCov);	
+    //  }
+   //}
     //check 'Main.cpp'
     bool is_region = false;
 
@@ -511,7 +517,11 @@ void mainMarkerInCPP(
 
     if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest)){
       //ptr_gSAIGEobj->set_flagSparseGRM_cur(true);
-      ptr_gSAIGEobj->set_flagSparseGRM_cur(ptr_gSAIGEobj->m_flagSparseGRM);
+      if(MAC > ptr_gSAIGEobj->m_cateVarRatioMinMACVecExclude.back()){
+	ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
+      }else{
+        ptr_gSAIGEobj->set_flagSparseGRM_cur(ptr_gSAIGEobj->m_flagSparseGRM);
+      }
       ptr_gSAIGEobj->set_isnoadjCov_cur(false);
       
       if(!isSingleVarianceRatio){ 
@@ -1279,6 +1289,12 @@ Rcpp::List mainRegionInCPP(
         std::cout << "Start analyzing chunk " << ichunk << "....." << std::endl;
       }
 
+      if(MAC > ptr_gSAIGEobj->m_cateVarRatioMinMACVecExclude.back()){
+        ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
+      }else{
+        ptr_gSAIGEobj->set_flagSparseGRM_cur(ptr_gSAIGEobj->m_flagSparseGRM);
+      } 
+
       if(!isSingleVarianceRatio){
         hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur, false);
       }else{
@@ -1559,7 +1575,13 @@ if(i2 > 0){
           }
 
 	  MAC = MAF * 2 * t_n * (1 - missingRate);   // checked on 08-10-2021
+if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){
 
+      if(MAC > ptr_gSAIGEobj->m_cateVarRatioMinMACVecExclude.back()){
+        ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
+      }else{
+        ptr_gSAIGEobj->set_flagSparseGRM_cur(ptr_gSAIGEobj->m_flagSparseGRM);
+      }
 
       if(!isSingleVarianceRatio){
         hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur, false);
@@ -1568,7 +1590,6 @@ if(i2 > 0){
       }
 
 
-	  if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){
 
 
 	    annoMAFIndicatorVec.zeros();
@@ -1587,9 +1608,9 @@ if(i2 > 0){
 
 	    if(MAC <= g_MACCutoffforER && t_traitType == "binary"){	
 
-              ptr_gSAIGEobj->getMarkerPval(genoURVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true, false, ptr_gSAIGEobj->m_flagSparseGRM);
+              ptr_gSAIGEobj->getMarkerPval(genoURVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true, false, ptr_gSAIGEobj->m_flagSparseGRM_cur);
 	    }else{
-              ptr_gSAIGEobj->getMarkerPval(genoURVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false, false, ptr_gSAIGEobj->m_flagSparseGRM);
+              ptr_gSAIGEobj->getMarkerPval(genoURVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false, false, ptr_gSAIGEobj->m_flagSparseGRM_cur);
 
 	    }
 
@@ -1862,9 +1883,22 @@ if(t_regionTestType == "BURDEN"){
           isPolyMarker = true;   
 	  std::vector<uint32_t> indexForMissing;
 
-          if(!isSingleVarianceRatio){
-            hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur, false);
-          }
+      if(MAC > ptr_gSAIGEobj->m_cateVarRatioMinMACVecExclude.back()){
+        ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
+      }else{
+        ptr_gSAIGEobj->set_flagSparseGRM_cur(ptr_gSAIGEobj->m_flagSparseGRM);
+      }
+
+      if(!isSingleVarianceRatio){
+        hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur, false);
+      }else{
+        ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur, false);
+      }
+          //if(!isSingleVarianceRatio){
+           // hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur, false);
+          //}
+
+
 	  //arma::vec timeoutput_getp = getTime();
 	  if(MAC <= g_MACCutoffforER && t_traitType == "binary"){
           ptr_gSAIGEobj->getMarkerPval(genoSumVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, isregion, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true, false, ptr_gSAIGEobj->m_flagSparseGRM_cur);
