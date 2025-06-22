@@ -169,8 +169,11 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
     }else{
       //arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
       //t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
+      //double var2m_test = dot(t_P2Vec , t_gtilde);
+      //std::cout << "var2m_test " << var2m_test << std::endl;
       t_P2Vec = getPCG1ofSigmaAndGtilde(t_gtilde, 100, 0.02); 
       var2m = dot(t_P2Vec , t_gtilde);
+      //std::cout << "var2m " << var2m << std::endl;
       if(m_isVarPsadj){
 	var2m = var2m - t_gtilde.t() * m_Sigma_iXXSigma_iX * m_X.t() * t_P2Vec;	
       }
@@ -435,6 +438,7 @@ arma::sp_mat SAIGEClass::gen_sp_SigmaMat() {
     return resultMat;
 }
 */
+
 // revised
 // need to add sparse Sigma version 
 // This function only uses variance ratio and does not use sparse GRM
@@ -501,7 +505,7 @@ if(!m_flagSparseGRM_cur && t_isnoadjCov){
 	is_gtilde = true;
         isScoreFast = false;
         scoreTest(t_GVec, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq, t_Tstat, t_var1, t_var2, t_gtilde, t_P2Vec, t_gy, is_region, iIndex);
-	std::cout << "m_flagSparseGRM_cur " << m_flagSparseGRM_cur << std::endl;
+	//std::cout << "m_flagSparseGRM_cur " << m_flagSparseGRM_cur << std::endl;
 }else{
 	is_gtilde = false;
         isScoreFast = true;
@@ -732,6 +736,7 @@ if(!t_isER){
       t_qval_ER = boost::math::quantile(ns, pval_ER/2);
       t_qval_ER = fabs(t_qval_ER);
       t_seBeta = fabs(t_Beta)/t_qval_ER;
+      t_isSPAConverge = true;
     }catch (const std::overflow_error&) {
       t_qval_ER = std::numeric_limits<double>::infinity();
       t_seBeta = 0;
@@ -740,7 +745,7 @@ if(!t_isER){
     if(m_is_Firth_beta & pval <= m_pCutoffforFirth){
 	t_isFirth = true;
 	t_qval_Firth = t_qval_ER;
-    }	    
+    }
 }
 
    if(t_isFirth){
@@ -1197,6 +1202,7 @@ arma::vec SAIGEClass::getPCG1ofSigmaAndGtilde(arma::vec& bVec, int maxiterPCG, d
     arma::vec zVec(Nnomissing);
     //arma::vec minvVec = 1.0 / spsigma.diag(); // Preconditioner (reciprocal of diagonal elements)
 arma::vec minvVec = 1.0 / m_diagSigma; // Convert diagonal view to dense vector
+    //m_diagSigma.print("m_diagSigma");
     zVec = minvVec % rVec; // Apply preconditioner
     double sumr2 = arma::dot(rVec, rVec); // Initial residual norm
     arma::vec pVec = zVec; // Search direction
@@ -1205,10 +1211,14 @@ arma::vec minvVec = 1.0 / m_diagSigma; // Convert diagonal view to dense vector
     while (sumr2 > tolPCG && iter < maxiterPCG) {
         iter++;
         arma::vec ApVec = m_spSigmaMat * pVec; // Sparse matrix-vector multiplication
+	//ApVec.print("ApVec");
         double alpha = arma::dot(rVec, zVec) / arma::dot(pVec, ApVec); // Step size
-
-        xVec += alpha * pVec; // Update solution
-        arma::vec r1Vec = rVec - alpha * ApVec; // Update residual
+	//std::cout << "alpha" << alpha << std::endl;
+        //pVec.print("pVec");
+	//xVec += alpha * pVec; // Update solution
+        xVec = xVec + alpha * pVec;
+	
+	arma::vec r1Vec = rVec - alpha * ApVec; // Update residual
 
         arma::vec z1Vec = minvVec % r1Vec; // Apply preconditioner to new residual
         double beta = arma::dot(z1Vec, r1Vec) / arma::dot(zVec, rVec); // Update beta
@@ -1216,15 +1226,15 @@ arma::vec minvVec = 1.0 / m_diagSigma; // Convert diagonal view to dense vector
         pVec = z1Vec + beta * pVec; // Update search direction
         zVec = z1Vec; // Update preconditioned residual
         rVec = r1Vec; // Update residual
-
+	//xVec.print("xVec");
         sumr2 = arma::dot(rVec, rVec); // Update residual norm
     }
 
     if (iter >= maxiterPCG) {
-        std::cout << "PCG did not converge. You may increase maxiter number." << std::endl;
+        std::cout << "PCG in getPCG1ofSigmaAndGtilde did not converge. You may increase maxiter number." << std::endl;
     }
 
-    std::cout << "Iterations from getPCG1ofSigmaAndGtilde: " << iter << std::endl;
+    //std::cout << "Iterations from getPCG1ofSigmaAndGtilde: " << iter << std::endl;
     return xVec;
 }
 

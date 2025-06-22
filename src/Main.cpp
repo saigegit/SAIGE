@@ -517,11 +517,11 @@ void mainMarkerInCPP(
 
     if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest)){
       //ptr_gSAIGEobj->set_flagSparseGRM_cur(true);
-      if(MAC > ptr_gSAIGEobj->m_cateVarRatioMinMACVecExclude.back()){
+     if(MAC > ptr_gSAIGEobj->m_cateVarRatioMinMACVecExclude.back()){
 	ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
       }else{
-        std::cout << "MAC " << MAC << std::endl;
-        std::cout << "pval_num " << pval_num << std::endl;
+        //std::cout << "MAC " << MAC << std::endl;
+        //std::cout << "pval_num " << pval_num << std::endl;
         ptr_gSAIGEobj->set_flagSparseGRM_cur(ptr_gSAIGEobj->m_flagSparseGRM);
       }
       ptr_gSAIGEobj->set_isnoadjCov_cur(false);
@@ -540,7 +540,7 @@ void mainMarkerInCPP(
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,
                           altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false, ptr_gSAIGEobj->m_isnoadjCov_cur, ptr_gSAIGEobj->m_flagSparseGRM_cur);
      }else{
-      std::cout << "ER " << std::endl;
+      //std::cout << "ER " << std::endl;
       Unified_getMarkerPval(
                     t_GVec,
                           false, // bool t_isOnlyOutputNonZero,
