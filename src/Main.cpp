@@ -436,7 +436,7 @@ if(!isReadMarker){
      arma::uvec indexForMissing_sub;
      double MAC, MAF;
   //std::cout << "mainMarker4" << std::endl;
-  flip=false;
+     flip=false;
      flip = imputeGenoAndFlip_sub(t_GVec, t_GVec_sub, altFreq, altCounts, indexForMissing_sub, indexForMissing_all, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec_arma, indexNonZeroVec_arma, include_indices);
 
   //std::cout << "mainMarker5" << std::endl;
@@ -593,8 +593,15 @@ if(!isReadMarker){
 
     if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest)){
       //ptr_gSAIGEobj->set_flagSparseGRM_cur(true);
-      ptr_gSAIGEobj->set_flagSparseGRM_cur(ptr_gSAIGEobj->m_flagSparseGRM);
-      ptr_gSAIGEobj->set_isnoadjCov_cur(false);
+      
+      if(MAC > ptr_gSAIGEobj->m_cateVarRatioMinMACVecExclude.back()){
+        ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
+      }else{
+        //std::cout << "MAC " << MAC << std::endl;
+        //std::cout << "pval_num " << pval_num << std::endl;
+        ptr_gSAIGEobj->set_flagSparseGRM_cur(ptr_gSAIGEobj->m_flagSparseGRM);
+      }
+      ptr_gSAIGEobj->set_isnoadjCov_cur(false); 
       
       if(!isSingleVarianceRatio){ 
         hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur, ptr_gSAIGEobj->m_isnoadjCov_cur);
