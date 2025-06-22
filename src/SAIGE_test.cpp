@@ -65,7 +65,7 @@ SAIGEClass::SAIGEClass(
 	arma::umat & t_sampleIndexMat) {
 
     std::cout << "SAIGEClass" << std::endl;
-    m_res_mt_vec = std::vector<arma::vec>();
+    //m_res_mt_vec = std::vector<arma::vec>();
     //m_XV_mt_vec = std::vector<arma::mat>();
     
     
@@ -162,8 +162,8 @@ SAIGEClass::SAIGEClass(
         arma::vec  k_mu2_sub = t_mu2_mt.col(k_itrait);
         arma::vec k_mu2 = k_mu2_sub.elem(k_sampleindices_vec);
 
-	m_res_mt_vec.push_back(k_res);
- m_res_sum_vec(k_itrait) = arma::accu(k_res);
+	//m_res_mt_vec.push_back(k_res);
+        m_res_sum_vec(k_itrait) = arma::accu(k_res);
         m_mu2_sum_vec(k_itrait) = arma::accu(k_mu2);
 
 	//arma::mat k_XV_submat = m_XV_mt.submat(k_ip, k_sampleindices_vec);
@@ -209,19 +209,18 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
     if(t_is_region && m_traitType == "binary"){
       t_gy = dot(t_gtilde, m_y);
      }
-    //S = dot(t_gtilde, m_res);
-    S = dot(t_gtilde, m_res_mt_vec.at(m_itrait));
-    std::cout << "S " << S << std::endl;
+    S = dot(t_gtilde, m_res);
+    //S = dot(t_gtilde, m_res_mt_vec.at(m_itrait));
+    //std::cout << "S " << S << std::endl;
     S = S/m_tauvec_mt(0,m_itrait);;
 
-    std::cout << "S b " << S << std::endl;
+    //std::cout << "S b " << S << std::endl;
 
-    m_flagSparseGRM_cur = false;
     if(!m_flagSparseGRM_cur){
       t_P2Vec = t_gtilde % m_mu2 *(m_tauvec_mt(0,m_itrait)); 
 
       var2m = dot(t_P2Vec , t_gtilde);
-       std::cout << "!m_flagSparseGRM_cur" << std::endl;
+       //std::cout << "!m_flagSparseGRM_cur" << std::endl;
     }else{
       arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
       t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
@@ -229,7 +228,7 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
       if(m_isVarPsadj){
 	var2m = var2m - t_gtilde.t() * m_Sigma_iXXSigma_iX * m_X.t() * t_P2Vec;	
       }
-       std::cout << "m_flagSparseGRM_cur" << std::endl;
+      //std::cout << "m_flagSparseGRM_cur" << std::endl;
     }	      
     var2 = var2m(0,0);
 	//m_mu2.print("m_mu2");
@@ -1450,9 +1449,9 @@ void SAIGEClass::assign_for_itrait(unsigned int t_itrait){
             //std::cout << "m_y_mt.n_cols " << m_y_mt.n_cols << " " << m_itrait <<std::endl;
 	//m_sampleindices_vec.print("m_sampleindices_vec");
        m_y = m_y_sub.elem(m_sampleindices_vec);
-       //arma::vec  m_res_sub = m_res_mt.col(m_itrait);
-       //m_res = m_res_sub.elem(m_sampleindices_vec);
-       m_res = m_res_mt_vec.at(m_itrait);
+       arma::vec  m_res_sub = m_res_mt.col(m_itrait);
+       m_res = m_res_sub.elem(m_sampleindices_vec);
+       //m_res = m_res_mt_vec.at(m_itrait);
 	//std::cout << "assign_for_itrait5b " << std::endl;
 
        arma::vec  m_mu2_sub = m_mu2_mt.col(m_itrait);
@@ -1629,7 +1628,12 @@ void SAIGEClass::scoreTestFast_noadjCov_multiTrait(arma::vec & t_GVec,
     //std::cout << "end of scoreTestFast" << std::endl;
 }
 
-
+void SAIGEClass::assign_for_itrait_sampleIndices(unsigned int t_itrait){
+        //m_itrait = t_itrait;
+        //m_traitType = m_traitType_vec.at(m_itrait);
+        arma::uvec sampleindices_sub_vec = m_sampleindices_mt.col(t_itrait);
+        m_sampleindices_vec = sampleindices_sub_vec.subvec(0, (m_sampleIndexLenVec[t_itrait]-1));
+}
 
 
 

@@ -427,7 +427,8 @@ if(!isReadMarker){
      markerVec.at(j_mt0) = marker;               // marker IDs
      infoVec.at(j_mt0) = info;    // marker information: CHR:POS:REF:ALT
 
-     ptr_gSAIGEobj->assign_for_itrait(i_mt0);
+     ptr_gSAIGEobj->assign_for_itrait_sampleIndices(i_mt0);
+     //ptr_gSAIGEobj->assign_for_itrait(i_mt0);
 
      arma::uvec include_indices = ptr_gSAIGEobj->m_sampleindices_vec;
      arma::vec t_GVec_sub;
@@ -513,7 +514,7 @@ if(!isReadMarker){
     t_P2Vec.clear();
     G1tilde_P_G2tilde_Vec.clear();    
     //arma::vec timeoutput5 = getTime(); 
-
+   ptr_gSAIGEobj->assign_for_itrait(i_mt0);
 
     //set_varianceRatio(MAC, isSingleVarianceRatio);
    if(g_isgxe && ptr_gSAIGEobj->m_isCondition){

@@ -23,16 +23,17 @@ class SAIGEClass
       arma::vec  m_S_a;
       std::string m_traitType; 
       std::string m_impute_method;
-      std::vector<arma::vec> m_res_mt_vec;	
+      //std::vector<arma::vec> m_res_mt_vec;	
       //std::vector<arma::mat> m_XV_mt_vec;
     public:
         // Default constructor
-       SAIGEClass() {
+       /*
+	SAIGEClass() {
             // Initialize m_res_mt_vec as an empty vector
             m_res_mt_vec = std::vector<arma::vec>();
 	    //m_XV_mt_vec = std::vector<arma::mat>();
         }	
-
+        */
 
       std::vector<uint32_t> m_condition_genoIndex;
       arma::mat m_XXVX_inv;
@@ -375,6 +376,7 @@ void scoreTestFast_noadjCov_multiTrait(arma::vec & t_GVec,
 
 };
 
+void assign_for_itrait_sampleIndices(unsigned int t_itrait);
 
 }
 #endif
