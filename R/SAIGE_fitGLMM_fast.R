@@ -2792,6 +2792,7 @@ extractVarianceRatio = function(obj.glmm.null,
       numMarkers0 = numMarkers
       varRatio_sparseGRM_vec = NULL
       varRatio_NULL_vec = NULL
+      varRatio_NULL_noXadj_vec = NULL
       indexInMarkerList = 1
       numTestedMarker = 0
       ratioCV = ratioCVcutoff + 0.1
@@ -2838,7 +2839,8 @@ extractVarianceRatio = function(obj.glmm.null,
           #mu.eta = family$mu.eta(eta)
           #sqrtW = mu.eta/sqrt(obj.glm.null$family$variance(mu))
           #W = sqrtW^2
-          
+	  G_noXadj <- as.vector(G0 - mean(G0))
+	  g_noXadj = G_noXadj/sqrt(AC)          
 
 
           if(obj.glmm.null$traitType != "survival"){
@@ -2879,14 +2881,17 @@ extractVarianceRatio = function(obj.glmm.null,
 
     if(obj.glmm.null$traitType == "binary"){
          var2null = innerProduct(mu*(1-mu), g*g)
+	var2null_noXadj = innerProduct(mu*(1-mu), g_noXadj*g_noXadj)
     }else if(obj.glmm.null$traitType == "quantitative"){
          var2null = innerProduct(g, g)
+	var2null_noXadj = innerProduct(g_noXadj*g_noXadj)
     }else if(obj.glmm.null$traitType == "survival"){
          var2null = innerProduct(mu, g*g)
+	var2null_noXadj = innerProduct(mu, g_noXadj*g_noXadj)
     }
 
     varRatio_NULL_vec = c(varRatio_NULL_vec, var1/var2null)
-
+varRatio_NULL_noXadj_vec <- c(varRatio_NULL_noXadj_vec, var1 / var2null_noXadj)
     #indexInMarkerList = indexInMarkerList + 1
     numTestedMarker = numTestedMarker + 1
 
@@ -2923,10 +2928,14 @@ extractVarianceRatio = function(obj.glmm.null,
     varRatioTable = rbind(varRatioTable, c(varRatio_sparse, "sparse", k))
   }
   varRatio_null = mean(varRatio_NULL_vec)
+    varRatio_null_noXadj = mean(varRatio_NULL_noXadj_vec)
   cat("varRatio_null", varRatio_null, "\n")
+  cat("varRatio_null_noXadj", varRatio_null_noXadj, "\n")
   varRatioTable = rbind(varRatioTable, c(varRatio_null, "null", k))
+  varRatioTable = rbind(varRatioTable, c(varRatio_null_noXadj, "null_noXadj", k))
   }else{# if(cateVarRatioVec[k] == 1)
     varRatioTable = rbind(varRatioTable, c(1, "null", k))
+varRatioTable = rbind(varRatioTable, c(1, "null_noXadj", k))
     if(length(varRatio_sparseGRM_vec) > 0){
       varRatioTable = rbind(varRatioTable, c(1, "sparse", k))
     }
