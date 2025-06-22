@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+#!/usr/bin/env -S pixi run --manifest-path /app/pixi.toml Rscript
 
 #options(stringsAsFactors=F, scipen = 999)
 options(stringsAsFactors=F)
@@ -33,6 +33,8 @@ option_list <- list(
     help="Path to bim file (PLINK)"),
   make_option("--famFile", type="character",default="",
     help="Path to fam file (PLINK)"),
+  make_option("--pgenPrefix", type="character",default="",
+    help="Path to the pgen file minus its file extension."),
   make_option("--AlleleOrder", type="character",default="alt-first",
     help="alt-first or ref-first for bgen or PLINK files"),
   make_option("--idstoIncludeFile", type="character",default="",
@@ -206,6 +208,7 @@ if(nThreads == 1){
              bedFile=opt$bedFile,
              bimFile=opt$bimFile,
              famFile=opt$famFile,
+             pgenPrefix=opt$pgenPrefix,
              AlleleOrder=opt$AlleleOrder,
              idstoIncludeFile = opt$idstoIncludeFile,
              rangestoIncludeFile = opt$rangestoIncludeFile,
@@ -289,6 +292,7 @@ if(nThreads == 1){
              bedFile=opt$bedFile,
              bimFile=opt$bimFile,
              famFile=opt$famFile,
+             pgenPrefix=opt$pgenPrefix,
              AlleleOrder=opt$AlleleOrder,
              rangestoIncludeFile = opt$rangestoIncludeFile,
              chrom=opt$chrom,
@@ -335,6 +339,7 @@ if(nThreads == 1){
              is_fastTest = opt$is_fastTest,
              max_MAC_use_ER = opt$max_MAC_for_ER,
              subSampleFile = opt$subSampleFile,
+	is_noadjCov = opt$is_noadjCov,
              GMMATmodel_varianceRatio_multiTraits_File=opt$GMMATmodel_varianceRatio_multiTraits_File)
 
 
