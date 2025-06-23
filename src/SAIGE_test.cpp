@@ -724,11 +724,22 @@ if(!t_isER){
     arma::vec res_er = m_res;
     arma::vec pi1_er = m_mu;
     arma::vec resout_er = m_resout;
+    /*std::cout << "t_GVec(0) " << t_GVec(0) << std::endl;
+    std::cout << "res_er(0) " << res_er(0) << std::endl;
+    std::cout << "pi1_er(0) " << pi1_er(0) << std::endl;
+    resout_er.print("resout_er");
+    std::cout << "iIndex.n_elem" << iIndex.n_elem << std::endl;
+    std::cout << "iIndexComVec.n_elem" << iIndexComVec.n_elem << std::endl;
+    std::cout << "m_n_case " << m_n_case << std::endl;
+        iIndex.print("iIndex");
+*/	
     double pval_ER =  SKATExactBin_Work(Z_er, res_er, pi1_er, m_n_case, iIndex, iIndexComVec, resout_er, 2e+6, 1e+4, 1e-6, 1);
     char pValueBuf_ER[100];
     sprintf(pValueBuf_ER, "%.6E", pval_ER);
     std::string buffAsStdStr_ER = pValueBuf_ER;
     t_pval = pValueBuf_ER;
+    
+    //std::cout << "t_pval " << t_pval << std::endl;
     pval = pval_ER;
     boost::math::normal ns;
     double t_qval_ER;

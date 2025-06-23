@@ -210,7 +210,7 @@ setGenoInput = function(bgenFile = "",
     markerInfo = data.table::fread(pvarFile, header = T)
     names(markerInfo) = gsub('#CHROM', 'CHROM', names(markerInfo))
     # columns are 'CHROM', 'POS', 'ID', 'REF', 'ALT'
-
+markerInfo[, ID := paste(CHROM, POS, REF, ALT, sep = ":")]
     markerInfo$genoIndex = 1:nrow(markerInfo) - 1  # -1 is to convert 'R' to 'C++' 
     markerInfo$genoIndex_prev = rep(0, length(markerInfo$genoIndex))
     if(chrom != ""){
