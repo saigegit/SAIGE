@@ -515,7 +515,7 @@ void mainMarkerInCPP(
 	pval_num = 0;
     }
 
-    if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest)){
+    if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest) && MAC > g_MACCutoffforER){
       //ptr_gSAIGEobj->set_flagSparseGRM_cur(true);
      if(MAC > ptr_gSAIGEobj->m_cateVarRatioMinMACVecExclude.back()){
 	ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
@@ -533,22 +533,23 @@ void mainMarkerInCPP(
       }
 
 
-     if(MAC > g_MACCutoffforER){
+     //if(MAC > g_MACCutoffforER){
       Unified_getMarkerPval(
                     t_GVec,
                           false, // bool t_isOnlyOutputNonZero,
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,
                           altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false, ptr_gSAIGEobj->m_isnoadjCov_cur, ptr_gSAIGEobj->m_flagSparseGRM_cur);
-     }else{
+     //}else{
       //std::cout << "ER " << std::endl;
-      Unified_getMarkerPval(
+   /*
+   Unified_getMarkerPval(
                     t_GVec,
                           false, // bool t_isOnlyOutputNonZero,
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,
                           altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true, ptr_gSAIGEobj->m_isnoadjCov_cur, ptr_gSAIGEobj->m_flagSparseGRM_cur);
+ */
  
- 
-     }     
+      //}     
      }
 
 
