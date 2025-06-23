@@ -515,7 +515,11 @@ void mainMarkerInCPP(
 	pval_num = 0;
     }
 
-    if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest) && MAC > g_MACCutoffforER){
+  if((t_traitType == "binary" && MAC > g_MACCutoffforER) || t_traitType != "binary"){
+
+
+
+    if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest)){
       //ptr_gSAIGEobj->set_flagSparseGRM_cur(true);
      if(MAC > ptr_gSAIGEobj->m_cateVarRatioMinMACVecExclude.back()){
 	ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
@@ -551,7 +555,7 @@ void mainMarkerInCPP(
  
       //}     
      }
-
+}//if((t_traitType == "binary" && MAC > g_MACCutoffforER) || t_traitType != "binary"){
 
 
    if(t_traitType == "binary"){
