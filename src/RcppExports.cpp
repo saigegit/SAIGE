@@ -597,6 +597,19 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// setUpSparseSigmain_multiTrait_R
+void setUpSparseSigmain_multiTrait_R(arma::umat& sparseSigmaLocationMtx, arma::vec& sparseSigmaValueVec, arma::umat& sparseSigmaIndiceMtx, arma::ivec& dimNumVec);
+RcppExport SEXP _SAIGE_setUpSparseSigmain_multiTrait_R(SEXP sparseSigmaLocationMtxSEXP, SEXP sparseSigmaValueVecSEXP, SEXP sparseSigmaIndiceMtxSEXP, SEXP dimNumVecSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::umat& >::type sparseSigmaLocationMtx(sparseSigmaLocationMtxSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type sparseSigmaValueVec(sparseSigmaValueVecSEXP);
+    Rcpp::traits::input_parameter< arma::umat& >::type sparseSigmaIndiceMtx(sparseSigmaIndiceMtxSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type dimNumVec(dimNumVecSEXP);
+    setUpSparseSigmain_multiTrait_R(sparseSigmaLocationMtx, sparseSigmaValueVec, sparseSigmaIndiceMtx, dimNumVec);
+    return R_NilValue;
+END_RCPP
+}
 // closeGenoFile_plink
 void closeGenoFile_plink();
 RcppExport SEXP _SAIGE_closeGenoFile_plink() {
@@ -3130,6 +3143,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_assign_g_outputFilePrefix0", (DL_FUNC) &_SAIGE_assign_g_outputFilePrefix0, 1},
     {"_SAIGE_removeOutfile_inSingle", (DL_FUNC) &_SAIGE_removeOutfile_inSingle, 0},
     {"_SAIGE_assign_g_outputFilePrefixSingle", (DL_FUNC) &_SAIGE_assign_g_outputFilePrefixSingle, 1},
+    {"_SAIGE_setUpSparseSigmain_multiTrait_R", (DL_FUNC) &_SAIGE_setUpSparseSigmain_multiTrait_R, 4},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
     {"_SAIGE_getAlleleFreqVec", (DL_FUNC) &_SAIGE_getAlleleFreqVec, 0},

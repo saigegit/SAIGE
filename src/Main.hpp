@@ -392,4 +392,5 @@ void removeOutfile_inSingle();
 
 void assign_g_outputFilePrefixSingle( std::string t_outputFilePrefixSingle);
 
+void setUpSparseSigmain_multiTrait_R(arma::umat & sparseSigmaLocationMtx, arma::vec & sparseSigmaValueVec, arma::umat & sparseSigmaIndiceMtx, arma::ivec & dimNumVec);
 #endif

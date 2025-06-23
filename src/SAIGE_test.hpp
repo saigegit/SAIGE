@@ -21,11 +21,11 @@ class SAIGEClass
       arma::vec m_mu2;
       arma::vec m_tauvec;
       arma::vec  m_S_a;
-      std::string m_traitType; 
       std::string m_impute_method;
       //std::vector<arma::vec> m_res_mt_vec;	
       //std::vector<arma::mat> m_XV_mt_vec;
     public:
+      std::string m_traitType; 
         // Default constructor
        /*
 	SAIGEClass() {
@@ -131,7 +131,14 @@ arma::umat m_sampleindices_mt;
 arma::uvec m_sampleindices_vec;
 arma::uvec m_sampleIndexLenVec;
 arma::uvec m_colXvec;
-  ////////////////////// -------------------- functions ---------------------------------- //////////////////////
+
+arma::umat m_sparseSigmaLocationMtx;
+arma::vec m_sparseSigmaValueVec;
+arma::umat m_sparseSigmaIndiceMtx;
+arma::ivec m_dimNumVec;
+
+
+////////////////////// -------------------- functions ---------------------------------- //////////////////////
 SAIGEClass(
         arma::mat & t_XVX_mt,
         arma::mat & t_XXVX_inv_mt,
@@ -376,6 +383,12 @@ void scoreTestFast_noadjCov_multiTrait(arma::vec & t_GVec,
 
 void assign_for_itrait_sampleIndices(unsigned int t_itrait);
 
+arma::vec getPCG1ofSigmaAndGtilde_wo_precomp(arma::sp_mat & m_spSigmaMat, arma::vec & m_diagSigma, arma::vec& bVec, int maxiterPCG, double tolPCG);
+
+
+void setsparseSigmaMtxMultiTraits(arma::umat & sparseSigmaLocationMtx, arma::vec & sparseSigmaValueVec, arma::umat & sparseSigmaIndiceMtx, arma::ivec & dimNumVec);
+
+arma::sp_mat gen_sp_SigmaMat_multiTrait();
 
 };
 

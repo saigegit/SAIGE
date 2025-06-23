@@ -2884,7 +2884,7 @@ extractVarianceRatio = function(obj.glmm.null,
 	var2null_noXadj = innerProduct(mu*(1-mu), g_noXadj*g_noXadj)
     }else if(obj.glmm.null$traitType == "quantitative"){
          var2null = innerProduct(g, g)
-	var2null_noXadj = innerProduct(g_noXadj*g_noXadj)
+	var2null_noXadj = innerProduct(g_noXadj,g_noXadj)
     }else if(obj.glmm.null$traitType == "survival"){
          var2null = innerProduct(mu, g*g)
 	var2null_noXadj = innerProduct(mu, g_noXadj*g_noXadj)

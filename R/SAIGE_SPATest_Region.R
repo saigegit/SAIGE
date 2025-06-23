@@ -42,8 +42,12 @@ setSparseSigma_new = function(sparseGRMFile,
   sampleInModel$IID = sampleIDInModel
   #rm(sampleIDInModel)
   sampleInModel = data.frame(sampleInModel)
+  cat("length(sampleInModel$IID) ", length(sampleInModel$IID), "\n")
   sampleInModel$IndexInModel = seq(1, length(sampleInModel$IID), by = 1)
-  cat(nrow(sampleInModel),
+  
+
+
+cat(nrow(sampleInModel),
       " samples have been used to fit the glmm null model\n")
   mergeID = merge(sampleInModel,
                   sparseGRMSampleID,
@@ -86,7 +90,7 @@ setSparseSigma_new = function(sparseGRMFile,
   }
   #diag(sparseSigma) = tauVec[1] + diag(sparseSigma)
   
-  locations = rbind(sparseGRM@i, sparseGRM@j)
+  locations = cbind(sparseGRM@i, sparseGRM@j)
   values = sparseGRM@x
   nSubj = dim(sparseGRM)[1]
   sigmaMatListR = list(locations = locations,

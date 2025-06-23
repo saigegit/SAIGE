@@ -82,7 +82,7 @@ SAIGEClass::SAIGEClass(
     }
     m_X_mt = t_X_mt;
     m_S_a_mt = t_S_a_mt;
-    //m_res_mt = t_res_mt;
+    m_res_mt = t_res_mt;
     m_resout_mt = t_resout_mt;
     m_mu2_mt = t_mu2_mt;
     m_mu_mt = t_mu_mt;
@@ -222,8 +222,11 @@ void SAIGEClass::scoreTest(arma::vec & t_GVec,
       var2m = dot(t_P2Vec , t_gtilde);
        //std::cout << "!m_flagSparseGRM_cur" << std::endl;
     }else{
-      arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
-      t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
+      //arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
+      arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat_multiTrait();
+      arma::vec m_diagSigma = arma::vec(m_SigmaMat_sp.diag());
+      //t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
+      t_P2Vec = getPCG1ofSigmaAndGtilde_wo_precomp(m_SigmaMat_sp, m_diagSigma, t_gtilde, 100, 0.02); 
       var2m = dot(t_P2Vec , t_gtilde);
       if(m_isVarPsadj){
 	var2m = var2m - t_gtilde.t() * m_Sigma_iXXSigma_iX * m_X.t() * t_P2Vec;	
@@ -613,11 +616,13 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 if(!m_flagSparseGRM_cur && t_isnoadjCov){
         is_gtilde = false;
         isScoreFast = true;
+	//std::cout << "scoreTestFast_noadjCov_multiTrait "  << std::endl;
         scoreTestFast_noadjCov_multiTrait(t_GVec, iIndex, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq,t_Tstat, t_var1, t_var2);
 
 }else if(m_flagSparseGRM_cur){
         is_gtilde = true;
         isScoreFast = false;
+        //std::cout << "scoreTest "  << std::endl;
         scoreTest(t_GVec, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq, t_Tstat, t_var1, t_var2, t_gtilde, t_P2Vec, t_gy, is_region, iIndex);
 
 }else{
@@ -658,7 +663,6 @@ if((StdStat > m_SPA_Cutoff || std::isnan(StdStat)) && m_traitType != "quantitati
 	t_isER = false;
 }
 
-//std::cout << "ok2" << std::endl;
 
 if(!t_isER){
 
@@ -670,7 +674,6 @@ if(!t_isER){
           getadjGFast(t_GVec, t_gtilde, iIndex);
 	  is_gtilde = true;
        }
-       //std::cout << "ok3" << std::endl;
 	//int t_gtilden = t_gtilde.n_elem;
         p_iIndexComVecSize = double(iIndexComVecSize)/m_n;
 	//std::cout << m_mu.n_elem << std::endl;
@@ -707,7 +710,6 @@ if(!t_isER){
 	gNA = t_gtilde(iIndexComVec);
    	muNB = m_mu(iIndex);
    	muNA = m_mu(iIndexComVec);
-	//std::cout << "SPA 1" << std::endl;
 
 /*	
 	    std::cout << "gNA.n_elem 2 " << gNA.n_elem << std::endl;
@@ -845,7 +847,8 @@ if(!t_isER){
     arma::vec res_er = m_res;
     arma::vec pi1_er = m_mu;
     arma::vec resout_er = m_resout;
-    double pval_ER =  SKATExactBin_Work(Z_er, res_er, pi1_er, m_n_case, iIndex, iIndexComVec, resout_er, 2e+6, 1e+4, 1e-6, 1);
+    uint32_t n_case = arma::sum(m_y == 1); 
+    double pval_ER =  SKATExactBin_Work(Z_er, res_er, pi1_er, n_case, iIndex, iIndexComVec, resout_er, 2e+6, 1e+4, 1e-6, 1);
     char pValueBuf_ER[100];
     sprintf(pValueBuf_ER, "%.6E", pval_ER);
     std::string buffAsStdStr_ER = pValueBuf_ER;
@@ -1040,8 +1043,12 @@ if(!t_isER){
       if(!m_flagSparseGRM_cur){
         t_P2Vec = t_gtilde % m_mu2 *m_tauvec[0];
       }else{
-        arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
-        t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
+        //arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
+	arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat_multiTrait();
+        //t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
+        arma::vec m_diagSigma = arma::vec(m_SigmaMat_sp.diag());
+        t_P2Vec = getPCG1ofSigmaAndGtilde_wo_precomp(m_SigmaMat_sp, m_diagSigma, t_gtilde, 100, 0.02);
+
       }
     }
 }
@@ -1431,12 +1438,13 @@ void SAIGEClass::assign_for_itrait(unsigned int t_itrait){
 		m_startip = arma::sum(m_colXvec.subvec(0, t_itrait - 1));
 	}
         m_p = m_colXvec(t_itrait);
-	
+	//std::cout << "assign_for_itrait 1 " << std::endl;	
 	m_endip =  m_startip + m_colXvec[t_itrait]-1;
         
 	m_ip.set_size(m_endip - m_startip + 1);
         unsigned int diff = m_endip - m_startip + 1;
 	    
+	//std::cout << "assign_for_itrait 2 " << std::endl;	
         // Populate m_ip with values from m_startip to m_endip
         for (unsigned int i = 0; i < m_ip.size(); ++i) {
             m_ip(i) = m_startip + i;
@@ -1446,10 +1454,16 @@ void SAIGEClass::assign_for_itrait(unsigned int t_itrait){
             //std::cout << "m_y_mt.n_cols " << m_y_mt.n_cols << " " << m_itrait <<std::endl;	
 	
        arma::vec  m_y_sub = m_y_mt.col(m_itrait);
-            //std::cout << "m_y_mt.n_cols " << m_y_mt.n_cols << " " << m_itrait <<std::endl;
+          //  std::cout << "m_y_mt.n_cols " << m_y_mt.n_cols << " " << m_itrait <<std::endl;
 	//m_sampleindices_vec.print("m_sampleindices_vec");
+	//std::cout << "m_sampleindices_vec.n_elem " << m_sampleindices_vec.n_elem << std::endl;
        m_y = m_y_sub.elem(m_sampleindices_vec);
+       
+            //       std::cout << "assign_for_itrait5a " << std::endl;
+       
+       
        arma::vec  m_res_sub = m_res_mt.col(m_itrait);
+          //         std::cout << "assign_for_itrait5a1 " << std::endl;
        m_res = m_res_sub.elem(m_sampleindices_vec);
        //m_res = m_res_mt_vec.at(m_itrait);
 	//std::cout << "assign_for_itrait5b " << std::endl;
@@ -1462,6 +1476,11 @@ void SAIGEClass::assign_for_itrait(unsigned int t_itrait){
 
 	m_startic = m_itrait*m_numMarker_cond;
         m_endic = m_startic + m_numMarker_cond - 1;
+	//m_resout_mt.print("m_resout_mt");
+	//if(m_traitType == "binary"){
+	//	m_resout = m_resout_mt.col(m_itrait);
+	//}
+
             //std::cout << "assign_for_itrait6 " << std::endl;	
         //m_startip = m_itrait*m_p;
         //m_endip = m_startip + m_p - 1;
@@ -1635,6 +1654,65 @@ void SAIGEClass::assign_for_itrait_sampleIndices(unsigned int t_itrait){
         m_sampleindices_vec = sampleindices_sub_vec.subvec(0, (m_sampleIndexLenVec[t_itrait]-1));
 }
 
+arma::vec SAIGEClass::getPCG1ofSigmaAndGtilde_wo_precomp(arma::sp_mat & m_spSigmaMat, arma::vec & m_diagSigma, arma::vec& bVec, int maxiterPCG, double tolPCG) {
+    int Nnomissing = m_spSigmaMat.n_rows;
+    arma::vec xVec(Nnomissing, arma::fill::zeros); // Initialize xVec to zeros
+    arma::vec rVec = bVec; // Residual vector
+    arma::vec zVec(Nnomissing);
+    //arma::vec minvVec = 1.0 / spsigma.diag(); // Preconditioner (reciprocal of diagonal elements)
+    arma::vec minvVec = 1.0 / m_diagSigma; // Convert diagonal view to dense vector
+    //m_diagSigma.print("m_diagSigma");
+    zVec = minvVec % rVec; // Apply preconditioner
+    double sumr2 = arma::dot(rVec, rVec); // Initial residual norm
+    arma::vec pVec = zVec; // Search direction
 
+    int iter = 0;
+    while (sumr2 > tolPCG && iter < maxiterPCG) {
+        iter++;
+        arma::vec ApVec = m_spSigmaMat * pVec; // Sparse matrix-vector multiplication
+        //ApVec.print("ApVec");
+        double alpha = arma::dot(rVec, zVec) / arma::dot(pVec, ApVec); // Step size
+        //std::cout << "alpha" << alpha << std::endl;
+        //pVec.print("pVec");
+        //xVec += alpha * pVec; // Update solution
+        xVec = xVec + alpha * pVec;
+
+        arma::vec r1Vec = rVec - alpha * ApVec; // Update residual
+
+        arma::vec z1Vec = minvVec % r1Vec; // Apply preconditioner to new residual
+        double beta = arma::dot(z1Vec, r1Vec) / arma::dot(zVec, rVec); // Update beta
+
+        pVec = z1Vec + beta * pVec; // Update search direction
+        zVec = z1Vec; // Update preconditioned residual
+        rVec = r1Vec; // Update residual
+        //xVec.print("xVec");
+        sumr2 = arma::dot(rVec, rVec); // Update residual norm
+    }
+
+    if (iter >= maxiterPCG) {
+        std::cout << "PCG in getPCG1ofSigmaAndGtilde did not converge. You may increase maxiter number." << std::endl;
+    }
+
+    //std::cout << "Iterations from getPCG1ofSigmaAndGtilde: " << iter << std::endl;
+    return xVec;
+}
+
+
+void  SAIGEClass::setsparseSigmaMtxMultiTraits(arma::umat & sparseSigmaLocationMtx, arma::vec & sparseSigmaValueVec, arma::umat & sparseSigmaIndiceMtx, arma::ivec & dimNumVec){
+	m_sparseSigmaLocationMtx = sparseSigmaLocationMtx;
+	m_sparseSigmaValueVec = sparseSigmaValueVec;
+	m_sparseSigmaIndiceMtx = sparseSigmaIndiceMtx;
+	m_dimNumVec = dimNumVec;
+}
+
+arma::sp_mat SAIGEClass::gen_sp_SigmaMat_multiTrait() {
+    unsigned int starts = m_sparseSigmaIndiceMtx(m_itrait, 0);
+    unsigned int ends = m_sparseSigmaIndiceMtx(m_itrait, 1);
+    m_locationMat = m_sparseSigmaLocationMtx.rows(starts, ends);
+    m_valueVec = m_sparseSigmaValueVec.subvec(starts, ends-starts+1);
+    m_dimNum = m_dimNumVec[m_itrait];
+    arma::sp_mat resultMat(m_locationMat, m_valueVec, m_dimNum, m_dimNum);
+    return resultMat;
+}
 
 }

@@ -342,7 +342,26 @@ SPAGMMATtest = function(bgenFile = "",
     if(sparseGRMFile != ""){ 
       #sparseSigmaRList = setSparseSigma(sparseSigmaFile)
       if(length(obj.model.List) > 1){
-	stop("When multiple phenotypes are analyzed, sparse GRM can't be incorproated in step 2")
+	#stop("When multiple phenotypes are analyzed, sparse GRM can't be incorproated in step 2")
+        sparseSigmaLocationMtx = NULL
+        sparseSigmaValueVec = c()
+	dimNumVec = c()
+	sparseSigmaIndiceMtx = NULL
+	aend = 0	
+      	for(s in 1:length(obj.model.List)){
+          sparseSigmaRList = setSparseSigma_new(sparseGRMFile, sparseGRMSampleIDFile, relatednessCutoff, obj.model.List[[s]]$sampleID, obj.model.List[[s]]$theta, obj.model.List[[s]]$mu2,  obj.model.List[[s]]$traitType)
+          sparseSigmaLocationMtx = rbind(sparseSigmaLocationMtx, sparseSigmaRList$locations)
+	  sparseSigmaValueVec = c(sparseSigmaValueVec, sparseSigmaRList$values)
+	  astart = aend + 1  
+	  aend = astart + length(sparseSigmaRList$values) - 1
+	  sparseSigmaIndiceMtx = rbind(sparseSigmaIndiceMtx, c(astart-1, aend - 1))
+     
+     	 dimNumVec = c(dimNumVec, sparseSigmaRList$nSubj)
+     
+       }
+	sparseSigmaRList = list(nSubj = 0, locations = matrix(0,nrow=2,ncol=2), values = rep(0,2))
+
+
       }else{	
         sparseSigmaRList = setSparseSigma_new(sparseGRMFile, sparseGRMSampleIDFile, relatednessCutoff, obj.model.List[[1]]$sampleID, obj.model.List[[1]]$theta, obj.model.List[[1]]$mu2,  obj.model.List[[1]]$traitType)
         isSparseGRM = TRUE
@@ -402,7 +421,7 @@ SPAGMMATtest = function(bgenFile = "",
       #}
     }
 
-    nsample <- length(unique(obj.model.List[[1]]$sampleID))
+    nsample <- length(unique(obj.model.List[[1]]$sampleid))
     cateVarRatioMaxMACVecInclude = c(cateVarRatioMaxMACVecInclude, nsample)	
    
 #time_6 = proc.time()
@@ -425,7 +444,7 @@ SPAGMMATtest = function(bgenFile = "",
                  rangestoIncludeFile = rangestoIncludeFile,
                  chrom = chrom,
                  AlleleOrder = AlleleOrder,
-                 sampleInModel = obj.model.List[[1]]$sampleID)
+                 sampleInModel = obj.model.List[[1]]$sampleid)
 #time_7 = proc.time()
 
 
@@ -453,30 +472,32 @@ SPAGMMATtest = function(bgenFile = "",
     }
 
 
-    print("length(obj.model.List[[1]]$sampleID)")
-    print(length(obj.model.List[[1]]$sampleID))
+    print("length(obj.model.List[[1]]$sampleid)")
+    print(length(obj.model.List[[1]]$sampleid))
     print("obj.model.List[[1]]$nx")
     print(obj.model.List[[1]]$nx)
     valueVec=matrix(0) 
-    X <- matrix(0, length(obj.model.List[[1]]$sampleID), obj.model.List[[1]]$nx)
+    X <- matrix(0, length(obj.model.List[[1]]$sampleid), obj.model.List[[1]]$nx)
     colXvec <- rep(0, length(obj.model.List))
     XVX <- matrix(0, obj.model.List[[1]]$upperx, obj.model.List[[1]]$nx)
-    XXVX_inv <- matrix(0, length(obj.model.List[[1]]$sampleID), obj.model.List[[1]]$nx)
-    XV <- matrix(0, obj.model.List[[1]]$nx, length(obj.model.List[[1]]$sampleID))
-    XVX_inv_XV <- matrix(0, length(obj.model.List[[1]]$sampleID), obj.model.List[[1]]$nx)
-    Sigma_iXXSigma_iX <- matrix(0, length(obj.model.List[[1]]$sampleID), obj.model.List[[1]]$nx)
+    XXVX_inv <- matrix(0, length(obj.model.List[[1]]$sampleid), obj.model.List[[1]]$nx)
+    XV <- matrix(0, obj.model.List[[1]]$nx, length(obj.model.List[[1]]$sampleid))
+    XVX_inv_XV <- matrix(0, length(obj.model.List[[1]]$sampleid), obj.model.List[[1]]$nx)
+    Sigma_iXXSigma_iX <- matrix(0, length(obj.model.List[[1]]$sampleid), obj.model.List[[1]]$nx)
     S_a <-  matrix(0, obj.model.List[[1]]$upperx, length(obj.model.List)) 
-    res <-  matrix(0, length(obj.model.List[[1]]$sampleID), length(obj.model.List)) 
-    mu <-  matrix(0, length(obj.model.List[[1]]$sampleID), length(obj.model.List)) 
-    mu2 <-  matrix(0, length(obj.model.List[[1]]$sampleID), length(obj.model.List)) 
-    y <-  matrix(0, length(obj.model.List[[1]]$sampleID), length(obj.model.List)) 
-    sampleIndexMat <-  matrix(0, length(obj.model.List[[1]]$sampleID), length(obj.model.List)) 
+    res <-  matrix(0, length(obj.model.List[[1]]$sampleid), length(obj.model.List)) 
+    mu <-  matrix(0, length(obj.model.List[[1]]$sampleid), length(obj.model.List)) 
+    mu2 <-  matrix(0, length(obj.model.List[[1]]$sampleid), length(obj.model.List)) 
+    y <-  matrix(0, length(obj.model.List[[1]]$sampleid), length(obj.model.List)) 
+    sampleIndexMat <-  matrix(0, length(obj.model.List[[1]]$sampleid), length(obj.model.List)) 
     sampleIndexLenVec <- rep(0, length(obj.model.List))
-    offset <-  matrix(0, length(obj.model.List[[1]]$sampleID), length(obj.model.List)) 
-    obj_cc_res.out <-  matrix(0, length(obj.model.List[[1]]$sampleID), length(obj.model.List)) 
+    offset <-  matrix(0, length(obj.model.List[[1]]$sampleid), length(obj.model.List)) 
+    #obj_cc_res.out <- rep(0, length(obj.model.List))
+    obj_cc_res.out = matrix(0, 1, length(obj.model.List))
+    #matrix(0, length(obj.model.List[[1]]$sampleid), length(obj.model.List)) 
     theta <- matrix(0, 2,  length(obj.model.List))
     #tauVal_sp <- matrix(0, 2,  length(obj.model.List))
-    varWeights <-  matrix(0, length(obj.model.List[[1]]$sampleID), length(obj.model.List))
+    varWeights <-  matrix(0, length(obj.model.List[[1]]$sampleid), length(obj.model.List))
 
     theta <- matrix(0, 2, length(obj.model.List))
     #obj_cc_res.out <- NULL
@@ -516,7 +537,13 @@ SPAGMMATtest = function(bgenFile = "",
       y[obj.model$sampleIndices, oml] = obj.model$y
       offset[obj.model$sampleIndices, oml] = obj.model$offset
       if(obj.model$traitType == "binary"){
-      obj_cc_res.out[obj.model$sampleIndices, oml] = obj.model$obj_cc$res.out
+      #cat("obj.model$obj_cc$res.out ", length(obj.model$obj_cc$res.out), "\n")
+      #print(length(obj.model$sampleIndices))
+      #print(oml)
+      #obj_cc_res.out[obj.model$sampleIndices, oml] = obj.model$obj_cc$res.out
+      if(length(obj.model$obj_cc$res.out) > 0){
+      	obj_cc_res.out[1,oml] = as.integer(obj.model$obj_cc$res.out)
+      	}
       }
       #tauVal_sp[,oml] = obj.model$tauVal_sp
       #varWeights[obj.model$sampleIndices, oml] = obj.model$varWeights
@@ -545,7 +572,7 @@ setSAIGEobjInCPP(
   t_mu = mu,
   t_varRatio_sparse = as.matrix(ratioVecList$ratioVec_sparse),
   t_varRatio_null = as.matrix(ratioVecList$ratioVec_null),
-   t_varRatio_null_noXadj = as.matrix(ratioVecList$ratioVec_null_noXadj),
+  t_varRatio_null_noXadj = as.matrix(ratioVecList$ratioVec_null_noXadj),
   t_cateVarRatioMinMACVecExclude = cateVarRatioMinMACVecExclude, # arma::vec remains unchanged
   t_cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude, # arma::vec remains unchanged
   t_SPA_Cutoff = SPAcutoff, # Scalar remains unchanged
@@ -570,6 +597,12 @@ setSAIGEobjInCPP(
   t_sampleIndexLenVec = sampleIndexLenVec,
   t_sampleIndexMat = sampleIndexMat
 )
+
+
+    if(sparseGRMFile != "" & (length(obj.model.List) > 1)){
+        setUpSparseSigmain_multiTrait_R(sparseSigmaLocationMtx, sparseSigmaValueVec, sparseSigmaIndiceMtx, dimNumVec)
+     }
+
 
 
 # Print all arguments
@@ -635,7 +668,7 @@ setSAIGEobjInCPP(
     print("BetaDist_weight_mat")
     print(dim(BetaDist_weight_mat))
 
-    n = length(obj.model.List[[1]]$sampleID)
+    n = length(obj.model.List[[1]]$sampleid)
     assign_conditionMarkers_factors(genoType, condition_genoIndex_prev_a, condition_genoIndex_a, n, condition_weights, BetaDist_weight_mat, is_equal_weight_in_groupTest)
 
     #   print("OKKK2")

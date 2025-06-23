@@ -213,14 +213,9 @@ bool imputeGenoAndFlip_sub(arma::vec& t_GVec,
                        arma::uvec & t_sampleSubIndices) // Parameter for subsetting indices
 {
     bool flip = false;
-    //bool ischange = false;
-    t_indexNonZero.clear();
-    t_indexZero.clear();
-    int nMissing = t_indexForMissing_arma.size();
-    //uint dosagesSize = t_GVec.size();
-    //double imputeG = 0;
-    //double t_altFreq_0 = t_altFreq;
-    // Subset t_GVec using t_sampleSubIndices and store in t_GVec_sub
+    //t_indexNonZero.clear();
+    //t_indexZero.clear();
+    //int nMissing = t_indexForMissing_arma.size();
     if (!t_sampleSubIndices.is_empty()) {
         t_GVec_sub = t_GVec.elem(t_sampleSubIndices); // Store subset in t_GVec_sub
 	//ischange = true;
@@ -228,6 +223,7 @@ bool imputeGenoAndFlip_sub(arma::vec& t_GVec,
         t_GVec_sub = t_GVec; // If no subsetting, copy the original vector
     }
     
+/*
     arma::uvec m_indexForMissing_arma_sub;
     double imputeG = 0;
     if (nMissing > 0) {
@@ -239,7 +235,6 @@ bool imputeGenoAndFlip_sub(arma::vec& t_GVec,
     		}
 	}else{
 		m_indexForMissing_arma_sub = t_indexForMissing_arma; 		         }
-
 
 
 
@@ -277,12 +272,18 @@ bool imputeGenoAndFlip_sub(arma::vec& t_GVec,
         t_altCount = arma::accu(t_GVec_sub); 
         t_altFreq = t_altCount / (2 * (t_GVec_sub.n_elem));
         t_MAC = arma::min(arma::vec({t_altCount, 2*(t_GVec_sub.n_elem)-t_altCount}));	    
-     }else{//if (nMissing > 0) {
+     }
+*/
+     
+     //else{//if (nMissing > 0) {
 
 //std::cout << "t_altCount inner " << t_altCount << std::endl;
 //std::cout << "t_altFreq inner " << t_altFreq << std::endl;
         t_altCount = arma::accu(t_GVec_sub);
 	t_altFreq = t_altCount / (2 * (t_GVec_sub.n_elem));
+	 
+	 
+	 /*
 	 if(t_altFreq > 0.5){
                 t_GVec_sub = 2 - t_GVec_sub;
                 t_altFreq = 1 - t_altFreq;
@@ -291,15 +292,17 @@ bool imputeGenoAndFlip_sub(arma::vec& t_GVec,
 
         t_altCount = arma::accu(t_GVec_sub); 
         t_altFreq = t_altCount / (2 * (t_GVec_sub.n_elem));
+	*/
         t_MAC = arma::min(arma::vec({t_altCount, 2*(t_GVec_sub.n_elem)-t_altCount}));	
 
-//std::cout << "t_altCount inner 2 " << t_altCount << std::endl;
-//std::cout << "t_altFreq inner 2 " << t_altFreq << std::endl;
+	//std::cout << "t_altCount inner 2 " << t_altCount << std::endl;
+	//std::cout << "t_altFreq inner 2 " << t_altFreq << std::endl;
 
-//std::cout << "flip " << flip << std::endl;
+	//std::cout << "flip " << flip << std::endl;
 
 
-     }
+     //}
+/*
     if (t_dosage_zerod_cutoff > 0) {
         if (t_MAC <= t_dosage_zerod_MAC_cutoff) {
             t_GVec_sub.clean(t_dosage_zerod_cutoff); // Clean the subsetted vector
@@ -310,7 +313,7 @@ bool imputeGenoAndFlip_sub(arma::vec& t_GVec,
 	    //ischange = true;
         }
     }
-
+*/
 /*
     if (t_altFreq > 0.5) {
         if(flip == true){

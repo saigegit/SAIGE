@@ -169,6 +169,10 @@ assign_g_outputFilePrefixSingle <- function(t_outputFilePrefixSingle) {
     invisible(.Call('_SAIGE_assign_g_outputFilePrefixSingle', PACKAGE = 'SAIGE', t_outputFilePrefixSingle))
 }
 
+setUpSparseSigmain_multiTrait_R <- function(sparseSigmaLocationMtx, sparseSigmaValueVec, sparseSigmaIndiceMtx, dimNumVec) {
+    invisible(.Call('_SAIGE_setUpSparseSigmain_multiTrait_R', PACKAGE = 'SAIGE', sparseSigmaLocationMtx, sparseSigmaValueVec, sparseSigmaIndiceMtx, dimNumVec))
+}
+
 closeGenoFile_plink <- function() {
     invisible(.Call('_SAIGE_closeGenoFile_plink', PACKAGE = 'SAIGE'))
 }
