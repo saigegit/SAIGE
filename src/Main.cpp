@@ -2302,7 +2302,7 @@ void assign_conditionMarkers_factors(
 
   arma::vec gtildeVec;
 
-  if(MAC <=  g_MACCutoffforER && t_traitType == "binary"){
+  if(MAC <=  g_MACCutoffforER && ptr_gSAIGEobj->m_traitType == "binary"){
      Unified_getMarkerPval(
                     GVec,
                     false, // bool t_isOnlyOutputNonZero,

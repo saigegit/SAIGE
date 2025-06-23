@@ -21,12 +21,13 @@ class SAIGEClass
       arma::vec m_mu2;
       arma::vec m_tauvec;
       arma::vec  m_S_a;
-      std::string m_traitType; 
+      //std::string m_traitType; 
       std::string m_impute_method;
       std::vector<uint32_t> m_condition_genoIndex;
       	
 
     public:
+           std::string m_traitType;
       arma::mat m_XXVX_inv;
       arma::mat m_XV;
       int m_n, m_p; //MAIN Dimensions: sample size, number of covariates
