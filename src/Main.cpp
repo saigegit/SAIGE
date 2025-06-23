@@ -433,6 +433,7 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
     std::string pds = std::to_string(pd); 
     std::string info = chr+":"+pds+":"+ref+":"+alt;
 
+    //std::cout << "info " << info << std::endl;
      //std::cout << "t_traitType.size() " << t_traitType.size() << std::endl;
    for(int i_mt0 = 0; i_mt0 < t_traitType.size(); i_mt0++){
      //std::cout << "i_mt0 " << i_mt0 << std::endl;
@@ -579,7 +580,7 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
       }
 
 
-    if(MAC <= g_MACCutoffforER && t_traitType == "binary"){
+    if(MAC <= g_MACCutoffforER && ptr_gSAIGEobj->m_traitType == "binary"){
       Unified_getMarkerPval( 
 		    t_GVec_sub, 
                           false, // bool t_isOnlyOutputNonZero, 
@@ -605,7 +606,7 @@ std::cout << "t_GVec.size() " << t_GVec.size() << std::endl;
 	pval_num = 0;
     }
 
-    if((t_traitType == "binary" && MAC > g_MACCutoffforER) || t_traitType != "binary"){
+    if((ptr_gSAIGEobj->m_traitType == "binary" && MAC > g_MACCutoffforER) || ptr_gSAIGEobj->m_traitType != "binary"){
 
     if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest)){
       //ptr_gSAIGEobj->set_flagSparseGRM_cur(true);
