@@ -23,4 +23,65 @@ SAIGE-GENE (now known as SAIGE-GENE+) are new method extension in the R package 
 The package takes genotype file input in the following formats
 - PLINK (bed, bim, fam), PGEN, BGEN, VCF, BCF, SAV
 
+How to install:
+
+On Linux:
+```
+# install pixi
+curl -fsSL https://pixi.sh/install.sh | sh
+# --- need a new shell or source .*shrc here ---
+
+# install deps from pixi.toml
+pixi install
+
+# install extra dep
+pixi run Rscript -e 'install.packages("lintools", repos="https://cloud.r-project.org")'
+
+# set up plink2
+curl -L https://github.com/chrchang/plink-ng/archive/refs/tags/v2.0.0-a.6.16.tar.gz | tar -zx
+mv plink-ng-2.0.0-a.6.16 plink-ng
+pixi run x86_64-conda-linux-gnu-cc -std=c++14 -fPIC -O3 -I.pixi/envs/default/include -L.pixi/envs/default/lib -o plink2_includes.a plink-ng/2.0/include/*.cc -shared -lz -lzstd -lpthread -lm -ldeflate
+mv plink2_includes.a .pixi/envs/default/lib
+
+# install SAIGE
+pixi run R CMD INSTALL .
+
+# example run
+pixi run Rscript extdata/step1_fitNULLGLMM.R --help
+```
+
+On MacOS
+```
+# install pixi
+curl -fsSL https://pixi.sh/install.sh | sh
+# --- need a new shell or source .*shrc here ---
+
+# install deps from pixi.toml
+pixi install
+
+# install extra dep
+pixi run Rscript -e 'install.packages("lintools", repos="https://cloud.r-project.org")'
+
+# set up plink2
+curl -L https://github.com/chrchang/plink-ng/archive/refs/tags/v2.0.0-a.6.16.tar.gz | tar -zx
+mv plink-ng-2.0.0-a.6.16 plink-ng
+## pixi run clang++ -std=c++14 -fPIC -O3 -I.pixi/envs/default/include -L.pixi/envs/default/lib -o plink2_includes.a plink-ng/2.0/include/*.cc -shared -lz -lzstd -lpthread -lm -ldeflate
+# mv plink2_includes.a .pixi/envs/default/lib
+mkdir -p plink-ng/2.0/build
+cd plink-ng/2.0
+### compile using clang
+pixi run clang++ -std=c++14 -fPIC -O3 -I../../../.pixi/envs/default/include -c include/*.cc
+mv *.o build/
+cd build
+ar rcs ../plink2_includes.a *.o
+
+cp ../plink2_includes.a ../../../.pixi/envs/default/lib/libplink2_includes.a
+cd ../../../
+# install SAIGE
+pixi run R CMD INSTALL .
+
+# example run
+pixi run Rscript extdata/step1_fitNULLGLMM.R --help
+```
+
 
