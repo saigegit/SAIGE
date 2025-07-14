@@ -642,8 +642,8 @@ glmmkin.ai_PCG_Rcpp_Quantitative = function(bedFile, bimFile, famFile, Xorig, is
 
 #    cat("tau0_after_fit: ", tau0,"\n")
 #    print(fit)
-
-   if(tau[1]!=0){
+   
+   if((fit$tau)[1]!=0){
     tau = as.numeric(fit$tau)
     cov = re.coef$cov
     alpha = re.coef$alpha
@@ -2891,7 +2891,7 @@ extractVarianceRatio = function(obj.glmm.null,
     }
 
     varRatio_NULL_vec = c(varRatio_NULL_vec, var1/var2null)
-varRatio_NULL_noXadj_vec <- c(varRatio_NULL_noXadj_vec, var1 / var2null_noXadj)
+    varRatio_NULL_noXadj_vec <- c(varRatio_NULL_noXadj_vec, var1 / var2null_noXadj)
     #indexInMarkerList = indexInMarkerList + 1
     numTestedMarker = numTestedMarker + 1
 
