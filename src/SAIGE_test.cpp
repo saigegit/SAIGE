@@ -330,23 +330,27 @@ void SAIGEClass::scoreTestFast_noadjCov(arma::vec & t_GVec,
     //if(t_is_region && m_traitType == "binary"){
     //  t_gy = dot(t_gtilde, m_y);
     // }
+     
     double var2_a = dot(m_mu21,pow(g1,2));
     double var2_b = dot(m_mu21, 2*2*t_altFreq*g1);
     double var2_c = arma::accu(m_mu2)*pow(2*t_altFreq, 2);
     var2 = var2_a - var2_b + var2_c;
+    var2 = var2 *(m_tauvec[0]);
+    //std::cout << "var2 " << var2 << std::endl;
 
     //arma::vec t_GVec_center = t_GVec-arma::mean(t_GVec);
-    //var2 = dot(m_mu2, pow(t_GVec_center,2));  
+    //var2 = dot(m_mu2, pow(t_GVec_center,2))*(m_tauvec[0]);  
+    //std::cout << "var2 b " << var2 << std::endl;
     //S = dot(t_GVec_center, m_res);
-    S = dot(g1, m_res1)  - arma::accu(m_res)*(2*t_altFreq);
     //std::cout << "S " << S << std::endl;
+    S = dot(g1, m_res1)  - arma::accu(m_res)*(2*t_altFreq);
+    //std::cout << "S b " << S << std::endl; 
     S = S/m_tauvec[0];
 
-    //std::cout << "S b " << S << std::endl;
 
     //var2 = var2m(0,0);
     double var1 = var2 * m_varRatioVal;
-
+    //std::cout << "var1 " << var1 << std::endl;
     double stat = S*S/var1;
     if (var1 <= std::numeric_limits<double>::min()){
           t_pval = 1;
