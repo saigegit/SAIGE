@@ -550,7 +550,8 @@ SPAGMMATtest = function(bgenFile = "",
 			print("Firth correction will be used for effect sizes of single variant tests")
 
 		}
-	}	
+	}
+	
 	SAIGE.Region(mu,
 		     OutputFile,
 		     MACCutoff_to_CollapseUltraRare,
