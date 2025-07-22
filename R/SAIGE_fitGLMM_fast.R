@@ -2598,9 +2598,9 @@ extractVarianceRatio = function(obj.glmm.null,
   obj.noK = obj.glmm.null$obj.noK
   if(file.exists(testOut)){file.remove(testOut)}
   bimPlink = data.frame(data.table:::fread(bimFile, header=F))
-  if(sum(sapply(bimPlink[,1], is.numeric)) != nrow(bimPlink)){
-    stop("ERROR: chromosome column in plink bim file is no numeric!\n")
-  }
+  #if(sum(sapply(bimPlink[,1], is.numeric)) != nrow(bimPlink)){
+  #  stop("ERROR: chromosome column in plink bim file is not numeric!\n")
+  #}
 
   family = obj.glm.null$family
   print(family)
@@ -2812,6 +2812,8 @@ extractVarianceRatio = function(obj.glmm.null,
 
           cat("G0", G0[1:10], "\n")
           CHR = bimPlink[Indexvector_forVarRatio[i]+1,1]
+	  CHR = gsub("(?i)^chr", "", CHR, perl = TRUE)
+	  CHR = as.numeric(CHR)
 	  cat("CHR ", CHR, "\n")
           if(sum(G0)/(2*Nnomissing) > 0.5){
             G0 = 2-G0
@@ -2820,6 +2822,7 @@ extractVarianceRatio = function(obj.glmm.null,
           AC = sum(G0)
 
          indexInMarkerList = indexInMarkerList + 1
+	if(!is.na(CHR)){ 
          if((CHR >= 1 & CHR <= 22) | includeNonautoMarkersforVarRatio){
           AF = AC/(2*Nnomissing)
           if(CHR >= 1 & CHR <= 22){
@@ -2898,6 +2901,10 @@ extractVarianceRatio = function(obj.glmm.null,
       }else{
         indexInMarkerList = indexInMarkerList + 1
       }
+  }else{ #if(!is.na(CHR)){
+	indexInMarkerList = indexInMarkerList + 1
+  }
+
 
       if(indexInMarkerList-1 == length(listOfMarkersForVarRatio[[k]])){
         numTestedMarker = numMarkers0
