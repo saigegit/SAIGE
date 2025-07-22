@@ -1,0 +1,32 @@
+[workspace]
+channels = ["conda-forge", "bioconda"]
+name = "SAIGE"
+platforms = ["linux-64", "osx-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+boost-cpp = "*"
+cget = "*"
+openblas = "*"
+r = "*"
+r-bh = "*"
+r-cpp11 = "*"
+r-devtools = "*"
+r-rcpparmadillo = "*"
+r-rcppeigen = "*"
+r-rcppparallel = "*"
+"r-data.table" = "*"
+r-dplyr = "*"
+r-metaskat = "*"
+r-optparse = "*"
+r-qlcmatrix = "*"
+r-rhpcblasctl = "*"
+r-rsqlite = "*"
+r-skat = "*"
+r-spatest = "*"
+savvy = "*"
+superlu = "*"
+zlib = "*"
+zstd = "*"

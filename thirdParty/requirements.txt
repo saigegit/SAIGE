@@ -1,2 +1,0 @@
-statgen/savvy@v2.1.0
-xiaoyeli/superlu@b814567e6cdeba61edffe45839a4043a46215c7a
