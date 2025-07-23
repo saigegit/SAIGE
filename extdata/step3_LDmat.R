@@ -1,4 +1,4 @@
-#!/usr/bin/env -S pixi run --manifest-path /app/pixi.toml Rscript
+#!/usr/bin/env Rscript
 
 #options(stringsAsFactors=F, scipen = 999)
 options(stringsAsFactors=F)
@@ -60,6 +60,8 @@ option_list <- list(
     help="annotations of markers included in the LD matrices using ; to combine multiple annotations in the same test, e.g. missense;lof;synonymous will include missense+lof+synonymous variants. use ALL to include all markers in the genotype/dosage files.  default: missense;lof;synonymous"),
   make_option("--groupFile", type="character", default="",
     help="Path to the file containing the group information for gene-based tests. Each gene/set has 2 or 3 lines in the group file. The first element is the gene/set name. The second element in the first line is to indicate whether this line contains variant IDs (var), annotations (anno), or weights (weight). The line for weights is optional. If not specified, the default weights will be generated based on beta(MAF, 1, 25). Use --weights.beta to change the parameters for the Beta distribution. The variant ids must be in the format chr:pos_ref/alt. Elements are seperated by tab or space."),
+  make_option("--ldH5File", type="character", default="",
+    help="Optional path to write all per-gene LD and marker info into one HDF5"),
   make_option("--markers_per_chunk_in_groupTest", type="numeric", default=100,
     help="Number of markers in each chunk when calculating the variance covariance matrix in the set/group-based tests  [default=100]."),
   make_option("--dosage_zerod_cutoff",type="numeric", default=0.2,
@@ -131,6 +133,7 @@ if(packageVersion("SAIGE")>="1.1.3"){
 	     groups_per_chunk=opt$groups_per_chunk,
 	     markers_per_chunk_in_groupTest=opt$markers_per_chunk_in_groupTest,	
              groupFile = opt$groupFile,
+             ldH5File    = opt$ldH5File, 
      	     dosage_zerod_cutoff = opt$dosage_zerod_cutoff,
              dosage_zerod_MAC_cutoff = opt$dosage_zerod_MAC_cutoff,
 	     annotation_in_groupTest = opt$annotation_in_groupTest,
