@@ -16,7 +16,8 @@ SAIGE.Marker = function(traitType,
 			chrom,
 			isCondition,
 			isOverWriteOutput, 
-			isAnyInclude)
+			isAnyInclude,
+			isGbyE)
 {
 
   if(is.null(OutputFileIndex))
@@ -32,7 +33,7 @@ SAIGE.Marker = function(traitType,
     isappend = TRUE
   }  
 
-  isOpenOutFile_single = openOutfile_single(traitType, isImputation, isappend, isMoreOutput)
+  isOpenOutFile_single = openOutfile_single(traitType, isImputation, isappend, isMoreOutput, isGbyE)
 
   if(!isOpenOutFile_single){
     stop("Output file ", OutputFile, " can't be opened\n")

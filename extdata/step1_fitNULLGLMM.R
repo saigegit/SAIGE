@@ -35,6 +35,8 @@ option_list <- list(
     help="List of covariates (comma separated)"),
   make_option("--qCovarColList", type="character", default="",
     help="List of categorical covariates (comma separated). All categorical covariates must also be in covarColList"),
+  make_option("--eCovarColList", type="character", default="",
+    help="List of environmental covariates (comma separated). All environmental covariates must also be in covarColList"),
   make_option("--sampleIDColinphenoFile", type="character", default="IID",
     help="Required. Column name of sample IDs in the phenotype file, e.g. IID"),
   make_option("--tol", type="numeric", default=0.02,
@@ -133,6 +135,8 @@ print(opt)
 
 covars <- strsplit(opt$covarColList,",")[[1]]
 qcovars <- strsplit(opt$qCovarColList,",")[[1]]
+ecovars <- strsplit(opt$eCovarColList,",")[[1]]
+
 
 convertoNumeric = function(x,stringOutput){
         y= tryCatch(expr = as.numeric(x),warning = function(w) {return(NULL)})
@@ -260,7 +264,7 @@ fitNULLGLMM(plinkFile=opt$plinkFile,
             MaleOnly=opt$MaleOnly,
             SampleIDIncludeFile=opt$SampleIDIncludeFile
         )
-}else if (packageVersion("SAIGE")>="1.4.5"){
+}else if (packageVersion("SAIGE")>="1.4.5" & packageVersion("SAIGE") <= "1.5.0"){
 fitNULLGLMM(plinkFile=opt$plinkFile,
             bedFile=opt$bedFile,
             bimFile=opt$bimFile,
@@ -319,7 +323,64 @@ fitNULLGLMM(plinkFile=opt$plinkFile,
         )
 
 
-
+}else if(packageVersion("SAIGE")>="1.5.1"){
+fitNULLGLMM(plinkFile=opt$plinkFile,
+            bedFile=opt$bedFile,
+            bimFile=opt$bimFile,
+            famFile=opt$famFile,
+            useSparseGRMtoFitNULL=opt$useSparseGRMtoFitNULL,
+            usePCGwithSparseGRM=opt$usePCGwithSparseGRM,
+            sparseGRMFile=opt$sparseGRMFile,
+            sparseGRMSampleIDFile=opt$sparseGRMSampleIDFile,
+            phenoFile = opt$phenoFile,
+            phenoCol = opt$phenoCol,
+            sampleIDColinphenoFile = opt$sampleIDColinphenoFile,
+            traitType = opt$traitType,
+            eventTimeCol = opt$eventTimeCol,
+            eventTimeBinSize = opt$eventTimeBinSize,
+            pcgforUhatforSurvAnalysis = opt$pcgforUhatforSurvAnalysis,
+            outputPrefix = opt$outputPrefix,
+            isCovariateOffset=opt$isCovariateOffset,
+            nThreads = opt$nThreads,
+            useSparseGRMforVarRatio = opt$useSparseGRMforVarRatio,
+            invNormalize = opt$invNormalize,
+            covarColList = covars,
+            qCovarCol = qcovars,
+	    eCovarCol = ecovars,
+            tol=opt$tol,
+            maxiter=opt$maxiter,
+            tolPCG=opt$tolPCG,
+            maxiterPCG=opt$maxiterPCG,
+            SPAcutoff = opt$SPAcutoff,
+            numMarkersForVarRatio = opt$numRandomMarkerforVarianceRatio,
+            skipModelFitting = opt$skipModelFitting,
+            skipVarianceRatioEstimation = opt$skipVarianceRatioEstimation,
+            memoryChunk = opt$memoryChunk,
+            tauInit = tauInit,
+            LOCO = opt$LOCO,
+            isLowMemLOCO = opt$isLowMemLOCO,
+            traceCVcutoff = opt$traceCVcutoff,
+            nrun = opt$nrun,
+            ratioCVcutoff = opt$ratioCVcutoff,
+            outputPrefix_varRatio = opt$outputPrefix_varRatio,
+            IsOverwriteVarianceRatioFile = opt$IsOverwriteVarianceRatioFile,
+            relatednessCutoff = opt$relatednessCutoff,
+            isCateVarianceRatio = opt$isCateVarianceRatio,
+            cateVarRatioMinMACVecExclude = cateVarRatioMinMACVecExclude,
+            cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
+            isCovariateTransform = opt$isCovariateTransform,
+            isDiagofKinSetAsOne = opt$isDiagofKinSetAsOne,
+            minMAFforGRM = opt$minMAFforGRM,
+            maxMissingRateforGRM = opt$maxMissingRateforGRM,
+            minCovariateCount=opt$minCovariateCount,
+            includeNonautoMarkersforVarRatio=opt$includeNonautoMarkersforVarRatio,
+            sexCol=opt$sexCol,
+            FemaleCode=opt$FemaleCode,
+            FemaleOnly=opt$FemaleOnly,
+            MaleCode=opt$MaleCode,
+            MaleOnly=opt$MaleOnly,
+            SampleIDIncludeFile=opt$SampleIDIncludeFile
+        )
 
 
 }else{

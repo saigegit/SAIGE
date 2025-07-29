@@ -916,6 +916,7 @@ fitNULLGLMM = function(plinkFile = "",
                 invNormalize = FALSE,
                 covarColList = NULL,
                 qCovarCol = NULL,
+		eCovarCol = NULL,
                 sampleIDColinphenoFile = "",
                 tol=0.02,
                 maxiter=20,
@@ -1132,6 +1133,14 @@ fitNULLGLMM = function(plinkFile = "",
                 stringsAsFactors = FALSE, colClasses = list(character = sampleIDColinphenoFile), data.table=F)
         }
         #data = data.frame(ydat)
+
+    	if (length(eCovarCol) > 0) {
+      	    cat(eCovarCol, "are environmental covariates\n")
+      	    if (!all(eCovarCol %in% covarColList)) {
+        	stop("ERROR! all covariates in eCovarCol must be in covarColList\n")
+      	    }
+    	}
+
         for (i in c(phenoCol, covarColList, sampleIDColinphenoFile)) {
             if (!(i %in% colnames(data))) {
                 stop("ERROR! column for ", i, " does not exist in the phenoFile \n")
@@ -1461,6 +1470,22 @@ fitNULLGLMM = function(plinkFile = "",
         }else{
             cat(phenoCol, " is a binary trait\n")
         }
+
+
+
+    if (length(eCovarCol) > 0) {
+      cat(eCovarCol, "are environmental covariates\n")
+      eMat <- dataMerge_sort[, which(colnames(dataMerge_sort) %in% eCovarCol), drop = F]
+      for (em in 1:ncol(eMat)) {
+        eMat[, em] <- (eMat[, em] - mean(eMat[, em])) / (sd(eMat[, em]))
+      }
+      eMat = as.matrix(eMat)
+      set_EMat(eMat)
+    }else{
+      eMat = NULL
+    }
+
+
 
         uniqPheno = sort(unique(dataMerge_sort[, which(colnames(dataMerge_sort) == phenoCol)]))
         if (uniqPheno[1] != 0 | uniqPheno[2] != 1) {

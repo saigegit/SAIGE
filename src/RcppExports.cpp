@@ -498,8 +498,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // openOutfile_single
-bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput);
-RcppExport SEXP _SAIGE_openOutfile_single(SEXP t_traitTypeSEXP, SEXP t_isImputationSEXP, SEXP isappendSEXP, SEXP t_isMoreOutputSEXP) {
+bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput, bool t_isGbyE);
+RcppExport SEXP _SAIGE_openOutfile_single(SEXP t_traitTypeSEXP, SEXP t_isImputationSEXP, SEXP isappendSEXP, SEXP t_isMoreOutputSEXP, SEXP t_isGbyESEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -507,7 +507,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type t_isImputation(t_isImputationSEXP);
     Rcpp::traits::input_parameter< bool >::type isappend(isappendSEXP);
     Rcpp::traits::input_parameter< bool >::type t_isMoreOutput(t_isMoreOutputSEXP);
-    rcpp_result_gen = Rcpp::wrap(openOutfile_single(t_traitType, t_isImputation, isappend, t_isMoreOutput));
+    Rcpp::traits::input_parameter< bool >::type t_isGbyE(t_isGbyESEXP);
+    rcpp_result_gen = Rcpp::wrap(openOutfile_single(t_traitType, t_isImputation, isappend, t_isMoreOutput, t_isGbyE));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -3063,7 +3064,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_closeGenoFile", (DL_FUNC) &_SAIGE_closeGenoFile, 1},
     {"_SAIGE_openOutfile", (DL_FUNC) &_SAIGE_openOutfile, 2},
     {"_SAIGE_openOutfile_singleinGroup", (DL_FUNC) &_SAIGE_openOutfile_singleinGroup, 4},
-    {"_SAIGE_openOutfile_single", (DL_FUNC) &_SAIGE_openOutfile_single, 4},
+    {"_SAIGE_openOutfile_single", (DL_FUNC) &_SAIGE_openOutfile_single, 5},
     {"_SAIGE_set_flagSparseGRM_cur_SAIGE", (DL_FUNC) &_SAIGE_set_flagSparseGRM_cur_SAIGE, 1},
     {"_SAIGE_set_flagSparseGRM_cur_SAIGE_org", (DL_FUNC) &_SAIGE_set_flagSparseGRM_cur_SAIGE_org, 0},
     {"_SAIGE_copy_singleInGroup", (DL_FUNC) &_SAIGE_copy_singleInGroup, 0},

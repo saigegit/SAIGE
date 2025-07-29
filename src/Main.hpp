@@ -98,6 +98,41 @@ void Unified_getMarkerPval(
 			  bool t_isSparseGRM);
 
 
+
+void Unified_getMarkerPval_gxe(
+                           arma::vec & t_GVec,
+                           bool t_isOnlyOutputNonZero,
+                           arma::uvec & t_indexForNonZero_vec,
+                           arma::uvec & t_indexForZero_vec,
+                           double& t_Beta,
+                           double& t_seBeta,
+                           double& t_pval,
+                           double& t_pval_noSPA,
+                           double& t_Tstat,
+                           double& t_gy,
+                           double& t_varT,
+                           double t_altFreq,
+                           bool & t_isSPAConverge,
+                           arma::vec & t_gtilde,
+                           bool & is_gtilde,
+                           bool  is_region,
+                           arma::vec & t_P2Vec,
+                           bool t_isCondition,
+                           double& t_Beta_c,
+                           double& t_seBeta_c,
+                           double& t_pval_c,
+                           double& t_pval_noSPA_c,
+                           double& t_Tstat_c,
+                           double& t_varT_c,
+                           arma::rowvec & t_G1tilde_P_G2tilde_Vec,
+                           bool & t_isFirth,
+                           bool & t_isFirthConverge,
+                           bool t_isER,
+                           bool t_isnoadjCov,
+                           bool t_isSparseGRM);
+
+
+
 Rcpp::List mainRegionInCPP(
                            std::string t_genoType,     // "PLINK", "BGEN"
 			   std::vector<std::string> & t_genoIndex_prev,
@@ -221,7 +256,7 @@ bool openOutfile(std::string t_traitType, bool isappend);
 
 bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput);
 
-bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput);
+bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput, bool t_isGbyE);
 
 void writeOutfile_single(bool t_isMoreOutput,
       bool t_isImputation,
@@ -260,7 +295,13 @@ void writeOutfile_single(bool t_isMoreOutput,
                         std::vector<double>  & N_ctrl_hetVec,
                         std::vector<double>  & N_case_hetVec,
                         std::vector<double>  & N_ctrl_homVec,
-                        std::vector<uint32_t> & N_Vec);
+                        std::vector<uint32_t> & N_Vec,
+		                        bool is_GbyE,
+                        std::vector<std::string> & Beta_ge_cStrVec,
+                        std::vector<std::string> & seBeta_ge_cStrVec,
+                        std::vector<std::string> & pval_ge_cStrVec,
+                        std::vector<std::string> & pval_noSPA_ge_cStrVec,
+                        std::vector<std::string>  & pval_SKAT_ge_cVec);
 
 
 

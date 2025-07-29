@@ -1255,4 +1255,459 @@ arma::vec minvVec = 1.0 / m_diagSigma; // Convert diagonal view to dense vector
 
 
 
+// revised
+// need to add sparse Sigma version
+// This function only uses variance ratio and does not use sparse GRM
+void SAIGEClass::getMarkerPval_gxe(arma::vec & t_GVec,
+                               arma::uvec & iIndex,
+                               arma::uvec & iIndexComVec,
+                               double& t_Beta,
+                               double& t_seBeta,
+                               double& t_pval,
+                               double& t_pval_noSPA,
+                               double t_altFreq,
+                               double& t_Tstat,
+                               double& t_gy,
+                               double& t_var1,
+                               bool & t_isSPAConverge,
+                               arma::vec & t_gtilde,
+                               bool & is_gtilde,
+                               bool  is_region,
+                               arma::vec & t_P2Vec,
+                               bool t_isCondition,
+                               double& t_Beta_c,
+                                double& t_seBeta_c,
+                                double& t_pval_c,
+                                double& t_pval_noSPA_c,
+                                double& t_Tstat_c,
+                                double& t_varT_c,
+                                arma::rowvec & t_G1tilde_P_G2tilde,
+                                bool & t_isFirth,
+                                bool & t_isFirthConverge,
+                                bool t_isER,
+                                bool t_isnoadjCov,
+                                bool t_isSparseGRM){
+
+  std::string t_pval_str;
+  double t_var2, t_SPApval;
+  double altFreq0;
+  arma::vec t_GVec0 = t_GVec;
+  arma::uvec indexNonZeroVec0_arma = iIndex;
+  arma::uvec indexZeroVec0_arma = iIndexComVec;
+
+
+        scoreTest_gxe(t_GVec0, t_Beta, t_seBeta, t_pval_str, t_altFreq, t_Tstat, t_var1, t_var2, t_gtilde, t_P2Vec, t_gy, is_region, indexNonZeroVec0_arma, t_pval);
+
+        //scoreTestFast_gxe(t_GVec0, indexNonZeroVec0_arma, t_Beta, t_seBeta, t_pval_str, altFreq0, t_Tstat, t_var1, t_var2, t_pval);
+
+
+ is_gtilde = true;
+
+ if(!is_gtilde){
+        getadjGFast_gxe(t_GVec, t_gtilde, indexNonZeroVec0_arma);
+   }
+
+
+//std::cout << "here is_gtilde" << std::endl;
+
+//std::cout << "t_pval " << t_pval << std::endl;
+
+
+        t_G1tilde_P_G2tilde = sqrt(m_varRatioVal) * t_gtilde.t() * (m_P2Mat_cond.cols(m_startic, m_endic));
+        arma::vec t_Tstat_ctemp =  t_G1tilde_P_G2tilde * (m_VarInvMat_cond.cols(m_startic, m_endic)) * (m_Tstat_cond.subvec(m_startic, m_endic));
+//std::cout << "here is_gtilde 2" << std::endl;
+        arma::mat tempgP2 = t_gtilde.t() * (m_P2Mat_cond.cols(m_startic, m_endic));
+//std::cout << "here is_gtilde 3" << std::endl;
+        //std::cout << "t_Tstat " << t_Tstat << std::endl;
+        //std::cout << "t_Tstat_ctemp(0) " << t_Tstat_ctemp(0) << std::endl;
+        //m_Tstat_cond.print("m_Tstat_cond");
+        //t_G1tilde_P_G2tilde.print("t_G1tilde_P_G2tilde");
+        //m_VarInvMat_cond.print("m_VarInvMat_cond");
+        t_Tstat_c = t_Tstat - t_Tstat_ctemp(0);
+//std::cout << "here is_gtilde 4" << std::endl;
+        arma::vec t_varT_ctemp = t_G1tilde_P_G2tilde * (m_VarInvMat_cond.cols(m_startic, m_endic)) * (t_G1tilde_P_G2tilde.t());
+//std::cout << "here is_gtilde 5" << std::endl;
+        t_varT_c = t_var1 - t_varT_ctemp(0);
+        //std::cout << "t_varT_c " << t_varT_c << " t_var1 " << t_var1 << " t_varT_ctemp(0) " << t_varT_ctemp(0) << std::endl;
+        //std::cout << "t_Tstat_c " << t_Tstat_c << " t_Tstat " << t_Tstat << " t_Tstat_ctemp(0) " << t_Tstat_ctemp(0) << std::endl;
+//std::cout << "here is_gtilde 6" << std::endl;
+
+    double S_c = t_Tstat_c;
+    double stat_c = S_c*S_c/t_varT_c;
+     //std::cout << "here is_gtilde 7" << std::endl;
+     //std::cout << "t_varT_c " << t_varT_c << std::endl;
+     //std::cout << "t_Tstat_c " << t_Tstat_c << std::endl;
+
+
+     //std::cout << "t_var1 " << t_var1 << std::endl;
+     //std::cout << "t_varT_ctemp(0) " << t_varT_ctemp(0) << std::endl;
+     //std::cout << "std::numeric_limits<double>::min() " << std::numeric_limits<double>::min() << std::endl;
+        double pval_noSPA_c;
+     //std::cout << "std::pow(std::numeric_limits<double>::min()) " << std::numeric_limits<double>::min() << std::endl;
+     //std::cout << "t_varT_c " << t_varT_c << std::endl;
+     if (t_varT_c <= std::numeric_limits<double>::min() || t_varT_c <= std::pow(10, -5)){
+     //if (t_varT_c <= 10^-10){
+        t_pval_noSPA_c = 1;
+        stat_c = 0;
+        t_Beta_c = 0;
+        t_seBeta_c = fabs(t_Beta_c) / sqrt(stat_c);
+        t_Tstat_c = S_c;
+        std::string buffAsStdStr_c = "1";
+        std::string& t_pval_noSPA_str_c =  buffAsStdStr_c;
+        pval_noSPA_c = 1;
+     }else{
+        boost::math::chi_squared chisq_dist(1);
+        t_pval_noSPA_c = boost::math::cdf(complement(chisq_dist, stat_c));
+
+    //std::cout << "t_pval_noSPA_c " << t_pval_noSPA_c << std::endl;
+    char pValueBuf_c[100];
+    if (t_pval_noSPA_c != 0)
+        sprintf(pValueBuf_c, "%.6E", t_pval_noSPA_c);
+    else {
+        double log10p_c = log10(2.0) - M_LOG10E*stat_c/2 - 0.5*log10(stat_c*2*M_PI);
+        int exponent_c = floor(log10p_c);
+        double fraction_c = pow(10.0, log10p_c - exponent_c);
+        if (fraction_c >= 9.95) {
+          fraction_c = 1;
+           exponent_c++;
+         }
+        sprintf(pValueBuf_c, "%.1fE%d", fraction_c, exponent_c);
+    }
+
+
+    std::string buffAsStdStr_c = pValueBuf_c;
+    std::string& t_pval_noSPA_str_c = buffAsStdStr_c;
+//std::cout << "here is_gtilde 7" << std::endl;
+
+    t_Beta_c = S_c/t_varT_c;
+    t_seBeta_c = fabs(t_Beta_c) / sqrt(stat_c);
+    t_Tstat_c = S_c;
+  //}
+  //double pval_noSPA_c;
+  try {
+        pval_noSPA_c = std::stod(t_pval_noSPA_str_c);
+  } catch (const std::invalid_argument&) {
+        pval_noSPA_c = 0;
+        std::cerr << "Argument is invalid\n";
+        //throw;
+  } catch (const std::out_of_range&) {
+        std::cerr << "Argument is out of range for a double\n";
+        //throw;
+        pval_noSPA_c = 0;
+  }
+
+
+  t_pval_noSPA_c = pval_noSPA_c;
+}
+  //std::cout << "here is_gtilde 8" << std::endl;
+  //std::cout << "pval_noSPA_c " << pval_noSPA_c << std::endl;
+
+double q, qinv, m1, NAmu, NAsigma, tol1, p_iIndexComVecSize;
+arma::vec gNB, gNA, muNB, muNA;
+  double gmuNB;;
+
+    if((m_traitType == "binary" || m_traitType == "count")  && pval_noSPA_c != 1 && stat_c > std::pow(m_SPA_Cutoff,2)){
+/*
+        arma::vec mu_vec = m_mu_gxe_mt.col(m_itrait);
+         m1 = dot(mu_vec, t_gtilde);
+        bool t_isSPAConverge_c;
+        double q_c, qinv_c, pval_noadj_c, SPApval_c;
+
+
+        if(p_iIndexComVecSize >= 0.5 && !m_flagSparseGRM_cur ){
+                unsigned int j1 = 0;
+                unsigned int j2 = 0;
+                gNB = t_gtilde(iIndex);
+                gNA = t_gtilde(iIndexComVec);
+                muNB = mu_vec(iIndex);
+                //muNB = m_mu_mt(iIndex, m_itrait);
+                muNA = mu_vec(iIndexComVec);
+                //muNA = m_mu_mt(iIndexComVec, m_itrait);
+                gmuNB = dot(gNB,muNB);
+                NAmu= m1-gmuNB;
+        }else{
+                gNA.clear();
+                gNB.clear();
+                muNA.clear();
+                gNB.clear();
+
+        }
+
+        if(m_traitType == "binary"){
+                q_c = t_Tstat_c/sqrt(t_varT_c/t_var2) + m1;
+
+                if((q_c-m1) > 0){
+                        qinv_c = -1 * std::abs(q_c-m1) + m1;
+                }else if ((q_c-m1) == 0){
+                        qinv_c =  m1;
+                }else{
+                        qinv_c = std::abs(q_c-m1) + m1;
+                }
+        }else if(m_traitType == "count"){
+                q_c = t_Tstat_c/sqrt(t_varT_c/t_var2);
+                qinv = -q_c;
+                NAsigma = t_var2 - arma::sum(muNB % arma::pow(gNB,2));
+        }
+
+        bool logp=false;
+
+std::cout << "here is_gtilde 9" << std::endl;
+
+
+        if(p_iIndexComVecSize >= 0.5 && !m_flagSparseGRM_cur){
+                //std::cout << "SPA_fast " << std::endl;
+                SPA_fast(mu_vec, t_gtilde, q_c, qinv_c, pval_noadj_c, false, gNA, gNB, muNA, muNB, NAmu, NAsigma, tol1, m_traitType, SPApval_c, t_isSPAConverge_c);
+        }else{
+                std::cout << "SPA " << std::endl;
+                SPA(mu_vec, t_gtilde, q_c, qinv_c, pval_noadj_c, tol1, logp, m_traitType, SPApval_c, t_isSPAConverge_c);
+        }
+*/
+        //std::cout << "here is_gtilde 10" << std::endl;
+        boost::math::normal ns;
+        t_pval_c =pval_noSPA_c;
+        //t_pval_c = SPApval_c;
+        double t_qval_c;
+        try {
+           t_qval_c = boost::math::quantile(ns, t_pval_c/2);
+           t_qval_c = fabs(t_qval_c);
+           t_seBeta_c = fabs(t_Beta_c)/t_qval_c;
+        }catch (const std::overflow_error&) {
+          t_qval_c = std::numeric_limits<double>::infinity();
+          t_seBeta_c = 0;
+        }
+    }else{
+     t_pval_c = t_pval_noSPA_c;
+
+    }
+   }
+
+void SAIGEClass::getadjGFast_gxe(arma::vec & t_GVec, arma::vec & g, arma::uvec & iIndex)
+{
+
+  //arma::vec t_GVec0 = t_GVec;
+  arma::uvec indexNonZeroVec0_arma = iIndex;
+  // To increase computational efficiency when lots of GVec elements are 0
+  arma::vec m_XVG_gxe(m_p_gxe, arma::fill::zeros);
+  //arma::mat m_XV_gxe_mt_sub(m_p_gxe, m_XV_gxe_mt.n_cols);
+  for(int i = 0; i < indexNonZeroVec0_arma.n_elem; i++){
+        //m_XV_gxe_mt_sub = m_XV_gxe_mt.rows(m_startip_gxe, m_endip_gxe);
+        //m_XVG_gxe += m_XV_gxe_mt_sub.col(indexNonZeroVec0_arma(i)) * t_GVec0(indexNonZeroVec0_arma(i));
+        m_XVG_gxe += m_XV_gxe_mt.rows(m_startip_gxe, m_endip_gxe).col(indexNonZeroVec0_arma(i)) * t_GVec(indexNonZeroVec0_arma(i));
+  }
+  g = t_GVec - m_XXVX_inv_gxe_mt.rows(m_startin_gxe, m_endin_gxe) * m_XVG_gxe;
+}
+
+void SAIGEClass::scoreTest_gxe(arma::vec & t_GVec,
+                     double& t_Beta,
+                     double& t_seBeta,
+                     std::string& t_pval_str,
+                     double t_altFreq,
+                     double &t_Tstat,
+                     double &t_var1,
+                     double &t_var2,
+                     arma::vec & t_gtilde,
+                     arma::vec & t_P2Vec,
+                     double& t_gy,
+                     bool t_is_region,
+                     arma::uvec & t_indexForNonZero,
+                     double & t_pval){
+    arma::vec Sm, var2m;
+    double S, var2;
+    getadjGFast_gxe(t_GVec, t_gtilde, t_indexForNonZero);
+    //getadjG(t_GVec, t_gtilde);
+
+
+    if(t_is_region && m_traitType == "binary"){
+      t_gy = dot(t_gtilde, m_y_gxe_mt.col(m_itrait));
+    }
+
+    S = dot(t_gtilde, m_res_gxe_mt.col(m_itrait) % m_varWeights_gxe_mt.col(m_itrait));
+
+    //std::cout << "S scoreTest_gxe " << S << std::endl;
+
+    S = S/m_tauvec_mt(0,m_itrait);
+
+    double varRatioVal_var2 = m_varRatioVal;
+
+   if(!m_flagSparseGRM_cur){
+      t_P2Vec = t_gtilde % (m_mu2_gxe_mt.col(m_itrait)) *(m_tauvec_mt(0,m_itrait));
+      //t_P2Vec = t_gtilde % m_mu2;
+      var2m = dot(t_P2Vec, t_gtilde);
+    }else{
+      if(m_SigmaMat_sp.n_rows > 2){
+      //t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
+      t_P2Vec = m_SigmaMat_sp * t_gtilde;
+      var2m = dot(t_P2Vec, t_gtilde);
+      if(m_isVarPsadj){
+        varRatioVal_var2 = 1;
+        var2m = var2m - t_gtilde.t() * m_Sigma_iXXSigma_iX * m_X.t() * t_P2Vec;
+      }
+     }else{
+        //t_P2Vec = m_sigmainvG_noV;
+        t_P2Vec = getSigma_G_V(t_gtilde, 500, 1e-5);
+        var2m = dot(t_P2Vec, t_gtilde);
+      if(m_isVarPsadj){
+        varRatioVal_var2 = 1;
+        var2m = var2m - t_gtilde.t() * m_Sigma_iXXSigma_iX * m_X.t() * t_P2Vec;
+      }
+     }
+    }
+
+    var2 = var2m(0,0);
+    //std::cout << "var2 Scoretest_gxe " << var2 << std::endl;
+    //std::cout << "m_varRatioVal " << m_varRatioVal << std::endl;
+    //double var1 = var2 * m_varRatioVal;
+    double var1 = var2 * varRatioVal_var2;
+    //std::cout << "var1 Scoretest_gxe " << var1 << std::endl;
+    double stat = S*S/var1;
+    //double t_pval;
+    //std::cout << "S " << S << std::endl;
+    //std::cout << "var1 " << var1 << std::endl;
+
+    //if (var1 <= std::pow(std::numeric_limits<double>::min(), 2)){
+    if (var1 <= std::numeric_limits<double>::min()){
+        t_pval = 1;
+    }else{
+        boost::math::chi_squared chisq_dist(1);
+        t_pval = boost::math::cdf(complement(chisq_dist, stat));
+    }
+    //std::cout << "t_pval Scoretest_gxe " << t_pval << std::endl;
+/*
+    char pValueBuf[100];
+    if (t_pval != 0)
+        sprintf(pValueBuf, "%.6E", t_pval);
+    else {
+        double log10p = log10(2.0) - M_LOG10E*stat/2 - 0.5*log10(stat*2*M_PI);
+        int exponent = floor(log10p);
+        double fraction = pow(10.0, log10p - exponent);
+        if (fraction >= 9.95) {
+          fraction = 1;
+           exponent++;
+         }
+        sprintf(pValueBuf, "%.1fE%d", fraction, exponent);
+    }
+    std::string buffAsStdStr = pValueBuf;
+    t_pval_str = buffAsStdStr;
+*/
+    t_Beta = S/var1;
+    t_seBeta = fabs(t_Beta) / sqrt(fabs(stat));
+    t_Tstat = S;
+    t_var1 = var1;
+    t_var2 = var2;
+}
+
+
+void SAIGEClass::scoreTestFast_gxe(arma::vec & t_GVec,
+                     arma::uvec & t_indexForNonZero,
+                     double& t_Beta,
+                     double& t_seBeta,
+                     std::string& t_pval_str,
+                     double t_altFreq,
+                     double &t_Tstat,
+                     double &t_var1,
+                     double &t_var2,
+                     double & t_pval){
+
+    arma::vec g1 = t_GVec.elem(t_indexForNonZero);
+    arma::vec m_varWeightsvec_new_sub = m_varWeights_gxe_mt.col(m_itrait);
+    arma::vec m_varWeightsvec_new = m_varWeightsvec_new_sub.elem(t_indexForNonZero);
+//    std::cout << "m_startin_gxe " << m_startin_gxe << " " << m_endin_gxe << std::endl;
+//    std::cout << "m_startip_gxe " << m_startip_gxe << " " << m_endip_gxe << std::endl;
+//    std::cout << "m_X_gxe_mt.rows " << m_X_gxe_mt.n_rows << " " <<  m_X_gxe_mt.n_cols <<  std::endl;
+    arma::mat X_gxe_mt = m_X_gxe_mt.rows(m_startin_gxe, m_endin_gxe);
+    arma::mat X1 = X_gxe_mt.rows(t_indexForNonZero);
+    //arma::mat X1 = (m_X_gxe_mt.rows(m_startip_gxe, m_endip_gxe)).cols(t_indexForNonZero);
+//    std::cout << "m_XVX_inv_XV_gxe_mt.rows " << m_XVX_inv_XV_gxe_mt.n_rows << " " <<  m_XVX_inv_XV_gxe_mt.n_cols <<  std::endl;
+    arma::mat XVX_inv_XV_gxe_mt = m_XVX_inv_XV_gxe_mt.rows(m_startin_gxe, m_endin_gxe);
+    arma::mat A1 = XVX_inv_XV_gxe_mt.rows(t_indexForNonZero);
+    //arma::mat A1 = (m_XVX_inv_XV_gxe_mt.rows(m_startip_gxe, m_endip_gxe)).cols(t_indexForNonZero);
+    arma::vec mu21;
+    arma::vec res_gxe_vec = m_res_gxe_mt.col(m_itrait);
+    arma::vec res1 = res_gxe_vec.elem(t_indexForNonZero);
+    res1 = res1 % m_varWeightsvec_new;
+    arma::vec Z = A1.t() * g1;
+    arma::vec B = X1 * Z;
+    arma::vec g1_tilde = g1 - B;
+    double var1, var2, S, S1, S2, g1tildemu2;
+    arma::vec S_a2;
+    double Bmu2;
+    arma::mat  ZtXVXZ = Z.t() * m_XVX_gxe_mt * Z;
+//    std::cout << "OKKKKK\n";
+    if(m_traitType == "binary" || m_traitType == "count"){
+
+        arma::vec mu2_gxe_vec = m_mu2_gxe_mt.col(m_itrait);
+      mu21  = mu2_gxe_vec.elem(t_indexForNonZero);
+//      std::cout << "OKKKKKa\n";
+      g1tildemu2 = dot(square(g1_tilde), mu21);
+//      std::cout << "OKKKKKb\n";
+      Bmu2 = arma::dot(square(B),  mu21);
+//      std::cout << "OKKKKKc\n";
+      var2 = ZtXVXZ(0,0) - Bmu2 + g1tildemu2;
+//      std::cout << "OKKKKK1\n";
+    }else if(m_traitType == "quantitative" || m_traitType == "count_nb"){
+      Bmu2 = dot(g1, B % m_varWeightsvec_new);
+      //Bmu2 = dot(g1, B);
+      var2 = ZtXVXZ(0,0)*m_tauvec[0] +  dot(g1,g1 % m_varWeightsvec_new) - 2*Bmu2;
+      //var2 = ZtXVXZ(0,0)*m_tauvec[0] +  dot(g1,g1) - 2*Bmu2;
+    }
+
+    var1 = var2 * m_varRatioVal;
+  //    std::cout << "OKKKKK1\n";
+    S1 = dot(res1, g1_tilde);
+  //    std::cout << "OKKKKK1a\n";
+    arma::mat res1X1_temp = (res1.t()) * X1;
+  //    std::cout << "OKKKKK1b\n";
+    arma::vec res1X1 = res1X1_temp.t();
+  //    std::cout << "OKKKKK1c\n";
+  //    m_S_a_gxe_mt.print("m_S_a_gxe_mt");
+  //    res1X1.print("res1X1");
+    S_a2 = m_S_a_gxe_mt.col(m_itrait) - res1X1;
+    S2 = - arma::dot(S_a2,  Z);
+  //    std::cout << "OKKKKK1d\n";
+    S = S1 + S2;
+    S = S/(m_tauvec_mt(0,m_itrait));
+  //    std::cout << "OKKKKK2\n";
+    double stat = S*S/var1;
+    //double t_pval;
+/*
+    std::cout << "S FastTest " << S << std::endl;
+    std::cout << "var1 " << var1 << std::endl;
+    std::cout << "m_varRatioVal " << m_varRatioVal << std::endl;
+*/
+
+    //if (var1 <= std::pow(std::numeric_limits<double>::min(), 2)){
+    if (var1 <= std::numeric_limits<double>::min()){
+        t_pval = 1;
+    } else{
+      boost::math::chi_squared chisq_dist(1);
+      t_pval = boost::math::cdf(complement(chisq_dist, stat));
+    }
+
+
+//      std::cout << "OKKKKK3\n";
+    char pValueBuf[100];
+    if (t_pval != 0)
+        sprintf(pValueBuf, "%.6E", t_pval);
+    else {
+        double log10p = log10(2.0) - M_LOG10E*stat/2 - 0.5*log10(stat*2*M_PI);
+        int exponent = floor(log10p);
+        double fraction = pow(10.0, log10p - exponent);
+        if (fraction >= 9.95) {
+          fraction = 1;
+           exponent++;
+         }
+        sprintf(pValueBuf, "%.1fE%d", fraction, exponent);
+    }
+    std::string buffAsStdStr = pValueBuf;
+    t_pval_str = buffAsStdStr;
+    t_Beta = S/var1;
+    t_seBeta = fabs(t_Beta) / sqrt(fabs(stat));
+    t_Tstat = S;
+    t_var1 = var1;
+    t_var2 = var2;
+    //std::cout << "t_pval_str scoreTestFast " << t_pval_str << std::endl;
+    //std::cout << "end of scoreTestFast" << std::endl;
+}
+
+
 }

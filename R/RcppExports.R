@@ -133,8 +133,8 @@ openOutfile_singleinGroup <- function(t_traitType, t_isImputation, isappend, t_i
     .Call('_SAIGE_openOutfile_singleinGroup', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend, t_isMoreOutput)
 }
 
-openOutfile_single <- function(t_traitType, t_isImputation, isappend, t_isMoreOutput) {
-    .Call('_SAIGE_openOutfile_single', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend, t_isMoreOutput)
+openOutfile_single <- function(t_traitType, t_isImputation, isappend, t_isMoreOutput, t_isGbyE) {
+    .Call('_SAIGE_openOutfile_single', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend, t_isMoreOutput, t_isGbyE)
 }
 
 set_flagSparseGRM_cur_SAIGE <- function(t_flagSparseGRM_cur) {
