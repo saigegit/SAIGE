@@ -18,8 +18,6 @@ class SAIGEClass
       arma::vec m_res;
       arma::vec m_resout;
       arma::vec m_mu;
-      arma::vec m_mu2;
-      arma::vec m_tauvec;
       arma::vec  m_S_a;
       //std::string m_traitType; 
       std::string m_impute_method;
@@ -27,7 +25,9 @@ class SAIGEClass
       	
 
     public:
-           std::string m_traitType;
+      arma::vec m_mu2;
+      arma::vec m_tauvec;
+      std::string m_traitType;
       arma::mat m_XXVX_inv;
       arma::mat m_XV;
       int m_n, m_p; //MAIN Dimensions: sample size, number of covariates
@@ -35,6 +35,8 @@ class SAIGEClass
       arma::vec m_varRatio_sparse;
       arma::vec m_varRatio_null;
       arma::vec m_varRatio_null_noXadj;
+      arma::vec m_varRatio_null_eg;
+      arma::vec m_varRatio_sparse_eg;
       arma::vec m_y;
 
       bool m_isOutputAFinCaseCtrl;
@@ -102,6 +104,8 @@ class SAIGEClass
         arma::vec & t_varRatio_sparse,
         arma::vec & t_varRatio_null,
         arma::vec & t_varRatio_null_noXadj,
+        arma::vec & t_varRatio_sparse_eg,
+        arma::vec & t_varRatio_null_eg,
         arma::vec & t_cateVarRatioMinMACVecExclude,
         arma::vec & t_cateVarRatioMaxMACVecInclude,
         double t_SPA_Cutoff,
@@ -220,6 +224,8 @@ void scoreTestFast_noadjCov(arma::vec & t_GVec,
 
     void assignSingleVarianceRatio_withinput(double t_varRatioVal);
 
+     arma::vec getSigma_G_V(arma::vec & bVec, int maxiterPCG, double tolPCG);
+
 
     void assignConditionFactors(
       arma::mat & t_P2Mat_cond,
@@ -259,13 +265,15 @@ void scoreTestFast_noadjCov(arma::vec & t_GVec,
 
      arma::vec getPCG1ofSigmaAndGtilde(arma::vec& bVec, int maxiterPCG, double tolPCG);
 
+
+
 void getMarkerPval_gxe(arma::vec & t_GVec,
                                arma::uvec & iIndex,
                                arma::uvec & iIndexComVec,
                                double& t_Beta,
                                double& t_seBeta,
-                               double& t_pval,
-                               double& t_pval_noSPA,
+                               std::string& t_pval,
+                               std::string& t_pval_noSPA,
                                double t_altFreq,
                                double& t_Tstat,
                                double& t_gy,
@@ -278,47 +286,15 @@ void getMarkerPval_gxe(arma::vec & t_GVec,
                                bool t_isCondition,
                                double& t_Beta_c,
                                 double& t_seBeta_c,
-                                double& t_pval_c,
-                                double& t_pval_noSPA_c,
+                               std::string& t_pval_c,
+                               std::string& t_pval_noSPA_c,
                                 double& t_Tstat_c,
                                 double& t_varT_c,
                                 arma::rowvec & t_G1tilde_P_G2tilde,
                                 bool & t_isFirth,
                                 bool & t_isFirthConverge,
                                 bool t_isER,
-                                bool t_isnoadjCov,
-                                bool t_isSparseGRM);
-
-void getadjGFast_gxe(arma::vec & t_GVec, arma::vec & g, arma::uvec & iIndex);
-
-void scoreTest_gxe(arma::vec & t_GVec,
-                     double& t_Beta,
-                     double& t_seBeta,
-                     std::string& t_pval_str,
-                     double t_altFreq,
-                     double &t_Tstat,
-                     double &t_var1,
-                     double &t_var2,
-                     arma::vec & t_gtilde,
-                     arma::vec & t_P2Vec,
-                     double& t_gy,
-                     bool t_is_region,
-                     arma::uvec & t_indexForNonZero,
-                     double & t_pval);
-
-
-void scoreTestFast_gxe(arma::vec & t_GVec,
-                     arma::uvec & t_indexForNonZero,
-                     double& t_Beta,
-                     double& t_seBeta,
-                     std::string& t_pval_str,
-                     double t_altFreq,
-                     double &t_Tstat,
-                     double &t_var1,
-                     double &t_var2,
-                     double & t_pval);
-
-
+                                bool t_isnoadjCov,                                              bool t_isSparseGRM);
 
 
 };

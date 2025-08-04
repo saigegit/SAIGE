@@ -49,6 +49,10 @@ setRegion_GlobalVarsInCPP <- function(t_max_maf_region, t_max_markers_region, t_
     invisible(.Call('_SAIGE_setRegion_GlobalVarsInCPP', PACKAGE = 'SAIGE', t_max_maf_region, t_max_markers_region, t_MACCutoff_to_CollapseUltraRare, t_min_gourpmac_for_burdenonly))
 }
 
+setAssocTest_GlobalVarsInCPP_GbyE <- function(t_emat, t_isgxe, t_pval_cutoff_for_gxe, t_is_permute_e, t_is_permute_ginge) {
+    invisible(.Call('_SAIGE_setAssocTest_GlobalVarsInCPP_GbyE', PACKAGE = 'SAIGE', t_emat, t_isgxe, t_pval_cutoff_for_gxe, t_is_permute_e, t_is_permute_ginge))
+}
+
 mainMarkerInCPP <- function(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth) {
     invisible(.Call('_SAIGE_mainMarkerInCPP', PACKAGE = 'SAIGE', t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth))
 }
@@ -85,8 +89,8 @@ setVCFobjInCPP <- function(t_vcfFileName, t_vcfFileIndex, t_vcfField, t_SampleIn
     invisible(.Call('_SAIGE_setVCFobjInCPP', PACKAGE = 'SAIGE', t_vcfFileName, t_vcfFileIndex, t_vcfField, t_SampleInModel))
 }
 
-setSAIGEobjInCPP <- function(t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_varRatio_null_noXadj, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_isnoadjCov, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout) {
-    invisible(.Call('_SAIGE_setSAIGEobjInCPP', PACKAGE = 'SAIGE', t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_varRatio_null_noXadj, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_isnoadjCov, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout))
+setSAIGEobjInCPP <- function(t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_varRatio_null_noXadj, t_varRatio_sparse_eg, t_varRatio_null_eg, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_isnoadjCov, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout) {
+    invisible(.Call('_SAIGE_setSAIGEobjInCPP', PACKAGE = 'SAIGE', t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_varRatio_null_noXadj, t_varRatio_sparse_eg, t_varRatio_null_eg, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_isnoadjCov, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout))
 }
 
 RegionSetUpConditional_binary_InCPP <- function(t_weight_cond) {
@@ -707,6 +711,54 @@ set_Diagof_StdGeno_LOCO <- function() {
 
 setminMAC_VarianceRatio <- function(t_minMACVarRatio, t_maxMACVarRatio, t_isVarianceRatioinGeno) {
     invisible(.Call('_SAIGE_setminMAC_VarianceRatio', PACKAGE = 'SAIGE', t_minMACVarRatio, t_maxMACVarRatio, t_isVarianceRatioinGeno))
+}
+
+call_qfc <- function(lambdas, noncentral, df, r, sigma, q, lim, acc) {
+    .Call('_SAIGE_call_qfc', PACKAGE = 'SAIGE', lambdas, noncentral, df, r, sigma, q, lim, acc)
+}
+
+Get_Davies_PVal <- function(Q, W, Q_resampling, isFast) {
+    .Call('_SAIGE_Get_Davies_PVal', PACKAGE = 'SAIGE', Q, W, Q_resampling, isFast)
+}
+
+SKAT_davies <- function(q, lambda, h, delta, sigma, lim, acc) {
+    .Call('_SAIGE_SKAT_davies', PACKAGE = 'SAIGE', q, lambda, h, delta, sigma, lim, acc)
+}
+
+SKAT_Optimal_Integrate_Func_Davies <- function(x, pmin_q, param_m, r_all) {
+    .Call('_SAIGE_SKAT_Optimal_Integrate_Func_Davies', PACKAGE = 'SAIGE', x, pmin_q, param_m, r_all)
+}
+
+Met_SKAT_Get_Pvalue <- function(Score, Phi, r_corr, method, isFast) {
+    .Call('_SAIGE_Met_SKAT_Get_Pvalue', PACKAGE = 'SAIGE', Score, Phi, r_corr, method, isFast)
+}
+
+Get_Liu_Params <- function(c1) {
+    .Call('_SAIGE_Get_Liu_Params', PACKAGE = 'SAIGE', c1)
+}
+
+Get_Liu_PVal <- function(Q, W, Q_resampling) {
+    .Call('_SAIGE_Get_Liu_PVal', PACKAGE = 'SAIGE', Q, W, Q_resampling)
+}
+
+forceSymmetric <- function(K) {
+    .Call('_SAIGE_forceSymmetric', PACKAGE = 'SAIGE', K)
+}
+
+get_SKAT_pvalue_cpp <- function(Score, Phi, r_corr, Pvalue_SKATO, Pvalue_Burden, Pvalue_SKAT, BETA_Burden, SE_Burden, error_code) {
+    invisible(.Call('_SAIGE_get_SKAT_pvalue_cpp', PACKAGE = 'SAIGE', Score, Phi, r_corr, Pvalue_SKATO, Pvalue_Burden, Pvalue_SKAT, BETA_Burden, SE_Burden, error_code))
+}
+
+get_jointScore_pvalue <- function(Score, Phi) {
+    .Call('_SAIGE_get_jointScore_pvalue', PACKAGE = 'SAIGE', Score, Phi)
+}
+
+SPA_ER_kernel_related_Phiadj_fast_new_cpp <- function(p_new, Score, Phi, p_value_burden, regionTestType, scaleFactor) {
+    invisible(.Call('_SAIGE_SPA_ER_kernel_related_Phiadj_fast_new_cpp', PACKAGE = 'SAIGE', p_new, Score, Phi, p_value_burden, regionTestType, scaleFactor))
+}
+
+get_newPhi_scaleFactor_cpp <- function(q_sum, mu_a, g_sum, p_new, Score, Phi, regionTestType, scaleFactor) {
+    invisible(.Call('_SAIGE_get_newPhi_scaleFactor_cpp', PACKAGE = 'SAIGE', q_sum, mu_a, g_sum, p_new, Score, Phi, regionTestType, scaleFactor))
 }
 
 SPA <- function(mu, g, q, qinv, pval_noadj, tol, logp, traitType, pval, isSPAConverge) {

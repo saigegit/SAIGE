@@ -1480,7 +1480,7 @@ fitNULLGLMM = function(plinkFile = "",
         eMat[, em] <- (eMat[, em] - mean(eMat[, em])) / (sd(eMat[, em]))
       }
       eMat = as.matrix(eMat)
-      set_EMat(eMat)
+      #set_EMat(eMat)
     }else{
       eMat = NULL
     }
@@ -1617,6 +1617,13 @@ fitNULLGLMM = function(plinkFile = "",
 		modglmm$minEventTime = minEventTime
 		modglmm$eventTimeBinSize = eventTimeBinSize	
             }
+
+    if (length(eCovarCol) > 0) {
+      cat(eCovarCol, "are environmental covariates\n")
+      modglmm$eMat = eMat
+    }
+
+
 
             if(LOCO & isLowMemLOCO){
                 modglmm$LOCOResult = NULL
@@ -1893,6 +1900,13 @@ fitNULLGLMM = function(plinkFile = "",
                 coef.alpha<-Covariate_Transform_Back(alpha0, out.transform$Param.transform)
                 modglmm$coefficients = coef.alpha
             }
+
+
+    if (length(eCovarCol) > 0) {
+      cat(eCovarCol, "are environmental covariates\n")
+      modglmm$eMat = eMat
+    }
+
 
             if(LOCO & isLowMemLOCO){
                 modglmm$LOCOResult = NULL
@@ -2818,6 +2832,16 @@ extractVarianceRatio = function(obj.glmm.null,
       varRatio_sparseGRM_vec = NULL
       varRatio_NULL_vec = NULL
       varRatio_NULL_noXadj_vec = NULL
+
+
+      if (!is.null(obj.glmm.null$eMat)) {
+        varRatio_NULL_eg_mat <- NULL
+        varRatio_NULL_eg_vec <- NULL
+        varRatio_sparse_eg_mat <- NULL
+        varRatio_sparse_eg_vec <- NULL
+      }
+
+
       indexInMarkerList = 1
       numTestedMarker = 0
       ratioCV = ratioCVcutoff + 0.1
@@ -2887,6 +2911,63 @@ extractVarianceRatio = function(obj.glmm.null,
           var1 = var1a/AC
           m1 = innerProduct(mu,g)
 
+            if (!is.null(obj.glmm.null$eMat)) {
+              var1GE_vec <- NULL
+              var2sparseGE_vec <- NULL
+              getildeMat <- NULL
+              getilde_sample0_Mat <- NULL
+              for (ne in 1:ncol(obj.glmm.null$eMat)) {
+                evec <- obj.glmm.null$eMat[, ne]
+
+
+                print("evec[1:100]")
+                print(evec[1:100])
+                GE <- G0 * evec
+                print("length(GE)")
+                print(length(GE))
+                GE_tilde <- GE - obj.noK$XXVX_inv %*% (obj.noK$XV %*% GE)
+                getildeMat <- cbind(getildeMat, GE_tilde)
+
+          if(obj.glmm.null$traitType != "survival"){
+            Sigma_iGE = getSigma_G(W, tauVecNew, GE_tilde, maxiterPCG, tolPCG)
+          }else{
+           if(pcgforUhatforSurvAnalysis){
+             Sigma_iGE = getSigma_G_Surv_new(W, tauVecNew, GE_tilde, RvecIndex, sqrtWinvNVec, WinvNvec, Dvec, diagofWminusUinv, Nvec, maxiterPCG, tolPCG)
+           }else{
+             Sigma_iGE = getSigma_G_Surv(W, tauVecNew, GE_tilde, WinvNRt, ACinv, diagofWminusUinv, sqrtDRN, maxiterPCG, tolPCG)
+           }
+          }
+                var1GE <- t(GE_tilde) %*% Sigma_iGE - t(GE_tilde) %*% Sigma_iX %*% (solve(t(X) %*% Sigma_iX)) %*% t(X) %*% Sigma_iGE
+                var1GE_vec <- c(var1GE_vec, var1GE)
+                S_GE <- innerProduct(GE_tilde, obj.glmm.null$residuals)
+                p_exact_GE <- pchisq(S_GE^2 / var1GE, df = 1, lower.tail = F)
+                cat("p_exact_GE ", p_exact_GE, "\n")
+                cat("S_GE ", S_GE, "\n")
+                cat("var1GE ", var1GE, "\n")
+
+                # I_mat_e = I_mat * evec
+                # GE_sample = as.vector(t(G0) %*% I_mat_e)
+                # GE_sample_tilde = GE_sample  -  XXVXsample_inv0 %*%  (XVsample0 %*% GE_sample)
+                # getilde_sample0_Mat = cbind(getilde_sample0_Mat, GE_sample_tilde)
+   if(!useSparseGRMtoFitNULL){
+        if(useSparseGRMforVarRatio){
+           pcginvSigma_GE = solve(sparseSigma, GE_tilde, sparse=T)
+           var2_a_GE = t(GE_tilde) %*% pcginvSigma_GE
+           var2sparseGRM_GE = var2_a_GE[1,1]
+	   var2sparseGE_vec <- c(var2sparseGE_vec, var2sparseGRM_GE)           
+        }
+    }else{
+        if(useSparseGRMforVarRatio){
+          #pcginvSigma_GE = Sigma_iGE/sqrt(AC)
+          pcginvSigma_GE = Sigma_iGE
+          var2_a_GE = t(GE_tilde) %*% pcginvSigma_GE
+          var2sparseGRM_GE = var2_a_GE[1,1]
+	  var2sparseGE_vec <- c(var2sparseGE_vec, var2sparseGRM_GE)           
+        }
+    }
+
+
+
    if(!useSparseGRMtoFitNULL){
         if(useSparseGRMforVarRatio){
            pcginvSigma = solve(sparseSigma, g, sparse=T)
@@ -2907,19 +2988,59 @@ extractVarianceRatio = function(obj.glmm.null,
 	}  
     }
 
+
+}
+
+}
+
+
     if(obj.glmm.null$traitType == "binary"){
          var2null = innerProduct(mu*(1-mu), g*g)
 	var2null_noXadj = innerProduct(mu*(1-mu), g_noXadj*g_noXadj)
+              var2nullGE_vec <- NULL
+              if (!is.null(obj.glmm.null$eMat)) {
+                for (ne in 1:ncol(obj.glmm.null$eMat)) {
+                  GE_tilde <- getildeMat[, ne]
+                  var22nullGE <- innerProduct(mu * (1 - mu) , GE_tilde * GE_tilde)
+                  var2nullGE_vec <- c(var2nullGE_vec, var22nullGE)
+                }
+              }
+
+
     }else if(obj.glmm.null$traitType == "quantitative"){
          var2null = innerProduct(g, g)
 	var2null_noXadj = innerProduct(g_noXadj,g_noXadj)
+
+              var2nullGE_vec <- NULL
+              if (!is.null(obj.glmm.null$eMat)) {
+                for (ne in 1:ncol(obj.glmm.null$eMat)) {
+                  GE_tilde <- getildeMat[, ne]
+                  var22nullGE <- innerProduct(GE_tilde, GE_tilde * var_weights)
+                  var2nullGE_vec <- c(var2nullGE_vec, var22nullGE)
+                }
+              }
     }else if(obj.glmm.null$traitType == "survival"){
          var2null = innerProduct(mu, g*g)
 	var2null_noXadj = innerProduct(mu, g_noXadj*g_noXadj)
+
+              var2nullGE_vec <- NULL
+              if (!is.null(obj.glmm.null$eMat)) {
+                for (ne in 1:ncol(obj.glmm.null$eMat)) {
+                  GE_tilde <- getildeMat[, ne]
+                  var22nullGE <- innerProduct(mu, GE_tilde*GE_tilde)
+                  var2nullGE_vec <- c(var2nullGE_vec, var22nullGE)
+                }
+              }
+
+
     }
 
     varRatio_NULL_vec = c(varRatio_NULL_vec, var1/var2null)
     varRatio_NULL_noXadj_vec <- c(varRatio_NULL_noXadj_vec, var1 / var2null_noXadj)
+            if (!is.null(obj.glmm.null$eMat)) {
+              varRatio_NULL_eg_mat <- rbind(varRatio_NULL_eg_mat, var1GE_vec / var2nullGE_vec)
+              varRatio_sparse_eg_mat <- rbind(varRatio_sparse_eg_mat, var1GE_vec / var2sparseGE_vec)
+            }
     #indexInMarkerList = indexInMarkerList + 1
     numTestedMarker = numTestedMarker + 1
 
@@ -2965,11 +3086,27 @@ extractVarianceRatio = function(obj.glmm.null,
   cat("varRatio_null_noXadj", varRatio_null_noXadj, "\n")
   varRatioTable = rbind(varRatioTable, c(varRatio_null, "null", k))
   varRatioTable = rbind(varRatioTable, c(varRatio_null_noXadj, "null_noXadj", k))
-  }else{# if(cateVarRatioVec[k] == 1)
+       if (!is.null(obj.glmm.null$eMat)) {
+        varRatio_NULL_eg_vec <- as.vector(colMeans(varRatio_NULL_eg_mat))
+        varRatio_sparse_eg_vec <- as.vector(colMeans(varRatio_sparse_eg_mat))
+        for (ne in 1:ncol(obj.glmm.null$eMat)) {
+          varRatioTable <- rbind(varRatioTable, c(varRatio_NULL_eg_vec[ne], "null", 0))
+          varRatioTable <- rbind(varRatioTable, c(varRatio_sparse_eg_vec[ne], "sparse", 0))
+        }
+        print(varRatio_NULL_eg_vec)
+        print(varRatio_NULL_eg_mat)
+      }   
+
+
+
+}else{# if(cateVarRatioVec[k] == 1)
     varRatioTable = rbind(varRatioTable, c(1, "null", k))
 varRatioTable = rbind(varRatioTable, c(1, "null_noXadj", k))
     if(length(varRatio_sparseGRM_vec) > 0){
       varRatioTable = rbind(varRatioTable, c(1, "sparse", k))
+    }
+    if(ncol(obj.glmm.null$eMat) > 0){
+	stop("Variance ratios for multiple MAC categories are not supported for gxeyet\n")
     }
   }
 

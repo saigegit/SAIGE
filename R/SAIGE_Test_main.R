@@ -117,10 +117,13 @@ SPAGMMATtest = function(bgenFile = "",
 		 is_no_weight_in_groupTest = FALSE,
 		 is_output_markerList_in_groupTest = FALSE,
 		 is_fastTest = FALSE,
-		 pval_cutoff_for_fastTest = 0.05, 
+		 pval_cutoff_for_fastTest = 0.05,
+                         pval_cutoff_for_gxe = 0.001, 
 		 max_MAC_use_ER = 4, 
 		 subSampleFile = "",
-		 is_noadjCov = FALSE
+		 is_noadjCov = FALSE,
+                         is_permute_e = FALSE,
+                         is_permute_ginge = FALSE
 ){
 
   cat("is_noadjCov ", is_noadjCov, "\n")
@@ -408,7 +411,18 @@ SPAGMMATtest = function(bgenFile = "",
     condition_genoIndex = c(-1)
     if(isCondition){
         cat("Conducting conditional analysis. Please specify the conditioning markers in the order as they are store in the genotype/dosage file.\n")
-    }	   
+    }
+
+  eMat <- NULL
+  isgxe = FALSE
+
+if(!is.null(obj.model$isgxe)){
+  if(obj.model$isgxe){
+	isgxe = TRUE
+	 eMat = obj.model$eMat
+  }
+}
+
     #set up the SAIGE object based on the null model results
     setSAIGEobjInCPP(t_XVX=obj.model$obj.noK$XVX,
 		     t_XXVX_inv=obj.model$obj.noK$XXVX_inv,
@@ -423,6 +437,8 @@ SPAGMMATtest = function(bgenFile = "",
 		     t_varRatio_sparse = as.vector(ratioVecList$ratioVec_sparse),
 		     t_varRatio_null = as.vector(ratioVecList$ratioVec_null),
 		     t_varRatio_null_noXadj = as.vector(ratioVecList$ratioVec_null_noXadj),
+		     t_varRatio_sparse_eg = as.vector(ratioVecList$ratioVec_sparse_eg),
+		     t_varRatio_null_eg = as.vector(ratioVecList$ratioVec_null_eg),
 		     t_cateVarRatioMinMACVecExclude = cateVarRatioMinMACVecExclude,
 		     t_cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
 		     t_SPA_Cutoff = SPAcutoff,
@@ -445,6 +461,10 @@ SPAGMMATtest = function(bgenFile = "",
 		     t_resout = as.integer(obj.model$obj_cc$res.out))
   rm(sparseSigmaRList)
   gc()
+
+if (isgxe) {
+  setAssocTest_GlobalVarsInCPP_GbyE(eMat, isgxe, as.numeric(pval_cutoff_for_gxe),is_permute_e,is_permute_ginge)	
+}
 
 #time_8 = proc.time()
 #process condition
@@ -527,7 +547,8 @@ SPAGMMATtest = function(bgenFile = "",
                    chrom,
 		   isCondition,
 		   is_overwrite_output,
-		   objGeno$anyInclude)
+		   objGeno$anyInclude,
+		   isgxe)
 
 
     }else{

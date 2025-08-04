@@ -24,12 +24,13 @@
 #include "SAIGE_test.hpp"
 #include "UTIL.hpp"
 #include "CCT.hpp"
+#include "SKAT_funcs.hpp"
 
 #include <Rcpp.h>
 #include "getMem.hpp"
 
 #include <boost/math/distributions/beta.hpp>
-
+#include <boost/algorithm/string/join.hpp>
 // global objects for different genotype formats
 
 static PLINK::PlinkClass* ptr_gPLINKobj = NULL;
@@ -135,6 +136,13 @@ std::string g_outputFilePrefixSingleInGroup;
 std::string g_outputFilePrefixSingleInGroup_temp;
 std::string g_outputFilePrefixSingle;
 
+arma::mat g_emat;
+bool g_isgxe;
+double g_pval_cutoff_for_gxe;
+bool g_is_permute_e;
+bool g_is_permute_ginge;
+arma::uvec g_permute_ginge_indices;
+arma::uvec g_permute_e_indices;
 
 
 
@@ -211,6 +219,36 @@ void setRegion_GlobalVarsInCPP(
 }
 
 
+// [[Rcpp::export]]
+void setAssocTest_GlobalVarsInCPP_GbyE(
+                                arma::mat & t_emat,
+                                bool t_isgxe,
+                                double t_pval_cutoff_for_gxe,
+                                bool t_is_permute_e,
+                                bool t_is_permute_ginge)
+{
+        //g_emat_f=t_emat;
+        g_emat=t_emat;
+        //g_emat = arma::conv_to< arma::mat >::from(g_emat_f);
+        g_isgxe=t_isgxe;
+        g_pval_cutoff_for_gxe = t_pval_cutoff_for_gxe;
+        g_is_permute_e = t_is_permute_e;
+        g_is_permute_ginge = t_is_permute_ginge;
+        if(g_is_permute_ginge){
+                g_permute_ginge_indices = arma::randperm(ptr_gSAIGEobj->m_n);  // Get random indices
+        }
+
+        if(g_is_permute_e){
+                g_permute_e_indices = arma::randperm(g_emat.n_rows);
+        }
+        if(g_is_permute_ginge && g_is_permute_e){
+                std::cerr << "G and cell contexts can't be permuted simutaneously" << std::endl;
+        }
+}
+
+
+
+
 
 //////// ---------- Main function for marker-level analysis --------- ////////////
                            //std::vector<uint32_t> & t_genoIndex,
@@ -260,6 +298,13 @@ void mainMarkerInCPP(
   //std::vector<double> pvalNA_cVec(q, arma::datum::nan);
   std::vector<std::string> pvalNA_cVec(q, "NA");
   //}
+   std::vector<std::string> Beta_ge_cStrVec(q, "NA");         // beta value for ALT allele
+  std::vector<std::string> seBeta_ge_cStrVec(q, "NA");
+  std::vector<std::string> pval_ge_cStrVec(q, "NA");
+  std::vector<std::string> pval_noSPA_ge_cStrVec(q, "NA");
+  std::vector<double> pval_SKATO_ge_cVec(q, arma::datum::nan);
+  std::vector<std::string> pval_SKAT_ge_cVec(q, "NA");
+ 
   arma::rowvec G1tilde_P_G2tilde_Vec(ptr_gSAIGEobj->m_numMarker_cond);
 
   std::vector<bool>  isSPAConvergeVec(q);
@@ -292,6 +337,7 @@ void mainMarkerInCPP(
 */
   bool hasVarRatio = true;;
   bool isSingleVarianceRatio = true;
+
   if((ptr_gSAIGEobj->m_varRatio_null).n_elem == 1){
         ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM, ptr_gSAIGEobj->m_isnoadjCov);
         //ptr_gSAIGEobj->assignSingleVarianceRatio(false);
@@ -367,7 +413,6 @@ void mainMarkerInCPP(
     }
 
 
-   //std::cout << "t_GVec0.size()) " << t_GVec0.size() << std::endl;
    //arma::vec t_GVec(t_GVec0.size());
    //arma::vec t_GVec = arma::conv_to< arma::colvec >::from(t_GVec0);
 
@@ -412,14 +457,14 @@ void mainMarkerInCPP(
     double MAC = MAF * n * (1 - missingRate) *2;
     
     
-  /*
+/*  
    std::cout << "missingRate " << missingRate << std::endl;
    std::cout << "MAF " << MAF << std::endl;
    std::cout << "MAC " << MAC << std::endl;
    std::cout << "altFreq " << altFreq << std::endl;
    std::cout << "altCounts " << altCounts << std::endl;
    std::cout << "n " << n << std::endl;
-   */
+  */ 
 
 
     // Quality Control (QC) based on missing rate, MAF, and MAC
@@ -469,6 +514,7 @@ void mainMarkerInCPP(
 
     //set_varianceRatio(MAC, isSingleVarianceRatio);
 
+
     if(ptr_gSAIGEobj->m_isFastTest){
       ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
     }else{
@@ -489,7 +535,6 @@ void mainMarkerInCPP(
    //}
     //check 'Main.cpp'
     bool is_region = false;
-
 
     if(MAC <= g_MACCutoffforER && t_traitType == "binary"){
     //if(MAC > g_MACCutoffforER){
@@ -517,6 +562,7 @@ void mainMarkerInCPP(
         std::cerr << "Argument is out of range for a double\n";
 	pval_num = 0;
     }
+
 
   if((t_traitType == "binary" && MAC > g_MACCutoffforER) || t_traitType != "binary"){
 
@@ -572,8 +618,8 @@ void mainMarkerInCPP(
 //arma::vec timeoutput6 = getTime();
 //printTime(timeoutput5, timeoutput6, "Unified_getMarkerPval");
 
-   indexNonZeroVec_arma.clear();
-   indexZeroVec_arma.clear();
+  // indexNonZeroVec_arma.clear();
+  // indexZeroVec_arma.clear();
    //std::cout << "isSPAConverge " << isSPAConverge << std::endl;
     BetaVec.at(i) = Beta * (1 - 2*flip);  // Beta if flip = false, -1*Beta is flip = true       
     seBetaVec.at(i) = seBeta;       
@@ -636,7 +682,17 @@ void mainMarkerInCPP(
     std::vector<std::string> pval_noSPA_c_ge_vec(ne);
     std::vector<std::string> pval_c_ge_vec(ne);
     arma::vec evec;
-    if(g_isgxe && pval < g_pval_cutoff_for_gxe){
+    double pvaldb;
+    try {
+        double pvaldb = std::stod(pval);
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "Invalid input: " << e.what() << std::endl;
+    } catch (const std::out_of_range& e) {
+        std::cerr << "Out of range: " << e.what() << std::endl;
+    }
+
+
+    if(g_isgxe && pvaldb < g_pval_cutoff_for_gxe){
 
         //std::cout << "Here3 G x E" << std::endl;
         unsigned int qg = 1;
@@ -645,15 +701,17 @@ void mainMarkerInCPP(
         arma::mat VarInvMat_g(qg, qg);
         arma::mat VarMat_g(qg, qg);
         arma::vec TstatVec_g(qg);
-        arma::vec pVec_g(qg);
-        arma::vec MAFVec_g(qg);
+        //arma::vec pVec_g(qg);
+        std::vector<std::string> pVec_g(qg);
+	pVec_g.at(0) = pval; 
+	arma::vec MAFVec_g(qg);
         arma::vec w0G2_cond_Vec_g(qg);
         arma::vec gsumVec(nrow_e, arma::fill::zeros);
         arma::vec gyVec_g(qg);
         gyVec_g(0) = gy;
         double qsum_g = arma::accu(gyVec_g);
-        arma::vec qsumVec_g(qg);
-        qsumVec_g(0) = qsum_g;
+        //arma::vec qsumVec_g(qg);
+        //qsumVec_g(0) = qsum_g;
         std::string Beta_c_ge_str;
         std::string seBeta_c_ge_str;
         std::string pval_noSPA_c_ge_str;
@@ -669,43 +727,33 @@ void mainMarkerInCPP(
         t_GVec1 = t_GVec;
         
         if(!is_gtilde){
-        	ptr_gSAIGEobj->getadjGFast_gxe(t_GVec1, gtildeVec, indexNonZeroVec_arma);
+        	ptr_gSAIGEobj->getadjGFast(t_GVec1, gtildeVec, indexNonZeroVec_arma);
         }
-
         w0G2_cond_Vec_g(0) = 1;
         TstatVec_g(0) = Tstat;
         //TstatVec_g(0) = Tstat - Tstat_g_diff;
-        pVec_g(0) = pval;
         MAFVec_g(0) = MAF;
         //t_P2Vec.print("t_P2Vec");
 
     ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
     if(isSingleVarianceRatio){
        //std::cout << "Here2f mainMarkerInCPP" << std::endl;
-       ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur, false,false);
+       ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur, false);
        //std::cout << "Here2g mainMarkerInCPP" << std::endl;
     }else{
        //std::cout << "Here2gb mainMarkerInCPP" << std::endl;
-       hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur, false,false);
+       hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur, false);
        //std::cout << "Here2gc mainMarkerInCPP" << std::endl;
     }
-
                 if(!ptr_gSAIGEobj->m_flagSparseGRM_cur){
-                        t_P2Vec = gtildeVec % ((ptr_gSAIGEobj->m_mu2_gxe_mt).col(i_mt)) *((ptr_gSAIGEobj->m_tauvec_mt)(0,i_mt));
+                        t_P2Vec = gtildeVec % ((ptr_gSAIGEobj->m_mu2)) *((ptr_gSAIGEobj->m_tauvec)[0]);
                 }else{
-                        t_P2Vec = ptr_gSAIGEobj->getSigma_G_V(gtildeVec, 500, 1e-5);
+                        t_P2Vec =  ptr_gSAIGEobj->getPCG1ofSigmaAndGtilde(gtildeVec, 500, 1e-5);
+			
                 }
-        //}
 
-        //std::cout << "ptr_gSAIGEobj->m_varRatioVal null" << ptr_gSAIGEobj->m_varRatioVal << std::endl;
-        //std::cout << "HEREa1a" << std::endl;
-        //std::cout << "P2Mat_g " << P2Mat_g.n_rows << " " << P2Mat_g.n_cols << std::endl;
-        //std::cout << "t_P2Vec " << t_P2Vec.n_elem << std::endl;
         P2Mat_g.col(0) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*t_P2Vec;
-        //std::cout << "HEREa1b" << std::endl;
         VarMat_g = sqrt(ptr_gSAIGEobj->m_varRatioVal)*gtildeVec.t() * P2Mat_g;
-        //VarMat_g.print("VarMat_g");
-        //std::cout << "HEREa1c" << std::endl;
         VarInvMat_g = VarMat_g.i();
         //std::cout << "HEREa2" << std::endl;
 
@@ -716,13 +764,12 @@ void mainMarkerInCPP(
                                         TstatVec_g,
                                         w0G2_cond_Vec_g,
                                         MAFVec_g,
-                                        qsumVec_g,
+                                        qsum_g,
                                         gtildeVec,
                                         pVec_g);
-        ptr_gSAIGEobj->assign_for_itrait(i_mt);
-        //std::cout << "HEREa3" << std::endl;
-        double Beta_ge, seBeta_ge, pval_ge, Tstat_ge, varT_ge, pval_noSPA_ge, Beta_c_ge, seBeta_c_ge, pval_c_ge, Tstat_c_ge, varT_c_ge, pval_noSPA_c_ge, gy_ge, altFreq_ge;
-        arma::vec gtildeVec_ge, t_P2Vec_ge, t_GEVec;
+        double Beta_ge, seBeta_ge, Tstat_ge, varT_ge, Beta_c_ge, seBeta_c_ge, Tstat_c_ge, varT_c_ge, gy_ge, altFreq_ge;
+        std::string pval_ge, pval_noSPA_ge, pval_c_ge, pval_noSPA_c_ge; 
+	arma::vec gtildeVec_ge, t_P2Vec_ge, t_GEVec;
         arma::rowvec G1tilde_P_G2tilde_Vec_ge;
         arma::mat G1tilde_P_G2tilde_Mat_ge(ne, TstatVec_g.n_elem);
         bool isSPAConverge_ge, is_gtilde_ge, is_region_ge, is_Firth_ge, is_FirthConverge_ge;
@@ -734,8 +781,7 @@ void mainMarkerInCPP(
         }
 
        for(unsigned int k = 0; k < ne; k++){
-            ksub = i_mt * ne + k;
-            evec = g_emat.col(ksub);
+            evec = g_emat.col(k);
             if(g_is_permute_e){
                 arma::vec evec_permute = evec.elem(g_permute_e_indices);
                 t_GEVec = t_GVec1 % evec_permute;
@@ -743,98 +789,67 @@ void mainMarkerInCPP(
                 t_GEVec = t_GVec1 % evec;
             }
 
-            //if(info == "1:170085453:C:A"){
-            //if(info == "1:169802760:G:T"){
-                //t_GVec1.save("geno_1_170085453_C_A.csv", arma::csv_ascii);
-            //  t_GVec1.save("geno_1_169802760_G_T.csv", arma::csv_ascii);
-                //evec.save("pseudotime_1_170085453_C_A.csv", arma::csv_ascii);
-                //(ptr_gSAIGEobj->m_y_mt).save("SELL_1_170085453_C_A.csv", arma::csv_ascii);
-            //}
-
-
-            //std::cout << "t_GEVec(0) " << t_GEVec(0) << std::endl;
-            //std::cout << "t_GEVec.n_elem " << t_GEVec.n_elem << std::endl;
-            //std::cout << "t_GVec1.n_elem " << t_GVec1.n_elem << std::endl;
-            //t_GEVec = gtildeVec % evec;
-            //
-            //
-            //double corGandGE = calculatePearsonCorrelation(t_GVec1, evec);
-            //std::cout << "corGandGE " << corGandGE << std::endl;
-            //
             altFreq_ge = arma::mean(t_GEVec)/2;
             is_gtilde_ge = false;
             gtildeVec_ge.clear();
             t_P2Vec_ge.clear();
             G1tilde_P_G2tilde_Vec_ge.clear();
 
-
             if(!ptr_gSAIGEobj->m_flagSparseGRM_cur){
                 //std::cout << "ksub c " << ksub << std::endl;
-                ptr_gSAIGEobj->m_varRatioVal = ptr_gSAIGEobj->m_varRatio_null_eg_mt(k,i_mt);
-        //      ptr_gSAIGEobj->m_varRatio_null_eg(k);
+                ptr_gSAIGEobj->m_varRatioVal = ptr_gSAIGEobj->m_varRatio_null_eg(k);
             }else{
-                ptr_gSAIGEobj->m_varRatioVal =  ptr_gSAIGEobj->m_varRatio_sparse_eg_mt(k,i_mt);
-        //      ptr_gSAIGEobj->m_varRatioVal = ptr_gSAIGEobj->m_varRatio_sparse_eg(k);
+                ptr_gSAIGEobj->m_varRatioVal = ptr_gSAIGEobj->m_varRatio_sparse_eg(k);
             }
+	//arma::uvec indexZeroVec_arma_gxe = arma::find(t_GEVec == 0);
+	//indexZeroVec_arma_gxe.print("indexZeroVec_arma_gxe");
+	//indexZeroVec_arma.print("indexZeroVec_arma");
 
-//std::cout << "HEREa4" << std::endl;
-            //std::cout << "ptr_gSAIGEobj->m_varRatioVa null_eg " << ptr_gSAIGEobj->m_varRatioVal << std::endl;
-            //
+
+
             Unified_getMarkerPval_gxe(
                     t_GEVec,
                           false, // bool t_isOnlyOutputNonZero,
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta_ge, seBeta_ge, pval_ge, pval_noSPA_ge, Tstat_ge, gy_ge, varT_ge, altFreq_ge, isSPAConverge_ge, gtildeVec_ge, is_gtilde_ge, is_region_ge, t_P2Vec_ge, true, Beta_c_ge, seBeta_c_ge, pval_c_ge, pval_noSPA_c_ge, Tstat_c_ge, varT_c_ge, G1tilde_P_G2tilde_Vec_ge, is_Firth_ge, is_FirthConverge_ge, false, true, false);
-        //std::cout << "HEREa5" << std::endl;
+
 
     char pValueBuf[100];
-    sprintf(pValueBuf, "%.6E", pval_c_ge);
-    //sprintf(pValueBuf, "%.6E", pval_ge);
-    //std::string buffAsStdStr_c = pValueBuf;
-    //std::string& pval_c_ge_c = buffAsStdStr_c;
-       //std::cout << "pval_c_ge first " << pval_c_ge << std::endl;
-        //std::cout << "pval_ge " << pval_ge << std::endl;
 
                         G1tilde_P_G2tilde_Mat_ge.row(k) = G1tilde_P_G2tilde_Vec_ge;
                         //pval_c_ge_vec.at(k) = std::to_string(pval_c_ge);
-                        pval_c_ge_vec.at(k) = pValueBuf;
+                        pval_c_ge_vec.at(k) = pval_c_ge;
                         //Beta_c_ge_vec.at(k) = std::to_string(Beta_c_ge);
                         Beta_c_ge_vec.at(k) = std::to_string(Beta_c_ge);
                         //Beta_c_ge_vec.at(k) = std::to_string(Beta_ge);
                         //seBeta_c_ge_vec.at(k) = std::to_string(seBeta_c_ge);
                         seBeta_c_ge_vec.at(k) = std::to_string(seBeta_c_ge);
                         //seBeta_c_ge_vec.at(k) = std::to_string(seBeta_ge);
-                         sprintf(pValueBuf, "%.6E", pval_noSPA_c_ge);
+                        //sprintf(pValueBuf, "%.6E", pval_noSPA_c_ge);
                         //pval_noSPA_c_ge_vec.at(k) = std::to_string(pval_noSPA_c_ge);
                         //pval_noSPA_c_ge_vec.at(k) = std::to_string(pval_noSPA_ge);
-                        pval_noSPA_c_ge_vec.at(k) = pValueBuf;
+                        pval_noSPA_c_ge_vec.at(k) = pval_noSPA_c_ge;
                         Score_c_ge_vec(k) = Tstat_c_ge;
                         //Score_c_ge_vec(k) = Tstat_ge;
         if(ne > 1){
           P1Matge.row(k) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*(gtildeVec_ge.t());
-        //std::cout << "HEREa5a" << std::endl;
-        /*
+        
         if(t_P2Vec_ge.n_elem == 0){
                 if(!ptr_gSAIGEobj->m_flagSparseGRM_cur){
-                        t_P2Vec_ge = gtildeVec_ge % ((ptr_gSAIGEobj->m_mu2_gxe_mt).col(i_mt)) *((ptr_gSAIGEobj->m_tauvec_mt)(0,i_mt));
+                        t_P2Vec_ge = gtildeVec_ge % (ptr_gSAIGEobj->m_mu2) *((ptr_gSAIGEobj->m_tauvec)(0));
                 }else{
-                        t_P2Vec_ge = ptr_gSAIGEobj->getSigma_G_V(gtildeVec_ge, 500, 1e-5);
+                        t_P2Vec_ge = ptr_gSAIGEobj->getPCG1ofSigmaAndGtilde(gtildeVec_ge, 100, 0.02);
                 }
         }
-        */
-//      //std::cout << "HEREa5b" << std::endl;
-
-
 
              P2Matge.col(k) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*t_P2Vec_ge;
 
         }
 
         }
-        //std::cout << "HEREa5c" << std::endl;
         //
         if(ne > 1){
         VarMatge = P1Matge * P2Matge;
-        arma::mat VarMatge_temp = G1tilde_P_G2tilde_Mat_ge * (ptr_gSAIGEobj->m_VarInvMat_cond).cols((ptr_gSAIGEobj->m_startic), (ptr_gSAIGEobj->m_endic)) * ((G1tilde_P_G2tilde_Mat_ge).t());
+        arma::mat VarMatge_temp = G1tilde_P_G2tilde_Mat_ge * (ptr_gSAIGEobj->m_VarInvMat_cond) * ((G1tilde_P_G2tilde_Mat_ge).t());
         arma::mat VarMatge_c = VarMatge - VarMatge_temp;
         arma::vec r_corr = {0.000}; //SKAT test
         double Pvalue_SKATO, Pvalue_Burden, Pvalue_SKAT, BETA_Burden, SE_Burden;
@@ -853,7 +868,7 @@ void mainMarkerInCPP(
                 );
         char pValueBuf2[100];
         sprintf(pValueBuf2, "%.6E", Pvalue_SKAT);
-        pval_SKAT_ge_cVec.at(j_mt) = pValueBuf2;
+        pval_SKAT_ge_cVec.at(i) = pValueBuf2;
 
         }
         //arma::vec r_corr = {1.000};
@@ -876,13 +891,11 @@ void mainMarkerInCPP(
             pval_noSPA_c_ge_str = pval_noSPA_c_ge_vec.at(0);
         }
 
-        //std::cout << "Beta_c_ge_str " << Beta_c_ge_str << std::endl;
-        //std::cout << "seBeta_c_ge_str " << seBeta_c_ge_str << std::endl;
 
-        Beta_ge_cStrVec.at(j_mt) = Beta_c_ge_str;
-        seBeta_ge_cStrVec.at(j_mt) = seBeta_c_ge_str;
-        pval_ge_cStrVec.at(j_mt) = pval_c_ge_str;
-        pval_noSPA_ge_cStrVec.at(j_mt) = pval_noSPA_c_ge_str;
+        Beta_ge_cStrVec.at(i) = Beta_c_ge_str;
+        seBeta_ge_cStrVec.at(i) = seBeta_c_ge_str;
+        pval_ge_cStrVec.at(i) = pval_c_ge_str;
+        pval_noSPA_ge_cStrVec.at(i) = pval_noSPA_c_ge_str;
         //pval_SKATO_ge_cVec.at(i) = Rcpp::as<double>(groupOutListge["Pvalue_SKATO"]);
         //pval_SKAT_ge_cVec.at(j_mt) = Rcpp::as<double>(groupOutListge["Pvalue_SKAT"]);
 
@@ -1127,8 +1140,8 @@ void Unified_getMarkerPval_gxe(
                            arma::uvec & t_indexForZero_vec,
                            double& t_Beta,
                            double& t_seBeta,
-                           double& t_pval,
-                           double& t_pval_noSPA,
+                        std::string& t_pval,
+                               std::string& t_pval_noSPA,
                            double& t_Tstat,
                            double& t_gy,
                            double& t_varT,
@@ -1141,8 +1154,8 @@ void Unified_getMarkerPval_gxe(
                            bool t_isCondition,
                            double& t_Beta_c,
                            double& t_seBeta_c,
-                           double& t_pval_c,
-                           double& t_pval_noSPA_c,
+                               std::string& t_pval_c,
+                               std::string& t_pval_noSPA_c,
                            double& t_Tstat_c,
                            double& t_varT_c,
                            arma::rowvec & t_G1tilde_P_G2tilde_Vec,
@@ -1248,6 +1261,8 @@ void setSAIGEobjInCPP(arma::mat & t_XVX,
         arma::vec & t_varRatio_sparse,
         arma::vec & t_varRatio_null,
         arma::vec & t_varRatio_null_noXadj,
+        arma::vec & t_varRatio_sparse_eg,
+        arma::vec & t_varRatio_null_eg,
 	arma::vec & t_cateVarRatioMinMACVecExclude,
         arma::vec & t_cateVarRatioMaxMACVecInclude,
         double t_SPA_Cutoff,
@@ -1284,6 +1299,8 @@ void setSAIGEobjInCPP(arma::mat & t_XVX,
 	t_varRatio_sparse,
         t_varRatio_null,
 	t_varRatio_null_noXadj,
+	t_varRatio_sparse_eg,
+        t_varRatio_null_eg,
 	t_cateVarRatioMinMACVecExclude,
 	t_cateVarRatioMaxMACVecInclude,
         t_SPA_Cutoff,
@@ -3378,5 +3395,4 @@ void copy_singleInGroup(){
   }
   ini_file.close();
 }
-
 

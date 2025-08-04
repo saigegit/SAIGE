@@ -165,6 +165,20 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// setAssocTest_GlobalVarsInCPP_GbyE
+void setAssocTest_GlobalVarsInCPP_GbyE(arma::mat& t_emat, bool t_isgxe, double t_pval_cutoff_for_gxe, bool t_is_permute_e, bool t_is_permute_ginge);
+RcppExport SEXP _SAIGE_setAssocTest_GlobalVarsInCPP_GbyE(SEXP t_ematSEXP, SEXP t_isgxeSEXP, SEXP t_pval_cutoff_for_gxeSEXP, SEXP t_is_permute_eSEXP, SEXP t_is_permute_gingeSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type t_emat(t_ematSEXP);
+    Rcpp::traits::input_parameter< bool >::type t_isgxe(t_isgxeSEXP);
+    Rcpp::traits::input_parameter< double >::type t_pval_cutoff_for_gxe(t_pval_cutoff_for_gxeSEXP);
+    Rcpp::traits::input_parameter< bool >::type t_is_permute_e(t_is_permute_eSEXP);
+    Rcpp::traits::input_parameter< bool >::type t_is_permute_ginge(t_is_permute_gingeSEXP);
+    setAssocTest_GlobalVarsInCPP_GbyE(t_emat, t_isgxe, t_pval_cutoff_for_gxe, t_is_permute_e, t_is_permute_ginge);
+    return R_NilValue;
+END_RCPP
+}
 // mainMarkerInCPP
 void mainMarkerInCPP(std::string& t_genoType, std::string& t_traitType, std::vector<std::string>& t_genoIndex_prev, std::vector<std::string>& t_genoIndex, bool& t_isMoreOutput, bool& t_isImputation, bool& t_isFirth);
 RcppExport SEXP _SAIGE_mainMarkerInCPP(SEXP t_genoTypeSEXP, SEXP t_traitTypeSEXP, SEXP t_genoIndex_prevSEXP, SEXP t_genoIndexSEXP, SEXP t_isMoreOutputSEXP, SEXP t_isImputationSEXP, SEXP t_isFirthSEXP) {
@@ -298,8 +312,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // setSAIGEobjInCPP
-void setSAIGEobjInCPP(arma::mat& t_XVX, arma::mat& t_XXVX_inv, arma::mat& t_XV, arma::mat& t_XVX_inv_XV, arma::mat& t_Sigma_iXXSigma_iX, arma::mat& t_X, arma::vec& t_S_a, arma::vec& t_res, arma::vec& t_mu2, arma::vec& t_mu, arma::vec& t_varRatio_sparse, arma::vec& t_varRatio_null, arma::vec& t_varRatio_null_noXadj, arma::vec& t_cateVarRatioMinMACVecExclude, arma::vec& t_cateVarRatioMaxMACVecInclude, double t_SPA_Cutoff, arma::vec& t_tauvec, std::string t_traitType, arma::vec& t_y, std::string t_impute_method, bool t_flagSparseGRM, bool t_isFastTest, bool t_isnoadjCov, double t_pval_cutoff_for_fastTest, arma::umat& t_locationMat, arma::vec& t_valueVec, int t_dimNum, bool t_isCondition, std::vector<uint32_t>& t_condition_genoIndex, bool t_is_Firth_beta, double t_pCutoffforFirth, arma::vec& t_offset, arma::vec& t_resout);
-RcppExport SEXP _SAIGE_setSAIGEobjInCPP(SEXP t_XVXSEXP, SEXP t_XXVX_invSEXP, SEXP t_XVSEXP, SEXP t_XVX_inv_XVSEXP, SEXP t_Sigma_iXXSigma_iXSEXP, SEXP t_XSEXP, SEXP t_S_aSEXP, SEXP t_resSEXP, SEXP t_mu2SEXP, SEXP t_muSEXP, SEXP t_varRatio_sparseSEXP, SEXP t_varRatio_nullSEXP, SEXP t_varRatio_null_noXadjSEXP, SEXP t_cateVarRatioMinMACVecExcludeSEXP, SEXP t_cateVarRatioMaxMACVecIncludeSEXP, SEXP t_SPA_CutoffSEXP, SEXP t_tauvecSEXP, SEXP t_traitTypeSEXP, SEXP t_ySEXP, SEXP t_impute_methodSEXP, SEXP t_flagSparseGRMSEXP, SEXP t_isFastTestSEXP, SEXP t_isnoadjCovSEXP, SEXP t_pval_cutoff_for_fastTestSEXP, SEXP t_locationMatSEXP, SEXP t_valueVecSEXP, SEXP t_dimNumSEXP, SEXP t_isConditionSEXP, SEXP t_condition_genoIndexSEXP, SEXP t_is_Firth_betaSEXP, SEXP t_pCutoffforFirthSEXP, SEXP t_offsetSEXP, SEXP t_resoutSEXP) {
+void setSAIGEobjInCPP(arma::mat& t_XVX, arma::mat& t_XXVX_inv, arma::mat& t_XV, arma::mat& t_XVX_inv_XV, arma::mat& t_Sigma_iXXSigma_iX, arma::mat& t_X, arma::vec& t_S_a, arma::vec& t_res, arma::vec& t_mu2, arma::vec& t_mu, arma::vec& t_varRatio_sparse, arma::vec& t_varRatio_null, arma::vec& t_varRatio_null_noXadj, arma::vec& t_varRatio_sparse_eg, arma::vec& t_varRatio_null_eg, arma::vec& t_cateVarRatioMinMACVecExclude, arma::vec& t_cateVarRatioMaxMACVecInclude, double t_SPA_Cutoff, arma::vec& t_tauvec, std::string t_traitType, arma::vec& t_y, std::string t_impute_method, bool t_flagSparseGRM, bool t_isFastTest, bool t_isnoadjCov, double t_pval_cutoff_for_fastTest, arma::umat& t_locationMat, arma::vec& t_valueVec, int t_dimNum, bool t_isCondition, std::vector<uint32_t>& t_condition_genoIndex, bool t_is_Firth_beta, double t_pCutoffforFirth, arma::vec& t_offset, arma::vec& t_resout);
+RcppExport SEXP _SAIGE_setSAIGEobjInCPP(SEXP t_XVXSEXP, SEXP t_XXVX_invSEXP, SEXP t_XVSEXP, SEXP t_XVX_inv_XVSEXP, SEXP t_Sigma_iXXSigma_iXSEXP, SEXP t_XSEXP, SEXP t_S_aSEXP, SEXP t_resSEXP, SEXP t_mu2SEXP, SEXP t_muSEXP, SEXP t_varRatio_sparseSEXP, SEXP t_varRatio_nullSEXP, SEXP t_varRatio_null_noXadjSEXP, SEXP t_varRatio_sparse_egSEXP, SEXP t_varRatio_null_egSEXP, SEXP t_cateVarRatioMinMACVecExcludeSEXP, SEXP t_cateVarRatioMaxMACVecIncludeSEXP, SEXP t_SPA_CutoffSEXP, SEXP t_tauvecSEXP, SEXP t_traitTypeSEXP, SEXP t_ySEXP, SEXP t_impute_methodSEXP, SEXP t_flagSparseGRMSEXP, SEXP t_isFastTestSEXP, SEXP t_isnoadjCovSEXP, SEXP t_pval_cutoff_for_fastTestSEXP, SEXP t_locationMatSEXP, SEXP t_valueVecSEXP, SEXP t_dimNumSEXP, SEXP t_isConditionSEXP, SEXP t_condition_genoIndexSEXP, SEXP t_is_Firth_betaSEXP, SEXP t_pCutoffforFirthSEXP, SEXP t_offsetSEXP, SEXP t_resoutSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat& >::type t_XVX(t_XVXSEXP);
@@ -315,6 +329,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec& >::type t_varRatio_sparse(t_varRatio_sparseSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type t_varRatio_null(t_varRatio_nullSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type t_varRatio_null_noXadj(t_varRatio_null_noXadjSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type t_varRatio_sparse_eg(t_varRatio_sparse_egSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type t_varRatio_null_eg(t_varRatio_null_egSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type t_cateVarRatioMinMACVecExclude(t_cateVarRatioMinMACVecExcludeSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type t_cateVarRatioMaxMACVecInclude(t_cateVarRatioMaxMACVecIncludeSEXP);
     Rcpp::traits::input_parameter< double >::type t_SPA_Cutoff(t_SPA_CutoffSEXP);
@@ -335,7 +351,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type t_pCutoffforFirth(t_pCutoffforFirthSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type t_offset(t_offsetSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type t_resout(t_resoutSEXP);
-    setSAIGEobjInCPP(t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_varRatio_null_noXadj, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_isnoadjCov, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout);
+    setSAIGEobjInCPP(t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_varRatio_null_noXadj, t_varRatio_sparse_eg, t_varRatio_null_eg, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_isnoadjCov, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout);
     return R_NilValue;
 END_RCPP
 }
@@ -2472,6 +2488,181 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// call_qfc
+Rcpp::List call_qfc(arma::vec& lambdas, arma::vec& noncentral, arma::ivec& df, int r, double sigma, double q, int lim, double acc);
+RcppExport SEXP _SAIGE_call_qfc(SEXP lambdasSEXP, SEXP noncentralSEXP, SEXP dfSEXP, SEXP rSEXP, SEXP sigmaSEXP, SEXP qSEXP, SEXP limSEXP, SEXP accSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type lambdas(lambdasSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type noncentral(noncentralSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type df(dfSEXP);
+    Rcpp::traits::input_parameter< int >::type r(rSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< double >::type q(qSEXP);
+    Rcpp::traits::input_parameter< int >::type lim(limSEXP);
+    Rcpp::traits::input_parameter< double >::type acc(accSEXP);
+    rcpp_result_gen = Rcpp::wrap(call_qfc(lambdas, noncentral, df, r, sigma, q, lim, acc));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Get_Davies_PVal
+Rcpp::List Get_Davies_PVal(arma::mat& Q, arma::mat& W, arma::mat& Q_resampling, bool isFast);
+RcppExport SEXP _SAIGE_Get_Davies_PVal(SEXP QSEXP, SEXP WSEXP, SEXP Q_resamplingSEXP, SEXP isFastSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type W(WSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Q_resampling(Q_resamplingSEXP);
+    Rcpp::traits::input_parameter< bool >::type isFast(isFastSEXP);
+    rcpp_result_gen = Rcpp::wrap(Get_Davies_PVal(Q, W, Q_resampling, isFast));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SKAT_davies
+Rcpp::List SKAT_davies(double q, arma::vec& lambda, arma::ivec& h, arma::vec& delta, double sigma, int lim, double acc);
+RcppExport SEXP _SAIGE_SKAT_davies(SEXP qSEXP, SEXP lambdaSEXP, SEXP hSEXP, SEXP deltaSEXP, SEXP sigmaSEXP, SEXP limSEXP, SEXP accSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type q(qSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type h(hSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type delta(deltaSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< int >::type lim(limSEXP);
+    Rcpp::traits::input_parameter< double >::type acc(accSEXP);
+    rcpp_result_gen = Rcpp::wrap(SKAT_davies(q, lambda, h, delta, sigma, lim, acc));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SKAT_Optimal_Integrate_Func_Davies
+arma::vec SKAT_Optimal_Integrate_Func_Davies(arma::vec& x, arma::mat& pmin_q, Rcpp::List& param_m, arma::vec& r_all);
+RcppExport SEXP _SAIGE_SKAT_Optimal_Integrate_Func_Davies(SEXP xSEXP, SEXP pmin_qSEXP, SEXP param_mSEXP, SEXP r_allSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type pmin_q(pmin_qSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List& >::type param_m(param_mSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type r_all(r_allSEXP);
+    rcpp_result_gen = Rcpp::wrap(SKAT_Optimal_Integrate_Func_Davies(x, pmin_q, param_m, r_all));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Met_SKAT_Get_Pvalue
+Rcpp::List Met_SKAT_Get_Pvalue(arma::vec& Score, arma::mat& Phi, arma::vec& r_corr, std::string& method, bool isFast);
+RcppExport SEXP _SAIGE_Met_SKAT_Get_Pvalue(SEXP ScoreSEXP, SEXP PhiSEXP, SEXP r_corrSEXP, SEXP methodSEXP, SEXP isFastSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type Score(ScoreSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Phi(PhiSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type r_corr(r_corrSEXP);
+    Rcpp::traits::input_parameter< std::string& >::type method(methodSEXP);
+    Rcpp::traits::input_parameter< bool >::type isFast(isFastSEXP);
+    rcpp_result_gen = Rcpp::wrap(Met_SKAT_Get_Pvalue(Score, Phi, r_corr, method, isFast));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Get_Liu_Params
+Rcpp::List Get_Liu_Params(arma::vec& c1);
+RcppExport SEXP _SAIGE_Get_Liu_Params(SEXP c1SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type c1(c1SEXP);
+    rcpp_result_gen = Rcpp::wrap(Get_Liu_Params(c1));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Get_Liu_PVal
+Rcpp::List Get_Liu_PVal(arma::vec& Q, arma::mat& W, arma::mat& Q_resampling);
+RcppExport SEXP _SAIGE_Get_Liu_PVal(SEXP QSEXP, SEXP WSEXP, SEXP Q_resamplingSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type W(WSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Q_resampling(Q_resamplingSEXP);
+    rcpp_result_gen = Rcpp::wrap(Get_Liu_PVal(Q, W, Q_resampling));
+    return rcpp_result_gen;
+END_RCPP
+}
+// forceSymmetric
+arma::mat forceSymmetric(const arma::mat& K);
+RcppExport SEXP _SAIGE_forceSymmetric(SEXP KSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type K(KSEXP);
+    rcpp_result_gen = Rcpp::wrap(forceSymmetric(K));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_SKAT_pvalue_cpp
+void get_SKAT_pvalue_cpp(arma::vec& Score, arma::mat& Phi, arma::vec& r_corr, double& Pvalue_SKATO, double& Pvalue_Burden, double& Pvalue_SKAT, double& BETA_Burden, double& SE_Burden, int& error_code);
+RcppExport SEXP _SAIGE_get_SKAT_pvalue_cpp(SEXP ScoreSEXP, SEXP PhiSEXP, SEXP r_corrSEXP, SEXP Pvalue_SKATOSEXP, SEXP Pvalue_BurdenSEXP, SEXP Pvalue_SKATSEXP, SEXP BETA_BurdenSEXP, SEXP SE_BurdenSEXP, SEXP error_codeSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type Score(ScoreSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Phi(PhiSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type r_corr(r_corrSEXP);
+    Rcpp::traits::input_parameter< double& >::type Pvalue_SKATO(Pvalue_SKATOSEXP);
+    Rcpp::traits::input_parameter< double& >::type Pvalue_Burden(Pvalue_BurdenSEXP);
+    Rcpp::traits::input_parameter< double& >::type Pvalue_SKAT(Pvalue_SKATSEXP);
+    Rcpp::traits::input_parameter< double& >::type BETA_Burden(BETA_BurdenSEXP);
+    Rcpp::traits::input_parameter< double& >::type SE_Burden(SE_BurdenSEXP);
+    Rcpp::traits::input_parameter< int& >::type error_code(error_codeSEXP);
+    get_SKAT_pvalue_cpp(Score, Phi, r_corr, Pvalue_SKATO, Pvalue_Burden, Pvalue_SKAT, BETA_Burden, SE_Burden, error_code);
+    return R_NilValue;
+END_RCPP
+}
+// get_jointScore_pvalue
+double get_jointScore_pvalue(arma::vec& Score, arma::mat& Phi);
+RcppExport SEXP _SAIGE_get_jointScore_pvalue(SEXP ScoreSEXP, SEXP PhiSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type Score(ScoreSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Phi(PhiSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_jointScore_pvalue(Score, Phi));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SPA_ER_kernel_related_Phiadj_fast_new_cpp
+void SPA_ER_kernel_related_Phiadj_fast_new_cpp(arma::vec& p_new, arma::vec& Score, arma::mat& Phi, double p_value_burden, std::string regionTestType, arma::vec& scaleFactor);
+RcppExport SEXP _SAIGE_SPA_ER_kernel_related_Phiadj_fast_new_cpp(SEXP p_newSEXP, SEXP ScoreSEXP, SEXP PhiSEXP, SEXP p_value_burdenSEXP, SEXP regionTestTypeSEXP, SEXP scaleFactorSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type p_new(p_newSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type Score(ScoreSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Phi(PhiSEXP);
+    Rcpp::traits::input_parameter< double >::type p_value_burden(p_value_burdenSEXP);
+    Rcpp::traits::input_parameter< std::string >::type regionTestType(regionTestTypeSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type scaleFactor(scaleFactorSEXP);
+    SPA_ER_kernel_related_Phiadj_fast_new_cpp(p_new, Score, Phi, p_value_burden, regionTestType, scaleFactor);
+    return R_NilValue;
+END_RCPP
+}
+// get_newPhi_scaleFactor_cpp
+void get_newPhi_scaleFactor_cpp(double q_sum, arma::vec& mu_a, arma::vec& g_sum, arma::vec& p_new, arma::vec& Score, arma::mat& Phi, std::string regionTestType, arma::vec& scaleFactor);
+RcppExport SEXP _SAIGE_get_newPhi_scaleFactor_cpp(SEXP q_sumSEXP, SEXP mu_aSEXP, SEXP g_sumSEXP, SEXP p_newSEXP, SEXP ScoreSEXP, SEXP PhiSEXP, SEXP regionTestTypeSEXP, SEXP scaleFactorSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type q_sum(q_sumSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type mu_a(mu_aSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type g_sum(g_sumSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type p_new(p_newSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type Score(ScoreSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Phi(PhiSEXP);
+    Rcpp::traits::input_parameter< std::string >::type regionTestType(regionTestTypeSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type scaleFactor(scaleFactorSEXP);
+    get_newPhi_scaleFactor_cpp(q_sum, mu_a, g_sum, p_new, Score, Phi, regionTestType, scaleFactor);
+    return R_NilValue;
+END_RCPP
+}
 // SPA
 void SPA(arma::vec& mu, arma::vec& g, double q, double qinv, double pval_noadj, double tol, bool logp, std::string traitType, double& pval, bool& isSPAConverge);
 RcppExport SEXP _SAIGE_SPA(SEXP muSEXP, SEXP gSEXP, SEXP qSEXP, SEXP qinvSEXP, SEXP pval_noadjSEXP, SEXP tolSEXP, SEXP logpSEXP, SEXP traitTypeSEXP, SEXP pvalSEXP, SEXP isSPAConvergeSEXP) {
@@ -3043,6 +3234,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setAssocTest_GlobalVarsInCPP_X_PARregion_mat", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP_X_PARregion_mat, 1},
     {"_SAIGE_setMarker_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setMarker_GlobalVarsInCPP, 2},
     {"_SAIGE_setRegion_GlobalVarsInCPP", (DL_FUNC) &_SAIGE_setRegion_GlobalVarsInCPP, 4},
+    {"_SAIGE_setAssocTest_GlobalVarsInCPP_GbyE", (DL_FUNC) &_SAIGE_setAssocTest_GlobalVarsInCPP_GbyE, 5},
     {"_SAIGE_mainMarkerInCPP", (DL_FUNC) &_SAIGE_mainMarkerInCPP, 7},
     {"_SAIGE_Unified_getOneMarker", (DL_FUNC) &_SAIGE_Unified_getOneMarker, 18},
     {"_SAIGE_processMale_XnonPAR", (DL_FUNC) &_SAIGE_processMale_XnonPAR, 3},
@@ -3052,7 +3244,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setPGENobjInCPP", (DL_FUNC) &_SAIGE_setPGENobjInCPP, 4},
     {"_SAIGE_setBGENobjInCPP", (DL_FUNC) &_SAIGE_setBGENobjInCPP, 5},
     {"_SAIGE_setVCFobjInCPP", (DL_FUNC) &_SAIGE_setVCFobjInCPP, 4},
-    {"_SAIGE_setSAIGEobjInCPP", (DL_FUNC) &_SAIGE_setSAIGEobjInCPP, 33},
+    {"_SAIGE_setSAIGEobjInCPP", (DL_FUNC) &_SAIGE_setSAIGEobjInCPP, 35},
     {"_SAIGE_RegionSetUpConditional_binary_InCPP", (DL_FUNC) &_SAIGE_RegionSetUpConditional_binary_InCPP, 1},
     {"_SAIGE_mainRegionInCPP", (DL_FUNC) &_SAIGE_mainRegionInCPP, 20},
     {"_SAIGE_assign_conditionMarkers_factors", (DL_FUNC) &_SAIGE_assign_conditionMarkers_factors, 5},
@@ -3208,6 +3400,18 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_setmaxMissingRateforGRM", (DL_FUNC) &_SAIGE_setmaxMissingRateforGRM, 1},
     {"_SAIGE_set_Diagof_StdGeno_LOCO", (DL_FUNC) &_SAIGE_set_Diagof_StdGeno_LOCO, 0},
     {"_SAIGE_setminMAC_VarianceRatio", (DL_FUNC) &_SAIGE_setminMAC_VarianceRatio, 3},
+    {"_SAIGE_call_qfc", (DL_FUNC) &_SAIGE_call_qfc, 8},
+    {"_SAIGE_Get_Davies_PVal", (DL_FUNC) &_SAIGE_Get_Davies_PVal, 4},
+    {"_SAIGE_SKAT_davies", (DL_FUNC) &_SAIGE_SKAT_davies, 7},
+    {"_SAIGE_SKAT_Optimal_Integrate_Func_Davies", (DL_FUNC) &_SAIGE_SKAT_Optimal_Integrate_Func_Davies, 4},
+    {"_SAIGE_Met_SKAT_Get_Pvalue", (DL_FUNC) &_SAIGE_Met_SKAT_Get_Pvalue, 5},
+    {"_SAIGE_Get_Liu_Params", (DL_FUNC) &_SAIGE_Get_Liu_Params, 1},
+    {"_SAIGE_Get_Liu_PVal", (DL_FUNC) &_SAIGE_Get_Liu_PVal, 3},
+    {"_SAIGE_forceSymmetric", (DL_FUNC) &_SAIGE_forceSymmetric, 1},
+    {"_SAIGE_get_SKAT_pvalue_cpp", (DL_FUNC) &_SAIGE_get_SKAT_pvalue_cpp, 9},
+    {"_SAIGE_get_jointScore_pvalue", (DL_FUNC) &_SAIGE_get_jointScore_pvalue, 2},
+    {"_SAIGE_SPA_ER_kernel_related_Phiadj_fast_new_cpp", (DL_FUNC) &_SAIGE_SPA_ER_kernel_related_Phiadj_fast_new_cpp, 6},
+    {"_SAIGE_get_newPhi_scaleFactor_cpp", (DL_FUNC) &_SAIGE_get_newPhi_scaleFactor_cpp, 8},
     {"_SAIGE_SPA", (DL_FUNC) &_SAIGE_SPA, 10},
     {"_SAIGE_SPA_fast", (DL_FUNC) &_SAIGE_SPA_fast, 16},
     {"_SAIGE_SPA_pval", (DL_FUNC) &_SAIGE_SPA_pval, 9},

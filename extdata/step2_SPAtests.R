@@ -135,10 +135,16 @@ mean, p-value based on traditional score test is returned. Default value is 2.")
         help="Whether to regress out covariates from genotype"),
   make_option("--max_MAC_for_ER", type="numeric", default=4,
     help="p-values of genetic variants with MAC <= max_MAC_for_ER will be calculated via efficient resampling. [default=4]"),
+  make_option("--pval_cutoff_for_gxe", type="numeric", default=0.001,
+      help="p-value cutoff for gxe test"),
   make_option("--nThreads", type="integer", default=1,
     help="Optional. Number of threads (CPUs) to use [default=1]."),
  make_option("--subSampleFile", type="character",default="",
-    help="Path to the file that contains one column for IDs of samples that are included in Step 1 and will be also included in Step 2. This option is used when any sample included in Step 1 but does not have dosages/genotypes for Step 2. Please make sure it contains one column of sample IDs that will be used for subsetting samples from the Step 1 results for Step 2 jobs. Note: Thi option has not been fully evaluated. If more than 5% of the samples in Step 1 are missing in Step 2, please consider re-run Step 1. ")
+    help="Path to the file that contains one column for IDs of samples that are included in Step 1 and will be also included in Step 2. This option is used when any sample included in Step 1 but does not have dosages/genotypes for Step 2. Please make sure it contains one column of sample IDs that will be used for subsetting samples from the Step 1 results for Step 2 jobs. Note: Thi option has not been fully evaluated. If more than 5% of the samples in Step 1 are missing in Step 2, please consider re-run Step 1. "),
+  make_option("--is_permute_e", type="logical", default=FALSE,
+    help="Whether to permute e in gxe"),
+  make_option("--is_permute_ginge", type="logical", default=FALSE,
+    help="Whether to permute g in gxe")
 )
 
 
@@ -255,7 +261,10 @@ if(nThreads == 1){
              is_fastTest = opt$is_fastTest,
 	     max_MAC_use_ER = opt$max_MAC_for_ER,
 	     subSampleFile = opt$subSampleFile,
-	     is_noadjCov = opt$is_noadjCov)
+	     is_noadjCov = opt$is_noadjCov,
+	     pval_cutoff_for_gxe = opt$pval_cutoff_for_gxe,
+	     is_permute_e = opt$is_permute_e,
+	     is_permute_ginge = opt$is_permute_ginge)
 
 
 }else{ #if(nThreads == 1)
@@ -336,7 +345,10 @@ if(nThreads == 1){
              is_fastTest = opt$is_fastTest,
              max_MAC_use_ER = opt$max_MAC_for_ER,
              subSampleFile = opt$subSampleFile,
-	    is_noadjCov = opt$is_noadjCov)
+	    is_noadjCov = opt$is_noadjCov,
+             pval_cutoff_for_gxe = opt$pval_cutoff_for_gxe,
+             is_permute_e = opt$is_permute_e,
+             is_permute_ginge = opt$is_permute_ginge)
 
 
 	param_list <- mapply(function(SAIGEOutputFile, idstoIncludeFile) {

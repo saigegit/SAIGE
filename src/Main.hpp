@@ -97,7 +97,12 @@ void Unified_getMarkerPval(
 			  bool t_isnoadjCov,
 			  bool t_isSparseGRM);
 
-
+void setAssocTest_GlobalVarsInCPP_GbyE(
+                                arma::mat & t_emat,
+                                bool t_isgxe,
+                                double t_pval_cutoff_for_gxe,
+                                bool t_is_permute_e,
+                                bool t_is_permute_ginge);
 
 void Unified_getMarkerPval_gxe(
                            arma::vec & t_GVec,
@@ -106,8 +111,8 @@ void Unified_getMarkerPval_gxe(
                            arma::uvec & t_indexForZero_vec,
                            double& t_Beta,
                            double& t_seBeta,
-                           double& t_pval,
-                           double& t_pval_noSPA,
+                        std::string& t_pval,
+                               std::string& t_pval_noSPA,
                            double& t_Tstat,
                            double& t_gy,
                            double& t_varT,
@@ -120,8 +125,8 @@ void Unified_getMarkerPval_gxe(
                            bool t_isCondition,
                            double& t_Beta_c,
                            double& t_seBeta_c,
-                           double& t_pval_c,
-                           double& t_pval_noSPA_c,
+                               std::string& t_pval_c,
+                               std::string& t_pval_noSPA_c,
                            double& t_Tstat_c,
                            double& t_varT_c,
                            arma::rowvec & t_G1tilde_P_G2tilde_Vec,
@@ -195,6 +200,8 @@ void setSAIGEobjInCPP(arma::mat & t_XVX,
         arma::vec & t_varRatio_sparse,
         arma::vec & t_varRatio_null,
         arma::vec & t_varRatio_null_noXadj,
+        arma::vec & t_varRatio_sparse_eg,
+        arma::vec & t_varRatio_null_eg,
         arma::vec & t_cateVarRatioMinMACVecExclude,
         arma::vec & t_cateVarRatioMaxMACVecInclude,
         double t_SPA_Cutoff,

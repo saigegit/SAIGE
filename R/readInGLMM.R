@@ -177,6 +177,21 @@ ReadModel = function(GMMATmodelFile = "", chrom="", LOCO=TRUE, is_Firth_beta=FAL
  if(is.null(modglmm$Sigma_iXXSigma_iX)){
         modglmm$Sigma_iXXSigma_iX = matrix(0, nrow=1, ncol=1)
  }
+
+  if (!is.null(modglmm$eMat)) {
+    modglmm$isgxe <- TRUE
+    modglmm$eMat <- as.matrix(modglmm$eMat)
+    # for(em in 1:ncol(modglmm$eMat)){
+    #   modglmm$eMat[,em] = (modglmm$eMat[,em] - mean(modglmm$eMat[,em]))/sd(modglmm$eMat[,em])
+    # modglmm$eMat[,em] = rep(1, nrow(modglmm$eMat))
+    # }
+  } else {
+    modglmm$isgxe <- FALSE
+    modglmm$eMat <- matrix(rep(1, 4), nrow = 2, ncol = 2)
+  }
+
+
+
  return(modglmm)
 }
 
@@ -360,7 +375,20 @@ rm(obj.noK)
         modglmm$Sigma_iXXSigma_iX = matrix(0, nrow=1, ncol=1)
  }else{
 	modglmm$Sigma_iXXSigma_iX = modglmm$Sigma_iXXSigma_iX[includeIndex,, drop=F]
-  }	 
+  }
+
+  if (!is.null(modglmm$eMat)) {
+    modglmm$isgxe <- TRUE
+    modglmm$eMat <- as.matrix(modglmm$eMat)
+    # for(em in 1:ncol(modglmm$eMat)){
+    #   modglmm$eMat[,em] = (modglmm$eMat[,em] - mean(modglmm$eMat[,em]))/sd(modglmm$eMat[,em])
+    # modglmm$eMat[,em] = rep(1, nrow(modglmm$eMat))
+    # }
+  } else {
+    modglmm$isgxe <- FALSE
+    modglmm$eMat <- matrix(rep(1, 4), nrow = 2, ncol = 2)
+  }
+	 
  return(modglmm)
 }
 
@@ -394,7 +422,7 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 	if(ncol(varRatioData) == 3){
 	    spindex = which(varRatioData[,2] == "sparse")
 	    if(length(spindex) > 0){
-	        ratioVec_sparse = varRatioData[which(varRatioData[,2] == "sparse"),1]
+	        ratioVec_sparse <- varRatioData[which(varRatioData[, 2] == "sparse" & varRatioData[, 3] > 0), 1]
 		ratioVec_sparse = as.numeric(ratioVec_sparse)
 		#if(!isSparseGRM & sum(ratioVec_sparse > 1.0001 | ratioVec_sparse < 0.9999) > 0){
 		#       	stop("sparse GRM is not specified but it was used for estimating variance ratios in Step 1. Please specify --sparseGRMFile and --sparseGRMSampleIDFile\n")
@@ -405,7 +433,7 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
 			stop("sparse GRM is specified but the variance ratio for sparse GRM was not estimatedin Step 1. Pleae remove --sparseGRMFile and --sparseGRMSampleIDFile\n")
 		}	
 	    }
-	    ratioVec_null = varRatioData[which(varRatioData[,2] == "null"),1]
+	    ratioVec_null <- varRatioData[which(varRatioData[, 2] == "null" & varRatioData[, 3] > 0), 1]
 	    ratioVec_null = as.numeric(ratioVec_null)
             cat("variance Ratio null is ", ratioVec_null, "\n")
 	    if(length(ratioVec_null) > 1){
@@ -425,6 +453,22 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
                         stop("categorical variance Ratio null_noXadj are needed\n")
                 }
             }
+
+      egindex <- which(varRatioData[, 3] == 0 & varRatioData[, 2] == "null")
+      if (length(egindex) > 0) {
+        ratioVec_null_eg <- varRatioData[egindex, 1]
+        ratioVec_null_eg <- as.numeric(ratioVec_null_eg)
+      } else {
+        ratioVec_null_eg <- c(-1)
+      }
+
+      egindex <- which(varRatioData[, 3] == 0 & varRatioData[, 2] == "sparse")
+      if (length(egindex) > 0) {
+        ratioVec_sparse_eg <- varRatioData[egindex, 1]
+        ratioVec_sparse_eg <- as.numeric(ratioVec_sparse_eg)
+      } else {
+        ratioVec_sparse_eg <- c(-1)
+      }
 
 
 	}else{
@@ -473,7 +517,7 @@ Get_Variance_Ratio<-function(varianceRatioFile, cateVarRatioMinMACVecExclude, ca
     print("ratioVec_null_noXadj")
     print(ratioVec_null_noXadj)
 
-    return(list(ratioVec_sparse = ratioVec_sparse, ratioVec_null = ratioVec_null, ratioVec_null_noXadj = ratioVec_null_noXadj))
+    return(list(ratioVec_sparse = ratioVec_sparse, ratioVec_null = ratioVec_null, ratioVec_null_noXadj = ratioVec_null_noXadj, ratioVec_null_eg = ratioVec_null_eg, ratioVec_sparse_eg = ratioVec_sparse_eg))
 }
 
 
