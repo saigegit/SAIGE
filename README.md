@@ -21,7 +21,7 @@ mkdir SAIGE-GPU
 cd SAIGE-GPU
 git clone https://github.com/saigegit/SAIGE.git
 cd SAIGE/
-git pull origin SAIGE-GPU-1.3.3
+git checkout SAIGE-GPU-1.3.3
 ```
 
 #### Step 2: Create a Conda Environment
