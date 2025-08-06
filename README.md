@@ -119,7 +119,7 @@ mpirun -n 4 Rscript $path_to_saige/extdata/step1_fitNULLGLMM.R \
 
 You should see a succesful run where all GPUs are used. The log should provide the IDs of the GPUs used.
 
-Currently, Step 2 is not optimized to use GPUs and is being developed to run multiple phenotypes in parallel. 
+Currently, Step 2 is not optimized to use GPUs and but can run multiple phenotypes in parallel using nThreads. 
 You can also test step 2 for a single phenotype by running the following:
 
 ```
@@ -135,7 +135,9 @@ You can also test step 2 for a single phenotype by running the following:
      --GMMATmodelFile=./GPU_step1_output.rda \
      --varianceRatioFile=./GPU_step1_output.varianceRatio.txt   \
      --LOCO=FALSE       \
-     --is_fastTest=TRUE
+     --is_fastTest=TRUE \
+     --nThreas 2
+
 ```
 
 ## Run on HPC Systems Using Singularity Container
