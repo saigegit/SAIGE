@@ -3,8 +3,10 @@
 
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
+#include <memory>
+#include "SAIGE2_test.hpp"
 
-
+/*
 void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
                 double t_missing_cutoff,
                                double t_min_maf_marker,
@@ -14,7 +16,18 @@ void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
                                double t_dosage_zerod_MAC_cutoff,
                                arma::vec & t_weights_beta,
 			       std::string t_outputFilePrefix);
+*/
 
+void setAssocTest_GlobalVarsInCPP(std::string t_impute_method,
+                                 double t_missing_cutoff,
+                                 double t_min_maf_marker,
+                                 double t_min_mac_marker,
+                                 double t_min_info_marker,
+                                 double t_dosage_zerod_cutoff,
+                                 double t_dosage_zerod_MAC_cutoff,
+                                 arma::vec & t_weights_beta,
+                                 std::vector<std::string> t_outputFilePrefixes,  // Changed to vector
+                                 double t_MACCutoffforER);  // Added the missing parameter
 
 void setAssocTest_GlobalVarsInCPP_indexInModel_male(arma::uvec & t_indexInModel_male);
 
@@ -38,13 +51,23 @@ void setRegion_GlobalVarsInCPP(
 
 
 void mainMarkerInCPP(
-                           std::string & t_genoType,     // "PLINK", "BGEN"
-                           std::string & t_traitType,
-			   std::vector<std::string> & t_genoIndex_prev,
-                           std::vector<std::string>  & t_genoIndex,
-                           bool & t_isMoreOutput,
-                           bool & t_isImputation,
-			   bool & t_isFirth);
+                           std::string  t_genoType,     // "PLINK", "BGEN"
+                           std::string  t_traitType,
+			   std::vector<std::string>  t_genoIndex_prev,
+                           std::vector<std::string>   t_genoIndex,
+                           bool  t_isMoreOutput,
+                           bool  t_isImputation,
+			   bool  t_isFirth);
+
+void executeMarkerProcessing(
+                           std::string  t_genoType,     // "PLINK", "BGEN"
+                           std::string  t_traitType,
+                           std::vector<std::string>  t_genoIndex_prev,
+                           std::vector<std::string>   t_genoIndex,
+                           bool  t_isMoreOutput,
+                           bool  t_isImputation,
+                           bool  t_isFirth,
+			   int attempt);
 
 bool Unified_getOneMarker(std::string & t_genoType,   // "PLINK", "BGEN"
 				uint64_t & t_gIndex_prev,
@@ -75,6 +98,37 @@ void Unified_getMarkerPval(
                            std::string& t_pval,
                            std::string& t_pval_noSPA,
                            double& t_Tstat,
+                           double& t_gy,
+                           double& t_varT,
+                           double t_altFreq,
+                           bool & t_isSPAConverge,
+                           arma::vec & t_gtilde,
+                           bool & is_gtilde,
+                           bool  is_region,
+                           arma::vec & t_P2Vec,
+                           bool t_isCondition,
+                           double& t_Beta_c,
+                           double& t_seBeta_c,
+                           std::string& t_pval_c,
+                           std::string& t_pval_noSPA_c,
+                           double& t_Tstat_c,
+                           double& t_varT_c,
+                           arma::rowvec & t_G1tilde_P_G2tilde_Vec,
+                            bool & t_isFirth,
+                           bool & t_isFirthConverge,
+                           bool t_isER,
+                           uint64_t t_objIndex);
+
+void Unified_getMarkerPval_threaded(
+                           arma::vec & t_GVec,
+                           bool t_isOnlyOutputNonZero,
+                           arma::uvec & t_indexForNonZero_vec,
+                           arma::uvec & t_indexForZero_vec,
+                           double& t_Beta,
+                           double& t_seBeta,
+                           std::string& t_pval,
+                           std::string& t_pval_noSPA,
+                           double& t_Tstat,
 			   double& t_gy,
                            double& t_varT,
                            double t_altFreq,
@@ -93,7 +147,8 @@ void Unified_getMarkerPval(
 			   arma::rowvec & t_G1tilde_P_G2tilde_Vec,
 			    bool & t_isFirth,
 			   bool & t_isFirthConverge,
-			   bool t_isER);
+			   bool t_isER,
+			   std::shared_ptr<SAIGE2::SAIGE2Class>& ptr_gSAIGEobj);
 
 
 Rcpp::List mainRegionInCPP(
@@ -211,6 +266,45 @@ bool openOutfile(std::string t_traitType, bool isappend);
 bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput);
 
 bool openOutfile_single(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput);
+
+void writeOutfile_single_multiple(bool t_isMoreOutput,
+                        bool t_isImputation,
+                        bool t_isCondition,
+                        bool t_isFirth,
+                        arma::Mat<uint32_t> mFirth,
+                        arma::Mat<uint32_t> mFirthConverge,
+                        std::string t_traitType,
+                        std::vector<std::string> & chrVec,
+                        std::vector<std::string> & posVec,
+                        std::vector<std::string> & markerVec,
+                        std::vector<std::string> & refVec,
+                        std::vector<std::string> & altVec,
+                        std::vector<double> & altCountsVec,
+                        std::vector<double> & altFreqVec,
+                        std::vector<double> & imputationInfoVec,
+                        std::vector<double> & missingRateVec,
+                        arma::mat & BetaMat,
+                        arma::mat & seBetaMat,
+                        arma::mat & TstatMat,
+                        arma::mat & varTMat,
+                        std::vector<std::vector<std::string>> & pvalMat,
+                        std::vector<std::vector<std::string>> & pvalNAMat,
+                        std::vector<std::vector<bool>>  & isSPAConvergeMat,
+                        arma::mat & Beta_cMat,
+                        arma::mat & seBeta_cMat,
+                        arma::mat & Tstat_cMat,
+                        arma::mat & varT_cMat,
+                        std::vector<std::vector<std::string>> & pval_CMat,
+                        std::vector<std::vector<std::string>> & pvalNA_cMat,
+                        arma::mat & AF_caseMat,
+                        arma::mat & AF_ctrlVec,
+                        arma::Mat<uint32_t> & N_caseMat,
+                        arma::Mat<uint32_t> & N_ctrlMat,
+                        arma::mat  & N_case_homMat,
+                        arma::mat  & N_ctrl_hetMat,
+                        arma::mat  & N_case_hetMat,
+                        arma::mat  & N_ctrl_homMat,
+                        arma::Mat<uint32_t> & N_Mat);
 
 void writeOutfile_single(bool t_isMoreOutput,
       bool t_isImputation,

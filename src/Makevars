@@ -21,12 +21,12 @@ CXX_STD = CXX11
 
 PKG_LIBS = $(ZLIB_LIB) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -L../thirdParty/cget/lib/ -L../thirdParty/cget/lib64/ -lsuperlu -lzstd -L../lib64
 #PKG_LIBS += $(shell ${R_HOME}/bin/Rscript -e "RcppParallel::RcppParallelLibs()")
-PKG_LIBS += -L/sw/summit/spack-envs/base/opt/linux-rhel8-ppc64le/gcc-9.1.0/openblas-0.3.17-ehvho6jt4ooly45nfunnwqq3kp476x5h/lib -lopenblas
+#PKG_LIBS += -L/sw/summit/spack-envs/base/opt/linux-rhel8-ppc64le/gcc-9.1.0/openblas-0.3.17-ehvho6jt4ooly45nfunnwqq3kp476x5h/lib -lopenblas
 PKG_LIBS += $(MPI_LDFLAGS)
 PKG_LIBS += $(CUDA_LIBS)
 
 #OBJECTS = RcppExports.o SAIGE_fitGLMM_fast.o getMem.o VCF.o BGEN.o PLINK.o SAIGE_test.o SPA_binary.o SPA.o SPA_survival.o UTIL.o Main.o test.o CCT.o 
-OBJECTS = gpuSymMatMult.o RcppExports.o SAIGE_fitGLMM_fast.o getMem.o VCF.o BGEN.o PLINK.o SAIGE_test.o SPA_binary.o SPA.o SPA_survival.o UTIL.o Main.o test.o CCT.o Binary_HyperGeo.o Binary_ComputeExact.o Binary_global.o Binary_ComputeExactSKATO.o Binary_resampling.o Binary_Permu_SKAT.o ER_binary_func.o LDmat.o 
+OBJECTS = gpuSymMatMult.o RcppExports.o SAIGE_fitGLMM_fast.o getMem.o VCF.o BGEN.o PLINK.o SAIGE_test.o SAIGE2_test.o SPA_binary.o SPA.o SPA_survival.o SPA_binary_threadsafe.o SPA_threadsafe.o SPA_survival_threadsafe.o UTIL.o Main.o test.o CCT.o Binary_HyperGeo.o Binary_ComputeExact.o Binary_global.o Binary_ComputeExactSKATO.o Binary_resampling.o Binary_Permu_SKAT.o ER_binary_func.o LDmat.o
 
 %.o: %.cu
 	$(NVCC) -O2 -x cu -c -arch=sm_70 -Xcompiler "-fPIC" $< -o $@

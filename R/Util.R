@@ -438,26 +438,25 @@ Check_GenoFile<-function(GenoFile,
   #sampleIndex <- Check_GenotypeSamples(genoFilelist$samplesInGeno, sampleInModel) 
   #dosageFileType = genoFilelist$dosageFileType
 
+# Updated checkOutputFile function to handle multiple files
 checkOutputFile = function(OutputFile,
                            OutputFileIndex,
                            AnalysisType,      ## "Marker" or "Region"
                            nEachChunk,
-			   isOverwriteOutput)
+                           isOverwriteOutput)
 {
   ## The following messages are for 'OutputFileIndex'
   message1 = "This is the output index file for SAIGE package to record the end point in case users want to restart the analysis. Please do not modify this file."
   message2 = paste("This is a", AnalysisType, "level analysis.")
   message3 = paste("nEachChunk =", nEachChunk)
-  # message4 = paste("Have completed the analysis of chunk", indexChunk)
   message5 = "Have completed the analyses of all chunks."
-
+  
   ## an R list of output
   if(OutputFile == "")
     stop("Argument of 'OutputFile' is required.")
-
-if(isOverwriteOutput){
+    
+  if(isOverwriteOutput){
     Check_OutputFile_Create(OutputFile)
-    #Check_OutputFile_Create(OutputFileIndex) 
     Start = TRUE;
     End = FALSE;
     indexChunk = 0;
@@ -465,52 +464,43 @@ if(isOverwriteOutput){
       indexChunk = 1;
     }
   }else{
-
-
-
-  if(file.exists(OutputFile)){
-    if(!file.exists(OutputFileIndex)){
-      stop(paste0("'OutputFile' of '", OutputFile,"' has existed.
-                  Please use another 'OutputFile' or specify --is_overwrite_output=TRUE to overwrite the OutputFile."))
-    }else{
-      outIndexData = read.table(OutputFileIndex, header = F, sep="\t")
-
-      if(outIndexData[1,1] != message1 | outIndexData[2,1] != message2 | outIndexData[3,1] != message3)
-        stop(paste0("'OutputFileIndex' of '", OutputFileIndex, "' is not as expected.
-                    Probably, it has been modified by user, which is not permitted.
-                    Please remove the existing files of 'OutputFile' and 'OutputFileIndex' or specify --is_overwrite_output=TRUE to overwrite the OutputFile."))
-
-      lastMessage = outIndexData[nrow(outIndexData), 1]
-      if(lastMessage == message5){
-        End = TRUE
-        indexChunk = outIndexData[nrow(outIndexData)-1, 1];
-        indexChunk = as.numeric(gsub("Have completed the analysis of chunk ", "", indexChunk))
-        cat("Based on 'OutputFile' and 'OutputFileIndex', the analysis has been completed for the toal", indexChunk, "chunks.\n")
+    if(file.exists(OutputFile)){
+      if(!file.exists(OutputFileIndex)){
+        stop(paste0("'OutputFile' of '", OutputFile,"' has existed.
+                    Please use another 'OutputFile' or specify --is_overwrite_output=TRUE to overwrite the OutputFile."))
       }else{
-        End = FALSE;
-        indexChunk = lastMessage;
-        indexChunk = as.numeric(gsub("Have completed the analysis of chunk ", "", indexChunk))
-        cat("Based on 'OutputFile' and 'OutputFileIndex', we restart the analysis from the", indexChunk+1, "chunk.\n")
+        outIndexData = read.table(OutputFileIndex, header = F, sep="\t")
+        if(outIndexData[1,1] != message1 | outIndexData[2,1] != message2 | outIndexData[3,1] != message3)
+          stop(paste0("'OutputFileIndex' of '", OutputFileIndex, "' is not as expected.
+                      Probably, it has been modified by user, which is not permitted.
+                      Please remove the existing files of 'OutputFile' and 'OutputFileIndex' or specify --is_overwrite_output=TRUE to overwrite the OutputFile."))
+        lastMessage = outIndexData[nrow(outIndexData), 1]
+        if(lastMessage == message5){
+          End = TRUE
+          indexChunk = outIndexData[nrow(outIndexData)-1, 1];
+          indexChunk = as.numeric(gsub("Have completed the analysis of chunk ", "", indexChunk))
+          cat("Based on 'OutputFile' and 'OutputFileIndex', the analysis has been completed for the total", indexChunk, "chunks.\n")
+        }else{
+          End = FALSE;
+          indexChunk = lastMessage;
+          indexChunk = as.numeric(gsub("Have completed the analysis of chunk ", "", indexChunk))
+          cat("Based on 'OutputFile' and 'OutputFileIndex', we restart the analysis from the", indexChunk+1, "chunk.\n")
+        }
+      }
+      Start = FALSE
+    }else{
+      Check_OutputFile_Create(OutputFile)
+      Start = TRUE;
+      End = FALSE;
+      indexChunk = 0;
+      if(AnalysisType == "Marker"){
+        indexChunk = 1;
       }
     }
-    Start = FALSE
-  }else{
-    Check_OutputFile_Create(OutputFile)	  
-    #Check_OutputFile_Create(OutputFileIndex)	  
-    Start = TRUE;
-    End = FALSE;
-    indexChunk = 0;
-    if(AnalysisType == "Marker"){
-      indexChunk = 1;
-    }	    
   }
+  
+  return(list(Start = Start, End = End, indexChunk = indexChunk))
 }
-
-
-  returnList = list(Start = Start, End = End, indexChunk = indexChunk)
-  return(returnList)
-}
-
 
 
 writeOutputFile = function(Output,
@@ -583,15 +573,15 @@ writeOutputFileIndex = function(
   message5 = "Have completed the analyses of all chunks."
 
   cat("write to output\n")
-
   #print("write Output 2")
   if(Start)
-    write.table(c(message1, message2, message3), OutputFileIndex,
+    cat(OutputFileIndex[1])
+    write.table(c(message1, message2, message3), OutputFileIndex[1],
                 quote = F, sep = "\t", append = F, col.names = F, row.names = F)
-  write.table(message4, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+  write.table(message4, OutputFileIndex[1], quote = F, sep = "\t", append = T, col.names = F, row.names = F)
 
   if(End)
-    write.table(message5, OutputFileIndex, quote = F, sep = "\t", append = T, col.names = F, row.names = F)
+    write.table(message5, OutputFileIndex[1], quote = F, sep = "\t", append = T, col.names = F, row.names = F)
 }
 
 

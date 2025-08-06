@@ -29,8 +29,8 @@ closeOutfile_single_LDmat <- function() {
     invisible(.Call('_SAIGE_closeOutfile_single_LDmat', PACKAGE = 'SAIGE'))
 }
 
-setAssocTest_GlobalVarsInCPP <- function(t_impute_method, t_missing_cutoff, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_weights_beta, t_outputFilePrefix, t_MACCutoffforER) {
-    invisible(.Call('_SAIGE_setAssocTest_GlobalVarsInCPP', PACKAGE = 'SAIGE', t_impute_method, t_missing_cutoff, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_weights_beta, t_outputFilePrefix, t_MACCutoffforER))
+setAssocTest_GlobalVarsInCPP <- function(t_impute_method, t_missing_cutoff, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_weights_beta, t_outputFilePrefixes, t_MACCutoffforER) {
+    invisible(.Call('_SAIGE_setAssocTest_GlobalVarsInCPP', PACKAGE = 'SAIGE', t_impute_method, t_missing_cutoff, t_min_maf_marker, t_min_mac_marker, t_min_info_marker, t_dosage_zerod_cutoff, t_dosage_zerod_MAC_cutoff, t_weights_beta, t_outputFilePrefixes, t_MACCutoffforER))
 }
 
 setAssocTest_GlobalVarsInCPP_indexInModel_male <- function(t_indexInModel_male) {
@@ -83,6 +83,10 @@ setVCFobjInCPP <- function(t_vcfFileName, t_vcfFileIndex, t_vcfField, t_SampleIn
 
 setSAIGEobjInCPP <- function(t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout) {
     invisible(.Call('_SAIGE_setSAIGEobjInCPP', PACKAGE = 'SAIGE', t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout))
+}
+
+createSAIGEObject <- function(t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout) {
+    .Call('_SAIGE_createSAIGEObject', PACKAGE = 'SAIGE', t_XVX, t_XXVX_inv, t_XV, t_XVX_inv_XV, t_Sigma_iXXSigma_iX, t_X, t_S_a, t_res, t_mu2, t_mu, t_varRatio_sparse, t_varRatio_null, t_cateVarRatioMinMACVecExclude, t_cateVarRatioMaxMACVecInclude, t_SPA_Cutoff, t_tauvec, t_traitType, t_y, t_impute_method, t_flagSparseGRM, t_isFastTest, t_pval_cutoff_for_fastTest, t_locationMat, t_valueVec, t_dimNum, t_isCondition, t_condition_genoIndex, t_is_Firth_beta, t_pCutoffforFirth, t_offset, t_resout)
 }
 
 setSparseSigmaInCPP <- function(r, t_locationMatinR, t_valueVecinR) {

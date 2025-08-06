@@ -3,8 +3,8 @@ SAIGE.Marker = function(traitType,
 			genoIndex_prev,
                         genoIndex,
 			CHROM,
-                        OutputFile,
-                        OutputFileIndex = NULL,
+                        OutputFiles,
+                        OutputFilesIndex = NULL,
                         nMarkersEachChunk, 
 			isMoreOutput,
 			isImputation,
@@ -16,23 +16,30 @@ SAIGE.Marker = function(traitType,
 			isAnyInclude)
 {
 
-  if(is.null(OutputFileIndex))
-    OutputFileIndex = paste0(OutputFile, ".index")
+  if(is.null(OutputFilesIndex))
+    OutputFilesIndex = paste0(OutputFiles, ".index")
   
   #genoType = objGeno$genoType
 
-  outIndex = checkOutputFile(OutputFile, OutputFileIndex, "Marker", format(nMarkersEachChunk, scientific=F), isOverWriteOutput)    # this function is in 'Util.R'
-  outIndex = outIndex$indexChunk
+  # Updated R code to handle multiple output files
+  outIndices = vector("list", length(OutputFiles))
+  for(i in 1:length(OutputFiles)) {
+    outIndices[[i]] = checkOutputFile(OutputFiles[[i]], OutputFilesIndex[[i]], "Marker", format(nMarkersEachChunk, scientific=F), isOverWriteOutput)
+  }
+
+  # Get the minimum outIndex to determine where to restart
+  outIndex = min(sapply(outIndices, function(x) x$indexChunk))
+
   isappend = FALSE
   if(outIndex != 1){
     cat("Restart the analysis from chunk:\t", outIndex, "\n")
     isappend = TRUE
-  }  
+  }
 
+  # Open all output files
   isOpenOutFile_single = openOutfile_single(traitType, isImputation, isappend, isMoreOutput)
-
   if(!isOpenOutFile_single){
-    stop("Output file ", OutputFile, " can't be opened\n")
+    stop("One or more output files can't be opened\n")
   }
 
   ## set up an object for genotype
@@ -80,21 +87,21 @@ SAIGE.Marker = function(traitType,
       set_iterator_inVcf("", chrom, 1, 250000000)
     }
    }
-    if(outIndex > 1){
+   if(outIndex > 1){
 	move_forward_iterator_Vcf(outIndex*nMarkersEachChunk)    
-    }
-    isVcfEnd =  check_Vcf_end()
-    if(!isVcfEnd){
+   }
+   isVcfEnd =  check_Vcf_end()
+   if(!isVcfEnd){
     	#outIndex = 1
     	genoIndex = rep("0", nMarkersEachChunk) 
     	genoIndex_prev = rep("0", nMarkersEachChunk) 
 	#nChunks = outIndex + 1
 	is_marker_test = TRUE
         i = outIndex
-    }else{
+   }else{
 	is_marker_test = FALSE    
 	stop("No markers are left in VCF")
-    }
+   }
   }
 
   chrom = "InitialChunk"
@@ -105,7 +112,7 @@ SAIGE.Marker = function(traitType,
 #time_left = system.time({
 
 
-    if(genoType != "vcf"){	
+  if(genoType != "vcf"){	
       tempList = genoIndexList[[i]]
       genoIndex = as.character(format(tempList$genoIndex, scientific = FALSE))
       tempChrom = tempList$chrom
@@ -114,7 +121,7 @@ SAIGE.Marker = function(traitType,
       }else{
 	genoIndex_prev = c("-1")
       }
-    }
+  }
 
     #print("tempList")
     #print(tempList)
@@ -133,11 +140,11 @@ SAIGE.Marker = function(traitType,
     #print(ptm)
     #print("gc()")
     #print(gc())
-    if(genoType != "vcf"){
+  if(genoType != "vcf"){
       cat(paste0("(",Sys.time(),") ---- Analyzing Chunk ", i, "/", nChunks, ": chrom ", chrom," ---- \n"))
-    }else{
+  }else{
       cat(paste0("(",Sys.time(),") ---- Analyzing Chunk ", i, " :  chrom ", chrom," ---- \n"))
-    }	    
+  }	    
     # main function to calculate summary statistics for markers in one chunk
    
    #resMarker = as.data.frame(mainMarkerInCPP(genoType, traitType, genoIndex_prev, genoIndex, isMoreOutput, isImputation)) 
@@ -156,6 +163,7 @@ SAIGE.Marker = function(traitType,
   
   #}
 
+  OutputFileIndex = OutputFilesIndex[1]
   writeOutputFileIndex(OutputFileIndex = OutputFileIndex,
 			AnalysisType = "Marker",
 			nEachChunk = format(nMarkersEachChunk, scientific=F),
@@ -195,10 +203,10 @@ SAIGE.Marker = function(traitType,
     }	    
   }
 	  
-  } #while(is_marker_test){
+ } #while(is_marker_test){
 
   # information to users
-  output = paste0("Analysis done! The results have been saved to '", OutputFile,"'.")
+  output = paste0("Analysis done! The results have been saved to '", OutputFiles,"'.")
 
   return(output)
 }
