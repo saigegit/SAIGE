@@ -21,7 +21,7 @@ mkdir SAIGE-GPU
 cd SAIGE-GPU
 git clone https://github.com/exascale-genomics/SAIGE-DOE.git
 cd SAIGE-DOE/
-git pull origin SAIGE-step1GPU-step2Wei-openmpi
+git pull origin SAIGE-GPU-1.3.3
 ```
 
 #### Step 2: Create a Conda Environment
