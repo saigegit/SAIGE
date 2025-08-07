@@ -12,7 +12,7 @@ This version was used to run the VA MVP gwPheWAS on the DOE ORNL OLCF Summit HPC
 
 ### Installation Steps
 
-#### Step 1: Create directory and clone the SAIGE-DOE GitHub repository
+#### Step 1: Create directory and clone the SAIGE-GPU GitHub repository
 
 Create and activate a new Conda environment for SAIGE:
 
@@ -79,7 +79,7 @@ To compile SAIGE-GPU, first clean any previous builds and then run make:
 
 ```bash
 cd ./SAIGE-GPU
-R CMD INSTALL SAIGE-DOE
+R CMD INSTALL SAIGE
 ```
 
 If you encounter linking errors, ensure that the PKG_LIBS line in the Makevars file correctly references the MPI library.
@@ -88,7 +88,7 @@ If you encounter linking errors, ensure that the PKG_LIBS line in the Makevars f
 Check if the installation for step 1 was successful by running the following commands where the output should be the list of parameter options:
 
 ```bash
-path_to_saige=./SAIGE-GPU/SAIGE-DOE
+path_to_saige=./SAIGE-GPU/SAIGE
 Rscript $path_to_saige/extdata/step1_fitNULLGLMM.R --help
 ```
 
@@ -101,7 +101,7 @@ You can also run a test with the provided test input files. You can replace `mpi
 # once the node is provided
 conda activate /home/user/conda_envs/RSAIGE_GPU
 
-path_to_saige=~/SAIGE-GPU/SAIGE-DOE
+path_to_saige=~/SAIGE-GPU/SAIGE
 mpirun -n 4 Rscript $path_to_saige/extdata/step1_fitNULLGLMM.R \
 --plinkFile=$path_to_saige/extdata/input/plinkforGRM_1000samples_10kMarkers \
 --phenoFile=$path_to_saige/extdata/input/pheno_1000samples.txt \
@@ -269,7 +269,7 @@ Replace [ ] with your specific dataset information and run the following command
            --gpus device=all \
            saige_gpu_image \
            mpirun -n [number of gpus] --allow-run-as-root \
-           /opt/conda/lib/R/bin/Rscript /SAIGE_container/SAIGE-DOE/extdata/step1_fitNULLGLMM.R \
+           /opt/conda/lib/R/bin/Rscript /SAIGE_container/SAIGE/extdata/step1_fitNULLGLMM.R \
            --plinkFile=/SAIGE_container/data/[your PLINK dataset prefix] \
            --phenoFile=/SAIGE_container/data/[your pheno-covar table] \
            --phenoCol=[Phenotype column name] \
