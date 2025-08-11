@@ -45,7 +45,7 @@ std::string CCT_cpp(arma::vec & pval){
 	double minpval = pval.min();
 	minpval = minpval * np;
 	cauchyp = std::min(1.0, minpval);
-	sprintf(pValueBuf, "%.6E", minpval);
+	sprintf(pValueBuf, "%.6E", cauchyp);
 	cauchyp_str = pValueBuf;	
     }else{	    
         double weight = 1.0/double(np);

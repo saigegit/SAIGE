@@ -2281,7 +2281,8 @@ if(iswriteOutput){
   bool isopen0 = OutFile.is_open();
   if(isopen0){OutFile.close();}
   OutFile.open(g_outputFilePrefixGroup.c_str(), std::ofstream::out );  
-  bool isopen = openOutfile_single_admixed(t_traitType,isCondition, t_isMoreOutput, pvalVec, OutFile);
+  //bool isopen = openOutfile_single_admixed(t_traitType,isCondition, t_isMoreOutput, pvalVec, OutFile);
+  bool isopen = openOutfile_single_admixed(t_traitType, true, t_isMoreOutput, pvalVec, OutFile);
   OutFile.close();
   OutFile.open(g_outputFilePrefixGroup.c_str(), std::ofstream::out | std::ofstream::app); 
   nonNAIndexVec.clear();
@@ -3501,6 +3502,7 @@ bool openOutfile_single_admixed(std::string t_traitType, bool t_isCondition, boo
       //}
       //isopen = t_OutFile_singleInGroup.is_open();
       //std::cout << "pvalVec.size() " << pvalVec.size() << std::endl;
+      std::cout << "t_isCondition " << t_isCondition << std::endl;
       if(isopen){
         std::string ancstr;
         t_OutFile_singleInGroup << "Marker\tHR\tPOS\tMarkerID\tAllele1\tAllele2\t";
@@ -4294,7 +4296,8 @@ void mainAdmixedInCPP_inner(
   if(isopen0){OutFile.close();}
   if(t_isWriteHeader){
   	OutFile.open(g_outputFilePrefixGroup.c_str(), std::ofstream::out );
-  	bool isopen = openOutfile_single_admixed(t_traitType,isCondition, t_isMoreOutput, pvalVec, OutFile);
+  	//bool isopen = openOutfile_single_admixed(t_traitType,isCondition, t_isMoreOutput, pvalVec, OutFile);
+  	bool isopen = openOutfile_single_admixed(t_traitType, true,t_isMoreOutput, pvalVec, OutFile);
   	OutFile.close();
   }
   OutFile.open(g_outputFilePrefixGroup.c_str(), std::ofstream::out | std::ofstream::app);
@@ -4648,7 +4651,8 @@ void mainMarkerAdmixedInCPP(
   arma::vec Scorevec = arma::zeros<arma::vec>(t_NumberofANC);
   arma::vec PvalvecallAnc = arma::zeros<arma::vec>(t_NumberofANC);
   arma::vec Scorevec_c = arma::zeros<arma::vec>(t_NumberofANC);
-  arma::mat G1tilde_P_G2tilde_Mat(t_NumberofANC, ptr_gSAIGEobj->m_numMarker_cond);
+  //arma::mat G1tilde_P_G2tilde_Mat(t_NumberofANC, ptr_gSAIGEobj->m_numMarker_cond);
+  arma::mat G1tilde_P_G2tilde_Mat(t_NumberofANC, 1);
 
  int numancresults = 0;
 
@@ -4700,8 +4704,6 @@ void mainMarkerAdmixedInCPP(
     }
 
 
-
-
     //Main.cpp
     //PLINK or BGEN
     //uint32_t gIndex_temp = gIndex;
@@ -4727,12 +4729,66 @@ void mainMarkerAdmixedInCPP(
                                           isOnlyOutputNonZero, // bool t_isOnlyOutputNonZero,
                                           indexNonZeroVec, t_GVec, t_isImputation, vcfFieldtoRead);
    nanc = arma::accu(t_GVec);
- if(t_traitType == "binary" || t_traitType == "survival"){
+   double MAC_anc = std::min(nanc, 2*n - nanc); 
+
+   arma::uvec indexZeroVec_arma_anc, indexNonZeroVec_arma_anc;
+   indexZeroVec_arma_anc = arma::conv_to<arma::uvec>::from(indexZeroVec);
+   indexNonZeroVec_arma_anc = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
+
+    indexZeroVec.clear();
+    indexNonZeroVec.clear();
+    //t_P2Vec_anc.clear();
+    G1tilde_P_G2tilde_Vec.clear();
+
+    if(ptr_gSAIGEobj->m_isFastTest){
+      ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
+
+      if(isSingleVarianceRatio){
+        ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur);
+      }else{
+        hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC_anc, ptr_gSAIGEobj->m_flagSparseGRM_cur);
+      }
+    }else{
+      if(!isSingleVarianceRatio){
+        hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC_anc, ptr_gSAIGEobj->m_flagSparseGRM_cur);
+      }
+    }
+
+    arma::mat t_P2Vec_anc(n, 1);
+    arma::mat t_VarInvMat_cond_anc(1,1);
+    arma::mat t_VarMat_cond_anc(1,1);
+    arma::vec t_Tstat_anc(1);
+
+    ptr_gSAIGEobj->extract_anc_stat_for_cond(t_GVec, gtildeVec, t_P2Vec_anc, t_VarInvMat_cond_anc, t_VarMat_cond_anc, t_Tstat_anc, indexNonZeroVec_arma_anc); 
+
+    double qsum_anc = 0.0;
+    arma::vec gsumtildeVec_anc(n);
+    std::vector<std::string> pVec_anc(1);
+    pVec_anc.at(0) = "1";
+    arma::vec w0G2_cond_Vec_anc(1);
+    arma::vec MAFVec_anc(1);
+   
+
+    ptr_gSAIGEobj->assignConditionFactors(
+                                        t_P2Vec_anc,
+					t_VarInvMat_cond_anc,
+					t_VarMat_cond_anc,
+					t_Tstat_anc,
+					w0G2_cond_Vec_anc,
+					MAFVec_anc,
+					qsum_anc,
+					gsumtildeVec_anc,
+					pVec_anc);
+
+
+    isCondition = true;
+
+   if(t_traitType == "binary" || t_traitType == "survival"){
         arma::vec dosage_case = t_GVec.elem(ptr_gSAIGEobj->m_case_indices);
 	nanc_case = arma::accu(dosage_case);
         arma::vec dosage_ctrl = t_GVec.elem(ptr_gSAIGEobj->m_ctrl_indices);
 	nanc_ctrl = arma::accu(dosage_ctrl);
-}
+   }
 
    t_GVec.zeros();
    indexZeroVec.clear();
@@ -4750,8 +4806,6 @@ void mainMarkerAdmixedInCPP(
    altCounts = arma::accu(t_GVec);
    altFreq = altCounts/double(nanc);
 
-
-
    if(!isReadMarker){
       //std::cout << "isReadMarker " << isReadMarker << std::endl;
       g_markerTestEnd = true;
@@ -4768,40 +4822,19 @@ void mainMarkerAdmixedInCPP(
     nanc = 2*n;
   }
 
-   //std::cout << "t_GVec.size()) " << t_GVec.size() << std::endl;
-   //arma::vec t_GVec(t_GVec0.size());
-   //arma::vec t_GVec = arma::conv_to< arma::colvec >::from(t_GVec0);
-
-   //arma::vec t_GVec(t_GVec0);
-   //t_GVec0.clear();
-
-   //for(uint j = 0; j < n; j++){
-   //   t_GVec(j) = t_GVec0.at(j);
-   //}
-
-    //for(int indi = 0; indi < indexForNonZero.size(); indi++){
-    //  std::cout << indexForNonZero[indi] << std::endl;
-    //}
-//   std::cout << "marker " << marker << std::endl;
-//   std::cout << "indexForMissing.size() " << indexForMissing.size() << std::endl;
-//   std::cout << "indexNonZeroVec.size() " << indexNonZeroVec.size() << std::endl;
-    //int n = t_GVec.size();
-    //arma::vec gtildeVec(n);
-
-
 
 
     std::string pds = std::to_string(pd);
     std::string info = chr+":"+pds+":"+ref+":"+alt; 
-if(j == 0){
-    chrVec.at(i) = chr;
-    posVec.at(i) = pds;
-    refVec.at(i) = ref;
-    altVec.at(i) = alt;
-    // record basic information for the marker
-    markerVec.at(i) = marker;               // marker IDs
-    infoVec.at(i) = info;    // marker information: CHR:POS:REF:ALT
-}
+    if(j == 0){
+      chrVec.at(i) = chr;
+      posVec.at(i) = pds;
+      refVec.at(i) = ref;
+      altVec.at(i) = alt;
+      // record basic information for the marker
+      markerVec.at(i) = marker;               // marker IDs
+      infoVec.at(i) = info;    // marker information: CHR:POS:REF:ALT
+    }
     int k = i*(t_NumberofANC+1) + j; 
     altFreqVec.at(k) = altFreq;         // allele frequencies of ALT allele, this is not always < 0.5.
     //altCountsVec.at(i) = altCounts;         // allele frequencies of ALT allele, this is not always < 0.5.
@@ -4845,10 +4878,6 @@ if(j == 0){
           N_ctrl_homVec.at(k) = N_case_ctrl_het_hom0.n_elem;
           N_case_ctrl_het_hom0 = arma::find(dosage_ctrl < 1.5 && dosage_ctrl >= 0.5);
           N_ctrl_hetVec.at(k) = N_case_ctrl_het_hom0.n_elem;
-          //if(flip){
-          //      N_case_homVec.at(k) = N_case - N_case_hetVec.at(k) -  N_case_homVec.at(k);
-          //      N_ctrl_homVec.at(k) = N_ctrl - N_ctrl_hetVec.at(k) - N_ctrl_homVec.at(k);
-          //}
         }
       }else if(t_traitType == "quantitative"){
         N_Vec.at(k) = nanc;
@@ -4870,12 +4899,7 @@ if(j == 0){
 
 
     flip = imputeGenoAndFlip_fakeflip(t_GVec, altFreq, altCounts,indexForMissing, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec, indexNonZeroVec);
-    //if(j < t_NumberofANC){
-      MAC = std::min(altCounts, nanc-altCounts);
-    //}else{
-    //  MAC = std::min(altCounts, 2*n-altCounts);
-    //}
-
+    MAC = std::min(altCounts, nanc-altCounts);
     MAF = std::min(altFreq, 1 - altFreq);
 
    if((MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff)){
@@ -4936,16 +4960,8 @@ if(j == 0){
                           altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false);
 	if(isSPAConverge){isSPAjoint = true;}		  
     }else{
-    	//if(t_traitType != "quantitative"){
     		includeTestANCvec(j) = 1;
 		continue;
-    	//}
-      /*Unified_getMarkerPval(
-                    t_GVec,
-                          false, // bool t_isOnlyOutputNonZero,
-                          indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,
-                          altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true);
-			  */
     }
 
 
@@ -4961,35 +4977,11 @@ if(j == 0){
         std::cerr << "Argument is out of range for a double\n";
         pval_num = 0;
     }
-/*
-    if(ptr_gSAIGEobj->m_isFastTest && pval_num < (ptr_gSAIGEobj->m_pval_cutoff_for_fastTest)){
-      ptr_gSAIGEobj->set_flagSparseGRM_cur(true);
-
-      if(!isSingleVarianceRatio){
-        hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC, ptr_gSAIGEobj->m_flagSparseGRM_cur);
-      }else{
-        ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur);
-      }
-
-
-     if(MAC > g_MACCutoffforER){
-      Unified_getMarkerPval(
-                    t_GVec,
-                          false, // bool t_isOnlyOutputNonZero,
-                          indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,
-                          altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false);
-     }else{
-      Unified_getMarkerPval(
-                    t_GVec,
-                          false, // bool t_isOnlyOutputNonZero,
-                          indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,
-                          altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true);
-     }
-     }
-*/
-if(t_traitType == "binary" || "survival"){
+  if(t_traitType == "binary" || "survival"){
         isSPAConvergeVec.at(k) = isSPAConverge;
-}     
+  } 
+
+
   if(j < t_NumberofANC){
    P1Mat.row(j) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*gtildeVec.t();
    P2Mat.col(j) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*t_P2Vec;
@@ -4997,9 +4989,10 @@ if(t_traitType == "binary" || "survival"){
    PvalvecallAnc(j) = pval_num;
 
    if(isCondition){
-	G1tilde_P_G2tilde_Mat.row(i) = G1tilde_P_G2tilde_Vec;
+	G1tilde_P_G2tilde_Mat.row(j) = G1tilde_P_G2tilde_Vec;
    	Scorevec_c(j) = Tstat_c;
    }
+
 
   } 
 
@@ -5432,7 +5425,7 @@ bool openOutfile_single_admixed_new(std::string t_traitType, bool t_isImputation
                 OutFile_single << "Is.SPA";
                 OutFile_single << ancstr;;
              }
-             if(ptr_gSAIGEobj->m_isCondition){
+             //if(ptr_gSAIGEobj->m_isCondition){
                 OutFile_single << "\t";
                 OutFile_single << "BETA_c";
                 OutFile_single << ancstr;;
@@ -5455,7 +5448,7 @@ bool openOutfile_single_admixed_new(std::string t_traitType, bool t_isImputation
                 OutFile_single << ancstr;;
 
                 }
-             }
+             //}
 
              if(t_traitType == "binary" || t_traitType == "survival"){
                 OutFile_single << "\t";
@@ -5511,7 +5504,7 @@ bool openOutfile_single_admixed_new(std::string t_traitType, bool t_isImputation
                 OutFile_single << "P_hom_admixed";
                 OutFile_single << "\t";
                 OutFile_single << "P_cct_admixed";
-        if(ptr_gSAIGEobj->m_isCondition){
+        //if(ptr_gSAIGEobj->m_isCondition){
 /*
                 OutFile_single << "\t";
                 OutFile_single << "Pvalue_SKATO_c";
@@ -5531,7 +5524,7 @@ bool openOutfile_single_admixed_new(std::string t_traitType, bool t_isImputation
                 OutFile_single << "\t";
                 OutFile_single << "P_cct_admixed_c";
 
-        }
+        //}
         OutFile_single << "\n";
      }//if(isopen){
  }    

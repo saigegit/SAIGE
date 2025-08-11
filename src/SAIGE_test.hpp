@@ -229,6 +229,16 @@ void scoreTestFast(arma::vec & t_GVec,
 	bool & isfirthconverge);	
 
 
+	void extract_anc_stat_for_cond(
+        arma::vec & t_GVec,
+        arma::vec & t_gtilde,
+        arma::mat & t_P2Vec_cond,
+        arma::mat & t_VarInvMat_cond,
+        arma::mat & t_VarMat_cond,
+        arma::vec & t_Tstat_cond,
+        arma::uvec & t_indexForNonZero);
+
+
 
 };
 }
