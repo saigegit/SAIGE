@@ -4,10 +4,11 @@ thirdParty/zlib-1.2.8
 thirdParty/bgen/.lock-waf_linux2_build
 thirdParty/bgen/build
 thirdParty/bgen/.hg
+thirdParty/
 src/*.o
 src/*.so
 src/backup/*
 extdata/input/nfam_100_nindep_0_step1_includeMoreRareVariants_poly.raw
 *.swp
-pixi.lock
 plink-ng/
+pixi.lock
