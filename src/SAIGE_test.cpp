@@ -517,7 +517,7 @@ if(!t_isER){
 		muNB.print("muNB");
 		gNB.print("gNB");
   */
-  }
+       }
     	//bool logp=false;
 	double tol0 = std::numeric_limits<double>::epsilon();
 	tol1 = std::pow(tol0, 0.25);
@@ -657,11 +657,32 @@ double t_GVecMAC = arma::accu(t_GVec);
         }
         t_G1tilde_P_G2tilde = sqrt(m_varRatioVal) * t_gtilde.t() * m_P2Mat_cond;
         arma::vec t_Tstat_ctemp =  t_G1tilde_P_G2tilde * m_VarInvMat_cond * m_Tstat_cond;
-	arma::mat tempgP2 = t_gtilde.t() * m_P2Mat_cond;
+	//arma::mat tempgP2 = t_gtilde.t() * m_P2Mat_cond;
 
     	t_Tstat_c = t_Tstat - t_Tstat_ctemp(0);
-    	arma::vec t_varT_ctemp = t_G1tilde_P_G2tilde * m_VarInvMat_cond * (t_G1tilde_P_G2tilde.t());
-    	t_varT_c = t_var1 - t_varT_ctemp(0);
+	
+	
+	arma::vec t_varT_ctemp = t_G1tilde_P_G2tilde * m_VarInvMat_cond * (t_G1tilde_P_G2tilde.t());
+ 	
+        //t_varT_c = t_var1 - t_varT_ctemp(0);
+	 if(m_traitType!="quantitative" && t_isSPAConverge){
+             double t_qval_update, t_var1_update;
+	     boost::math::normal ns;
+	     if(!ispvallog){
+                 t_qval_update = boost::math::quantile(ns, pval/2);
+             }else{
+                 t_qval_update = R::qnorm(pval/2, 0, 1, false, true);
+             }
+             //t_qval_update = fabs(t_qval_update);
+	     t_var1_update = std::pow(t_Tstat/t_qval_update, 2);
+             t_varT_c = t_var1_update - t_varT_ctemp(0);
+	}else{
+	     t_varT_c = t_var1 - t_varT_ctemp(0);
+	}
+
+	//std::cout << "t_var1 " << t_var1 << std::endl;
+	//std::cout << "t_varT_ctemp(0) " << t_varT_ctemp(0) << std::endl;
+	//m_VarInvMat_cond.print("m_VarInvMat_cond");
 
     double S_c = t_Tstat_c;
 
@@ -707,7 +728,12 @@ double t_GVecMAC = arma::accu(t_GVec);
     t_Tstat_c = S_c;
 
 
-    bool t_isSPAConverge_c;
+    bool t_isSPAConverge_c = false;
+    t_pval_c = t_pval_noSPA_c;  	
+    
+    /*
+    
+    
     if(m_traitType != "quantitative" && stat_c > std::pow(m_SPA_Cutoff,2)){
 	double q_c, qinv_c, pval_noadj_c, SPApval_c;    
 	if(m_traitType == "binary"){
@@ -726,17 +752,24 @@ double t_GVecMAC = arma::accu(t_GVec);
 
 
         if(p_iIndexComVecSize >= 0.5 && !m_flagSparseGRM_cur){
-		//std::cout << "SPA_fast " << std::endl;
+		std::cout << "SPA_fast " << std::endl;
                 SPA_fast(m_mu, t_gtilde, q_c, qinv_c, pval_noSPA_c, ispvallog, gNA, gNB, muNA, muNB, NAmu, NAsigma, tol1, m_traitType, SPApval_c, t_isSPAConverge_c);
+     std::cout << "t_isSPAConverge_c " << t_isSPAConverge_c << std::endl;	
+     std::cout << "pval_noSPA_c " << pval_noSPA_c << std::endl;	
+     std::cout << "SPApval_c " << SPApval_c << std::endl;	
         }else{
-		//std::cout << "SPA " << std::endl;
+		std::cout << "SPA " << std::endl;
                 SPA(m_mu, t_gtilde, q_c, qinv_c, pval_noSPA_c, tol1, ispvallog, m_traitType, SPApval_c, t_isSPAConverge_c);
+     std::cout << "t_isSPAConverge_c " << t_isSPAConverge_c << std::endl;	
+     std::cout << "pval_noSPA_c " << pval_noSPA_c << std::endl;	
+     std::cout << "SPApval_c " << SPApval_c << std::endl;	
         }
 
 	
         boost::math::normal ns;
         //double pval_SPA = t_SPApval;
         double t_qval_c;
+
      if(t_isSPAConverge_c){	
         try {
           if(!ispvallog){
@@ -782,8 +815,8 @@ double t_GVecMAC = arma::accu(t_GVec);
 	t_isSPAConverge_c = false;    
     	t_pval_c = t_pval_noSPA_c;	    
     }	    
+*/
  }
-
 
     gNA.clear();
     gNB.clear();

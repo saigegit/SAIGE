@@ -505,4 +505,21 @@ void writeOutfile_single_admixed_new(bool t_isMoreOutput,
 );
 
 bool openOutfile_single_admixed_new(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput, int t_NumberofANC);
+
+
+void assign_conditionHaplotypes(
+			   std::string t_traitType,
+                           std::string t_genoType,     //"vcf"
+                           unsigned int t_n,
+                           int t_NumberofANC,
+                           uint64_t gIndex,
+                           uint64_t gIndex_prev,
+                           arma::vec & nanc_case_vec,
+                           arma::vec & nanc_ctrl_vec,
+                           arma::vec & nanc_vec,
+                           arma::uvec & not_nan_anc_indices_vec
+                           );
+
+
+
 #endif
