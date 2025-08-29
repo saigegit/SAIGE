@@ -1,15 +1,11 @@
-PKG_CPPFLAGS = \
--I ../thirdParty/cget/include \
--I ../thirdParty/cget/lib \
--I ../thirdParty/cget/lib64 \
--D SQLITE_ENABLE_COLUMN_METADATA -O3 -fpic -Wall -Wextra -pedantic  -DARMA_64BIT_WORD=1 -D__STDC_FORMAT_MACROS
+PKG_CPPFLAGS = -D SQLITE_ENABLE_COLUMN_METADATA -fpic -w -pedantic -DARMA_64BIT_WORD=1 -D__STDC_FORMAT_MACROS
 
-CXX_STD = CXX11 
+CXX_STD = CXX14
 
-PKG_LIBS = $(ZLIB_LIB) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -L../thirdParty/cget/lib/ -L../thirdParty/cget/lib64/ -lsuperlu -lzstd -L../lib64 -llapack
-PKG_LIBS += $(shell ${R_HOME}/bin/Rscript -e "RcppParallel::RcppParallelLibs()")
+PKG_LIBS = $(ZLIB_LIB) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -lsuperlu -lzstd -llapack
 
-
+PKG_CPPFLAGS += -I../.pixi/envs/default/include -I../plink-ng/2.0/include
+PKG_LIBS += -L.. -l:plink2_includes.a
 
 
 #OBJECTS = RcppExports.o SAIGE_fitGLMM_fast.o getMem.o VCF.o BGEN.o PLINK.o SAIGE_test.o SPA_binary.o SPA.o SPA_survival.o UTIL.o Main.o test.o CCT.o 

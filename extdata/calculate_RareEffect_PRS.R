@@ -1,5 +1,6 @@
-# Calculate RareEffect PRS for each individual
+#!/usr/bin/env -S pixi run --manifest-path /app/pixi.toml Rscript
 
+# Calculate RareEffect PRS for each individual
 ## Load packages and sources
 
 library(SAIGE)
