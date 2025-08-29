@@ -5149,10 +5149,10 @@ void mainMarkerAdmixedInCPP(
 	    //double P_het_admixed_cond = get_jointScore_pvalue(Scorevec_cond, VarMat_cond);	
 	    std::string P_het_admixed_cond_str = get_jointScore_pvalue(Scorevec_cond, VarMat_cond);
 	    double P_het_admixed_cond = convertStringtoDoublePval(P_het_admixed_cond_str);
-	    double P_hom_admixed_cond = convertStringtoDoublePval(pval_c);
-	    //double P_hom_admixed_cond = convertStringtoDoublePval(pval);
-	    std::string P_hom_admixed_cond_str = pval_c;
-	    //std::string P_hom_admixed_cond_str = pval;
+	    //double P_hom_admixed_cond = convertStringtoDoublePval(pval_c);
+	    double P_hom_admixed_cond = convertStringtoDoublePval(pval);
+	    //std::string P_hom_admixed_cond_str = pval_c;
+	    std::string P_hom_admixed_cond_str = pval;
 	    arma::vec pvecforcct_cond = {P_het_admixed_cond, P_hom_admixed_cond};
             //double P_cct_admixed_cond = CCT_cpp(pvecforcct_cond);
             std::string P_cct_admixed_cond_str = CCT_cpp(pvecforcct_cond);
