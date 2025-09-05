@@ -117,6 +117,7 @@ SPAGMMATtest = function(bgenFile = "",
 		 is_fastTest = FALSE,
 		 is_admixed = FALSE,
 		 number_of_ancestry=2,
+		 pvalcutoff_of_haplotype=0.05,
 		 pval_cutoff_for_fastTest = 0.05, 
 		 max_MAC_use_ER = 4, 
 		 subSampleFile = ""
@@ -532,7 +533,8 @@ SPAGMMATtest = function(bgenFile = "",
                    isCondition,
                    is_overwrite_output,
                    objGeno$anyInclude, 
-		   number_of_ancestry)
+		   number_of_ancestry,
+		   pvalcutoff_of_haplotype)
 	
      }
 

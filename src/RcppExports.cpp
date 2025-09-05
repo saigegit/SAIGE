@@ -588,8 +588,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // mainMarkerAdmixedInCPP
-void mainMarkerAdmixedInCPP(std::string& t_genoType, std::string& t_traitType, std::vector<std::string>& t_genoIndex_prev, std::vector<std::string>& t_genoIndex, bool& t_isMoreOutput, bool& t_isImputation, bool& t_isFirth, int t_NumberofANC);
-RcppExport SEXP _SAIGE_mainMarkerAdmixedInCPP(SEXP t_genoTypeSEXP, SEXP t_traitTypeSEXP, SEXP t_genoIndex_prevSEXP, SEXP t_genoIndexSEXP, SEXP t_isMoreOutputSEXP, SEXP t_isImputationSEXP, SEXP t_isFirthSEXP, SEXP t_NumberofANCSEXP) {
+void mainMarkerAdmixedInCPP(std::string& t_genoType, std::string& t_traitType, std::vector<std::string>& t_genoIndex_prev, std::vector<std::string>& t_genoIndex, bool& t_isMoreOutput, bool& t_isImputation, bool& t_isFirth, int t_NumberofANC, double t_pvalcutoff_of_haplotype);
+RcppExport SEXP _SAIGE_mainMarkerAdmixedInCPP(SEXP t_genoTypeSEXP, SEXP t_traitTypeSEXP, SEXP t_genoIndex_prevSEXP, SEXP t_genoIndexSEXP, SEXP t_isMoreOutputSEXP, SEXP t_isImputationSEXP, SEXP t_isFirthSEXP, SEXP t_NumberofANCSEXP, SEXP t_pvalcutoff_of_haplotypeSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string& >::type t_genoType(t_genoTypeSEXP);
@@ -600,7 +600,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool& >::type t_isImputation(t_isImputationSEXP);
     Rcpp::traits::input_parameter< bool& >::type t_isFirth(t_isFirthSEXP);
     Rcpp::traits::input_parameter< int >::type t_NumberofANC(t_NumberofANCSEXP);
-    mainMarkerAdmixedInCPP(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth, t_NumberofANC);
+    Rcpp::traits::input_parameter< double >::type t_pvalcutoff_of_haplotype(t_pvalcutoff_of_haplotypeSEXP);
+    mainMarkerAdmixedInCPP(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth, t_NumberofANC, t_pvalcutoff_of_haplotype);
     return R_NilValue;
 END_RCPP
 }
@@ -3324,7 +3325,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_copy_singleInGroup", (DL_FUNC) &_SAIGE_copy_singleInGroup, 0},
     {"_SAIGE_mainAdmixedInCPP", (DL_FUNC) &_SAIGE_mainAdmixedInCPP, 11},
     {"_SAIGE_Unified_getOneMarker_Admixed", (DL_FUNC) &_SAIGE_Unified_getOneMarker_Admixed, 19},
-    {"_SAIGE_mainMarkerAdmixedInCPP", (DL_FUNC) &_SAIGE_mainMarkerAdmixedInCPP, 8},
+    {"_SAIGE_mainMarkerAdmixedInCPP", (DL_FUNC) &_SAIGE_mainMarkerAdmixedInCPP, 9},
     {"_SAIGE_openOutfile_single_admixed_new", (DL_FUNC) &_SAIGE_openOutfile_single_admixed_new, 5},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
