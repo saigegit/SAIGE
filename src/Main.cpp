@@ -5834,3 +5834,288 @@ if(i < q){ //do not need to test the last ancestry
   }
 
 }
+
+
+void assign_conditionHaplotypes_Region(
+                           std::string t_traitType,
+                           std::string t_genoType,     //"vcf"
+                           unsigned int t_n,
+                           int t_NumberofANC,
+                           std::vector<std::string> & t_genoIndex_prev,
+                           std::vector<std::string> & t_genoIndex,
+                           arma::mat & nanc_case_mat,
+                           arma::mat & nanc_ctrl_mat,
+                           arma::mat & nanc_mat
+                           )           // sample size
+{
+  bool isImpute = false;
+  unsigned int q0 = t_genoIndex.size();
+  unsigned int q1 = t_NumberofANC-1;
+  unsigned int q = q0*q1;
+  arma::mat P1Mat(q, t_n);
+  arma::mat P2Mat(t_n, q);
+  arma::mat VarInvMat(q, q);
+  arma::vec TstatVec(q);
+  //arma::mat TstatMat(q0, q1);
+  std::vector<std::string> pVec(q, "NA");
+  arma::vec MAFVec(q);
+  //arma::mat MAFMat(q0, q1);
+  arma::vec gyVec(q);
+  //arma::mat gyMat(q0, q1);
+  arma::vec w0G2_cond_Vec(q0);
+  arma::vec gsumVec(t_n, arma::fill::zeros);
+  //arma::mat gsumMat(q1, t_n, arma::fill::zeros);
+  //boost::math::beta_distribution<> beta_dist(g_weights_beta[0], g_weights_beta[1]);
+  arma::vec t_GVec(t_n);
+  std::string pval, pval_noSPA;
+  double Beta, seBeta, Tstat, varT, gy, w0G2_cond;
+  bool isSPAConverge, is_gtilde, is_Firth, is_FirthConverge;
+  arma::vec P2Vec(t_n);
+
+  std::string pval_c, pval_noSPA_c;
+  double Beta_c, seBeta_c, Tstat_c, varT_c;
+  arma::rowvec G1tilde_P_G2tilde_Vec;
+  bool isCondition = false;
+  std::vector <uint32_t> not_nan_anc_indices;
+  
+  // Move isskipanc outside loops to track across all markers
+  bool isskipanc = false;
+
+  for(unsigned int i = 0; i < q0; i++){
+    
+    std::string t_genoIndex_str = t_genoIndex.at(i);
+    char* end;
+    uint64_t gIndex = std::strtoull( t_genoIndex_str.c_str(), &end,10 );
+    std::remove(end);
+
+    uint64_t gIndex_prev = 0;
+    if(i == 0){
+        gIndex_prev = 0;
+    }else{
+        char* end_prev;
+        std::string t_genoIndex_prev_str;
+        if(t_genoType == "bgen"){
+            t_genoIndex_prev_str = t_genoIndex_prev.at(i-1);
+            gIndex_prev = std::strtoull( t_genoIndex_prev_str.c_str(), &end_prev,10 );
+        }else if(t_genoType == "plink"){
+            t_genoIndex_prev_str = t_genoIndex.at(i-1);
+            gIndex_prev = std::strtoull( t_genoIndex_prev_str.c_str(), &end_prev,10 );
+        }
+        //else if(t_genoType == "vcf"){
+         //   gIndex_prev = 0;
+        //}
+        std::remove(end_prev);
+    }
+
+    for(unsigned int j = 0; j < t_NumberofANC; j++)
+    {
+      // marker-level information
+      double altFreq, altCounts, missingRate, imputeInfo;
+      std::vector<uint32_t> indexForMissing;
+      std::vector<uint> indexZeroVec;
+      std::vector<uint> indexNonZeroVec;
+      std::string chr, ref, alt, marker;
+      uint32_t pd;
+      bool flip = false;
+      bool isOutputIndexForMissing = true;
+      bool isOnlyOutputNonZero = false;
+      std::string vcfFieldtoRead = "ANC" + std::to_string(j+1);
+      bool t_isImputation = true;
+      bool isReadMarker = Unified_getOneMarker_Admixed(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
+                                            isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
+                                            indexForMissing,
+                                            isOnlyOutputNonZero, // bool t_isOnlyOutputNonZero,
+                                            indexNonZeroVec, t_GVec, t_isImputation, vcfFieldtoRead);
+       //arma::vec GVec(GVec0);
+       //GVec0.clear();
+      if(!isReadMarker){
+        break;
+      }
+      double nanc = arma::accu(t_GVec);
+      nanc_mat(i,j) = nanc;
+
+      if(t_traitType == "binary" || t_traitType == "survival"){
+          arma::vec dosage_case = t_GVec.elem(ptr_gSAIGEobj->m_case_indices);
+          double nanc_case = arma::accu(dosage_case);
+          arma::vec dosage_ctrl = t_GVec.elem(ptr_gSAIGEobj->m_ctrl_indices);
+          double nanc_ctrl = arma::accu(dosage_ctrl);
+          nanc_case_mat(i,j) = nanc_case;
+          nanc_ctrl_mat(i,j) = nanc_ctrl;
+     }
+
+     //if(nanc > 0){
+     //  not_nan_anc_indices.push_back(i);
+     //}
+     
+      if(j < q1){ //do not need to test the last ancestry
+        double MAC_anc = std::min(nanc, 2*t_n - nanc);
+        double MAF = std::min(altFreq, 1 - altFreq);
+        double MAC = MAF * 2 * t_n * (1 - missingRate);
+        //bool hasVarRatio;
+        if(nanc > 0){
+
+          bool hasVarRatio = true;;
+          bool isSingleVarianceRatio = true;
+          if((ptr_gSAIGEobj->m_varRatio_null).n_elem == 1){
+            ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur);
+            //ptr_gSAIGEobj->assignSingleVarianceRatio(false);
+          }else{
+            isSingleVarianceRatio = false;
+          }
+
+          if(ptr_gSAIGEobj->m_isFastTest){
+              ptr_gSAIGEobj->set_flagSparseGRM_cur(false);
+
+            if(isSingleVarianceRatio){
+              ptr_gSAIGEobj->assignSingleVarianceRatio(ptr_gSAIGEobj->m_flagSparseGRM_cur);
+            }else{
+              hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC_anc, ptr_gSAIGEobj->m_flagSparseGRM_cur);
+            }
+          }else{
+            if(!isSingleVarianceRatio){
+              hasVarRatio = ptr_gSAIGEobj->assignVarianceRatio(MAC_anc, ptr_gSAIGEobj->m_flagSparseGRM_cur);
+            }
+          }
+
+          flip = false;
+
+          arma::uvec indexZeroVec_arma, indexNonZeroVec_arma;
+          indexZeroVec_arma = arma::conv_to<arma::uvec>::from(indexZeroVec);
+          indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
+
+          MAF = std::min(altFreq, 1 - altFreq);
+          MAC = std::min(altCounts, 2*t_n-altCounts);
+
+          arma::vec gtildeVec;
+
+          if(MAC > g_MACCutoffforER){
+             Unified_getMarkerPval(
+                            t_GVec,
+                            false, // bool t_isOnlyOutputNonZero,
+                            indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA,  Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false);
+          }else{
+             Unified_getMarkerPval(
+                            t_GVec,
+                            false, // bool t_isOnlyOutputNonZero,
+                            indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA,  Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true);
+          }
+          
+          // Fixed: Added missing semicolon
+          int k = j + i*(t_NumberofANC-1);
+          P1Mat.row(k) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*gtildeVec.t();
+          P2Mat.col(k) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*P2Vec;
+          MAFVec(k) = MAF;
+          if(MAF == 0.0){
+            std::cerr << "ERROR: Conditioning marker is monomorphic\n";
+          }
+
+/*
+        if(!t_weight_cond.is_zero()){
+             w0G2_cond = t_weight_cond(i);
+        }else{
+             w0G2_cond = boost::math::pdf(beta_dist, MAF);
+        }
+*/
+
+         w0G2_cond_Vec(i) = 1;
+         //gyVec(i) = gy * w0G2_cond;
+         //gsumVec = gsumVec + GVec * w0G2_cond;
+         gyVec(k) = gy;
+         //gyMat(i,j) = gy;
+         gsumVec = gsumVec + t_GVec;
+         TstatVec(k) = Tstat;
+         //pVec(i) = std::stod(pval);
+         pVec.at(k) = pval;
+         
+        }else{//if(nanc > 0){
+           isskipanc = true;
+        }
+     }//if(j < q1){ //do not need to test the last ancestry
+    } // End ancestry loop
+  } // End marker loop - Fixed: Added missing closing brace
+  
+  // Final conditioning assignment - Moved outside all loops
+  arma::vec gsumtildeVec;
+  double qsum = arma::accu(gyVec);
+  ptr_gSAIGEobj->getadjG(gsumVec, gsumtildeVec);
+
+  //arma::uvec not_nan_anc_indicesvectemp = arma::conv_to<arma::uvec>::from(not_nan_anc_indices);
+  //not_nan_anc_indices_vec.set_size(not_nan_anc_indicesvectemp.n_elem);
+  //not_nan_anc_indices_vec = not_nan_anc_indicesvectemp;
+
+  if(isskipanc){
+        arma::uvec not_nan_indices = arma::find_finite(TstatVec);
+        arma::vec TstatVecsub = TstatVec.elem(not_nan_indices);
+        arma::mat P1Matsub = P1Mat.rows(not_nan_indices);
+        arma::mat P2Matsub = P2Mat.cols(not_nan_indices);
+        arma::vec w0G2_cond_Vecsub = w0G2_cond_Vec.elem(not_nan_indices);
+        arma::vec MAFVecsub = MAFVec.elem(not_nan_indices);
+        arma::mat VarMatsub = P1Matsub * P2Matsub;
+        arma::mat VarInvMatsub =  arma::pinv(VarMatsub);
+        std::vector<std::string> pVecsub;
+        pVecsub.reserve(not_nan_indices.n_elem);
+
+    for (arma::uword idx : not_nan_indices) {
+        pVecsub.push_back(pVec[idx]);
+    }
+
+        ptr_gSAIGEobj->assignConditionFactors(
+                                        P2Matsub,
+                                        VarInvMatsub,
+                                        VarMatsub,
+                                        TstatVecsub,
+                                        w0G2_cond_Vecsub,
+                                        MAFVecsub,
+                                        qsum,
+                                        gsumtildeVec,
+                                        pVecsub);
+
+  }else{
+    arma::mat VarMat = P1Mat * P2Mat;
+    VarInvMat =  arma::pinv(VarMat);
+        ptr_gSAIGEobj->assignConditionFactors(
+                                        P2Mat,
+                                        VarInvMat,
+                                        VarMat,
+                                        TstatVec,
+                                        w0G2_cond_Vec,
+                                        MAFVec,
+                                        qsum,
+                                        gsumtildeVec,
+                                        pVec);
+  }
+}
+
+// [[Rcpp::export]]
+Rcpp::List process_Haplotype_Region(
+                           std::string t_traitType,
+                           std::string t_genoType,     //"vcf"
+                           unsigned int t_n,
+                           int t_NumberofANC,
+                           std::vector<std::string> & t_genoIndex_prev,
+                           std::vector<std::string> & t_genoIndex
+){
+    unsigned int q0 = t_genoIndex.size();
+    arma::mat nanc_case_mat(q0, t_NumberofANC+1, arma::fill::zeros);
+    arma::mat nanc_ctrl_mat(q0, t_NumberofANC+1, arma::fill::zeros);
+    arma::mat nanc_mat(q0, t_NumberofANC+1, arma::fill::zeros);
+
+    assign_conditionHaplotypes_Region(
+                           t_traitType,
+                           t_genoType,     //"vcf"
+                           t_n,
+                           t_NumberofANC,
+                           t_genoIndex_prev,
+                           t_genoIndex,
+                           nanc_case_mat,
+                           nanc_ctrl_mat,
+                           nanc_mat
+                           );
+
+  Rcpp::List OutList = Rcpp::List::create();
+  OutList.push_back(nanc_case_mat, "nanc_case_mat");
+  OutList.push_back(nanc_ctrl_mat, "nanc_ctrl_mat");
+  OutList.push_back(nanc_mat, "nanc_mat");
+
+  return OutList;
+}

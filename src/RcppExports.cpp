@@ -619,6 +619,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// process_Haplotype_Region
+Rcpp::List process_Haplotype_Region(std::string t_traitType, std::string t_genoType, unsigned int t_n, int t_NumberofANC, std::vector<std::string>& t_genoIndex_prev, std::vector<std::string>& t_genoIndex);
+RcppExport SEXP _SAIGE_process_Haplotype_Region(SEXP t_traitTypeSEXP, SEXP t_genoTypeSEXP, SEXP t_nSEXP, SEXP t_NumberofANCSEXP, SEXP t_genoIndex_prevSEXP, SEXP t_genoIndexSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type t_traitType(t_traitTypeSEXP);
+    Rcpp::traits::input_parameter< std::string >::type t_genoType(t_genoTypeSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type t_n(t_nSEXP);
+    Rcpp::traits::input_parameter< int >::type t_NumberofANC(t_NumberofANCSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string>& >::type t_genoIndex_prev(t_genoIndex_prevSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string>& >::type t_genoIndex(t_genoIndexSEXP);
+    rcpp_result_gen = Rcpp::wrap(process_Haplotype_Region(t_traitType, t_genoType, t_n, t_NumberofANC, t_genoIndex_prev, t_genoIndex));
+    return rcpp_result_gen;
+END_RCPP
+}
 // closeGenoFile_plink
 void closeGenoFile_plink();
 RcppExport SEXP _SAIGE_closeGenoFile_plink() {
@@ -3326,6 +3342,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_Unified_getOneMarker_Admixed", (DL_FUNC) &_SAIGE_Unified_getOneMarker_Admixed, 19},
     {"_SAIGE_mainMarkerAdmixedInCPP", (DL_FUNC) &_SAIGE_mainMarkerAdmixedInCPP, 8},
     {"_SAIGE_openOutfile_single_admixed_new", (DL_FUNC) &_SAIGE_openOutfile_single_admixed_new, 5},
+    {"_SAIGE_process_Haplotype_Region", (DL_FUNC) &_SAIGE_process_Haplotype_Region, 6},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
     {"_SAIGE_getAlleleFreqVec", (DL_FUNC) &_SAIGE_getAlleleFreqVec, 0},

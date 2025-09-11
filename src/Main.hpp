@@ -520,6 +520,26 @@ void assign_conditionHaplotypes(
                            arma::uvec & not_nan_anc_indices_vec
                            );
 
+void assign_conditionHaplotypes_Region(
+                           std::string t_traitType,
+                           std::string t_genoType,     //"vcf"
+                           unsigned int t_n,
+                           int t_NumberofANC,
+                           std::vector<std::string> & t_genoIndex_prev,
+                           std::vector<std::string> & t_genoIndex,
+                           arma::mat & nanc_case_mat,
+                           arma::mat & nanc_ctrl_mat,
+                           arma::mat & nanc_mat
+                           );
 
+
+Rcpp::List process_Haplotype_Region(
+                           std::string t_traitType,
+                           std::string t_genoType,     //"vcf"
+                           unsigned int t_n,
+                           int t_NumberofANC,
+                           std::vector<std::string> & t_genoIndex_prev,
+                           std::vector<std::string> & t_genoIndex
+);
 
 #endif

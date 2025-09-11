@@ -165,6 +165,10 @@ openOutfile_single_admixed_new <- function(t_traitType, t_isImputation, isappend
     .Call('_SAIGE_openOutfile_single_admixed_new', PACKAGE = 'SAIGE', t_traitType, t_isImputation, isappend, t_isMoreOutput, t_NumberofANC)
 }
 
+process_Haplotype_Region <- function(t_traitType, t_genoType, t_n, t_NumberofANC, t_genoIndex_prev, t_genoIndex) {
+    .Call('_SAIGE_process_Haplotype_Region', PACKAGE = 'SAIGE', t_traitType, t_genoType, t_n, t_NumberofANC, t_genoIndex_prev, t_genoIndex)
+}
+
 closeGenoFile_plink <- function() {
     invisible(.Call('_SAIGE_closeGenoFile_plink', PACKAGE = 'SAIGE'))
 }

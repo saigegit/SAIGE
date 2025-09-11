@@ -558,7 +558,8 @@ SPAGMMATtest = function(bgenFile = "",
 
 		}
 	}
-	SAIGE.Region(mu,
+	if(!is_admixed){
+	   SAIGE.Region(mu,
 		     OutputFile,
 		     MACCutoff_to_CollapseUltraRare,
                      groupFile,
@@ -581,9 +582,34 @@ SPAGMMATtest = function(bgenFile = "",
 		     chrom,
 		     is_fastTest,
 		     pval_cutoff_for_fastTest,
-		     is_output_moreDetails, 
-		     is_admixed)
-
-
+		     is_output_moreDetails)
+	}else{	     
+	   #SAIGE.Region.Admixed(mu,
+	   SAIGE.Region.byancestry.refactored(mu,
+                     OutputFile,
+                     MACCutoff_to_CollapseUltraRare,
+                     groupFile,
+                     annotation_in_groupTest,
+                     maxMAF_in_groupTest,
+                     markers_per_chunk_in_groupTest,
+                     genoType,
+                     objGeno$markerInfo,
+                     bgenFileIndex,
+                     traitType,
+                     is_imputed_data,
+                     isCondition,
+                     condition_weights,
+                     groups_per_chunk,
+                     r.corr,
+                     is_overwrite_output,
+                     is_single_in_groupTest,
+                     is_no_weight_in_groupTest,
+                     is_output_markerList_in_groupTest,
+                     chrom,
+                     is_fastTest,
+                     pval_cutoff_for_fastTest,
+                     is_output_moreDetails,
+		     number_of_ancestry)
+	}
     }	    
 }
