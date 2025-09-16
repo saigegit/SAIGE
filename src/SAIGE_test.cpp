@@ -220,7 +220,7 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
                      double &t_Tstat,
                      double &t_var1,
                      double &t_var2){
-
+std::cout << "scoreTestFast " << std::endl;
     arma::vec g1 = t_GVec.elem(t_indexForNonZero);
     arma::mat X1 = m_X.rows(t_indexForNonZero);
     arma::mat A1 = m_XVX_inv_XV.rows(t_indexForNonZero);
@@ -231,6 +231,7 @@ void SAIGEClass::scoreTestFast(arma::vec & t_GVec,
     arma::vec g1_tilde = g1 - B;
     double var1, var2, S, S1, S2, g1tildemu2;
     arma::vec S_a2;
+std::cout << "scoreTestFast1 " << std::endl;
     double Bmu2;
     arma::mat  ZtXVXZ = Z.t() * m_XVX * Z;
     if(m_traitType == "binary" || m_traitType == "survival"){
@@ -371,7 +372,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 				bool t_isER) 
 {
 
-
+std::cout << "getMarkerPval " << std::endl;
 
   t_isFirth = false;
   //arma::vec adjGVec = getadjGFast(t_GVec);
@@ -380,6 +381,9 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
   //iIndex = arma::find(t_GVec != 0);
   //arma::vec t_gtilde;
   bool isScoreFast = true;
+
+
+  std::cout << "m_flagSparseGRM_cur a " << m_flagSparseGRM_cur << std::endl;
   if(m_flagSparseGRM_cur){
     isScoreFast = false;
   }
@@ -390,15 +394,18 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
 
   //for test
   //arma::vec timeoutput3 = getTime();
-  if(!isScoreFast){
+std::cout << "getMarkerPval 2" << std::endl;
+std::cout << "isScoreFast " << isScoreFast << std::endl;
+if(!isScoreFast){
   	is_gtilde = true;
   	scoreTest(t_GVec, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq, t_Tstat, t_var1, t_var2, t_gtilde, t_P2Vec, t_gy, is_region, iIndex);
   }else{
   	is_gtilde = false;
+std::cout << "getMarkerPval 3" << std::endl;
         scoreTestFast(t_GVec, iIndex, t_Beta, t_seBeta, t_pval_noSPA, pval_noadj, ispvallog, t_altFreq, t_Tstat, t_var1, t_var2);
   }
 
-
+std::cout << "scoreTest 0 " << std::endl;
   double StdStat = std::abs(t_Tstat) / sqrt(t_var1);
 
   t_isSPAConverge = false;
@@ -406,6 +413,7 @@ void SAIGEClass::getMarkerPval(arma::vec & t_GVec,
  //arma::vec timeoutput3_a = getTime();
   double q, qinv, m1, NAmu, NAsigma, tol1, p_iIndexComVecSize;
 
+std::cout << "scoreTest 1 " << std::endl;
   //arma::uvec iIndexComVec = arma::find(t_GVec == 0);
   //arma::uvec iIndexVec = arma::find(t_GVec != 0);
  
@@ -428,17 +436,23 @@ if((StdStat > m_SPA_Cutoff || std::isnan(StdStat)) && m_traitType != "quantitati
 	t_isER = false;
 }
 
+std::cout << "scoreTest 2 " << std::endl;
 
 if(!t_isER){
 
+std::cout << "scoreTest 2a0 " << std::endl;
   if(!std::isnan(StdStat) && (StdStat > m_SPA_Cutoff) && m_traitType != "quantitative"){
+std::cout << "scoreTest 3a0 " << std::endl;
 
        if(!is_gtilde){
           t_gtilde.resize(m_n);
+std::cout << "scoreTest 3a " << std::endl;
           getadjGFast(t_GVec, t_gtilde, iIndex);
+std::cout << "scoreTest 3b " << std::endl;
 	  is_gtilde = true;
        }
 	//int t_gtilden = t_gtilde.n_elem;
+std::cout << "scoreTest 3c " << std::endl;
         p_iIndexComVecSize = double(iIndexComVecSize)/m_n;
    	m1 = dot(m_mu, t_gtilde);
 
@@ -493,6 +507,7 @@ if(!t_isER){
 
 	}*/
 
+std::cout << "scoreTest 3d " << std::endl;
    	if(m_traitType == "binary"){
                 q = t_Tstat/sqrt(t_var1/t_var2) + m1;
 
@@ -518,17 +533,22 @@ if(!t_isER){
 		gNB.print("gNB");
   */
        }
+std::cout << "SPA 0" << std::endl;
     	//bool logp=false;
 	double tol0 = std::numeric_limits<double>::epsilon();
 	tol1 = std::pow(tol0, 0.25);
 	if(p_iIndexComVecSize >= 0.5 && !m_flagSparseGRM_cur){
+std::cout << "SPA fast 1" << std::endl;
 		//std::cout << "SPA_fast" << std::endl;
         	SPA_fast(m_mu, t_gtilde, q, qinv, pval_noadj, ispvallog, gNA, gNB, muNA, muNB, NAmu, NAsigma, tol1, m_traitType, t_SPApval, t_isSPAConverge);
 	
 	}else{
+std::cout << "SPA 1" << std::endl;
 		//std::cout << "SPA" << std::endl;
 		SPA(m_mu, t_gtilde, q, qinv, pval_noadj, tol1, ispvallog, m_traitType, t_SPApval, t_isSPAConverge);	
 	}
+
+std::cout << "SPA" << std::endl;
 
 
     boost::math::normal ns;
@@ -648,6 +668,8 @@ double t_GVecMAC = arma::accu(t_GVec);
  //printTime(timeoutput3, timeoutput3_a, "Test Marker  ScoreTest");
 //printTime(timeoutput3, timeoutput4, "Test Marker 3 to 4");
 //printTime(timeoutput3_a, timeoutput4, "Test Marker SPA");
+
+std::cout << "t_isCondition " << t_isCondition << std::endl;
 
    //condition
    if(t_isCondition){
@@ -831,15 +853,16 @@ double t_GVecMAC = arma::accu(t_GVec);
     }
 
 
-    //std::cout << "is_region " << is_region << std::endl;
-    //std::cout << "isScoreFast " << isScoreFast << std::endl;
-    //std::cout << "m_flagSparseGRM_cur " << m_flagSparseGRM_cur << std::endl;
+    std::cout << "is_region " << is_region << std::endl;
+    std::cout << "isScoreFast " << isScoreFast << std::endl;
+    std::cout << "m_flagSparseGRM_cur " << m_flagSparseGRM_cur << std::endl;
     if(is_region && isScoreFast){
 
       t_gy = dot(t_gtilde, m_y);
       if(!m_flagSparseGRM_cur){
         t_P2Vec = t_gtilde % m_mu2 *m_tauvec[0];
       }else{
+      std::cout << "ok" << std::endl;
         arma::sp_mat m_SigmaMat_sp = gen_sp_SigmaMat();
         t_P2Vec = arma::spsolve(m_SigmaMat_sp, t_gtilde);
       }

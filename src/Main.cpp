@@ -5872,6 +5872,7 @@ void assign_conditionHaplotypes_Region(
   bool isSPAConverge, is_gtilde, is_Firth, is_FirthConverge;
   arma::vec P2Vec(t_n);
 
+    std::cout << "herehere 1" << std::endl; 
   std::string pval_c, pval_noSPA_c;
   double Beta_c, seBeta_c, Tstat_c, varT_c;
   arma::rowvec G1tilde_P_G2tilde_Vec;
@@ -5946,7 +5947,7 @@ void assign_conditionHaplotypes_Region(
      //if(nanc > 0){
      //  not_nan_anc_indices.push_back(i);
      //}
-     
+    std::cout << "herehere 2" << std::endl; 
       if(j < q1){ //do not need to test the last ancestry
         double MAC_anc = std::min(nanc, 2*t_n - nanc);
         double MAF = std::min(altFreq, 1 - altFreq);
@@ -5987,7 +5988,8 @@ void assign_conditionHaplotypes_Region(
           MAC = std::min(altCounts, 2*t_n-altCounts);
 
           arma::vec gtildeVec;
-
+    std::cout << "herehere 3" << std::endl; 
+    std::cout << "MAC " << MAC << " g_MACCutoffforER " << g_MACCutoffforER << std::endl;
           if(MAC > g_MACCutoffforER){
              Unified_getMarkerPval(
                             t_GVec,
@@ -6034,6 +6036,7 @@ void assign_conditionHaplotypes_Region(
     } // End ancestry loop
   } // End marker loop - Fixed: Added missing closing brace
   
+    std::cout << "herehere 4" << std::endl; 
   // Final conditioning assignment - Moved outside all loops
   arma::vec gsumtildeVec;
   double qsum = arma::accu(gyVec);
@@ -6059,6 +6062,7 @@ void assign_conditionHaplotypes_Region(
         pVecsub.push_back(pVec[idx]);
     }
 
+    std::cout << "herehere 5" << std::endl; 
         ptr_gSAIGEobj->assignConditionFactors(
                                         P2Matsub,
                                         VarInvMatsub,
@@ -6084,6 +6088,7 @@ void assign_conditionHaplotypes_Region(
                                         gsumtildeVec,
                                         pVec);
   }
+    std::cout << "herehere 6" << std::endl; 
 }
 
 // [[Rcpp::export]]
@@ -6100,6 +6105,7 @@ Rcpp::List process_Haplotype_Region(
     arma::mat nanc_ctrl_mat(q0, t_NumberofANC+1, arma::fill::zeros);
     arma::mat nanc_mat(q0, t_NumberofANC+1, arma::fill::zeros);
 
+std::cout << "assign_conditionHaplotypes_Region before" << std::endl;
     assign_conditionHaplotypes_Region(
                            t_traitType,
                            t_genoType,     //"vcf"
@@ -6111,6 +6117,7 @@ Rcpp::List process_Haplotype_Region(
                            nanc_ctrl_mat,
                            nanc_mat
                            );
+std::cout << "assign_conditionHaplotypes_Region after" << std::endl;
 
   Rcpp::List OutList = Rcpp::List::create();
   OutList.push_back(nanc_case_mat, "nanc_case_mat");

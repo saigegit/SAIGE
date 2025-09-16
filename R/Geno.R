@@ -303,7 +303,7 @@ setGenoInput = function(bgenFile = "",
     #if(chrom==""){
     #  stop("chrom needs to be specified for VCF/BCF/SAV input\n")
     #}
-    #markerInfo = NULL
+    markerInfo = NULL
   }
 
 
@@ -352,6 +352,7 @@ setGenoInput = function(bgenFile = "",
     }
 
     colnames(RangesToInclude) = c("CHROM", "START", "END")
+if(FALSE){
  if(dosageFileType == "vcf"){ 
    if(nrow(RangesToInclude) > 0){
     for(i in 1:nrow(RangesToInclude)){
@@ -364,6 +365,8 @@ setGenoInput = function(bgenFile = "",
 	cat(length(markerInfo$ID[posRows]), " markers in the range ", i, " are found in the geno/dosage file.\n")
     }
    }
+
+}#if(FALSE){   
   } 
     anyInclude = TRUE
   }

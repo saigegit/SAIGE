@@ -1104,7 +1104,16 @@ SAIGE.Region.byancestry.refactored <- function(mu,
         
         # Process haplotype analysis before ancestry-specific tests
         cat("Processing haplotype analysis for region", regionName, "\n")
-        process_Haplotype_Region(
+process_Haplotype_Region(
+	traitType,
+	genoType,
+	n,
+	number_of_ancestry,
+	region$genoIndex_prev,
+	          region$genoIndex
+)
+if(FALSE){	
+	process_Haplotype_Region(
           genoType,
           region$genoIndex_prev,
           region$genoIndex,
@@ -1127,7 +1136,7 @@ SAIGE.Region.byancestry.refactored <- function(mu,
           is_output_moreDetails,
           number_of_ancestry
         )
-        
+}        
         # Loop through each ancestry for group tests
         for (anc_index in 1:(number_of_ancestry + 1)) {
           anc_index_name <- anc_index
