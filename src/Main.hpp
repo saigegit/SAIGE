@@ -455,7 +455,8 @@ void mainMarkerAdmixedInCPP(
                            bool & t_isMoreOutput,
                            bool & t_isImputation,
                            bool & t_isFirth,
-                           int t_NumberofANC);
+                           int t_NumberofANC,
+			                              double t_pvalcutoff_of_haplotype);
 
 void writeOutfile_single_admixed_new(bool t_isMoreOutput,
                         bool t_isImputation,
@@ -501,7 +502,8 @@ void writeOutfile_single_admixed_new(bool t_isMoreOutput,
   std::vector<std::string> & pvalHet_cVec,
   std::vector<std::string> & pvalHom_cVec,
   std::vector<std::string> & pvalAdmixed_cVec,
-  int t_NumberofANC
+  int t_NumberofANC,
+    std::vector<std::string> & pvalHap_Vec
 );
 
 bool openOutfile_single_admixed_new(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput, int t_NumberofANC);
@@ -517,7 +519,9 @@ void assign_conditionHaplotypes(
                            arma::vec & nanc_case_vec,
                            arma::vec & nanc_ctrl_vec,
                            arma::vec & nanc_vec,
-                           arma::uvec & not_nan_anc_indices_vec
+                           arma::uvec & not_nan_anc_indices_vec,
+			                              double t_pvalcutoff_of_haplotype,
+						      bool & isconditiononHaplo
                            );
 
 void assign_conditionHaplotypes_Region(

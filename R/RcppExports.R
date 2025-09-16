@@ -157,8 +157,8 @@ Unified_getOneMarker_Admixed <- function(t_genoType, t_gIndex_prev, t_gIndex, t_
     .Call('_SAIGE_Unified_getOneMarker_Admixed', PACKAGE = 'SAIGE', t_genoType, t_gIndex_prev, t_gIndex, t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo, t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero, t_GVec, t_isImputation, t_vcfField)
 }
 
-mainMarkerAdmixedInCPP <- function(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth, t_NumberofANC) {
-    invisible(.Call('_SAIGE_mainMarkerAdmixedInCPP', PACKAGE = 'SAIGE', t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth, t_NumberofANC))
+mainMarkerAdmixedInCPP <- function(t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth, t_NumberofANC, t_pvalcutoff_of_haplotype) {
+    invisible(.Call('_SAIGE_mainMarkerAdmixedInCPP', PACKAGE = 'SAIGE', t_genoType, t_traitType, t_genoIndex_prev, t_genoIndex, t_isMoreOutput, t_isImputation, t_isFirth, t_NumberofANC, t_pvalcutoff_of_haplotype))
 }
 
 openOutfile_single_admixed_new <- function(t_traitType, t_isImputation, isappend, t_isMoreOutput, t_NumberofANC) {

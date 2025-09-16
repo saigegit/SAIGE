@@ -136,6 +136,8 @@ mean, p-value based on traditional score test is returned. Default value is 2.")
     help="Whether the associaion test is conducted for admixed samples with local ancestry inference"),
   make_option("--number_of_ancestry", type="numeric", default=2,
       help="Number of ancestries in samples if --is_admixed=TRUE [default=2]."),
+  make_option("--pvalcutoff_of_haplotype", type="numeric", default=0.05,
+      help="Conditional analyses on haplotypes will be conducted for haplotypes of any ancestry with p-value <= pvalcutoff_of_haplotype [default=0.05]."),
   make_option("--nThreads", type="integer", default=1,
     help="Optional. Number of threads (CPUs) to use [default=1]."),
  make_option("--subSampleFile", type="character",default="",
@@ -256,7 +258,8 @@ if(nThreads == 1){
              max_MAC_use_ER = opt$max_MAC_for_ER,
              subSampleFile = opt$subSampleFile,
              is_admixed = opt$is_admixed,
-             number_of_ancestry = opt$number_of_ancestry)
+             number_of_ancestry = opt$number_of_ancestry,
+	     pvalcutoff_of_haplotype = opt$pvalcutoff_of_haplotype)
 
 
 }else{ #if(nThreads == 1)

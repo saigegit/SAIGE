@@ -4559,7 +4559,8 @@ void mainMarkerAdmixedInCPP(
                            bool & t_isMoreOutput,
                            bool & t_isImputation,
                            bool & t_isFirth, 
-			   int t_NumberofANC)
+			   int t_NumberofANC,
+			   double t_pvalcutoff_of_haplotype)
 {
 
   int q = t_genoIndex.size();  // number of markers
@@ -4593,6 +4594,7 @@ void mainMarkerAdmixedInCPP(
   std::vector<double> varT_cVec(q, arma::datum::nan);
   //std::vector<double> pvalNA_cVec(q, arma::datum::nan);
   std::vector<std::string> pvalNA_cVec(q, "NA");
+  std::vector<std::string> pvalHap_Vec(q, "NA");
   arma::rowvec G1tilde_P_G2tilde_Vec(ptr_gSAIGEobj->m_numMarker_cond);
 
   std::vector<bool>  isSPAConvergeVec(q);
@@ -4705,6 +4707,8 @@ void mainMarkerAdmixedInCPP(
     arma::vec nanc_ctrl_vec(t_NumberofANC);
     arma::vec nanc_vec(t_NumberofANC);  
     arma::uvec not_nan_anc_indices_vec(t_NumberofANC);
+    std::vector<std::string> pvalHap_pervatiant_Vec(t_NumberofANC);
+    bool isconditiononHaplo;
     assign_conditionHaplotypes(
     		t_traitType,
                            t_genoType,     //"vcf"
@@ -4715,8 +4719,11 @@ void mainMarkerAdmixedInCPP(
                            nanc_case_vec,
                            nanc_ctrl_vec,
                            nanc_vec,
-                           not_nan_anc_indices_vec
+                           not_nan_anc_indices_vec,
+			   t_pvalcutoff_of_haplotype,
+			   isconditiononHaplo
                            );           // sample size
+
 
     G1tilde_P_G2tilde_Mat.set_size(t_NumberofANC, ptr_gSAIGEobj->m_VarInvMat_cond.n_rows);
 
@@ -4807,8 +4814,7 @@ void mainMarkerAdmixedInCPP(
      
      if(j < t_NumberofANC){
 
-		nanc = static_cast<int>(nanc_vec(j));
-
+       nanc = static_cast<int>(nanc_vec(j));
    t_GVec.zeros();
    indexZeroVec.clear();
    indexNonZeroVec.clear();
@@ -4824,7 +4830,6 @@ void mainMarkerAdmixedInCPP(
    t_GVecHom = t_GVecHom + t_GVec;
    altCounts = arma::accu(t_GVec);
    altFreq = altCounts/double(nanc);
-
    if(!isReadMarker){
       //std::cout << "isReadMarker " << isReadMarker << std::endl;
       g_markerTestEnd = true;
@@ -4836,6 +4841,9 @@ void mainMarkerAdmixedInCPP(
     t_GVec = t_GVecHom;
     altCounts = arma::accu(t_GVec);
     altFreq = arma::mean(t_GVec)/2.0;
+
+
+
     missingRate = 0;
     imputeInfo = 1;
     nanc = 2*n;
@@ -4858,12 +4866,17 @@ void mainMarkerAdmixedInCPP(
 
     int k = i*(t_NumberofANC+1) + j; 
     altFreqVec.at(k) = altFreq;         // allele frequencies of ALT allele, this is not always < 0.5.
+    if(j <  t_NumberofANC){
+    	pvalHap_Vec.at(k) = ptr_gSAIGEobj->m_p_cond.at(j);
+    }
     //altCountsVec.at(i) = altCounts;         // allele frequencies of ALT allele, this is not always < 0.5.
     missingRateVec.at(k) = missingRate;
     imputationInfoVec.at(k) = imputeInfo;
     // MAF and MAC are for Quality Control (QC)
     double MAF = std::min(altFreq, 1 - altFreq);
     double MAC = MAF * nanc * (1 - missingRate);
+    altFreqVec.at(k) = altFreq;         // allele frequencies of ALT allele, this is not always < 0.5.
+    altCountsVec.at(k) = altCounts;         // allele frequencies of ALT allele, this is not always < 0.5.
     
    //std::cout << "k " << k << std::endl;  
    //std::cout << "missingRate " << missingRate << std::endl;
@@ -4921,13 +4934,10 @@ void mainMarkerAdmixedInCPP(
       continue;
     }else{
 
-    if((t_traitType == "binary" || t_traitType == "survival") && nanc_case < 20){
-        includeTestANCvec(j) = 1;
-     	continue;
-    }else{
-
-
-
+    //if((t_traitType == "binary" || t_traitType == "survival")){
+    //    includeTestANCvec(j) = 1;
+    // 	continue;
+    //}else{
 
     // Check UTIL.cpp
     //
@@ -4949,8 +4959,6 @@ void mainMarkerAdmixedInCPP(
 
     //arma::vec timeoutput4 = getTime();
     //printTime(timeoutput3, timeoutput4, "imputeGenoAndFlip");
-    altFreqVec.at(k) = altFreq;         // allele frequencies of ALT allele, this is not always < 0.5.
-    altCountsVec.at(k) = altCounts;         // allele frequencies of ALT allele, this is not always < 0.5.
     //std::cout << "MAC " << MAC << std::endl;
     //std::cout << "altFreq after flip " << altFreq << std::endl;
     //std::cout << "info " << info << std::endl;
@@ -4996,7 +5004,7 @@ void mainMarkerAdmixedInCPP(
                     t_GVec,
                           false, // bool t_isOnlyOutputNonZero,
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA,  Tstat, gy, varT,
-                          altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false);
+                          altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isconditiononHaplo, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false);
 	if(isSPAConverge){isSPAjoint = true;}		  
     }else{
     		includeTestANCvec(j) = 1;
@@ -5028,9 +5036,11 @@ void mainMarkerAdmixedInCPP(
    Scorevec(j) = Tstat;
    PvalvecallAnc(j) = pval_num;
 
-   if(isCondition){
+   if(isconditiononHaplo){
 	G1tilde_P_G2tilde_Mat.row(j) = G1tilde_P_G2tilde_Vec;
    	Scorevec_c(j) = Tstat_c;
+   }else{
+	Scorevec_c(j) = Tstat;
    }
 
 
@@ -5056,17 +5066,22 @@ void mainMarkerAdmixedInCPP(
     TstatVec.at(k) = Tstat * (1 - 2*flip);
     varTVec.at(k) = varT;
 
-    if(isCondition){
+    if(isconditiononHaplo){
         Beta_cVec.at(k) = Beta_c * (1 - 2*flip);  // Beta if flip = false, -1*Beta is flip = true
         seBeta_cVec.at(k) = seBeta_c;
         pval_cVec.at(k) = pval_c;
         pvalNA_cVec.at(k) = pval_noSPA_c;
         Tstat_cVec.at(k) = Tstat_c * (1 - 2*flip);
         varT_cVec.at(k) = varT_c;
-    }
-
-
-       }//if(includeTestANCvec(j) == 0){
+    }else{
+        Beta_cVec.at(k) = Beta * (1 - 2*flip);  // Beta if flip = false, -1*Beta is flip = true
+        seBeta_cVec.at(k) = seBeta;
+        pval_cVec.at(k) = pval;
+        pvalNA_cVec.at(k) = pval_noSPA;
+        Tstat_cVec.at(k) = Tstat * (1 - 2*flip);
+        varT_cVec.at(k) = varT;
+    }	
+       //}//if(includeTestANCvec(j) == 0){
      
      }// if((MAF < g_marker_minMAF_cutoff) || (MAC < g_marker_minMAC_cutoff)){
 
@@ -5129,7 +5144,7 @@ void mainMarkerAdmixedInCPP(
 	pvalAdmixed_Vec.at(i) = P_cct_admixed_str;
 
 
-	if(isCondition){
+	if(isconditiononHaplo){
 		
 	arma::mat G1tilde_P_G2tilde_Matsub;
   	if(numancresults < t_NumberofANC){
@@ -5170,7 +5185,11 @@ void mainMarkerAdmixedInCPP(
             pvalHom_cVec.at(i) = P_hom_admixed_cond_str;
             pvalAdmixed_cVec.at(i) = P_cct_admixed_cond_str; 
 	
-	}	
+	}else{
+            pvalHet_cVec.at(i) = P_het_admixed_str;
+            pvalHom_cVec.at(i) = P_hom_admixed_str;
+            pvalAdmixed_cVec.at(i) = P_cct_admixed_str; 
+	}
     }else{
 	if(numancresults == 1){
 		double P_hom_admixed = convertStringtoDoublePval(pval);
@@ -5179,12 +5198,16 @@ void mainMarkerAdmixedInCPP(
 		pvalHom_Vec.at(i) = P_hom_admixed_str;
 		pvalHet_Vec.at(i) = P_hom_admixed_str;
 		pvalAdmixed_Vec.at(i) = P_hom_admixed_str;
-		if(isCondition){
+		if(isconditiononHaplo){
 			//double P_hom_admixed_cond = convertStringtoDoublePval(pval_c);
 			std::string P_hom_admixed_cond_str = pval_c;
 			pvalHom_cVec.at(i) = P_hom_admixed_cond_str;
 			pvalHet_cVec.at(i) = P_hom_admixed_cond_str;
 			pvalAdmixed_cVec.at(i) = P_hom_admixed_cond_str;
+		}else{
+			pvalHom_cVec.at(i) = P_hom_admixed_str;
+			pvalHet_cVec.at(i) = P_hom_admixed_str;
+			pvalAdmixed_cVec.at(i) = P_hom_admixed_str;
 		}
 	}
    } 
@@ -5196,6 +5219,9 @@ void mainMarkerAdmixedInCPP(
     }//for(int j = 0; j < t_NumberofANC; j++)
     ptr_gVCFobj->move_forward_iterator(1);
   }//i
+
+
+
 
   exit_loops:
   	std::cout << "the end of file" << std::endl;
@@ -5244,7 +5270,8 @@ void mainMarkerAdmixedInCPP(
   pvalHet_cVec,
   pvalHom_cVec,
   pvalAdmixed_cVec,
-  t_NumberofANC);
+  t_NumberofANC,
+  pvalHap_Vec);
 
 }
 
@@ -5294,7 +5321,8 @@ void writeOutfile_single_admixed_new(bool t_isMoreOutput,
   std::vector<std::string> & pvalHet_cVec,
   std::vector<std::string> & pvalHom_cVec,
   std::vector<std::string> & pvalAdmixed_cVec,
-  int t_NumberofANC
+  int t_NumberofANC,
+  std::vector<std::string> & pvalHap_Vec
 ){
   int numtest = 0;
   for(unsigned int j = 0; j < pvalHom_Vec.size(); j++){
@@ -5386,6 +5414,8 @@ void writeOutfile_single_admixed_new(bool t_isMoreOutput,
                         //OutFile_single << "\n";
 
                 }
+                 OutFile_single << "\t";
+                 OutFile_single << pvalHap_Vec.at(k);
         }//for(unsigned int i = 0; i < t_NumberofANC+1; i++){
  
 	 OutFile_single << "\t";
@@ -5535,6 +5565,9 @@ bool openOutfile_single_admixed_new(std::string t_traitType, bool t_isImputation
                 OutFile_single << "N_haplo";
                 OutFile_single << ancstr;
           }
+                OutFile_single << "\t";
+                OutFile_single << "Pvalue_haplo";
+                OutFile_single << ancstr;
 
         }//for(unsigned int k = 0; k < pvalVec.size(); k++)
 /*
@@ -5593,16 +5626,21 @@ void assign_conditionHaplotypes(
                            arma::vec & nanc_case_vec,
                            arma::vec & nanc_ctrl_vec,
                            arma::vec & nanc_vec,
-                           arma::uvec & not_nan_anc_indices_vec
+                           arma::uvec & not_nan_anc_indices_vec,
+			   double t_pvalcutoff_of_haplotype,
+			   bool & isconditiononHaplo
+			   
                            )           // sample size
 {
+  isconditiononHaplo=true;
   bool isImpute = false;
-  unsigned int q = t_NumberofANC-1;
-  //unsigned int q = t_NumberofANC;
+  //unsigned int q = t_NumberofANC-1;
+  unsigned int q = t_NumberofANC;
   arma::mat P1Mat(q, t_n);
   arma::mat P2Mat(t_n, q);
   arma::mat VarInvMat(q, q);
   arma::vec TstatVec(q);
+  arma::vec pdoubleVec(q);
   std::vector<std::string> pVec(q, "NA");
   arma::vec MAFVec(q);
   arma::vec gyVec(q);
@@ -5689,7 +5727,7 @@ if(nanc > 0){
     not_nan_anc_indices.push_back(i);
 }
 
-if(i < q){ //do not need to test the last ancestry
+//if(i < q){ //do not need to test the last ancestry
   double MAC_anc = std::min(nanc, 2*t_n - nanc);
   double MAF = std::min(altFreq, 1 - altFreq);
   double MAC = MAF * 2 * t_n * (1 - missingRate);
@@ -5771,9 +5809,10 @@ if(i < q){ //do not need to test the last ancestry
      TstatVec(i) = Tstat;
      //pVec(i) = std::stod(pval);
      pVec.at(i) = pval;
+     pdoubleVec(i) = std::stod(pval);
      }//if(nanc > 0){
 
-   }//if(i < q){ //do not need to test the last ancestry
+   //}//if(i < q){ //do not need to test the last ancestry
 
 
 
@@ -5787,15 +5826,24 @@ if(i < q){ //do not need to test the last ancestry
   not_nan_anc_indices_vec.set_size(not_nan_anc_indicesvectemp.n_elem);
   not_nan_anc_indices_vec = not_nan_anc_indicesvectemp;
   
-  if(not_nan_anc_indices_vec.n_elem != t_NumberofANC){
-        arma::uvec not_nan_indices = arma::find_finite(TstatVec);
-        arma::vec TstatVecsub = TstatVec.elem(not_nan_indices);
+  //if(not_nan_anc_indices_vec.n_elem != t_NumberofANC){
+        arma::uvec finite_indices = arma::find_finite(TstatVec);
+	arma::uvec pval_indices = arma::find(pdoubleVec <= t_pvalcutoff_of_haplotype);
+	arma::uvec not_nan_indices = arma::intersect(finite_indices, pval_indices);
+
+
+	if(not_nan_indices.n_elem == t_NumberofANC){
+		not_nan_indices=not_nan_indices.head(not_nan_indices.n_elem - 1);
+	}
+	if(not_nan_indices.n_elem > 0){
+	isconditiononHaplo=true;
+	arma::vec TstatVecsub = TstatVec.elem(not_nan_indices);
         arma::mat P1Matsub = P1Mat.rows(not_nan_indices);
         arma::mat P2Matsub = P2Mat.cols(not_nan_indices);
         arma::vec w0G2_cond_Vecsub = w0G2_cond_Vec.elem(not_nan_indices);
         arma::vec MAFVecsub = MAFVec.elem(not_nan_indices);
-    arma::mat VarMatsub = P1Matsub * P2Matsub;
-    arma::mat VarInvMatsub =  arma::pinv(VarMatsub);
+        arma::mat VarMatsub = P1Matsub * P2Matsub;
+        arma::mat VarInvMatsub =  arma::pinv(VarMatsub);
 
     std::vector<std::string> pVecsub;
     pVecsub.reserve(not_nan_indices.n_elem);
@@ -5814,9 +5862,14 @@ if(i < q){ //do not need to test the last ancestry
                                         MAFVecsub,
                                         qsum,
                                         gsumtildeVec,
-                                        pVecsub);
-
-  }else{
+                                        pVec);
+                                        //pVecsub);	
+}else{
+	ptr_gSAIGEobj->m_p_cond = pVec;
+	isconditiononHaplo=false;
+}
+  //}else{
+    /*
     arma::mat VarMat = P1Mat * P2Mat;
     VarInvMat =  arma::pinv(VarMat);
         ptr_gSAIGEobj->assignConditionFactors(
@@ -5832,7 +5885,7 @@ if(i < q){ //do not need to test the last ancestry
 
 
   }
-
+  */
 }
 
 

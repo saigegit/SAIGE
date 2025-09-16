@@ -14,7 +14,8 @@ SAIGE.Admixed = function(traitType,
                         isCondition,
                         isOverWriteOutput,
                         isAnyInclude,
-			NumberofANC)
+			NumberofANC,
+			pvalcutoff_of_haplotype)
 {
 
   if(is.null(OutputFileIndex))
@@ -144,7 +145,7 @@ SAIGE.Admixed = function(traitType,
    #resMarker = as.data.frame(mainMarkerInCPP(genoType, traitType, genoIndex_prev, genoIndex, isMoreOutput, isImputation))
    #resMarker = resMarker[which(!is.na(resMarker$BETA)), ]
 
-  mainMarkerAdmixedInCPP(genoType, traitType, genoIndex_prev, genoIndex, isMoreOutput, isImputation, isFirth, NumberofANC)
+  mainMarkerAdmixedInCPP(genoType, traitType, genoIndex_prev, genoIndex, isMoreOutput, isImputation, isFirth, NumberofANC, pvalcutoff_of_haplotype)
 
     #timeoutput=system.time({writeOutputFile(Output = list(resMarker),
   #if(nrow(resMarker) > 0){

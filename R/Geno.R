@@ -352,7 +352,7 @@ setGenoInput = function(bgenFile = "",
     }
 
     colnames(RangesToInclude) = c("CHROM", "START", "END")
-if(FALSE){
+ if(FALSE){
  if(dosageFileType == "vcf"){ 
    if(nrow(RangesToInclude) > 0){
     for(i in 1:nrow(RangesToInclude)){
