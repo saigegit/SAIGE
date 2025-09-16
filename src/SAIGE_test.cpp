@@ -381,20 +381,33 @@ std::cout << "getMarkerPval " << std::endl;
   //iIndex = arma::find(t_GVec != 0);
   //arma::vec t_gtilde;
   bool isScoreFast = true;
+  std::cout << "test isScoreFast " << isScoreFast << std::endl;
+    std::cout << "test isScoreFast " << isScoreFast << " (address: " << &isScoreFast << ")" << std::endl;
 
 
   std::cout << "m_flagSparseGRM_cur a " << m_flagSparseGRM_cur << std::endl;
+  
+  std::cout << "m_flagSparseGRM_cur value: " << m_flagSparseGRM_cur << std::endl;
+    std::cout << "m_flagSparseGRM_cur address: " << &m_flagSparseGRM_cur << std::endl;
+      std::cout << "m_flagSparseGRM_cur size: " << sizeof(m_flagSparseGRM_cur) << std::endl;
+        std::cout << "m_flagSparseGRM_cur type: " << typeid(m_flagSparseGRM_cur).name() << std::endl;
+  
+   std::cout << "Thread ID: " << std::this_thread::get_id() << std::endl; 
+  
+  
   if(m_flagSparseGRM_cur){
     isScoreFast = false;
   }
 
- 
+   std::cout << "isScoreFast after if: " << isScoreFast << " (address: " << &isScoreFast << ")" << std::endl;
+
   double pval_noadj, pval, t_qval_Firth; //can be log or not raw
   bool ispvallog;
 
   //for test
   //arma::vec timeoutput3 = getTime();
 std::cout << "getMarkerPval 2" << std::endl;
+  std::cout << "isScoreFast after if: " << isScoreFast << " (address: " << &isScoreFast << ")" << std::endl;
 std::cout << "isScoreFast " << isScoreFast << std::endl;
 if(!isScoreFast){
   	is_gtilde = true;

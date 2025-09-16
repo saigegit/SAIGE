@@ -1104,6 +1104,13 @@ SAIGE.Region.byancestry.refactored <- function(mu,
         
         # Process haplotype analysis before ancestry-specific tests
         cat("Processing haplotype analysis for region", regionName, "\n")
+
+        if (!is_fastTest) {
+            set_flagSparseGRM_cur_SAIGE_org()
+          } else {
+            set_flagSparseGRM_cur_SAIGE(FALSE)
+          }
+
 process_Haplotype_Region(
 	traitType,
 	genoType,
