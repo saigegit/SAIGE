@@ -546,4 +546,28 @@ Rcpp::List process_Haplotype_Region(
                            std::vector<std::string> & t_genoIndex
 );
 
+
+bool Unified_getOneMarker_Admixed(std::string & t_genoType,   // "PLINK", "BGEN", "Vcf"
+                               uint64_t & t_gIndex_prev,        // different meanings for different genoType
+                               uint64_t & t_gIndex,        // different meanings for different genoType
+                               std::string& t_ref,       // REF allele
+                               std::string& t_alt,       // ALT allele (should probably be minor allele, otherwise, computation time will increase)
+                               std::string& t_marker,    // marker ID extracted from genotype file
+                               uint32_t& t_pd,           // base position
+                               std::string& t_chr,       // chromosome
+                               double& t_altFreq,        // frequency of ALT allele
+                               double& t_altCounts,      // counts of ALT allele
+                               double& t_missingRate,    // missing rate
+                               double& t_imputeInfo,     // imputation information score, i.e., R2 (all 1 for PLINK)
+                               bool & t_isOutputIndexForMissing,               // if true, output index of missing genotype data
+                               std::vector<uint>& t_indexForMissing,     // index of missing genotype data
+                               bool & t_isOnlyOutputNonZero,                   // if true, only output a vector of non-zero genotype. (NOTE: if ALT allele is not minor allele, this might take much computation time)
+                               std::vector<uint>& t_indexForNonZero, //
+                               arma::vec & t_GVec,
+                               bool t_isImputation,
+                                std::string t_vcfField
+                               );
+
+
+
 #endif

@@ -121,10 +121,11 @@ bool g_is_rewrite_XnonPAR_forMales = false;
 
 
 bool g_isadmixed = false;
+std::string g_current_vcffield_ancestry = "NA";
+
 
 
 arma::uvec g_indexInModel_male;
-
 arma::umat g_X_PARregion_mat;
 
 
@@ -1204,13 +1205,31 @@ Rcpp::List mainRegionInCPP(
     }
 
 
-    bool isReadMarker = Unified_getOneMarker(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
+  bool isReadMarker;
+  if(!g_isadmixed){
+
+    isReadMarker = Unified_getOneMarker(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
                                           isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
                                           indexForMissing,
                                           isOnlyOutputNonZero, // bool t_isOnlyOutputNonZero,
                                           indexNonZeroVec,
 					  GVec,
 					  t_isImputation);
+  }else{
+    isReadMarker = Unified_getOneMarker_Admixed(t_genoType, gIndex_prev, gIndex, ref, alt, marker, pd, chr, altFreq, altCounts, missingRate, imputeInfo,
+                                          isOutputIndexForMissing, // bool t_isOutputIndexForMissing,
+                                          indexForMissing,
+                                          isOnlyOutputNonZero, // bool t_isOnlyOutputNonZero,
+                                          indexNonZeroVec,
+                                          GVec,
+                                          t_isImputation,
+					g_current_vcffield_ancestry);
+
+  std::cout << "g_current_vcffield_ancestry " << g_current_vcffield_ancestry << std::endl;
+  std::cout << "isReadMarker " << isReadMarker << std::endl;
+
+  }
+
 
    //arma::vec timeoutput2a = getTime();
    //printTime(timeoutput1a, timeoutput2a, "Unified_getOneMarker");
@@ -1234,10 +1253,14 @@ Rcpp::List mainRegionInCPP(
    	GVec_sumdosage = GVec_sumdosage + GVec;
 	
     }
+    
 
     arma::uvec indexZeroVec_arma, indexNonZeroVec_arma;
     MAF = std::min(altFreq, 1 - altFreq);
     MAC = std::min(altCounts, t_n *2 - altCounts);
+    
+    std::cout << "MAF " << MAF << std::endl;  
+    
     chrVec.at(i) = chr;
     posVec.at(i) = pds;
     refVec.at(i) = ref;
@@ -6178,4 +6201,12 @@ std::cout << "assign_conditionHaplotypes_Region after" << std::endl;
   OutList.push_back(nanc_mat, "nanc_mat");
 
   return OutList;
+}
+
+
+
+
+// [[Rcpp::export]]
+void set_current_anc_index_name(std::string anc_index_name){
+	g_current_vcffield_ancestry = anc_index_name;	
 }

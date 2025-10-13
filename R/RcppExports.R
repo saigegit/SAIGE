@@ -169,6 +169,10 @@ process_Haplotype_Region <- function(t_traitType, t_genoType, t_n, t_NumberofANC
     .Call('_SAIGE_process_Haplotype_Region', PACKAGE = 'SAIGE', t_traitType, t_genoType, t_n, t_NumberofANC, t_genoIndex_prev, t_genoIndex)
 }
 
+set_current_anc_index_name <- function(anc_index_name) {
+    invisible(.Call('_SAIGE_set_current_anc_index_name', PACKAGE = 'SAIGE', anc_index_name))
+}
+
 closeGenoFile_plink <- function() {
     invisible(.Call('_SAIGE_closeGenoFile_plink', PACKAGE = 'SAIGE'))
 }

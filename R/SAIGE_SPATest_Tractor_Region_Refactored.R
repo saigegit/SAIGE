@@ -317,12 +317,12 @@ process_region_analysis <- function(outList, regionTestType, is_fastTest, pval_c
             region$genoIndex_prev <- vcf_result$genoIndex_prev
             
             # Re-run the main analysis
-            outList <- mainRegionAdmixedInCPP(
+            outList <- mainRegionInCPP(
               genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat,
               maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType,
               isImputation, WEIGHT, weight_cond, is_single_in_groupTest,
               is_output_markerList_in_groupTest, annolistsub, regionName,
-              is_fastTest, is_output_moreDetails, number_of_ancestry, anc_index
+              is_fastTest, is_output_moreDetails
             )
             
             # Reprocess results with full test
@@ -1146,11 +1146,11 @@ if(FALSE){
 }        
         # Loop through each ancestry for group tests
         for (anc_index in 1:(number_of_ancestry + 1)) {
-          anc_index_name <- anc_index
+            anc_index_name <- anc_index
           if (anc_index > number_of_ancestry) {
             anc_index_name <- "ALL"
           }
-          
+          set_current_anc_index_name(paste0("DS", anc_index_name));
           # Set conditional analysis flag based on ancestry
           # Individual ancestries: conditional on haplotypes from process_Haplotype_Region
           # ALL ancestry: no conditioning on haplotypes
@@ -1170,12 +1170,12 @@ if(FALSE){
           }
           
           # Main analysis
-          outList <- mainRegionAdmixedInCPP(
+          outList <- mainRegionInCPP(
             genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat,
             maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType,
             isImputation, WEIGHT, weight_cond, is_single_in_groupTest,
             is_output_markerList_in_groupTest, annolistsub, regionName,
-            is_fastTest, is_output_moreDetails, number_of_ancestry, anc_index
+            is_fastTest, is_output_moreDetails
           )
           
           # Process results
@@ -1191,12 +1191,12 @@ if(FALSE){
               }
               
               # Re-run analysis
-              outList <- mainRegionAdmixedInCPP(
+              outList <- mainRegionInCPP(
                 genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat,
                 maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType,
                 isImputation, WEIGHT, weight_cond, is_single_in_groupTest,
                 is_output_markerList_in_groupTest, annolistsub, regionName,
-                is_fastTest, is_output_moreDetails, number_of_ancestry, anc_index
+                is_fastTest, is_output_moreDetails
               )
             }
           }

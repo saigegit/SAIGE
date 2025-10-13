@@ -636,6 +636,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// set_current_anc_index_name
+void set_current_anc_index_name(std::string anc_index_name);
+RcppExport SEXP _SAIGE_set_current_anc_index_name(SEXP anc_index_nameSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type anc_index_name(anc_index_nameSEXP);
+    set_current_anc_index_name(anc_index_name);
+    return R_NilValue;
+END_RCPP
+}
 // closeGenoFile_plink
 void closeGenoFile_plink();
 RcppExport SEXP _SAIGE_closeGenoFile_plink() {
@@ -3344,6 +3354,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_mainMarkerAdmixedInCPP", (DL_FUNC) &_SAIGE_mainMarkerAdmixedInCPP, 9},
     {"_SAIGE_openOutfile_single_admixed_new", (DL_FUNC) &_SAIGE_openOutfile_single_admixed_new, 5},
     {"_SAIGE_process_Haplotype_Region", (DL_FUNC) &_SAIGE_process_Haplotype_Region, 6},
+    {"_SAIGE_set_current_anc_index_name", (DL_FUNC) &_SAIGE_set_current_anc_index_name, 1},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
     {"_SAIGE_getAlleleFreqVec", (DL_FUNC) &_SAIGE_getAlleleFreqVec, 0},
