@@ -1067,6 +1067,7 @@ Rcpp::List mainRegionInCPP(
   unsigned int q_maf = maxMAFVec.n_elem;
   unsigned int q_anno_maf = q_anno*q_maf;
   arma::mat genoURMat(t_n, q_anno_maf, arma::fill::zeros);
+  arma::mat genoURMat_noweights(t_n, q_anno_maf, arma::fill::zeros);
   unsigned int q = q0 + q_anno_maf;
   arma::imat annoMAFIndicatorMat(q, q_anno_maf, arma::fill::zeros);
   arma::ivec annoMAFIndicatorVec(q_anno_maf);
@@ -1468,6 +1469,7 @@ Rcpp::List mainRegionInCPP(
 
                                   for(unsigned int k = 0; k < nNonZero; k++){
 					genoURMat(indexNonZeroVec_arma(k), jm) = std::max(genoURMat(indexNonZeroVec_arma(k), jm) , t_weight(i) * (GVec(indexNonZeroVec_arma(k))));
+					genoURMat_noweights(indexNonZeroVec_arma(k), jm) = std::max(genoURMat_noweights(indexNonZeroVec_arma(k), jm) , (GVec(indexNonZeroVec_arma(k))));
 					//weightURMat_cnt(indexNonZeroVec_arma(k), jm) = weightURMat_cnt(indexNonZeroVec_arma(k), jm) + 1;
 				  }
 				}	
@@ -1541,6 +1543,7 @@ if(i2 > 0){
      for(unsigned int m = 0; m < q_maf; m++){
 	jm = j*q_maf+m;
 	arma::vec genoURVec = genoURMat.col(jm);
+	arma::vec genoURVec_noweights = genoURMat_noweights.col(jm);
 	int n = genoURVec.size();
 	arma::uvec indexForNonZero = arma::find(genoURVec != 0);
 	i = q0 + jm;
@@ -1564,7 +1567,7 @@ if(i2 > 0){
 	    //genoSumMat.col(jm) = genoSumMat.col(jm) + genoURVec;
 	      for(unsigned int k = 0; k < indexForNonZero.n_elem; k++){
                 genoSumMat(indexForNonZero(k), jm) = genoSumMat(indexForNonZero(k), jm) + genoURVec(indexForNonZero(k));
-	 	genoSumcount_noweight(jm) = genoSumcount_noweight(jm) + genoURVec(indexForNonZero(k));
+	 	genoSumcount_noweight(jm) = genoSumcount_noweight(jm) + genoURVec_noweights(indexForNonZero(k));
 	      }
     	  }else{
                w0 = boost::math::pdf(beta_dist, MAF);
@@ -1616,7 +1619,8 @@ if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){
             indexZeroVec_arma = arma::conv_to<arma::uvec>::from(indexZeroVec);
             indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
 
-	    if(MAC <= g_MACCutoffforER && t_traitType == "binary"){	
+
+	    if(MAC <= g_MACCutoffforER && t_traitType == "binary" && !isWeightCustomized){	
 
               ptr_gSAIGEobj->getMarkerPval(genoURVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true, false, ptr_gSAIGEobj->m_flagSparseGRM_cur);
 	    }else{
