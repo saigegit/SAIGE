@@ -1227,7 +1227,9 @@ Rcpp::List mainRegionInCPP(
 
   std::cout << "g_current_vcffield_ancestry " << g_current_vcffield_ancestry << std::endl;
   std::cout << "isReadMarker " << isReadMarker << std::endl;
-
+  std::cout << "altFreq " << altFreq << std::endl;
+  std::cout << "altCounts " << altCounts << std::endl;
+  
   }
 
 
