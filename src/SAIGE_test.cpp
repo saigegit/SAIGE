@@ -652,7 +652,6 @@ if(!t_isER){
 		SPA(m_mu, t_gtilde, q, qinv, pval_noadj, tol1, ispvallog, m_traitType, t_SPApval, t_isSPAConverge);	
 	}
 
-
     boost::math::normal ns;
     double t_qval;
 
@@ -700,7 +699,7 @@ if(!t_isER){
 		pval = pval_noadj;
 		//pval_log10 = pval_noadj_log10;
         }
-
+     if(m_traitType=="binary"){
 	if(!ispvallog){
 		if(m_is_Firth_beta && pval <= m_pCutoffforFirth){
 			t_isFirth = true;
@@ -713,7 +712,7 @@ if(!t_isER){
 			t_qval_Firth = R::qnorm(pval/2, 0, 1, false, true);
 		}
 	}
-
+     }	
 
    }else{
         t_pval = t_pval_noSPA;
@@ -762,7 +761,6 @@ if(!t_isER){
 	t_qval_Firth = t_qval_ER;
     }
 }
-
    if(t_isFirth){
 	if(!is_gtilde){
                 getadjGFast(t_GVec, t_gtilde, iIndex);
