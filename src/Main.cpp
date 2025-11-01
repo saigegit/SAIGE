@@ -489,7 +489,6 @@ void mainMarkerInCPP(
     //check 'Main.cpp'
     bool is_region = false;
 
-
     if(MAC <= g_MACCutoffforER && t_traitType == "binary"){
     //if(MAC > g_MACCutoffforER){
       Unified_getMarkerPval( 
@@ -504,7 +503,6 @@ void mainMarkerInCPP(
                           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT,   
 			  altFreq, isSPAConverge, gtildeVec, is_gtilde, is_region, t_P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false, ptr_gSAIGEobj->m_isnoadjCov, ptr_gSAIGEobj->m_flagSparseGRM_cur);
     }
-
     double pval_num;
   
     try {
@@ -1059,10 +1057,16 @@ Rcpp::List mainRegionInCPP(
   Rcpp::List OutList = Rcpp::List::create();
   //arma::vec timeoutput1 = getTime();
   bool isWeightCustomized = false;
+  bool isEqualWeights = false;
   unsigned int q0 = t_genoIndex.size();                 // number of markers (before QC) in one region
   if(!(t_weight.is_zero()) && t_weight.n_elem == q0){
      isWeightCustomized = true;	
-  } 	  
+     bool all_ones = arma::all(t_weight == 1.0);
+     if(all_ones){
+	isEqualWeights = true;
+     }
+  }
+
   unsigned int q_anno = annoIndicatorMat.n_cols;
   unsigned int q_maf = maxMAFVec.n_elem;
   unsigned int q_anno_maf = q_anno*q_maf;
@@ -1288,7 +1292,6 @@ Rcpp::List mainRegionInCPP(
     }else{
         w0 = boost::math::pdf(beta_dist, MAF);
     }
-
 
     indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
     uint nNonZero = indexNonZeroVec_arma.n_elem;
@@ -1570,8 +1573,8 @@ if(i2 > 0){
 	 	genoSumcount_noweight(jm) = genoSumcount_noweight(jm) + genoURVec_noweights(indexForNonZero(k));
 	      }
     	  }else{
-               w0 = boost::math::pdf(beta_dist, MAF);
-	       for(unsigned int k = 0; k < indexForNonZero.n_elem; k++){
+                w0 = boost::math::pdf(beta_dist, MAF);
+	        for(unsigned int k = 0; k < indexForNonZero.n_elem; k++){
                 genoSumMat(indexForNonZero(k), jm) = genoSumMat(indexForNonZero(k), jm) + genoURVec(indexForNonZero(k)) * w0;
 	 	genoSumcount_noweight(jm) = genoSumcount_noweight(jm) + genoURVec(indexForNonZero(k));
 	      }
@@ -1620,12 +1623,10 @@ if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){
             indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
 
 
-	    if(MAC <= g_MACCutoffforER && t_traitType == "binary" && !isWeightCustomized){	
-
+	    if(MAC <= g_MACCutoffforER && t_traitType == "binary" && (!isWeightCustomized || isEqualWeights)){	
               ptr_gSAIGEobj->getMarkerPval(genoURVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true, false, ptr_gSAIGEobj->m_flagSparseGRM_cur);
 	    }else{
               ptr_gSAIGEobj->getMarkerPval(genoURVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false, false, ptr_gSAIGEobj->m_flagSparseGRM_cur);
-
 	    }
 
             BetaVec.at(i) = Beta* (1 - 2*flip);
@@ -1914,7 +1915,7 @@ if(t_regionTestType == "BURDEN"){
 
 
 	  //arma::vec timeoutput_getp = getTime();
-	  if(MAC <= g_MACCutoffforER && t_traitType == "binary"){
+	  if(MAC <= g_MACCutoffforER && t_traitType == "binary" && (!isWeightCustomized || isEqualWeights) ){
           ptr_gSAIGEobj->getMarkerPval(genoSumVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, isregion, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true, false, ptr_gSAIGEobj->m_flagSparseGRM_cur);
 	  }else{
           ptr_gSAIGEobj->getMarkerPval(genoSumVec, indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, altFreq, Tstat, gy, varT, isSPAConverge, gtildeVec, is_gtilde, isregion, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, false, false, ptr_gSAIGEobj->m_flagSparseGRM_cur);
