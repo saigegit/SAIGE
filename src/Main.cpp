@@ -1225,10 +1225,10 @@ Rcpp::List mainRegionInCPP(
                                           t_isImputation,
 					g_current_vcffield_ancestry);
   ptr_gVCFobj->move_forward_iterator(1);
-  std::cout << "g_current_vcffield_ancestry " << g_current_vcffield_ancestry << std::endl;
-  std::cout << "isReadMarker " << isReadMarker << std::endl;
-  std::cout << "altFreq " << altFreq << std::endl;
-  std::cout << "altCounts " << altCounts << std::endl;
+  //std::cout << "g_current_vcffield_ancestry " << g_current_vcffield_ancestry << std::endl;
+  //std::cout << "isReadMarker " << isReadMarker << std::endl;
+  //std::cout << "altFreq " << altFreq << std::endl;
+  //std::cout << "altCounts " << altCounts << std::endl;
   
   }
 
@@ -1261,7 +1261,7 @@ Rcpp::List mainRegionInCPP(
     MAF = std::min(altFreq, 1 - altFreq);
     MAC = std::min(altCounts, t_n *2 - altCounts);
 
-    std::cout << "MAF " << MAF << std::endl;  
+    //std::cout << "MAF " << MAF << std::endl;  
 
     chrVec.at(i) = chr;
     posVec.at(i) = pds;
@@ -1322,7 +1322,7 @@ Rcpp::List mainRegionInCPP(
           indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA, Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true);
 	}
 
-	std::cout << " pval " << pval << " pval_noSPA " << pval_noSPA << std::endl;
+	//std::cout << " pval " << pval << " pval_noSPA " << pval_noSPA << std::endl;
 	BetaVec.at(i) = Beta * (1 - 2*flip);  // Beta if flip = false, -1 * Beta is flip = true       
         seBetaVec.at(i) = seBeta;       
         pvalVec.at(i) = pval;
@@ -1772,7 +1772,7 @@ if(i2 > 0){
             pvalVec.at(i) = pval;
 	    //pvalVec_val.at(i) = std::stod(pval);
             pvalNAVec.at(i) = pval_noSPA;
-	    std::cout << "pval " << pval << " pval_noSPA " << pval_noSPA << std::endl;
+	    //std::cout << "pval " << pval << " pval_noSPA " << pval_noSPA << std::endl;
  	    TstatVec.at(i) = Tstat * (1 - 2*flip);
             TstatVec_flip.at(i) = Tstat;
             gyVec.at(i) = gy;
@@ -2168,7 +2168,7 @@ if(t_regionTestType == "BURDEN"){
     OutList.push_back(TstatVec_flip, "TstatVec_flip");	
   //arma::mat scaled_m_VarInvMat_cond;
   //
-    std::cout << "isCondition " << isCondition << std::endl;
+    //std::cout << "isCondition " << isCondition << std::endl;
     if(isCondition){
   //std::cout << "okk5" << std::endl;
       AdjCondMat = G1tilde_P_G2tilde_Weighted_Mat * (ptr_gSAIGEobj->m_VarInvMat_cond / (w0G2Mat_cond));
@@ -2191,8 +2191,6 @@ if(t_regionTestType == "BURDEN"){
         }
      }
 }
-
-std::cout << "xxxxxxxxx" << std::endl;
 
 
  int numofUR = q_anno_maf;
@@ -2245,6 +2243,7 @@ if(iswriteOutput){
       N_ctrl_homVec,
       N_Vec,
       OutFile_singleInGroup);
+      OutFile_singleInGroup.close();
  }else{
   OutFile_singleInGroup_temp.open(g_outputFilePrefixSingleInGroup_temp.c_str(), std::ofstream::out);
   numofUR0 = writeOutfile_singleInGroup(t_isMoreOutput,
@@ -2869,6 +2868,7 @@ bool openOutfile(std::string t_traitType, bool isappend){
 // [[Rcpp::export]]
 bool openOutfile_singleinGroup(std::string t_traitType, bool t_isImputation, bool isappend, bool t_isMoreOutput){
      bool isopen;
+     //std::cout << "g_outputFilePrefixSingleInGroup " << g_outputFilePrefixSingleInGroup << std::endl;
      if(!isappend){
         OutFile_singleInGroup.open(g_outputFilePrefixSingleInGroup.c_str());
 	isopen = OutFile_singleInGroup.is_open();
@@ -3383,8 +3383,12 @@ void copy_singleInGroup(){
 
 // [[Rcpp::export]]
 void set_singleInGroupFile_ancestry(std::string ancstr){
+  g_outputFilePrefixSingleInGroup_temp = g_outputFilePrefixGroup+ "_"+ancstr+".singleAssoc.txt_temp";
 
-  g_outputFilePrefixSingleInGroup_temp = g_outputFilePrefixGroup+ "_"+ancstr+".singleAssoc.txt_temp_";
+  g_outputFilePrefixSingleInGroup = g_outputFilePrefixGroup+ "_ancestry_"+ancstr+".singleAssoc.txt";
+
+  //std::cout << "g_outputFilePrefixSingleInGroup " << g_outputFilePrefixSingleInGroup << std::endl;
+
 }
 
 
@@ -4566,7 +4570,7 @@ bool Unified_getOneMarker_Admixed(std::string & t_genoType,   // "PLINK", "BGEN"
 
   if(t_genoType == "vcf"){
     ptr_gVCFobj->m_fmtField = t_vcfField;
-    std::cout << "ptr_gVCFobj->m_fmtField " << ptr_gVCFobj->m_fmtField << std::endl;
+    //std::cout << "ptr_gVCFobj->m_fmtField " << ptr_gVCFobj->m_fmtField << std::endl;
     ptr_gVCFobj->getOneMarker(t_ref, t_alt, t_marker, t_pd, t_chr, t_altFreq, t_altCounts, t_missingRate, t_imputeInfo,
                                       t_isOutputIndexForMissing, t_indexForMissing, t_isOnlyOutputNonZero, t_indexForNonZero, isBoolRead, t_GVec, t_isImputation);
     //ptr_gVCFobj->move_forward_iterator(1);
