@@ -238,7 +238,7 @@ void scoreTestFast(arma::vec & t_GVec,
         arma::vec & t_Tstat_cond,
         arma::uvec & t_indexForNonZero);
 
-
+    //void set_isCondition(bool t_isCondition);
 
 };
 }

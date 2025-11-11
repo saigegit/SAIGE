@@ -193,7 +193,7 @@ namespace VCF {
        }else{
 	t_imputeInfo = 1.0;
        }
-
+       std::cout << "t_pd " << t_pd << std::endl;
        double dosage;
        t_altCounts = 0;
        int missing_cnt = 0;
@@ -224,7 +224,7 @@ namespace VCF {
           }
         }
       }
-
+	std::cout << "t_altCounts VCF " << t_altCounts << std::endl;
        if(missing_cnt > 0){
          if(missing_cnt == m_N){
            t_altFreq = 0;

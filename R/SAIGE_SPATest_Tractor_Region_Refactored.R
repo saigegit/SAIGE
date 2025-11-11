@@ -245,6 +245,7 @@ process_region_analysis <- function(outList, regionTestType, is_fastTest, pval_c
       AnnoWeights <- c(WEIGHT, rep(1, outList$numofUR))
     }
   }
+     print("before process_annotation_groups 0 ") 
   
   # Process results if we have valid data
   if ((sum(outList$NumUltraRare_GroupVec) + sum(outList$NumRare_GroupVec)) > 0) {
@@ -290,13 +291,13 @@ process_region_analysis <- function(outList, regionTestType, is_fastTest, pval_c
         wStatVec_cond <- wStatVec - outList$TstatAdjCond
         wadjVarSMat_cond <- wadjVarSMat - outList$VarMatAdjCond
       }
-      
       # Process each annotation group
       pval.Region <- process_annotation_groups(
         annolistsub, maxMAFlist, outList, annoMAFIndicatorMat, wadjVarSMat,
         wStatVec, traitType, adjPVec, mu, regionTestType, AnnoWeights,
         r.corr, regionName, anc_index_name, isCondition, wadjVarSMat_cond, wStatVec_cond
       )
+     print("after process_annotation_groups") 
       
       # Handle fast test logic
       if (is_fastTest && !is.null(pval.Region)) {
@@ -389,7 +390,12 @@ process_annotation_groups <- function(annolistsub, maxMAFlist, outList, annoMAFI
             BETA_Burden = groupOutList$BETA_Burden,
             SE_Burden = groupOutList$SE_Burden
           )
-          
+         
+
+	print("groupOutList")
+	print(groupOutList)
+	print("re_phi")
+	print(re_phi)
           if (isCondition) {
             if (traitType == "binary" | traitType == "survival") {
               G1tilde_P_G2tilde_Mat_scaled <- t(t((
@@ -397,9 +403,19 @@ process_annotation_groups <- function(annolistsub, maxMAFlist, outList, annoMAFI
               ) * sqrt(as.vector(re_phi$scaleFactor))
               ) * sqrt(as.vector(outList$scalefactor_G2_cond)))
               
+		print("G1tilde_P_G2tilde_Mat_scaled")
+		print(G1tilde_P_G2tilde_Mat_scaled)
+
+
               adjCondTemp <- G1tilde_P_G2tilde_Mat_scaled %*% outList$VarInvMat_G2_cond_scaled
-              VarMatAdjCond <- adjCondTemp %*% t(G1tilde_P_G2tilde_Mat_scaled)
-              TstatAdjCond <- adjCondTemp %*% (outList$Tstat_G2_cond * outList$G2_Weight_cond)
+        
+	
+		VarMatAdjCond <- adjCondTemp %*% t(G1tilde_P_G2tilde_Mat_scaled)
+              
+	      print("adjCondTemp")
+	      print(adjCondTemp)
+	 
+	      TstatAdjCond <- adjCondTemp %*% (outList$Tstat_G2_cond * outList$G2_Weight_cond)
               Phi_cond <- re_phi$val - diag(VarMatAdjCond)
               Score_cond <- Score - TstatAdjCond
             } else {
@@ -1111,44 +1127,29 @@ SAIGE.Region.byancestry.refactored <- function(mu,
             set_flagSparseGRM_cur_SAIGE(FALSE)
           }
 
-process_Haplotype_Region(
-	traitType,
-	genoType,
-	n,
-	number_of_ancestry,
-	region$genoIndex_prev,
-	          region$genoIndex
-)
-if(FALSE){	
-	process_Haplotype_Region(
-          genoType,
-          region$genoIndex_prev,
-          region$genoIndex,
-          annoIndicatorMat,
-          maxMAFlist,
-          OutputFile,
-          traitType,
-          n,
-          P1Mat,
-          P2Mat,
-          regionTestType,
-          isImputation,
-          WEIGHT,
-          weight_cond,
-          is_single_in_groupTest,
-          is_output_markerList_in_groupTest,
-          annolistsub,
-          regionName,
-          is_fastTest,
-          is_output_moreDetails,
-          number_of_ancestry
+        process_Haplotype_Region(
+	  traitType,
+	  genoType,
+	  n,
+	  number_of_ancestry,
+	  region$genoIndex_prev,
+	  region$genoIndex
         )
-}        
+
+        vcf_result <- setup_vcf_iterator(genoType, SNP, regionName, chrom1)
+        if (genoType == "vcf" && is.null(vcf_result)) {
+          next
+        } else if (genoType == "vcf") {
+          region$genoIndex <- vcf_result$genoIndex
+          region$genoIndex_prev <- vcf_result$genoIndex_prev
+	  print("nooo")
+        }
+
         # Loop through each ancestry for group tests
         for (anc_index in 1:(number_of_ancestry + 1)) {
-            anc_index_name <- anc_index
+              anc_index_name <- anc_index
           if (anc_index > number_of_ancestry) {
-            anc_index_name <- "ALL"
+              anc_index_name <- "ALL"
           }
           set_current_anc_index_name(paste0("DS", anc_index_name));
           # Set conditional analysis flag based on ancestry
@@ -1161,14 +1162,17 @@ if(FALSE){
           } else {
             cat("Processing ancestry", anc_index_name, "for region", regionName, "(unconditional)\n")
           }
-          
+         
+	  set_isCondition_inSAIGE(isCondition_current); 
           # Set sparse GRM flag
           if (!is_fastTest) {
             set_flagSparseGRM_cur_SAIGE_org()
           } else {
             set_flagSparseGRM_cur_SAIGE(FALSE)
           }
-          
+         
+	  anc_index_name_str = as.character(anc_index_name)
+	  set_singleInGroupFile_ancestry(anc_index_name_str)
           # Main analysis
           outList <- mainRegionInCPP(
             genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat,
@@ -1177,7 +1181,29 @@ if(FALSE){
             is_output_markerList_in_groupTest, annolistsub, regionName,
             is_fastTest, is_output_moreDetails
           )
-          
+         
+        ##reset VCF file for genotype reading again for the same region
+        if (genoType == "vcf") {
+          SNPlist = paste(c(regionName, SNP), collapse = "\t")
+          if (length(SNP) == 1) {
+            fakem = strsplit(SNP, split = ":")[[1]]
+            fakemb = paste(c(fakem[1], as.numeric(fakem[2]) + 2, "N", "N"), collapse =
+                             ":")
+            SNPlisttemp = paste(c(SNPlist, fakemb), collapse = "\t")
+            set_iterator_inVcf(SNPlisttemp, chrom1, 1, 250000000)
+          } else {
+            set_iterator_inVcf(SNPlist, chrom1, 1, 250000000)
+          }
+
+          isVcfEnd =  check_Vcf_end()
+          if (!isVcfEnd) {
+            region$genoIndex = rep("0", length(SNP))
+            region$genoIndex_prev = rep("0", length(SNP))
+          }
+        }# if (genoType == "vcf")
+
+ 
+	print("outListtttttttttttt")
           # Process results
           if (regionTestType == "BURDEN" & is_fastTest) {
             if (!is.null(outList$iswriteOutput) && !(outList$iswriteOutput)) {
@@ -1198,6 +1224,26 @@ if(FALSE){
                 is_output_markerList_in_groupTest, annolistsub, regionName,
                 is_fastTest, is_output_moreDetails
               )
+##reset VCF file for genotype reading again for the same region
+        if (genoType == "vcf") {
+          SNPlist = paste(c(regionName, SNP), collapse = "\t")
+          if (length(SNP) == 1) {
+            fakem = strsplit(SNP, split = ":")[[1]]
+            fakemb = paste(c(fakem[1], as.numeric(fakem[2]) + 2, "N", "N"), collapse =
+                             ":")
+            SNPlisttemp = paste(c(SNPlist, fakemb), collapse = "\t")
+            set_iterator_inVcf(SNPlisttemp, chrom1, 1, 250000000)
+          } else {
+            set_iterator_inVcf(SNPlist, chrom1, 1, 250000000)
+          }
+
+          isVcfEnd =  check_Vcf_end()
+          if (!isVcfEnd) {
+            region$genoIndex = rep("0", length(SNP))
+            region$genoIndex_prev = rep("0", length(SNP))
+          }
+        }# if (genoType == "vcf")
+
             }
           }
           
@@ -1234,7 +1280,7 @@ if(FALSE){
             rm(ancestry_pval.Region)
           }
           gc()
-        }
+        }   ############### for (anc_index in 1:(number_of_ancestry + 1)) {
         
         # Generate marker list
         Output_MarkerList <- generate_marker_list(outList, annolistsub, maxMAFlist, SNP,

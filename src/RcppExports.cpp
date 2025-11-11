@@ -538,6 +538,16 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// set_singleInGroupFile_ancestry
+void set_singleInGroupFile_ancestry(std::string ancstr);
+RcppExport SEXP _SAIGE_set_singleInGroupFile_ancestry(SEXP ancstrSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type ancstr(ancstrSEXP);
+    set_singleInGroupFile_ancestry(ancstr);
+    return R_NilValue;
+END_RCPP
+}
 // mainAdmixedInCPP
 void mainAdmixedInCPP(Rcpp::List& RegionList, std::string t_genoType, std::string t_outputFile, std::string t_traitType, unsigned int t_n, std::string t_regionTestType, arma::vec& t_weight_cond, bool t_isImputation, bool t_isFastTest, bool t_isMoreOutput, bool t_isWriteHeader);
 RcppExport SEXP _SAIGE_mainAdmixedInCPP(SEXP RegionListSEXP, SEXP t_genoTypeSEXP, SEXP t_outputFileSEXP, SEXP t_traitTypeSEXP, SEXP t_nSEXP, SEXP t_regionTestTypeSEXP, SEXP t_weight_condSEXP, SEXP t_isImputationSEXP, SEXP t_isFastTestSEXP, SEXP t_isMoreOutputSEXP, SEXP t_isWriteHeaderSEXP) {
@@ -643,6 +653,16 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type anc_index_name(anc_index_nameSEXP);
     set_current_anc_index_name(anc_index_name);
+    return R_NilValue;
+END_RCPP
+}
+// set_isCondition_inSAIGE
+void set_isCondition_inSAIGE(bool t_isCondition);
+RcppExport SEXP _SAIGE_set_isCondition_inSAIGE(SEXP t_isConditionSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< bool >::type t_isCondition(t_isConditionSEXP);
+    set_isCondition_inSAIGE(t_isCondition);
     return R_NilValue;
 END_RCPP
 }
@@ -3349,12 +3369,14 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_set_flagSparseGRM_cur_SAIGE", (DL_FUNC) &_SAIGE_set_flagSparseGRM_cur_SAIGE, 1},
     {"_SAIGE_set_flagSparseGRM_cur_SAIGE_org", (DL_FUNC) &_SAIGE_set_flagSparseGRM_cur_SAIGE_org, 0},
     {"_SAIGE_copy_singleInGroup", (DL_FUNC) &_SAIGE_copy_singleInGroup, 0},
+    {"_SAIGE_set_singleInGroupFile_ancestry", (DL_FUNC) &_SAIGE_set_singleInGroupFile_ancestry, 1},
     {"_SAIGE_mainAdmixedInCPP", (DL_FUNC) &_SAIGE_mainAdmixedInCPP, 11},
     {"_SAIGE_Unified_getOneMarker_Admixed", (DL_FUNC) &_SAIGE_Unified_getOneMarker_Admixed, 19},
     {"_SAIGE_mainMarkerAdmixedInCPP", (DL_FUNC) &_SAIGE_mainMarkerAdmixedInCPP, 9},
     {"_SAIGE_openOutfile_single_admixed_new", (DL_FUNC) &_SAIGE_openOutfile_single_admixed_new, 5},
     {"_SAIGE_process_Haplotype_Region", (DL_FUNC) &_SAIGE_process_Haplotype_Region, 6},
     {"_SAIGE_set_current_anc_index_name", (DL_FUNC) &_SAIGE_set_current_anc_index_name, 1},
+    {"_SAIGE_set_isCondition_inSAIGE", (DL_FUNC) &_SAIGE_set_isCondition_inSAIGE, 1},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
     {"_SAIGE_getAlleleFreqVec", (DL_FUNC) &_SAIGE_getAlleleFreqVec, 0},

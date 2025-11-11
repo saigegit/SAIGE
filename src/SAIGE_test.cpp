@@ -1251,6 +1251,8 @@ void SAIGEClass::extract_anc_stat_for_cond(
     t_VarInvMat_cond = arma::pinv(t_VarMat_cond);  
 }
 
-
+//void SAIGEClass::set_isCondition(bool t_isCondition){
+//    m_isCondition = t_isCondition;	
+//}
 
 }

@@ -74,5 +74,8 @@ double add_logp(double p1, double p2);
 std::string convertDoubletoStringPval(double t_pval);
 
 double convertStringtoDoublePval(std::string pval);
+
+arma::vec convertToArmaVec(const std::vector<std::string>& stringVec);
+
 #endif
 

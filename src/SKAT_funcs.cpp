@@ -1734,12 +1734,15 @@ void get_newPhi_scaleFactor_cpp(double q_sum,
     //        pval_noadj <- pchisq((q.sum - m1)^2/var1, lower.tail = FALSE, df = 1, log.p = TRUE)
     boost::math::chi_squared chi2(1.0);
     double qval = std::pow(q_sum - m1, 2) / var1;
-    double pval_noadj = 1.0 - boost::math::cdf(chi2, qval);
+    std::cout << "qval " << qval << std::endl;
+    double pval_noadj = boost::math::cdf(chi2, qval);
+
     pval_noadj = std::log(pval_noadj);
 
     bool isSPAConverge = true;
 
     double p_value_burden;
+    std::cout << "pval_noadj " << pval_noadj << std::endl;
     if (std::abs(q_sum - m1) / std::sqrt(var1) < 2) {
         p_value_burden = pval_noadj;
     } else {

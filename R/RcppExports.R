@@ -149,6 +149,10 @@ copy_singleInGroup <- function() {
     invisible(.Call('_SAIGE_copy_singleInGroup', PACKAGE = 'SAIGE'))
 }
 
+set_singleInGroupFile_ancestry <- function(ancstr) {
+    invisible(.Call('_SAIGE_set_singleInGroupFile_ancestry', PACKAGE = 'SAIGE', ancstr))
+}
+
 mainAdmixedInCPP <- function(RegionList, t_genoType, t_outputFile, t_traitType, t_n, t_regionTestType, t_weight_cond, t_isImputation, t_isFastTest, t_isMoreOutput, t_isWriteHeader) {
     invisible(.Call('_SAIGE_mainAdmixedInCPP', PACKAGE = 'SAIGE', RegionList, t_genoType, t_outputFile, t_traitType, t_n, t_regionTestType, t_weight_cond, t_isImputation, t_isFastTest, t_isMoreOutput, t_isWriteHeader))
 }
@@ -171,6 +175,10 @@ process_Haplotype_Region <- function(t_traitType, t_genoType, t_n, t_NumberofANC
 
 set_current_anc_index_name <- function(anc_index_name) {
     invisible(.Call('_SAIGE_set_current_anc_index_name', PACKAGE = 'SAIGE', anc_index_name))
+}
+
+set_isCondition_inSAIGE <- function(t_isCondition) {
+    invisible(.Call('_SAIGE_set_isCondition_inSAIGE', PACKAGE = 'SAIGE', t_isCondition))
 }
 
 closeGenoFile_plink <- function() {

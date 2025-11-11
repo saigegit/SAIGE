@@ -569,5 +569,7 @@ bool Unified_getOneMarker_Admixed(std::string & t_genoType,   // "PLINK", "BGEN"
                                );
 
 
+void set_singleInGroupFile_ancestry(std::string ancstr);
 
+void set_isCondition_inSAIGE(bool t_isCondition);
 #endif

@@ -308,3 +308,20 @@ double convertStringtoDoublePval(std::string pval){
     return(pval_num);
 }
 
+arma::vec convertToArmaVec(const std::vector<std::string>& stringVec) {
+    arma::vec result(stringVec.size());
+
+    for (size_t i = 0; i < stringVec.size(); ++i) {
+        try {
+            result(i) = std::stod(stringVec[i]);  // Convert string to double
+        } catch (const std::invalid_argument& e) {
+            std::cerr << "Invalid number: " << stringVec[i] << std::endl;
+            result(i) = arma::datum::nan;  // Optional: set to NaN
+        } catch (const std::out_of_range& e) {
+            std::cerr << "Number out of range: " << stringVec[i] << std::endl;
+            result(i) = arma::datum::nan;
+        }
+    }
+
+    return result;
+}
