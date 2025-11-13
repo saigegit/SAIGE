@@ -401,17 +401,12 @@ process_annotation_groups <- function(annolistsub, maxMAFlist, outList, annoMAFI
               ) * sqrt(as.vector(re_phi$scaleFactor))
               ) * sqrt(as.vector(outList$scalefactor_G2_cond)))
               
-		#print("G1tilde_P_G2tilde_Mat_scaled")
-		#print(G1tilde_P_G2tilde_Mat_scaled)
-
 
               adjCondTemp <- G1tilde_P_G2tilde_Mat_scaled %*% outList$VarInvMat_G2_cond_scaled
         
 	
 		VarMatAdjCond <- adjCondTemp %*% t(G1tilde_P_G2tilde_Mat_scaled)
               
-	      print("adjCondTemp")
-	      print(adjCondTemp)
 	 
 	      TstatAdjCond <- adjCondTemp %*% (outList$Tstat_G2_cond * outList$G2_Weight_cond)
               Phi_cond <- re_phi$val - diag(VarMatAdjCond)
@@ -428,8 +423,15 @@ process_annotation_groups <- function(annolistsub, maxMAFlist, outList, annoMAFI
             resultDF$Pvalue_SKAT_cond <- groupOutList_cond$Pvalue_SKAT
             resultDF$BETA_Burden_cond <- groupOutList_cond$BETA_Burden
             resultDF$SE_Burden_cond <- groupOutList_cond$SE_Burden
-          }
-          
+          }else{
+            resultDF$Pvalue_cond <- resultDF$Pvalue
+            resultDF$Pvalue_Burden_cond <- resultDF$Pvalue_Burden
+            resultDF$Pvalue_SKAT_cond <- resultDF$Pvalue_SKAT
+            resultDF$BETA_Burden_cond <- resultDF$BETA_Burden
+            resultDF$SE_Burden_cond <- resultDF$SE_Burden
+
+	  }
+         
           pval.Region <- rbind.data.frame(pval.Region, resultDF)
         } else {
           isPolyRegion <- FALSE
@@ -438,18 +440,31 @@ process_annotation_groups <- function(annolistsub, maxMAFlist, outList, annoMAFI
         if (isPolyRegion) {
           annoMAFIndVec <- c(annoMAFIndVec, jm)
           # Create new resultDF for this case to ensure Ancestry column is preserved
-          resultDF_copy <- data.frame(
-            Ancestry = anc_index_name,
-            Region = regionName,
-            Group = AnnoName,
-            max_MAF = maxMAFName,
-            Pvalue = NA,
-            Pvalue_Burden = NA,
-            Pvalue_SKAT = NA,
-            BETA_Burden = NA,
-            SE_Burden = NA
-          )
-          pval.Region <- rbind.data.frame(pval.Region, resultDF_copy)
+          #resultDF_copy <- data.frame(
+          #  Ancestry = anc_index_name,
+          #  Region = regionName,
+          #  Group = AnnoName,
+          #  max_MAF = maxMAFName,
+          #  Pvalue = NA,
+          #  Pvalue_Burden = NA,
+          #  Pvalue_SKAT = NA,
+          #  BETA_Burden = NA,
+          #  SE_Burden = NA
+          #)
+	  ##if (isCondition) {
+	  #  resultDF_copy$Pvalue_cond <- NA
+          #  resultDF_copy$Pvalue_Burden_cond <- NA
+          #  resultDF_copy$Pvalue_SKAT_cond <- NA
+          #  resultDF_copy$BETA_Burden_cond <- NA
+          #  resultDF_copy$SE_Burden_cond <- NA
+	  ##}
+          #pval.Region <- rbind.data.frame(pval.Region, resultDF_copy)
+
+                    resultDF$Ancestry = anc_index_name
+                    resultDF$Region = regionName
+                    resultDF$Group = AnnoName
+                    resultDF$max_MAF = maxMAFName
+                    pval.Region = rbind.data.frame(pval.Region, resultDF)
         }
       }
     }
@@ -1026,7 +1041,7 @@ SAIGE.Region.byancestry.refactored <- function(mu,
   
   # Setup single variant testing
   #setup_single_variant_testing(is_single_in_groupTest, traitType, isImputation, isappend, is_output_moreDetails)
-  
+  singleVarOutputAppendind = rep(FALSE, (number_of_ancestry+1)) 
   # Setup group file parameters
   group_params <- setup_group_file_parameters(groupFile, is_no_weight_in_groupTest)
   nRegions <- group_params$nRegions
@@ -1125,19 +1140,29 @@ SAIGE.Region.byancestry.refactored <- function(mu,
           }
 
         # cat("Processing haplotype analysis for region", regionName, "\n")
-        #process_Haplotype_Region(
-	#  traitType,
-	#  genoType,
-	#  n,
-	#  number_of_ancestry,
-	#  region$genoIndex_prev,
-	#  region$genoIndex
-        #  )
-
+        process_Haplotype_Region(
+	  traitType,
+	  genoType,
+	  n,
+	  number_of_ancestry,
+	  region$genoIndex_prev,
+	  region$genoIndex
+          )
+	 
+        if(traitType == "binary"){ 
+            outG2cond = RegionSetUpConditional_binary_InCPP(weight_cond)
+            outG2cond$pval_G2_cond = unlist(lapply(outG2cond$pval_G2_cond,convert_str_to_log))
+            G2condList = get_newPhi_scaleFactor(q.sum = outG2cond$qsum_G2_cond, mu.a = mu, g.sum = outG2cond$gsum_G2_cond, p.new = outG2cond$pval_G2_cond, Score = outG2cond$Score_G2_cond, Phi = outG2cond$VarMat_G2_cond, "SKAT-O")
+            #print(G2condList)
+            scaleFactorVec = as.vector(G2condList$scaleFactor)
+            #print(scaleFactorVec)
+            assign_conditionMarkers_factors_binary_region(scaleFactorVec)
+        } 
 
         # Loop through each ancestry for group tests
         for (anc_index in 1:(number_of_ancestry + 1)) {
               anc_index_name <- anc_index
+              set_current_anc_index(anc_index);
           if (anc_index > number_of_ancestry) {
               anc_index_name <- "ALL"
           }
@@ -1147,12 +1172,12 @@ SAIGE.Region.byancestry.refactored <- function(mu,
           # ALL ancestry: no conditioning on haplotypes
 
 
-          #isCondition_current <- if (anc_index <= number_of_ancestry) TRUE else FALSE
-          #if (isCondition_current) {
-          #  cat("Processing ancestry", anc_index_name, "for region", regionName, "(conditional on haplotypes)\n")
-          #} else {
-          #  cat("Processing ancestry", anc_index_name, "for region", regionName, "(unconditional)\n")
-          #}
+          isCondition_current <- if (anc_index <= number_of_ancestry) TRUE else FALSE
+          if (isCondition_current) {
+            cat("Processing ancestry", anc_index_name, "for region", regionName, "(conditional on haplotypes)\n")
+          } else {
+            cat("Processing ancestry", anc_index_name, "for region", regionName, "(unconditional)\n")
+          }
           
 	  cat("Processing ancestry", anc_index_name, "for region", regionName, "\n")
         
@@ -1164,7 +1189,7 @@ SAIGE.Region.byancestry.refactored <- function(mu,
             region$genoIndex_prev <- vcf_result$genoIndex_prev
           }
 
-	  #set_isCondition_inSAIGE(isCondition_current); 
+	  set_isCondition_inSAIGE(isCondition_current); 
           # Set sparse GRM flag
           if (!is_fastTest) {
             set_flagSparseGRM_cur_SAIGE_org()
@@ -1174,6 +1199,13 @@ SAIGE.Region.byancestry.refactored <- function(mu,
          
 	  anc_index_name_str = as.character(anc_index_name)
 	  set_singleInGroupFile_ancestry(anc_index_name_str)
+
+	  #cat(anc_index_name_str, " isappend ", isappend, "\n")
+	  isappend = singleVarOutputAppendind[anc_index]
+	  if(!isappend){
+		singleVarOutputAppendind[anc_index] = TRUE
+	  }
+
 	  setup_single_variant_testing(is_single_in_groupTest, traitType, isImputation, isappend, is_output_moreDetails)
           # Main analysis
           outList <- mainRegionInCPP(
@@ -1183,7 +1215,7 @@ SAIGE.Region.byancestry.refactored <- function(mu,
             is_output_markerList_in_groupTest, annolistsub, regionName,
             is_fastTest, is_output_moreDetails
           )
-         
+        
         ##reset VCF file for genotype reading again for the same region
         #if (genoType == "vcf") {
         #  SNPlist = paste(c(regionName, SNP), collapse = "\t")
@@ -1241,23 +1273,23 @@ SAIGE.Region.byancestry.refactored <- function(mu,
           #print(outList)
           
           # Process analysis results
-          #analysis_result <- process_region_analysis(
-          #  outList, regionTestType, is_fastTest, pval_cutoff_for_fastTest,
-          #  is_single_in_groupTest, traitType, WEIGHT, annolistsub, regionName,
-          #  maxMAFlist, mu, isCondition_current, r.corr, genoType, region, SNP, chrom1,
-          #  annoIndicatorMat, OutputFile, n, P1Mat, P2Mat, isImputation,
-          #  weight_cond, is_output_markerList_in_groupTest, is_output_moreDetails,
-          #  number_of_ancestry, anc_index, anc_index_name
-          #  )
-         
           analysis_result <- process_region_analysis(
             outList, regionTestType, is_fastTest, pval_cutoff_for_fastTest,
             is_single_in_groupTest, traitType, WEIGHT, annolistsub, regionName,
-            maxMAFlist, mu, isCondition, r.corr, genoType, region, SNP, chrom1,
+            maxMAFlist, mu, isCondition_current, r.corr, genoType, region, SNP, chrom1,
             annoIndicatorMat, OutputFile, n, P1Mat, P2Mat, isImputation,
             weight_cond, is_output_markerList_in_groupTest, is_output_moreDetails,
             number_of_ancestry, anc_index, anc_index_name
-          )
+            )
+         
+          #analysis_result <- process_region_analysis(
+          #  outList, regionTestType, is_fastTest, pval_cutoff_for_fastTest,
+          #  is_single_in_groupTest, traitType, WEIGHT, annolistsub, regionName,
+          #  maxMAFlist, mu, isCondition, r.corr, genoType, region, SNP, chrom1,
+          #  annoIndicatorMat, OutputFile, n, P1Mat, P2Mat, isImputation,
+          #  weight_cond, is_output_markerList_in_groupTest, is_output_moreDetails,
+          #  number_of_ancestry, anc_index, anc_index_name
+          #)
 
           ancestry_outList <- analysis_result$outList
           ancestry_pval.Region <- analysis_result$pval.Region

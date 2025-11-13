@@ -27,6 +27,7 @@
 
 #include <Rcpp.h>
 #include "getMem.hpp"
+#include "Duplicate_vec.hpp"
 
 #include <boost/math/distributions/beta.hpp>
 
@@ -122,7 +123,10 @@ bool g_is_rewrite_XnonPAR_forMales = false;
 
 bool g_isadmixed = false;
 std::string g_current_vcffield_ancestry = "NA";
-
+unsigned int g_current_ancestry_index;
+arma::mat g_nanc_mat;
+arma::mat g_nanc_ctrl_mat;
+arma::mat g_nanc_case_mat;
 
 
 arma::uvec g_indexInModel_male;
@@ -1039,6 +1043,8 @@ Rcpp::List mainRegionInCPP(
   boost::math::beta_distribution<> beta_dist(g_weights_beta[0], g_weights_beta[1]);
 
   bool isCondition = ptr_gSAIGEobj->m_isCondition;
+  
+  //std::cout << "isCondition herehre " << isCondition <<  std::endl;
   arma::vec w0G2Vec_cond(q_cond);
   double w0G2_cond, MAFG2_cond;
   if(isCondition){
@@ -1166,7 +1172,7 @@ Rcpp::List mainRegionInCPP(
   std::string cctpval;
   std::string cctpval_cond;
     
-
+  double nanc;
   arma::mat AdjCondMat, VarMatAdjCond;
   arma::vec TstatAdjCond; 
   // cycle for q0 markers
@@ -1250,19 +1256,25 @@ Rcpp::List mainRegionInCPP(
     double MAC = MAF * 2 * t_n * (1 - missingRate);   // checked on 08-10-2021
     if(!g_isadmixed){
     	flip = imputeGenoAndFlip(GVec, altFreq, altCounts, indexForMissing, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec, indexNonZeroVec);
+    MAF = std::min(altFreq, 1 - altFreq);
+    MAC = std::min(altCounts, t_n *2 - altCounts);
     }else{
     	flip = imputeGenoAndFlip_fakeflip(GVec, altFreq, altCounts, indexForMissing, g_impute_method, g_dosage_zerod_cutoff, g_dosage_zerod_MAC_cutoff, MAC, indexZeroVec, indexNonZeroVec);
    	//GVec_sumdosage = GVec_sumdosage + GVec;
-	
+	if(g_current_vcffield_ancestry != "DSALL"){
+		nanc = g_nanc_mat(i, g_current_ancestry_index);	
+		altFreq = altCounts/nanc;
+                MAC = std::min(altCounts, nanc - altCounts);
+                MAF = std::min(altFreq, 1 - altFreq);
+	}else{
+                MAF = std::min(altFreq, 1 - altFreq);
+                MAC = std::min(altCounts, t_n *2 - altCounts);
+
+	}
     }
     
 
     arma::uvec indexZeroVec_arma, indexNonZeroVec_arma;
-    MAF = std::min(altFreq, 1 - altFreq);
-    MAC = std::min(altCounts, t_n *2 - altCounts);
-
-    //std::cout << "MAF " << MAF << std::endl;  
-
     chrVec.at(i) = chr;
     posVec.at(i) = pds;
     refVec.at(i) = ref;
@@ -1291,7 +1303,6 @@ Rcpp::List mainRegionInCPP(
 
     indexNonZeroVec_arma = arma::conv_to<arma::uvec>::from(indexNonZeroVec);
     uint nNonZero = indexNonZeroVec_arma.n_elem;
-
     if(MAC > g_region_minMAC_cutoff){  // not Ultra-Rare Variants
 
       indicatorVec.at(i) = 1;      
@@ -1409,9 +1420,20 @@ Rcpp::List mainRegionInCPP(
         }
         AF_caseVec.at(i) = AF_case;
         AF_ctrlVec.at(i) = AF_ctrl;
-	N_case = dosage_case.n_elem;
-	N_ctrl = dosage_ctrl.n_elem;
-        N_caseVec.at(i) = N_case;
+	if(!g_isadmixed || g_current_vcffield_ancestry == "DSALL"){	
+	  N_case = dosage_case.n_elem;
+	  N_ctrl = dosage_ctrl.n_elem;
+	}else{
+	  double nanc_case = g_nanc_case_mat(i, g_current_ancestry_index);
+	  double nanc_ctrl = g_nanc_ctrl_mat(i, g_current_ancestry_index);
+	  uint32_t n_case = static_cast<uint32_t>(nanc_case);
+	  uint32_t n_ctrl = static_cast<uint32_t>(nanc_ctrl);
+	  N_case = n_case;
+	  N_ctrl = n_ctrl;	  
+	}
+
+
+	N_caseVec.at(i) = N_case;
         N_ctrlVec.at(i) = N_ctrl;
         arma::uvec N_case_ctrl_het_hom0;
 
@@ -1430,7 +1452,12 @@ Rcpp::List mainRegionInCPP(
           }
         }
       }else if(t_traitType == "quantitative"){
-        N_Vec.at(i) = t_n;
+        if(!g_isadmixed || g_current_vcffield_ancestry == "DSALL"){
+        	N_Vec.at(i) = t_n;
+        }else{
+        	uint32_t n_nanc = static_cast<uint32_t>(nanc);
+		N_Vec.at(i) = n_nanc;
+        }
       }
      } //if(t_regionTestType != "BURDEN" || t_isSingleinGroupTest){
 
@@ -2203,6 +2230,8 @@ if(t_isSingleinGroupTest){
 	OutList.push_back(pval_cVec, "pval_cVec");
  }
 //if(!g_isadmixed){
+//
+  //std::cout << "isCondition herehre b" << isCondition << std::endl;
 if(iswriteOutput){
   numofUR0 = writeOutfile_singleInGroup(t_isMoreOutput,
       t_isImputation,
@@ -5947,7 +5976,8 @@ void assign_conditionHaplotypes_Region(
   arma::mat P1Mat(q, t_n);
   arma::mat P2Mat(t_n, q);
   arma::mat VarInvMat(q, q);
-  arma::vec TstatVec(q);
+  arma::vec TstatVec(q, arma::fill::none);
+  TstatVec.fill(NAN);
   //arma::mat TstatMat(q0, q1);
   std::vector<std::string> pVec(q, "NA");
   arma::vec MAFVec(q);
@@ -5964,7 +5994,6 @@ void assign_conditionHaplotypes_Region(
   bool isSPAConverge, is_gtilde, is_Firth, is_FirthConverge;
   arma::vec P2Vec(t_n);
 
-    std::cout << "herehere 1" << std::endl; 
   std::string pval_c, pval_noSPA_c;
   double Beta_c, seBeta_c, Tstat_c, varT_c;
   arma::rowvec G1tilde_P_G2tilde_Vec;
@@ -5974,6 +6003,7 @@ void assign_conditionHaplotypes_Region(
   // Move isskipanc outside loops to track across all markers
   bool isskipanc = false;
 
+ DenseVecDeduplicator dedup; 
   for(unsigned int i = 0; i < q0; i++){
     
     std::string t_genoIndex_str = t_genoIndex.at(i);
@@ -6039,13 +6069,18 @@ void assign_conditionHaplotypes_Region(
      //if(nanc > 0){
      //  not_nan_anc_indices.push_back(i);
      //}
-    std::cout << "herehere 2" << std::endl; 
       if(j < q1){ //do not need to test the last ancestry
         double MAC_anc = std::min(nanc, 2*t_n - nanc);
         double MAF = std::min(altFreq, 1 - altFreq);
         double MAC = MAF * 2 * t_n * (1 - missingRate);
         //bool hasVarRatio;
         if(nanc > 0){
+	  
+
+          int k = j + i*(t_NumberofANC-1);
+	  //check duplicates
+	  bool is_unique = dedup.check_and_add(t_GVec, static_cast<int>(k));
+          if(is_unique){
 
           bool hasVarRatio = true;;
           bool isSingleVarianceRatio = true;
@@ -6080,8 +6115,6 @@ void assign_conditionHaplotypes_Region(
           MAC = std::min(altCounts, 2*t_n-altCounts);
 
           arma::vec gtildeVec;
-    std::cout << "herehere 3" << std::endl; 
-    std::cout << "MAC " << MAC << " g_MACCutoffforER " << g_MACCutoffforER << std::endl;
           if(MAC > g_MACCutoffforER){
              Unified_getMarkerPval(
                             t_GVec,
@@ -6095,17 +6128,16 @@ void assign_conditionHaplotypes_Region(
           }
           
           // Fixed: Added missing semicolon
-          int k = j + i*(t_NumberofANC-1);
           P1Mat.row(k) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*gtildeVec.t();
           P2Mat.col(k) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*P2Vec;
           MAFVec(k) = MAF;
           if(MAF == 0.0){
             std::cerr << "ERROR: Conditioning marker is monomorphic\n";
           }
-	        boost::math::beta_distribution<> beta_dist(g_weights_beta[0], g_weights_beta[1]);
+	  boost::math::beta_distribution<> beta_dist(g_weights_beta[0], g_weights_beta[1]);
 
         //if(!t_weight_cond.is_zero()){
-        //     w0G2_cond = t_weight_cond(i);
+        //     w0G2_cond = t_weight_cond(k);
         //}else{
              w0G2_cond = boost::math::pdf(beta_dist, MAF);
         //}
@@ -6120,7 +6152,9 @@ void assign_conditionHaplotypes_Region(
          TstatVec(k) = Tstat;
          //pVec(i) = std::stod(pval);
          pVec.at(k) = pval;
-         
+         }else{ //if (is_unique) {
+	   isskipanc = true;
+	 }
         }else{//if(nanc > 0){
            isskipanc = true;
         }
@@ -6131,7 +6165,6 @@ void assign_conditionHaplotypes_Region(
 
   } // End marker loop - Fixed: Added missing closing brace
   
-  std::cout << "herehere 4" << std::endl; 
   // Final conditioning assignment - Moved outside all loops
   arma::vec gsumtildeVec;
   double qsum = arma::accu(gyVec);
@@ -6140,12 +6173,10 @@ void assign_conditionHaplotypes_Region(
   arma::vec mu_a = ptr_gSAIGEobj->m_mu; 
 
 //arma::uvec not_nan_anc_indicesvectemp = arma::conv_to<arma::uvec>::from(not_nan_anc_indices);
-  //not_nan_anc_indices_vec.set_size(not_nan_anc_indicesvectemp.n_elem);
-  //not_nan_anc_indices_vec = not_nan_anc_indicesvectemp;
+//not_nan_anc_indices_vec.set_size(not_nan_anc_indicesvectemp.n_elem);
+//not_nan_anc_indices_vec = not_nan_anc_indicesvectemp;
   
-  std::cout << "herehrerereer 4c" << std::endl;
   
- std::cout << "isskipanc " << isskipanc << std::endl; 
   if(isskipanc){
         arma::uvec not_nan_indices = arma::find_finite(TstatVec);
         arma::vec TstatVecsub = TstatVec.elem(not_nan_indices);
@@ -6162,7 +6193,6 @@ void assign_conditionHaplotypes_Region(
        pVecsub.push_back(pVec[idx]);
    }
 
-    std::cout << "herehere 5" << std::endl; 
     ptr_gSAIGEobj->assignConditionFactors(
                                         P2Matsub,
                                         VarInvMatsub,
@@ -6173,7 +6203,7 @@ void assign_conditionHaplotypes_Region(
                                         qsum,
                                         gsumtildeVec,
                                         pVecsub);
-if (t_traitType == "binary") {
+/*if (t_traitType == "binary") {
 
     std::cout << "herehere 5b" << std::endl;
 
@@ -6188,12 +6218,11 @@ if (t_traitType == "binary") {
                                 scaleFactor);
 	assign_conditionMarkers_factors_binary_region(scaleFactor);
 
-}
+}*/
 
   }else{
     arma::mat VarMat = P1Mat * P2Mat;
     VarInvMat =  arma::pinv(VarMat);
-        std::cout << "herehere 5" << std::endl;
     ptr_gSAIGEobj->assignConditionFactors(
                                         P2Mat,
                                         VarInvMat,
@@ -6204,7 +6233,7 @@ if (t_traitType == "binary") {
                                         qsum,
                                         gsumtildeVec,
                                         pVec);
-if (t_traitType == "binary") {
+/*if (t_traitType == "binary") {
     std::cout << "herehere 5b" << std::endl;
 	arma::vec pVec_arma = convertToArmaVec(pVec);
         get_newPhi_scaleFactor_cpp(qsum,
@@ -6216,9 +6245,8 @@ if (t_traitType == "binary") {
                                 "SKAT",
                                 scaleFactor);
 	assign_conditionMarkers_factors_binary_region(scaleFactor);
-}
+}*/
   }
-  std::cout << "herehere 6" << std::endl; 
 
   
  
@@ -6237,11 +6265,18 @@ Rcpp::List process_Haplotype_Region(
     //arma::mat nanc_case_mat(q0, t_NumberofANC+1, arma::fill::zeros);
     //arma::mat nanc_ctrl_mat(q0, t_NumberofANC+1, arma::fill::zeros);
     //arma::mat nanc_mat(q0, t_NumberofANC+1, arma::fill::zeros);
-    arma::mat nanc_case_mat(q0, t_NumberofANC, arma::fill::zeros);
-    arma::mat nanc_ctrl_mat(q0, t_NumberofANC, arma::fill::zeros);
-    arma::mat nanc_mat(q0, t_NumberofANC, arma::fill::zeros);
+    //arma::mat nanc_case_mat(q0, t_NumberofANC, arma::fill::zeros);
+    //arma::mat nanc_ctrl_mat(q0, t_NumberofANC, arma::fill::zeros);
+    //arma::mat nanc_mat(q0, t_NumberofANC, arma::fill::zeros);
+    g_nanc_mat.set_size(q0, t_NumberofANC);
+    g_nanc_mat.zeros();
+    g_nanc_case_mat.set_size(q0, t_NumberofANC);
+    g_nanc_case_mat.zeros();
+    g_nanc_ctrl_mat.set_size(q0, t_NumberofANC);
+    g_nanc_ctrl_mat.zeros();
 
-    std::cout << "assign_conditionHaplotypes_Region before" << std::endl;
+
+
     assign_conditionHaplotypes_Region(
                            t_traitType,
                            t_genoType,     //"vcf"
@@ -6249,16 +6284,15 @@ Rcpp::List process_Haplotype_Region(
                            t_NumberofANC,
                            t_genoIndex_prev,
                            t_genoIndex,
-                           nanc_case_mat,
-                           nanc_ctrl_mat,
-                           nanc_mat
+                           g_nanc_case_mat,
+                           g_nanc_ctrl_mat,
+                           g_nanc_mat
                            );
-  std::cout << "assign_conditionHaplotypes_Region after" << std::endl;
 
   Rcpp::List OutList = Rcpp::List::create();
-  OutList.push_back(nanc_case_mat, "nanc_case_mat");
-  OutList.push_back(nanc_ctrl_mat, "nanc_ctrl_mat");
-  OutList.push_back(nanc_mat, "nanc_mat");
+  OutList.push_back(g_nanc_case_mat, "nanc_case_mat");
+  OutList.push_back(g_nanc_ctrl_mat, "nanc_ctrl_mat");
+  OutList.push_back(g_nanc_mat, "nanc_mat");
 
   return OutList;
 }
@@ -6269,6 +6303,11 @@ Rcpp::List process_Haplotype_Region(
 // [[Rcpp::export]]
 void set_current_anc_index_name(std::string anc_index_name){
 	g_current_vcffield_ancestry = anc_index_name;	
+}
+
+// [[Rcpp::export]]
+void set_current_anc_index(unsigned int anc_index){
+	g_current_ancestry_index = anc_index - 1;	
 }
 
 // [[Rcpp::export]]

@@ -177,6 +177,10 @@ set_current_anc_index_name <- function(anc_index_name) {
     invisible(.Call('_SAIGE_set_current_anc_index_name', PACKAGE = 'SAIGE', anc_index_name))
 }
 
+set_current_anc_index <- function(anc_index) {
+    invisible(.Call('_SAIGE_set_current_anc_index', PACKAGE = 'SAIGE', anc_index))
+}
+
 set_isCondition_inSAIGE <- function(t_isCondition) {
     invisible(.Call('_SAIGE_set_isCondition_inSAIGE', PACKAGE = 'SAIGE', t_isCondition))
 }

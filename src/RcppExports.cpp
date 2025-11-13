@@ -656,6 +656,16 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// set_current_anc_index
+void set_current_anc_index(unsigned int anc_index);
+RcppExport SEXP _SAIGE_set_current_anc_index(SEXP anc_indexSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< unsigned int >::type anc_index(anc_indexSEXP);
+    set_current_anc_index(anc_index);
+    return R_NilValue;
+END_RCPP
+}
 // set_isCondition_inSAIGE
 void set_isCondition_inSAIGE(bool t_isCondition);
 RcppExport SEXP _SAIGE_set_isCondition_inSAIGE(SEXP t_isConditionSEXP) {
@@ -3376,6 +3386,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_openOutfile_single_admixed_new", (DL_FUNC) &_SAIGE_openOutfile_single_admixed_new, 5},
     {"_SAIGE_process_Haplotype_Region", (DL_FUNC) &_SAIGE_process_Haplotype_Region, 6},
     {"_SAIGE_set_current_anc_index_name", (DL_FUNC) &_SAIGE_set_current_anc_index_name, 1},
+    {"_SAIGE_set_current_anc_index", (DL_FUNC) &_SAIGE_set_current_anc_index, 1},
     {"_SAIGE_set_isCondition_inSAIGE", (DL_FUNC) &_SAIGE_set_isCondition_inSAIGE, 1},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
