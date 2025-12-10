@@ -611,7 +611,8 @@ SPAGMMATtest = function(bgenFile = "",
                      is_fastTest,
                      pval_cutoff_for_fastTest,
                      is_output_moreDetails,
-		     number_of_ancestry)
+		     number_of_ancestry,
+		     pvalcutoff_of_haplotype)
 	}
     }	    
 }

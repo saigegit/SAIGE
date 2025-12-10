@@ -127,7 +127,7 @@ unsigned int g_current_ancestry_index;
 arma::mat g_nanc_mat;
 arma::mat g_nanc_ctrl_mat;
 arma::mat g_nanc_case_mat;
-
+double g_pvalcutoff_of_haplotype_group;
 
 arma::uvec g_indexInModel_male;
 arma::umat g_X_PARregion_mat;
@@ -6126,7 +6126,25 @@ void assign_conditionHaplotypes_Region(
                             false, // bool t_isOnlyOutputNonZero,
                             indexNonZeroVec_arma, indexZeroVec_arma, Beta, seBeta, pval, pval_noSPA,  Tstat, gy, varT, altFreq, isSPAConverge, gtildeVec, is_gtilde, true, P2Vec, isCondition, Beta_c, seBeta_c, pval_c, pval_noSPA_c, Tstat_c, varT_c, G1tilde_P_G2tilde_Vec, is_Firth, is_FirthConverge, true);
           }
-          
+         
+
+
+    double pval_num;
+
+    try {
+        pval_num = std::stod(pval);
+    } catch (const std::invalid_argument&) {
+        std::cerr << "Argument is invalid\n";
+        pval_num = 0;
+    } catch (const std::out_of_range&) {
+        std::cerr << "Argument is out of range for a double\n";
+        pval_num = 0;
+    }	
+	std::cout << "pval_num " << pval_num << std::endl;
+	std::cout << "g_pvalcutoff_of_haplotype_group " << g_pvalcutoff_of_haplotype_group << std::endl;
+	  if(pval_num < g_pvalcutoff_of_haplotype_group){
+
+
           // Fixed: Added missing semicolon
           P1Mat.row(k) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*gtildeVec.t();
           P2Mat.col(k) = sqrt(ptr_gSAIGEobj->m_varRatioVal)*P2Vec;
@@ -6142,7 +6160,6 @@ void assign_conditionHaplotypes_Region(
              w0G2_cond = boost::math::pdf(beta_dist, MAF);
         //}
 
-
          w0G2_cond_Vec(k) = w0G2_cond;
          gyVec(i) = gy * w0G2_cond;
          gsumVec = gsumVec + t_GVec * w0G2_cond;
@@ -6152,6 +6169,11 @@ void assign_conditionHaplotypes_Region(
          TstatVec(k) = Tstat;
          //pVec(i) = std::stod(pval);
          pVec.at(k) = pval;
+
+	  	
+	  }else{ //if(pval_num < g_pvalcutoff_of_haplotype_group){
+		isskipanc = true;	
+	  }
          }else{ //if (is_unique) {
 	   isskipanc = true;
 	 }
@@ -6179,21 +6201,21 @@ void assign_conditionHaplotypes_Region(
   
   if(isskipanc){
         arma::uvec not_nan_indices = arma::find_finite(TstatVec);
-        arma::vec TstatVecsub = TstatVec.elem(not_nan_indices);
-        arma::mat P1Matsub = P1Mat.rows(not_nan_indices);
-        arma::mat P2Matsub = P2Mat.cols(not_nan_indices);
-        arma::vec w0G2_cond_Vecsub = w0G2_cond_Vec.elem(not_nan_indices);
-        arma::vec MAFVecsub = MAFVec.elem(not_nan_indices);
-        arma::mat VarMatsub = P1Matsub * P2Matsub;
-        arma::mat VarInvMatsub =  arma::pinv(VarMatsub);
-        std::vector<std::string> pVecsub;
-        pVecsub.reserve(not_nan_indices.n_elem);
+	if(not_nan_indices.n_elem > 0){
+            arma::vec TstatVecsub = TstatVec.elem(not_nan_indices);
+            arma::mat P1Matsub = P1Mat.rows(not_nan_indices);
+            arma::mat P2Matsub = P2Mat.cols(not_nan_indices);
+            arma::vec w0G2_cond_Vecsub = w0G2_cond_Vec.elem(not_nan_indices);
+            arma::vec MAFVecsub = MAFVec.elem(not_nan_indices);
+            arma::mat VarMatsub = P1Matsub * P2Matsub;
+            arma::mat VarInvMatsub =  arma::pinv(VarMatsub);
+            std::vector<std::string> pVecsub;
+            pVecsub.reserve(not_nan_indices.n_elem);
+   	    for (arma::uword idx : not_nan_indices) {
+       		pVecsub.push_back(pVec[idx]);
+   	    }
 
-   for (arma::uword idx : not_nan_indices) {
-       pVecsub.push_back(pVec[idx]);
-   }
-
-    ptr_gSAIGEobj->assignConditionFactors(
+    	    ptr_gSAIGEobj->assignConditionFactors(
                                         P2Matsub,
                                         VarInvMatsub,
                                         VarMatsub,
@@ -6203,6 +6225,7 @@ void assign_conditionHaplotypes_Region(
                                         qsum,
                                         gsumtildeVec,
                                         pVecsub);
+	}
 /*if (t_traitType == "binary") {
 
     std::cout << "herehere 5b" << std::endl;
@@ -6288,11 +6311,16 @@ Rcpp::List process_Haplotype_Region(
                            g_nanc_ctrl_mat,
                            g_nanc_mat
                            );
+    
+    
+
 
   Rcpp::List OutList = Rcpp::List::create();
-  OutList.push_back(g_nanc_case_mat, "nanc_case_mat");
-  OutList.push_back(g_nanc_ctrl_mat, "nanc_ctrl_mat");
-  OutList.push_back(g_nanc_mat, "nanc_mat");
+  //OutList.push_back(g_nanc_case_mat, "nanc_case_mat");
+  //OutList.push_back(g_nanc_ctrl_mat, "nanc_ctrl_mat");
+  //OutList.push_back(g_nanc_mat, "nanc_mat");
+  int numHapCond=ptr_gSAIGEobj->m_p_cond.size();
+  OutList.push_back(numHapCond, "numHapCond");
 
   return OutList;
 }
@@ -6314,3 +6342,9 @@ void set_current_anc_index(unsigned int anc_index){
 void set_isCondition_inSAIGE(bool t_isCondition){
     ptr_gSAIGEobj->m_isCondition = t_isCondition;
 }
+
+// [[Rcpp::export]]
+void set_pvalcutoff_of_haplotype(double t_pvalcutoff_of_haplotype_group){
+    g_pvalcutoff_of_haplotype_group = t_pvalcutoff_of_haplotype_group;
+}
+

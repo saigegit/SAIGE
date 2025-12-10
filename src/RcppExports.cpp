@@ -676,6 +676,16 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// set_pvalcutoff_of_haplotype
+void set_pvalcutoff_of_haplotype(double t_pvalcutoff_of_haplotype_group);
+RcppExport SEXP _SAIGE_set_pvalcutoff_of_haplotype(SEXP t_pvalcutoff_of_haplotype_groupSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type t_pvalcutoff_of_haplotype_group(t_pvalcutoff_of_haplotype_groupSEXP);
+    set_pvalcutoff_of_haplotype(t_pvalcutoff_of_haplotype_group);
+    return R_NilValue;
+END_RCPP
+}
 // closeGenoFile_plink
 void closeGenoFile_plink();
 RcppExport SEXP _SAIGE_closeGenoFile_plink() {
@@ -3388,6 +3398,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SAIGE_set_current_anc_index_name", (DL_FUNC) &_SAIGE_set_current_anc_index_name, 1},
     {"_SAIGE_set_current_anc_index", (DL_FUNC) &_SAIGE_set_current_anc_index, 1},
     {"_SAIGE_set_isCondition_inSAIGE", (DL_FUNC) &_SAIGE_set_isCondition_inSAIGE, 1},
+    {"_SAIGE_set_pvalcutoff_of_haplotype", (DL_FUNC) &_SAIGE_set_pvalcutoff_of_haplotype, 1},
     {"_SAIGE_closeGenoFile_plink", (DL_FUNC) &_SAIGE_closeGenoFile_plink, 0},
     {"_SAIGE_gettotalMarker", (DL_FUNC) &_SAIGE_gettotalMarker, 0},
     {"_SAIGE_getAlleleFreqVec", (DL_FUNC) &_SAIGE_getAlleleFreqVec, 0},

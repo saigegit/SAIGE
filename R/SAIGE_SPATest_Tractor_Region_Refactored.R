@@ -1003,7 +1003,8 @@ SAIGE.Region.byancestry.refactored <- function(mu,
                                               is_fastTest,
                                               pval_cutoff_for_fastTest,
                                               is_output_moreDetails,
-                                              number_of_ancestry) {
+                                              number_of_ancestry,
+					      pvalcutoff_of_haplotype) {
   
   # Setup marker info for BGEN files
   if (genoType == "bgen") {
@@ -1140,7 +1141,8 @@ SAIGE.Region.byancestry.refactored <- function(mu,
           }
 
         # cat("Processing haplotype analysis for region", regionName, "\n")
-        process_Haplotype_Region(
+        set_pvalcutoff_of_haplotype(pvalcutoff_of_haplotype)
+	HaploOut = process_Haplotype_Region(
 	  traitType,
 	  genoType,
 	  n,
@@ -1148,8 +1150,11 @@ SAIGE.Region.byancestry.refactored <- function(mu,
 	  region$genoIndex_prev,
 	  region$genoIndex
           )
-	 
-        if(traitType == "binary"){ 
+	print("OKKKKKKKKK")
+	print(HaploOut)
+
+	if(HaploOut$numHapCond > 0){ 
+          if(traitType == "binary"){ 
             outG2cond = RegionSetUpConditional_binary_InCPP(weight_cond)
             outG2cond$pval_G2_cond = unlist(lapply(outG2cond$pval_G2_cond,convert_str_to_log))
             G2condList = get_newPhi_scaleFactor(q.sum = outG2cond$qsum_G2_cond, mu.a = mu, g.sum = outG2cond$gsum_G2_cond, p.new = outG2cond$pval_G2_cond, Score = outG2cond$Score_G2_cond, Phi = outG2cond$VarMat_G2_cond, "SKAT-O")
@@ -1157,8 +1162,12 @@ SAIGE.Region.byancestry.refactored <- function(mu,
             scaleFactorVec = as.vector(G2condList$scaleFactor)
             #print(scaleFactorVec)
             assign_conditionMarkers_factors_binary_region(scaleFactorVec)
-        } 
+          }
+	  cat("region ", regionName, " is tested conditioning on ", HaploOut$numHapCond, " haplotypes\n")
+	}else{
 
+	  cat("region ", regionName, " is tested without conditioning on haplotypes\n") 
+	}
         # Loop through each ancestry for group tests
         for (anc_index in 1:(number_of_ancestry + 1)) {
               anc_index_name <- anc_index
@@ -1172,7 +1181,7 @@ SAIGE.Region.byancestry.refactored <- function(mu,
           # ALL ancestry: no conditioning on haplotypes
 
 
-          isCondition_current <- if (anc_index <= number_of_ancestry) TRUE else FALSE
+          isCondition_current <- if (anc_index <= number_of_ancestry & HaploOut$numHapCond > 0) TRUE else FALSE
           if (isCondition_current) {
             cat("Processing ancestry", anc_index_name, "for region", regionName, "(conditional on haplotypes)\n")
           } else {

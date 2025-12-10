@@ -185,6 +185,10 @@ set_isCondition_inSAIGE <- function(t_isCondition) {
     invisible(.Call('_SAIGE_set_isCondition_inSAIGE', PACKAGE = 'SAIGE', t_isCondition))
 }
 
+set_pvalcutoff_of_haplotype <- function(t_pvalcutoff_of_haplotype_group) {
+    invisible(.Call('_SAIGE_set_pvalcutoff_of_haplotype', PACKAGE = 'SAIGE', t_pvalcutoff_of_haplotype_group))
+}
+
 closeGenoFile_plink <- function() {
     invisible(.Call('_SAIGE_closeGenoFile_plink', PACKAGE = 'SAIGE'))
 }
