@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "Binary_ComputeExactMC.h"
-#include "Binary_global.h"
+#include "Binary_global.hpp"
 
 #ifdef _STAND_ALONE_
 #define Rprintf printf
@@ -40,16 +40,16 @@ CohortInfo::CohortInfo(){
 
 CohortInfo::~CohortInfo(){
 
-	
-	SL_free(m_fprob);
-	SL_free(m_teststat_all);
+
+        SL_free(m_fprob);
+        SL_free(m_teststat_all);
 
     
-	SL_free(m_Z0);
-	SL_free(m_Z1);
-	SL_free(m_teststat_Z0);
+        SL_free(m_Z0);
+        SL_free(m_Z1);
+        SL_free(m_teststat_Z0);
     SL_free(m_teststat_Z1);
-	SL_free(m_teststat_one);
+        SL_free(m_teststat_one);
     
     SL_free(m_array);
    
@@ -60,11 +60,11 @@ CohortInfo::~CohortInfo(){
 
 int     CohortInfo::CalTestStat(int k, int * array, int is_case){
     
-	int i, j, l, temp;
+        int i, j, l, temp;
     
     if(is_case == 1){
         memcpy(m_teststat_one, m_teststat_Z0, sizeof(double) *m_m);
-	
+
         for(i=0;i< k;i++){
             l = array[i];
             temp = l*m_m;
@@ -92,8 +92,8 @@ int     CohortInfo::CalTestStat(int k, int * array, int is_case){
 
 int     CohortInfo::CalFisherProb(int k, int * array, int is_case){
     
-	int i,l,k1;
-	double temp = 1;
+        int i,l,k1;
+        double temp = 1;
     
     if(is_case == 1){
         temp = 1;
@@ -110,7 +110,7 @@ int     CohortInfo::CalFisherProb(int k, int * array, int is_case){
             temp = temp / m_p1[l];
         }        
     }
-	m_fprob[m_idx] = temp;
+        m_fprob[m_idx] = temp;
     m_denomi[k1] = m_denomi[k1]+temp;
     
     return 0;
@@ -121,20 +121,20 @@ int     CohortInfo::CalFisherProb(int k, int * array, int is_case){
 
 int     CohortInfo::Exact_Recurse(int k, int * array, int cell, int start, int end, int is_case){
     
-	int i;
-	
-	/* node */
-	if(k == cell){
-		CalTestStat(k, array,is_case);
-		CalFisherProb(k, array,is_case);
-		m_idx++;
-	} else {
+        int i;
+
+        /* node */
+        if(k == cell){
+                CalTestStat(k, array,is_case);
+                CalFisherProb(k, array,is_case);
+                m_idx++;
+        } else {
         for(i=start; i<end; i++) {
             array[cell] = i;
             Exact_Recurse(k, array, cell+1, i+1, end, is_case);
         }
         
-	}
+        }
     return 0;
 }
 
@@ -144,15 +144,15 @@ int     CohortInfo::Exact_Recurse(int k, int * array, int cell, int start, int e
 int      CohortInfo::Init(double * Z0, double *Z1, int k, int m, int total_m, int * marker_idx, int total
               , int * total_k, double *prob_k, double * p1, int * IsExact){
     
-	int i,j;
-	m_idx=0;
-	//Rprintf("0\n");
-	
-	m_k = k;
-	m_m = m;
+        int i,j;
+        m_idx=0;
+        //Rprintf("0\n");
+
+        m_k = k;
+        m_m = m;
     m_total_m = total_m;
     
-	m_total = total;
+        m_total = total;
     
     // Init _k vectors
     m_pprod=1;
@@ -174,32 +174,32 @@ int      CohortInfo::Init(double * Z0, double *Z1, int k, int m, int total_m, in
         
         m_marker_idx.push_back(marker_idx[i]);
     }
-	
-	m_Z0 = (double *) SL_calloc(m_k * m_m, sizeof(double));
-	m_Z1 = (double *) SL_calloc(m_k * m_m, sizeof(double));	
-	m_teststat_Z0 = (double *) SL_calloc(m_m, sizeof(double));
+
+        m_Z0 = (double *) SL_calloc(m_k * m_m, sizeof(double));
+        m_Z1 = (double *) SL_calloc(m_k * m_m, sizeof(double));
+        m_teststat_Z0 = (double *) SL_calloc(m_m, sizeof(double));
     m_teststat_Z1 = (double *) SL_calloc(m_m, sizeof(double));
 
     
     
     m_array = (int *) SL_calloc(m_k+1, sizeof(int));
-	
-	memcpy(m_Z0, Z0, sizeof(double) * m_k * m_m);
-	memcpy(m_Z1, Z1, sizeof(double) * m_k * m_m);
+
+        memcpy(m_Z0, Z0, sizeof(double) * m_k * m_m);
+        memcpy(m_Z1, Z1, sizeof(double) * m_k * m_m);
     
     memset(m_teststat_Z0,0, sizeof(double)*m_m);
     memset(m_teststat_Z1,0, sizeof(double)*m_m);
-	/* generate prob matrix */
-	for(i=0;i< m_k;i++){
-		int idx = i*m_m;
-		for(j=0;j< m_m;j++){
-			m_teststat_Z0[j]+=m_Z0[idx+j];
+        /* generate prob matrix */
+        for(i=0;i< m_k;i++){
+                int idx = i*m_m;
+                for(j=0;j< m_m;j++){
+                        m_teststat_Z0[j]+=m_Z0[idx+j];
             m_teststat_Z1[j]+=m_Z1[idx+j];
-		}
-	}
+                }
+        }
     
-	m_fprob = (double *) SL_calloc(m_total, sizeof(double));
-	m_teststat_one = (double *) SL_calloc(m_m, sizeof(double));
+        m_fprob = (double *) SL_calloc(m_total, sizeof(double));
+        m_teststat_one = (double *) SL_calloc(m_m, sizeof(double));
     m_teststat_all = (double *)SL_calloc(m_m * m_total, sizeof(double));
     
     
@@ -376,34 +376,34 @@ int     ComputeExactMC::Run(){
     // Compute p-values 
     unsigned long i;
     double total_prob_sum = 0;
-	for(i=0;i < m_total;i++){
+        for(i=0;i < m_total;i++){
         total_prob_sum += m_fprob[i];
-	}
+        }
     
-	for(i=0;i < m_total;i++){
+        for(i=0;i < m_total;i++){
         m_fprob[i] =  m_fprob[i]/total_prob_sum;
-	}
+        }
     
     // Compute p-values 
-	for(int l=0;l< m_Q.size(); l++){
-		double n_num   =0;
-		double n_same  =0;
+        for(int l=0;l< m_Q.size(); l++){
+                double n_num   =0;
+                double n_same  =0;
         //int     n1=0;
         
-		for(i=0;i<m_total ; i++){
+                for(i=0;i<m_total ; i++){
             
             if(m_Q[l] <= m_teststat[i]){
-				n_num += m_fprob[i] ;
+                                n_num += m_fprob[i] ;
                 //Rprintf("[%e]\n", m_fprob[i]);
-				if( m_teststat[i]<=m_Q[l] ){
-					n_same += m_fprob[i] ;
-				}
-			}
-		}
-		
-		m_pval.push_back(n_num);
-		m_pval_same.push_back(n_same);
-	}
+                                if( m_teststat[i]<=m_Q[l] ){
+                                        n_same += m_fprob[i] ;
+                                }
+                        }
+                }
+
+                m_pval.push_back(n_num);
+                m_pval_same.push_back(n_same);
+        }
     return 1;
 } 
 
@@ -413,15 +413,15 @@ int     ComputeExactMC::Run(){
 
 int    ComputeExactMC::Recurse_GetTestStat(int idx_cohort, double * teststat, double prob){
     
-	int i, end;
+        int i, end;
     double prob_prev;
     //int  idx;
     CohortInfo * info;
 
-	if(idx_cohort >= m_ncohort){
-		put_results(teststat, prob);
+        if(idx_cohort >= m_ncohort){
+                put_results(teststat, prob);
         return 0;
-	} else {
+        } else {
         info =m_cohortinfo[idx_cohort];
         end = info->GetTotal();
         //idx = idx_cohort * m_total_m;
@@ -439,7 +439,7 @@ int    ComputeExactMC::Recurse_GetTestStat(int idx_cohort, double * teststat, do
             //memcpy(teststat, &(teststat_buf[idx]), m_total_m* sizeof(double));
         }
         
-	}
+        }
     return 0;
 }
 
@@ -448,9 +448,9 @@ int  ComputeExactMC::put_results(double * teststat, double prob){
     int j; 
     
     m_teststat[m_idx] = 0;
-	for(j=0;j< m_total_m;j++){
-		m_teststat[m_idx]+=teststat[j] * teststat[j];
-	}
+        for(j=0;j< m_total_m;j++){
+                m_teststat[m_idx]+=teststat[j] * teststat[j];
+        }
     m_fprob[m_idx] = prob;
     m_idx++;
     
@@ -483,11 +483,3 @@ int     ComputeExactMC::PrintPvals(){
     
     return 1;
 }
-
-
-
-
-
-
-
-

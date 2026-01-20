@@ -23,6 +23,7 @@ generate_LDMat_forMataRegion = function(bgenFile = "",
                  groups_per_chunk = 100,
                  markers_per_chunk_in_groupTest = 100, #new
                  groupFile="",
+                 ldH5File = "ld_matrices.h5", 
                  dosage_zerod_cutoff = 0.2,
                  dosage_zerod_MAC_cutoff = 10,
                  annotation_in_groupTest ="missense;lof;synonymous",  #new
@@ -30,6 +31,7 @@ generate_LDMat_forMataRegion = function(bgenFile = "",
                  is_overwrite_output = TRUE, 
 		 sampleFile_include_inLDMat = "")
 {
+    h5ptr = initHDF5(ldH5File);
     OutputFile = SAIGEOutputFile
     OutputFileIndex=NULL
     if(is.null(OutputFileIndex)){OutputFileIndex = paste0(OutputFile, ".index")}
@@ -85,6 +87,7 @@ generate_LDMat_forMataRegion = function(bgenFile = "",
 		           is_imputed_data,
 		           groups_per_chunk,
 		           chrom,
+               h5ptr = h5ptr,
 		           is_overwrite_output)
 
         closeOutfile_single_LDmat();
@@ -107,6 +110,7 @@ SAIGE.Region.LDmat = function(
                         isImputation,
                         groups_per_chunk,
                         chrom,
+                        h5ptr,
 			isOverWriteOutput)
 {
   OutputFileIndex = NULL
@@ -258,7 +262,7 @@ SAIGE.Region.LDmat = function(
 
       #LDmatInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, maxMAFlist, OutputFile, traitType, n, P1Mat, P2Mat, regionTestType, isImputation, WEIGHT, weight_cond, is_single_in_groupTest, is_output_markerList_in_groupTest, annolistsub, regionName, is_fastTest, is_output_moreDetails)
       n=Unified_getSampleSizeinAnalysis(genoType)
-      LDmatRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, OutputFile, n, isImputation, annolistsub, regionName)
+      LDmatRegionInCPP(h5ptr, genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, OutputFile, n, isImputation, annolistsub, regionName)
       #i1_nchunks_list = LDmatRegionInCPP(genoType, region$genoIndex_prev, region$genoIndex, annoIndicatorMat, OutputFile, n, isImputation, annolistsub, regionName)
 
     }else{#if(!is.null(region$SNP) & length(annolistsub) > 0){

@@ -2,7 +2,10 @@
 
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
-
+#include <highfive/H5File.hpp>
+#include <highfive/H5Group.hpp>
+#include <highfive/H5DataSet.hpp>
+#include <highfive/H5PropertyList.hpp> 
 #include <vector>
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
@@ -61,6 +64,53 @@ unsigned int g_startpos;
 unsigned int g_endpos;
 
 
+// JSH 250613 Write to HDF5
+
+
+// [[Rcpp::export]]
+SEXP initHDF5(std::string h5Filename) {
+  try {
+    auto file_ptr = std::make_shared<File>(
+      h5Filename, File::ReadWrite | File::Create | File::Truncate
+    );
+
+    // Wrap in external pointer to return to R
+    Rcpp::XPtr<std::shared_ptr<File>> xptr(new std::shared_ptr<File>(file_ptr), true);
+    return xptr;
+  } catch (const HighFive::Exception& e) {
+    Rcpp::stop("Failed to create HDF5 file: %s", e.what());
+  }
+}
+// Write sparse COO vectors into HDF5 under a gene/region group
+
+void writeSparseToHDF5(SEXP file_xptr, std::string regionName,
+                     std::vector<unsigned int>& rowVec,
+                     std::vector<unsigned int>& colVec,
+                     std::vector<int>& valVec) {
+
+    if (rowVec.empty() || colVec.empty() || valVec.empty()) {
+        return;
+    }
+
+    using namespace HighFive;
+
+    Rcpp::XPtr<std::shared_ptr<File>> file_ptr(file_xptr);
+
+    if (!(*file_ptr)->exist(regionName)) {
+        (*file_ptr)->createGroup(regionName);
+    }
+
+    Group grp = (*file_ptr)->getGroup(regionName);
+
+    DataSetCreateProps props;
+    props.add(Chunking({rowVec.size()}));
+    props.add(Deflate(6));
+
+    grp.createDataSet("row", rowVec, props);
+    grp.createDataSet("col", colVec, props);
+    grp.createDataSet("val", valVec, props);
+}
+
 // [[Rcpp::export]]
 void setGlobalVarsInCPP_LDmat(std::string t_impute_method,
                                double t_dosage_zerod_cutoff,
@@ -97,7 +147,7 @@ void setGlobalVarsInCPP_LDmat(std::string t_impute_method,
 
 
 // [[Rcpp::export]]
-void LDmatRegionInCPP(
+void LDmatRegionInCPP(     SEXP file_xptr,
                            std::string t_genoType,     // "PLINK", "BGEN"
                            std::vector<std::string> & t_genoIndex_prev,
                            std::vector<std::string> & t_genoIndex,
@@ -446,7 +496,14 @@ void LDmatRegionInCPP(
       OutFile_LDmat << values_VarMat_vec.at(k);
       OutFile_LDmat << "\n";
   }
- 
+
+
+//JSH 250613 Write to HDF5
+writeSparseToHDF5(file_xptr,regionName,
+                       rowIndices_VarMat_vec,
+                       colIndices_VarMat_vec,
+                       values_VarMat_vec);
+
  // Close the file
   //OutFile_LDmat.close();
 }else{
@@ -489,6 +546,7 @@ void LDmatRegionInCPP(
 		  missingRateVec,
 		  N_Vec,
 		  regionName);
+    
   
 }
 

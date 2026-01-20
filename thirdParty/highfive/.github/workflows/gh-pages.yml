@@ -1,0 +1,52 @@
+name: gh-pages
+
+on:
+  push:
+    branches:
+      - v2.x
+  pull_request:
+    branches:
+      - v2.x
+      - master
+      - main
+
+jobs:
+
+  publish:
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-file: doc/environment.yaml
+        environment-name: doc-build
+
+    - name: Run doxygen
+      run: |
+        CMAKE_OPTIONS=(
+          -DHIGHFIVE_UNIT_TESTS=OFF
+        )
+        cmake -B build -S . "${CMAKE_OPTIONS[@]}"
+        cmake --build build --target doc
+        cp -r doc/poster build/doc/html/
+
+    - name: Deploy to GitHub Pages
+      if: ${{ success() && github.ref == 'refs/heads/v2.x' && github.event_name == 'push' }}
+      uses: crazy-max/ghaction-github-pages@v2
+      with:
+        target_branch: gh-pages
+        build_dir: build/doc/html
+        jekyll: false
+        keep_history: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
