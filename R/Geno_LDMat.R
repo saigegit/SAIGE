@@ -3,6 +3,7 @@ checkGenoInput_LDmat = function(bgenFile = "",
                  vcfFile = "",
                  vcfFileIndex = "",
                  vcfField = "DS",
+                 vcfFilters = "",
                  savFile = "",
                  savFileIndex = "",
                  sampleFile = "",
@@ -65,6 +66,7 @@ setGenoInput_LDmat = function(bgenFile = "",
                  vcfFile = "",
                  vcfFileIndex = "",
                  vcfField = "DS",
+                 vcfFilters = "",
                  savFile = "",
                  savFileIndex = "",
                  sampleFile = "",
@@ -83,6 +85,7 @@ setGenoInput_LDmat = function(bgenFile = "",
                  vcfFile = vcfFile,
                  vcfFileIndex = vcfFileIndex,
                  vcfField = vcfField,
+                 vcfFilters = vcfFilters,
                  savFile = savFile,
                  savFileIndex = savFileIndex,
                  bedFile = bedFile,
@@ -342,7 +345,7 @@ if(FALSE){
       sampleInModel = as.character(NULL)
     }
 
-    setVCFobjInCPP(vcfFile, vcfFileIndex, vcfField, t_SampleInModel = sampleInModel)
+    setVCFobjInCPP(vcfFile, vcfFileIndex, vcfField, vcfFilters, t_SampleInModel = sampleInModel)
     if(!is.null(IDsToInclude)){
       SNPlist = paste(c("set1", IDsToInclude), collapse = "\t")
       in_chrom="fake_chrom"

@@ -24,6 +24,7 @@ checkGenoInput = function(bgenFile = "",
                  vcfFile = "",
 		 vcfFileIndex = "",
                  vcfField = "DS",
+                 vcfFilters = "",
                  savFile = "",
 		 savFileIndex = "",
                  sampleFile = "",
@@ -130,6 +131,7 @@ setGenoInput = function(bgenFile = "",
                  vcfFile = "",
                  vcfFileIndex = "",
                  vcfField = "DS",
+                 vcfFilters = "",
                  savFile = "",
                  savFileIndex = "",
                  sampleFile = "",
@@ -466,7 +468,7 @@ if(FALSE){
         vcfFileIndex = paste(vcfFile, ".s1r", sep = "")
     }
 	    
-    setVCFobjInCPP(vcfFile, vcfFileIndex, vcfField, t_SampleInModel = sampleInModel)
+    setVCFobjInCPP(vcfFile, vcfFileIndex, vcfField, vcfFilters, t_SampleInModel = sampleInModel)
     if(!is.null(IDsToInclude)){
       SNPlist = paste(c("set1", IDsToInclude), collapse = "\t")
       in_chrom="fake_chrom"
