@@ -20,8 +20,11 @@
 
 #include "VCF.hpp"
 
-
-
+// Forward declarations for helper functions
+std::tuple<std::string, float, float> parse_filter(std::string & filter);
+std::vector<std::tuple<std::string, float, float>> parse_filters(std::string & filters);
+std::vector<std::tuple<std::string, float, float>> consolidate_filters(
+  const std::vector<std::tuple<std::string, float, float>>& filters);
 
 
 using namespace std;
@@ -293,6 +296,8 @@ void VcfClass::getSampleIDlist_vcfMatrix(){
   m_SampleInVcf = sampleIDList;
 }
 
+} // namespace VCF
+
 std::vector<std::tuple<std::string, float, float>> parse_filters(std::string & filters){
   std::vector<std::tuple<std::string, float, float>> filters_parsed;
 
@@ -355,9 +360,9 @@ std::tuple<std::string, float, float> parse_filter(std::string & filter){
     std::string bound = filter.substr(comparator_loc+comparator.length(), filter.length());
 
     if (comparator == "<"){
-      upper_bound = std::stof(bound + std::numeric_limits<float>::epsilon());
+      upper_bound = std::stof(bound) - std::numeric_limits<float>::epsilon();
     }else if (comparator == ">"){
-      lower_bound = std::stof(bound - std::numeric_limits<float>::epsilon());
+      lower_bound = std::stof(bound) + std::numeric_limits<float>::epsilon();
     }else if (comparator == "<="){
       upper_bound = std::stof(bound);
     }else if (comparator == ">="){
