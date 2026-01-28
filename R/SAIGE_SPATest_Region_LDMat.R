@@ -65,6 +65,7 @@ generate_LDMat_forMataRegion = function(bgenFile = "",
                  vcfFile = vcfFile,   #not activate yet
                  vcfFileIndex = vcfFileIndex,
                  vcfField = vcfField,
+                 vcfFilters = vcfFilters,
                  savFile = savFile,
                  savFileIndex = savFileIndex,
                  sampleFile = sampleFile,

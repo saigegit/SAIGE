@@ -72,7 +72,7 @@ namespace VCF {
       // Regarding dosage fields:
       // DS and GT are equivalent.
       // That is, a given VCF may list its dosage field as "GT" rather than "DS".
-        if ((fmtField == "DS" || fmtField == "GT") && std::find_if(m_marker_file.format_headers().begin(), m_marker_file.format_headers().end(),
+      if ((fmtField == "DS" || fmtField == "GT") && std::find_if(m_marker_file.format_headers().begin(), m_marker_file.format_headers().end(),
         [&](const savvy::header_value_details& h) { return h.id == "HDS"; }) != m_marker_file.format_headers().end()) {
         fmtField = "HDS";
       } else {
@@ -296,7 +296,7 @@ void VcfClass::getSampleIDlist_vcfMatrix(){
   m_SampleInVcf = sampleIDList;
 }
 
-} // namespace VCF
+}
 
 std::vector<std::tuple<std::string, float, float>> parse_filters(std::string & filters){
   std::vector<std::tuple<std::string, float, float>> filters_parsed;
@@ -305,43 +305,25 @@ std::vector<std::tuple<std::string, float, float>> parse_filters(std::string & f
   std::string filter;
   
   while(std::getline(ss, filter, ',')){
-    filters_parsed.push_back(parse_filter(filter));
+    auto cur_parsed = parse_filter(filter);
+    push_filter(filters_parsed, cur_parsed);
   }
-  return consolidate_filters(filters_parsed);
+  return filters_parsed;
 }
 
-std::vector<std::tuple<std::string, float, float>> consolidate_filters(
-  const std::vector<std::tuple<std::string, float, float>>& filters) {
+void push_filter(std::vector<std::tuple<std::string, float, float>> & filters_parsed, std::tuple<std::string, float, float> & cur_parsed){
+  std::string field = std::get<0>(cur_parsed);
+  float lower_bound = std::get<1>(cur_parsed);
+  float upper_bound = std::get<2>(cur_parsed);
   
-  // Map to accumulate bounds per field
-  std::map<std::string, std::pair<float, float>> field_bounds;
-  
-  for (const auto& filter : filters) {
-      std::string field = std::get<0>(filter);
-      float lower = std::get<1>(filter);
-      float upper = std::get<2>(filter);
-      
-      if (field_bounds.find(field) == field_bounds.end()) {
-          // First time seeing this field - initialize with these bounds
-          field_bounds[field] = std::make_pair(lower, upper);
-      } else {
-          // Merge: take most restrictive bounds
-          field_bounds[field].first = std::max(field_bounds[field].first, lower);
-          field_bounds[field].second = std::min(field_bounds[field].second, upper);
-      }
+  for (size_t i=0; i<filters_parsed.size(); i++){
+    if (std::get<0>(filters_parsed[i]) == field){
+      std::get<1>(filters_parsed[i]) = std::max(std::get<1>(filters_parsed[i]), lower_bound);
+      std::get<2>(filters_parsed[i]) = std::min(std::get<2>(filters_parsed[i]), upper_bound);
+      return;
+    }
   }
-  
-  // Convert map back to vector of tuples
-  std::vector<std::tuple<std::string, float, float>> consolidated;
-  for (const auto& entry : field_bounds) {
-      consolidated.push_back(std::make_tuple(
-          entry.first,           // field name
-          entry.second.first,    // lower bound
-          entry.second.second    // upper bound
-      ));
-  }
-  
-  return consolidated;
+  filters_parsed.push_back(cur_parsed);
 }
 
 std::tuple<std::string, float, float> parse_filter(std::string & filter){
@@ -360,9 +342,9 @@ std::tuple<std::string, float, float> parse_filter(std::string & filter){
     std::string bound = filter.substr(comparator_loc+comparator.length(), filter.length());
 
     if (comparator == "<"){
-      upper_bound = std::stof(bound) - std::numeric_limits<float>::epsilon();
+      upper_bound = std::stof(bound)*(1 - std::numeric_limits<float>::epsilon());
     }else if (comparator == ">"){
-      lower_bound = std::stof(bound) + std::numeric_limits<float>::epsilon();
+      lower_bound = std::stof(bound)*(1 + std::numeric_limits<float>::epsilon());
     }else if (comparator == "<="){
       upper_bound = std::stof(bound);
     }else if (comparator == ">="){
