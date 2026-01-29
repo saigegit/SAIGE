@@ -21,6 +21,7 @@
 #include "VCF.hpp"
 
 // Forward declarations for helper functions
+void push_filter(std::vector<std::tuple<std::string, float, float>> & filters_parsed, std::tuple<std::string, float, float> & cur_parsed);
 std::tuple<std::string, float, float> parse_filter(std::string & filter);
 std::vector<std::tuple<std::string, float, float>> parse_filters(std::string & filters);
 std::vector<std::tuple<std::string, float, float>> consolidate_filters(
