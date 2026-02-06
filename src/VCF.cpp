@@ -185,11 +185,12 @@ namespace VCF {
 			  bool t_isImputation)
 			  //std::vector<double> & t_dosage) 
    {
-     static std::ofstream logFile("getOneMarker_log.tsv", std::ios::app);
+    //  static std::ofstream logFile("missing_filtered_counts.tsv", std::ios::app);
      static bool isFirstCall = true;
      
      if (isFirstCall) {
-       logFile << "marker\tchr\tposition\tref\talt\tisImputation\taltFreq\taltCounts\tmissingRate\timputeInfo\tmissingCount\tfilterCount\tnonzeroCount\tisBoolRead\n";
+      // logFile << "value\tlower_bound\tupper_bound\tpasses_filters\n";
+      //  logFile << "marker\tchr\tposition\tref\talt\tisImputation\taltFreq\taltCounts\tmissingRate\timputeInfo\tmissingCount\tfilterCount\tnonzeroCount\tisBoolRead\n";
        isFirstCall = false;
      }
 
@@ -252,12 +253,15 @@ namespace VCF {
             if (value <= lower_bound || value >= upper_bound){
               passes_filters = false;
               ++filter_cnt; // book keeping as of now; not used anywhere yet
+              // logFile << value << "\t" << lower_bound << "\t" << upper_bound << "\t" << passes_filters << "\n";
+              // logFile.flush();
               break;
             }
           }
           if (!passes_filters){
             dosages[m_posSampleInModel[j]] = -1;		  
             ++missing_cnt;
+            t_indexForMissingforOneMarker.push_back(m_posSampleInModel[j]);
             continue;
           }
 
@@ -288,11 +292,11 @@ namespace VCF {
 	 t_missingRate = 0; 
         }
         
-       logFile << t_marker << "\t" << t_chr << "\t" << t_pd << "\t" << t_ref << "\t" << t_alt << "\t"
-               << t_isImputation << "\t" << t_altFreq << "\t" << t_altCounts << "\t" << t_missingRate << "\t"
-               << t_imputeInfo << "\t" << missing_cnt << "\t" << filter_cnt << "\t" 
-               << t_indexForNonZero.size() << "\t" << isReadVariant << "\n";
-       logFile.flush();
+      //  logFile << t_marker << "\t" << t_chr << "\t" << t_pd << "\t" << t_ref << "\t" << t_alt << "\t"
+      //          << t_isImputation << "\t" << t_altFreq << "\t" << t_altCounts << "\t" << t_missingRate << "\t"
+      //          << t_imputeInfo << "\t" << missing_cnt << "\t" << filter_cnt << "\t" 
+      //          << t_indexForNonZero.size() << "\t" << isReadVariant << "\n";
+      //  logFile.flush();
      }else{
        isReadVariant = false;	     
        std::cout << "Reach the end of the vcf file" << std::endl;
