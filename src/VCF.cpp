@@ -247,14 +247,7 @@ namespace VCF {
               break;
             }
           }
-          if (!passes_filters){
-            dosages[m_posSampleInModel[j]] = -1;		  
-            ++missing_cnt;
-            t_indexForMissingforOneMarker.push_back(m_posSampleInModel[j]);
-            continue;
-          }
-
-          if (std::isnan(*dose_it)) {
+          if (!passes_filters || std::isnan(*dose_it)) {
             dosages[m_posSampleInModel[j]] = -1;		  
             ++missing_cnt;
             t_indexForMissingforOneMarker.push_back(m_posSampleInModel[j]);
