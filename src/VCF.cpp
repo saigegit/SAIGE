@@ -182,9 +182,16 @@ namespace VCF {
 				  //if true, the marker has been read successfully
 				  bool & t_isBoolRead,
 				  arma::vec & dosages,
-				  bool t_isImputation)
-				  //std::vector<double> & t_dosage) 
+			  bool t_isImputation)
+			  //std::vector<double> & t_dosage) 
    {
+     static std::ofstream logFile("getOneMarker_log.tsv", std::ios::app);
+     static bool isFirstCall = true;
+     
+     if (isFirstCall) {
+       logFile << "marker\tchr\tposition\tref\talt\tisImputation\taltFreq\taltCounts\tmissingRate\timputeInfo\tmissingCount\tfilterCount\tnonzeroCount\tisBoolRead\n";
+       isFirstCall = false;
+     }
 
      bool isReadVariant = true;
      variant_group_iterator end{};
@@ -259,12 +266,12 @@ namespace VCF {
             ++missing_cnt;
             t_indexForMissingforOneMarker.push_back(m_posSampleInModel[j]);
           }else{
-	    dosages[m_posSampleInModel[j]] = *dose_it; 		 	 
-	    if(*dose_it > 0){
-              t_indexForNonZero.push_back(m_posSampleInModel[j]);
-	     }		    
-            //dosagesforOneMarker[genetest_sample_idx_vcfDosage[i]] = *dose_it;
-            t_altCounts = t_altCounts + *dose_it;
+              dosages[m_posSampleInModel[j]] = *dose_it; 		 	 
+              if(*dose_it > 0){
+                      t_indexForNonZero.push_back(m_posSampleInModel[j]);
+              }		    
+                    //dosagesforOneMarker[genetest_sample_idx_vcfDosage[i]] = *dose_it;
+              t_altCounts = t_altCounts + *dose_it;
           }
         }
       }
@@ -279,7 +286,13 @@ namespace VCF {
         }else{
           t_altFreq = t_altCounts / 2 / (double)(m_N);
 	 t_missingRate = 0; 
-        } 
+        }
+        
+       logFile << t_marker << "\t" << t_chr << "\t" << t_pd << "\t" << t_ref << "\t" << t_alt << "\t"
+               << t_isImputation << "\t" << t_altFreq << "\t" << t_altCounts << "\t" << t_missingRate << "\t"
+               << t_imputeInfo << "\t" << missing_cnt << "\t" << filter_cnt << "\t" 
+               << t_indexForNonZero.size() << "\t" << isReadVariant << "\n";
+       logFile.flush();
      }else{
        isReadVariant = false;	     
        std::cout << "Reach the end of the vcf file" << std::endl;
