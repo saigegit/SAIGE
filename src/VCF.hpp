@@ -27,7 +27,7 @@ namespace VCF {
    std::vector<int32_t> m_SampleInModel, m_posSampleInModel;
    bool m_isDropMissingDosages;
    bool m_isSparseDosagesInVcf; 
-
+   std::vector<std::tuple<std::string, float, float>> m_vcfFilters;
    uint32_t m_M0, m_M;
    uint32_t m_N0, m_N;
    std::vector<std::string> m_MarkerInVcf;     // Variant identifier  
@@ -50,6 +50,7 @@ namespace VCF {
    VcfClass(std::string t_vcfFileName,
             std::string t_vcfFileIndex,
             std::string t_vcfField,
+            std::string t_vcfFilters,
             bool t_isSparseDosageInVcf,
             std::vector<std::string> t_SampleInModel);
  

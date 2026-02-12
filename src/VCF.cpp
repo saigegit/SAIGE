@@ -14,12 +14,18 @@
 #include <stdlib.h>
 #include <cstring>
 #include <limits>
+#include <map>
+#include <sstream>
 
 
 #include "VCF.hpp"
 
-
-
+// Forward declarations for helper functions
+void push_filter(std::vector<std::tuple<std::string, float, float>> & filters_parsed, std::tuple<std::string, float, float> & cur_parsed);
+std::tuple<std::string, float, float> parse_filter(std::string & filter);
+std::vector<std::tuple<std::string, float, float>> parse_filters(std::string & filters);
+std::vector<std::tuple<std::string, float, float>> consolidate_filters(
+  const std::vector<std::tuple<std::string, float, float>>& filters);
 
 
 using namespace std;
@@ -29,10 +35,14 @@ namespace VCF {
   VcfClass::VcfClass(std::string t_vcfFileName,
             std::string t_vcfFileIndex,
             std::string t_vcfField,
-	    bool t_isSparseDosageInVcf,
+            std::string t_vcfFilters,
+            bool t_isSparseDosageInVcf,
             std::vector<std::string> t_SampleInModel)
    {
-     bool isVcfOpen;	   
+     bool isVcfOpen;
+     if(t_vcfFilters != ""){
+      m_vcfFilters = parse_filters(t_vcfFilters);
+     }
      isVcfOpen = setVcfObj(t_vcfFileName,
               t_vcfFileIndex,
               t_vcfField);
@@ -60,6 +70,9 @@ namespace VCF {
 
     if (std::find_if(m_marker_file.format_headers().begin(), m_marker_file.format_headers().end(),
       [&](const savvy::header_value_details& h) { return h.id == fmtField; }) == m_marker_file.format_headers().end()) {
+      // Regarding dosage fields:
+      // DS and GT are equivalent.
+      // That is, a given VCF may list its dosage field as "GT" rather than "DS".
       if ((fmtField == "DS" || fmtField == "GT") && std::find_if(m_marker_file.format_headers().begin(), m_marker_file.format_headers().end(),
         [&](const savvy::header_value_details& h) { return h.id == "HDS"; }) != m_marker_file.format_headers().end()) {
         fmtField = "HDS";
@@ -169,10 +182,9 @@ namespace VCF {
 				  //if true, the marker has been read successfully
 				  bool & t_isBoolRead,
 				  arma::vec & dosages,
-				  bool t_isImputation)
-				  //std::vector<double> & t_dosage) 
+			  bool t_isImputation)
+			  //std::vector<double> & t_dosage) 
    {
-
      bool isReadVariant = true;
      variant_group_iterator end{};
      if(m_it_ != end){
@@ -197,30 +209,55 @@ namespace VCF {
        double dosage;
        t_altCounts = 0;
        int missing_cnt = 0;
+       int filter_cnt = 0;
 
        dosages.clear();
        dosages.set_size(m_N);
        dosages.fill(arma::fill::zeros);
        //t_dosage.clear();
        //t_dosage.reserve(m_N);
+
+       // compressed_vector: savvy construct, vector of zeros (sparse vector)
        savvy::compressed_vector<float> variant_dosages;
+
+       // std::vector<std::tuple<std::string, float, float>> filters; // format field name, lower bound, upper bound
+       std::vector<savvy::compressed_vector<float>> format_data(m_vcfFilters.size());
+
+       for (size_t i=0; i<m_vcfFilters.size(); i++){
+          m_it_->get_format(std::get<0>(m_vcfFilters[i]), format_data[i]);
+       }
+
        m_it_->get_format(m_fmtField, variant_dosages);
        std::size_t ploidy = m_N0 ? variant_dosages.size() / m_N0 : 1;
        savvy::stride_reduce(variant_dosages, ploidy);
        for (auto dose_it = variant_dosages.begin(); dose_it != variant_dosages.end(); ++dose_it) {
+        // j: offset, brings us to next dose value
+        // this "offset" corresponds to column (e.g. individual)
         int j = dose_it.offset();
         if(m_posSampleInModel[j] >= 0) {
-          if (std::isnan(*dose_it)) {
+
+          bool passes_filters = true;
+          for (size_t i=0; i<m_vcfFilters.size(); i++){
+            float value = format_data[i][j];
+            float lower_bound = std::get<1>(m_vcfFilters[i]);
+            float upper_bound = std::get<2>(m_vcfFilters[i]);
+            if (value < lower_bound || value > upper_bound){
+              passes_filters = false;
+              ++filter_cnt; // book keeping as of now; not used anywhere yet
+              break;
+            }
+          }
+          if (!passes_filters || std::isnan(*dose_it)) {
             dosages[m_posSampleInModel[j]] = -1;		  
             ++missing_cnt;
             t_indexForMissingforOneMarker.push_back(m_posSampleInModel[j]);
           }else{
-	    dosages[m_posSampleInModel[j]] = *dose_it; 		 	 
-	    if(*dose_it > 0){
-              t_indexForNonZero.push_back(m_posSampleInModel[j]);
-	     }		    
-            //dosagesforOneMarker[genetest_sample_idx_vcfDosage[i]] = *dose_it;
-            t_altCounts = t_altCounts + *dose_it;
+              dosages[m_posSampleInModel[j]] = *dose_it; 		 	 
+              if(*dose_it > 0){
+                      t_indexForNonZero.push_back(m_posSampleInModel[j]);
+              }		    
+              //dosagesforOneMarker[genetest_sample_idx_vcfDosage[i]] = *dose_it;
+              t_altCounts = t_altCounts + *dose_it;
           }
         }
       }
@@ -235,7 +272,7 @@ namespace VCF {
         }else{
           t_altFreq = t_altCounts / 2 / (double)(m_N);
 	 t_missingRate = 0; 
-        } 
+        }
      }else{
        isReadVariant = false;	     
        std::cout << "Reach the end of the vcf file" << std::endl;
@@ -253,4 +290,65 @@ void VcfClass::getSampleIDlist_vcfMatrix(){
   m_SampleInVcf = sampleIDList;
 }
 
+}
+
+std::vector<std::tuple<std::string, float, float>> parse_filters(std::string & filters){
+  std::vector<std::tuple<std::string, float, float>> filters_parsed;
+
+  std::stringstream ss(filters);
+  std::string filter;
+  
+  while(std::getline(ss, filter, ',')){
+    auto cur_parsed = parse_filter(filter);
+    push_filter(filters_parsed, cur_parsed);
+  }
+  return filters_parsed;
+}
+
+void push_filter(std::vector<std::tuple<std::string, float, float>> & filters_parsed, std::tuple<std::string, float, float> & cur_parsed){
+  std::string field = std::get<0>(cur_parsed);
+  float lower_bound = std::get<1>(cur_parsed);
+  float upper_bound = std::get<2>(cur_parsed);
+  
+  for (size_t i=0; i<filters_parsed.size(); i++){
+    if (std::get<0>(filters_parsed[i]) == field){
+      std::get<1>(filters_parsed[i]) = std::max(std::get<1>(filters_parsed[i]), lower_bound);
+      std::get<2>(filters_parsed[i]) = std::min(std::get<2>(filters_parsed[i]), upper_bound);
+      return;
+    }
+  }
+  filters_parsed.push_back(cur_parsed);
+}
+
+std::tuple<std::string, float, float> parse_filter(std::string & filter){
+  std::string field;
+  float lower_bound = -std::numeric_limits<float>::infinity();
+  float upper_bound = std::numeric_limits<float>::infinity();
+  
+  std::vector<std::string> comparators = {"<=", ">=", "==", "<", ">"};
+  for (size_t i=0; i<comparators.size(); i++){
+    std::string comparator = comparators[i];
+    size_t comparator_loc = filter.find(comparator);
+    if(comparator_loc == std::string::npos){
+      continue;
+    }
+    field = filter.substr(0, comparator_loc);
+    std::string bound = filter.substr(comparator_loc+comparator.length(), filter.length());
+
+    if (comparator == "<"){
+      upper_bound = std::stof(bound)*(1 - std::numeric_limits<float>::epsilon());
+    }else if (comparator == ">"){
+      lower_bound = std::stof(bound)*(1 + std::numeric_limits<float>::epsilon());
+    }else if (comparator == "<="){
+      upper_bound = std::stof(bound);
+    }else if (comparator == ">="){
+      lower_bound = std::stof(bound);
+    }else if (comparator == "=="){
+      upper_bound = std::stof(bound);
+      lower_bound = std::stof(bound);
+    }
+    break;
+  }
+
+  return std::make_tuple(field, lower_bound, upper_bound); 
 }

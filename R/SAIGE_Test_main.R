@@ -6,6 +6,7 @@
 #' @param vcfFile character. Path to vcf file
 #' @param vcfFileIndex character. Path to vcf index file. Indexed by tabix. Path to index for vcf file by tabix, .csi file using 'tabix --csi -p vcf file.vcf.gz'
 #' @param vcfField character. genotype field in vcf file to use. "DS" for dosages or "GT" for genotypes. By default, "DS".
+#' @param vcfFilters character. Comma-delimited list of FORMAT field filters for per-sample filtering. Genotypes failing any filter are treated as missing. Supports comparisons: >, <, >=, <=, ==. e.g. "DP>10,GQ>=30". By default, "" (no filtering).
 #' @param savFile character. Path to sav file
 #' @param savFileIndex character. Path to index for sav file .s1r
 #' @param bedFile character. Path to bed file (PLINK)
@@ -65,6 +66,7 @@ SPAGMMATtest = function(bgenFile = "",
                  vcfFile = "",
                  vcfFileIndex = "",
                  vcfField = "DS",
+                 vcfFilters = "", #new: comma-delimited list of filters, e.g. "DP>10,GQ<=30"
                  savFile = "",
                  savFileIndex = "",
                  bedFile="",
@@ -379,6 +381,7 @@ SPAGMMATtest = function(bgenFile = "",
                  vcfFile = vcfFile,   #not activate yet
                  vcfFileIndex = vcfFileIndex,
                  vcfField = vcfField,
+                 vcfFilters = vcfFilters,
                  savFile = savFile,
                  savFileIndex = savFileIndex,
                  sampleFile = sampleFile,

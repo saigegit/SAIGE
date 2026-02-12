@@ -144,6 +144,7 @@ void setBGENobjInCPP(std::string t_bgenFileName,
 void setVCFobjInCPP(std::string t_vcfFileName,
             std::string t_vcfFileIndex,
             std::string t_vcfField,
+            std::string t_vcfFilters,
             std::vector<std::string> & t_SampleInModel);
 
 
