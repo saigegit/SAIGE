@@ -234,7 +234,8 @@ process_region_analysis <- function(outList, regionTestType, is_fastTest, pval_c
                                   annoIndicatorMat, OutputFile, n, P1Mat, P2Mat, isImputation,
                                   weight_cond, is_output_markerList_in_groupTest, is_output_moreDetails,
                                   number_of_ancestry, anc_index, anc_index_name) {
-  
+ 
+
   # Initial processing and p-value calculation
   if (is_single_in_groupTest) {
     pvalVec_new <- unlist(lapply(outList$pvalVec, convert_str_to_log))
@@ -247,6 +248,8 @@ process_region_analysis <- function(outList, regionTestType, is_fastTest, pval_c
   }
   
   # Process results if we have valid data
+  
+  
   if ((sum(outList$NumUltraRare_GroupVec) + sum(outList$NumRare_GroupVec)) > 0) {
     if (regionTestType != "BURDEN") {
       
@@ -290,6 +293,7 @@ process_region_analysis <- function(outList, regionTestType, is_fastTest, pval_c
         wStatVec_cond <- wStatVec - outList$TstatAdjCond
         wadjVarSMat_cond <- wadjVarSMat - outList$VarMatAdjCond
       }
+      
       # Process each annotation group
       pval.Region <- process_annotation_groups(
         annolistsub, maxMAFlist, outList, annoMAFIndicatorMat, wadjVarSMat,
@@ -334,6 +338,9 @@ process_region_analysis <- function(outList, regionTestType, is_fastTest, pval_c
         }
       }
     }
+  }else{
+    pval.Region = NULL
+
   }
   
   return(list(outList = outList, pval.Region = pval.Region))
@@ -1150,8 +1157,7 @@ SAIGE.Region.byancestry.refactored <- function(mu,
 	  region$genoIndex_prev,
 	  region$genoIndex
           )
-	print("OKKKKKKKKK")
-	print(HaploOut)
+
 
 	if(HaploOut$numHapCond > 0){ 
           if(traitType == "binary"){ 
