@@ -390,7 +390,7 @@ markerInfo[, ID := paste(CHROM, POS, REF, ALT, sep = ":")]
     }
 
     colnames(RangesToInclude) = c("CHROM", "START", "END")
- if(dosageFileType == "vcf"){ 
+ if(dosageFileType == "vcf" | dosageFileType == "plink" | dosageFileType == "pgen"){ 
    if(nrow(RangesToInclude) > 0){
     for(i in 1:nrow(RangesToInclude)){
       CHROM1 = RangesToInclude$CHROM[i]
