@@ -572,7 +572,9 @@ SAIGE.Region = function(mu,
                       g.sum = outList$genoSumMat[, jm]
                       q.sum <- sum(outList$gyVec[tempPos] * AnnoWeights[tempPos])
                       mu.a = mu
-                      
+                     
+
+		      if (length(tempPos) > 1) {	
                       #re_phi = get_newPhi_scaleFactor(q.sum,
                       re_phi = get_newPhi_scaleFactor_traitType(q.sum,
                                                       mu.a,
@@ -583,7 +585,11 @@ SAIGE.Region = function(mu,
                                                       regionTestType,
 						      traitType)
                       Phi = re_phi$val
+			}else{
+	
+			re_phi = list(val = Phi, scaleFactor = 1, p.new = p.new)
 
+			}
                     }
                     groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType)
                     resultDF = data.frame(
@@ -874,13 +880,14 @@ SAIGE.Region = function(mu,
                         annoMAFIndVec = c(annoMAFIndVec, jm)
                         Phi = wadjVarSMat[tempPos, tempPos, drop = F]
                         Score = wStatVec[tempPos]
-                        if (traitType == "binary" | traitType == "survival") {
+                         if (traitType == "binary" | traitType == "survival") {
                           p.new = adjPVec[tempPos]
                           g.sum = outList$genoSumMat[, jm]
                           q.sum <- sum(outList$gyVec[tempPos] * AnnoWeights[tempPos])
                           mu.a = mu
                           #re_phi = get_newPhi_scaleFactor(q.sum,
-                          re_phi = get_newPhi_scaleFactor_traitType(q.sum,
+                           if (length(tempPos) > 1) {
+			  	re_phi = get_newPhi_scaleFactor_traitType(q.sum,
                                                           mu.a,
                                                           g.sum,
                                                           p.new,
@@ -888,10 +895,15 @@ SAIGE.Region = function(mu,
                                                           Phi,
                                                           regionTestType,
 							  traitType)
-                          Phi = re_phi$val
-                        }
-                        groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType)
+                          	Phi = re_phi$val
+			   }else{
+				re_phi = list(val = Phi, scaleFactor = 1, p.new = p.new)
+			   }
+                         }	
+                         groupOutList = get_SKAT_pvalue(Score, Phi, r.corr, regionTestType)
                         
+
+
                         resultDF = data.frame(
                           Region = regionName,
                           Group = AnnoName,
@@ -903,6 +915,7 @@ SAIGE.Region = function(mu,
                           SE_Burden = groupOutList$SE_Burden
                         )
                         if (isCondition) {
+
                           if (traitType == "binary" | traitType == "survival") {
                             G1tilde_P_G2tilde_Mat_scaled = t(t((
                               outList$G1tilde_P_G2tilde_Weighted_Mat[tempPos, , drop = F]
@@ -923,12 +936,13 @@ SAIGE.Region = function(mu,
                             Score_cond = wStatVec_cond[tempPos]
                             Phi_cond = wadjVarSMat_cond[tempPos, tempPos]
                           }
-                          
+                         
                           groupOutList_cond = get_SKAT_pvalue(Score_cond,
                                                               Phi_cond,
                                                               r.corr,
                                                               regionTestType)
-                          
+                         
+
                           resultDF$Pvalue_cond = groupOutList_cond$Pvalue_SKATO
                           resultDF$Pvalue_Burden_cond = groupOutList_cond$Pvalue_Burden
                           resultDF$Pvalue_SKAT_cond = groupOutList_cond$Pvalue_SKAT
