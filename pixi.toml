@@ -5,6 +5,13 @@ platforms = ["linux-64", "osx-64", "osx-arm64"]
 version = "0.1.0"
 
 [tasks]
+install-github-deps = "Rscript -e 'install.packages(\"lintools\", repos=\"https://cran.r-project.org\")'"
+install-plink2 = "curl -L https://github.com/chrchang/plink-ng/archive/refs/tags/v2.0.0-a.6.16.tar.gz | tar -zx && mv plink-ng-2.0.0-a.6.16 plink-ng && $CC -std=c++14 -fPIC -O3 -I.pixi/envs/default/include -L.pixi/envs/default/lib -o libplink2_includes.a plink-ng/2.0/include/*.cc -shared -lz -lzstd -lpthread -lm -ldeflate && mv libplink2_includes.a .pixi/envs/default/lib"
+
+all = { depends-on = ["install-github-deps", "install-plink2"] }
+
+[activation]
+scripts = ["activate.sh"]
 
 [dependencies]
 boost-cpp = "*"
@@ -31,3 +38,13 @@ superlu = "*"
 zlib = "*"
 zstd = "*"
 tbb = "*"
+
+[target.linux-64.dependencies]
+gxx_linux-64 = "*"
+
+[target.osx-arm64.dependencies]
+clangxx_osx-arm64 = "*"
+
+[target.osx-64.dependencies]
+clangxx_osx-64 = "*"
+
