@@ -614,9 +614,11 @@ SAIGE.Region = function(mu,
                           as.vector(outList$scalefactor_G2_cond)
                         ))
                         #t(t(b * sqrt(a1)) * sqrt(a2))
-                        adjCondTemp = G1tilde_P_G2tilde_Mat_scaled %*% outList$VarInvMat_G2_cond_scaled
+			
+			adjCondTemp = G1tilde_P_G2tilde_Mat_scaled %*% outList$VarInvMat_G2_cond_scaled
                         VarMatAdjCond = adjCondTemp %*% t(G1tilde_P_G2tilde_Mat_scaled)
-                        TstatAdjCond = adjCondTemp %*% (outList$Tstat_G2_cond * outList$G2_Weight_cond)
+			
+			TstatAdjCond = adjCondTemp %*% (outList$Tstat_G2_cond * outList$G2_Weight_cond)
                         Phi_cond = re_phi$val - diag(VarMatAdjCond)
                         Score_cond = Score - TstatAdjCond
                         
@@ -637,7 +639,9 @@ SAIGE.Region = function(mu,
                       resultDF$BETA_Burden_cond = groupOutList_cond$BETA_Burden
                       resultDF$SE_Burden_cond = groupOutList_cond$SE_Burden
                     }#if(isCondition){
-                    pval.Region = rbind.data.frame(pval.Region, resultDF)
+                    
+		    
+		    pval.Region = rbind.data.frame(pval.Region, resultDF)
                     
                   } else {
                     #if(length(tempPos) > 0){
@@ -722,8 +726,8 @@ SAIGE.Region = function(mu,
               if (traitType == "binary" | traitType == "survival") {
                 cctVec = c(cctVec, NA, NA)
               }
-              cctVec = c(cctVec, NA, NA)
-              
+              #cctVec = c(cctVec, NA, NA)
+
               pval.Region = rbind(pval.Region, cctVec)
             } else {
               cctpval = 1
@@ -928,7 +932,8 @@ SAIGE.Region = function(mu,
                             #t(t(b * sqrt(a1)) * sqrt(a2))
                             adjCondTemp = G1tilde_P_G2tilde_Mat_scaled %*% outList$VarInvMat_G2_cond_scaled
                             VarMatAdjCond = adjCondTemp %*% t(G1tilde_P_G2tilde_Mat_scaled)
-                            TstatAdjCond = adjCondTemp %*% (outList$Tstat_G2_cond * outList$G2_Weight_cond)
+                            
+			    TstatAdjCond = adjCondTemp %*% (outList$Tstat_G2_cond * outList$G2_Weight_cond)
                             Phi_cond = re_phi$val - diag(VarMatAdjCond)
                             Score_cond = Score - TstatAdjCond
                             
