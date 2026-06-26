@@ -78,12 +78,12 @@ fast.logistf.fit.WithL2 <- function (x, y, weight = NULL, offset = NULL, firth =
   # Error catching (if chol(x) not positive definite)
   if(all(is.na(XX.covs))==T) {
     var <- XX.covs
-    list(beta = NA, var = var, pi = NA, hat.diag = NA,
+    list(beta = NA, var = NA, pi = NA, hat.diag = NA,
          iter = NA, evals = NA, conv = c(NA,
                                          NA, NA))
   } else {
     var <- XX.covs
-    list(beta = beta, var = var, pi = pi, hat.diag = h,
+    list(beta = beta, var = NA, pi = pi, hat.diag = h,
          iter = iter, evals = evals, conv = c(max(abs(U.star)),
                                               max(abs(delta))))
   }
@@ -135,7 +135,7 @@ fast.logistf.fit.WithL2.fast <- function (x, y, out.null.firth=NULL, weight = NU
   gconv <- control$gconv
   xconv <- control$xconv
 
-  re.out<-list(beta = NA, var = var, pi = NA, hat.diag = NA, iter = NA, evals = NA, conv = c(NA, NA, NA))
+  re.out<-list(beta = NA, var = NA, pi = NA, hat.diag = NA, iter = NA, evals = NA, conv = c(NA, NA, NA))
 
   # By SLEE, compute once...
   if(is.null(out.null.firth)){
@@ -201,7 +201,7 @@ fast.logistf.fit.WithL2.fast <- function (x, y, out.null.firth=NULL, weight = NU
   # Error catching (if chol(x) not positive definite)
   if(all(is.na(XX.covs))==F) {
 
-    re.out = list(beta = beta, var = var, pi = pi, hat.diag = h,
+    re.out = list(beta = beta, var = NA, pi = pi, hat.diag = h,
          iter = iter, evals = evals, conv = c(max(abs(U.star)),
                                               max(abs(delta))))
   }
@@ -233,7 +233,7 @@ fast.logistf.fit.WithL2.Sparse <- function (g, y, idx=NULL, init = NULL, out.nul
   gconv <- control$gconv
   xconv <- control$xconv
 
-  re.out<-list(beta = NA, var = var, pi = NA, hat.diag = NA, iter = NA, evals = NA, conv = c(NA, NA, NA))
+  re.out<-list(beta = NA, var = NA, pi = NA, hat.diag = NA, iter = NA, evals = NA, conv = c(NA, NA, NA))
 
   # By SLEE, compute once...
   if(is.null(out.null.firth)){
@@ -310,7 +310,7 @@ fast.logistf.fit.WithL2.Sparse <- function (g, y, idx=NULL, init = NULL, out.nul
   }
 
 
-    re.out = list(beta = beta, var = var, iter = iter, evals = evals, conv = c(max(abs(U.star.1)),
+    re.out = list(beta = beta, var = NA, iter = iter, evals = evals, conv = c(max(abs(U.star.1)),
                                               max(abs(delta))))
 
   return(re.out)
@@ -372,7 +372,7 @@ Run_Firth_With_L2<-function(G1, y, offset, l2.var, Is.Fast=TRUE, Is.Sparse=FALSE
                                   , l2.var.pos=2, control=fast.logistf.control(maxit=maxit))
 	}
 
-    if(out_f2$iter <= maxit){ #Use the original version when the second one didnot converge.
+    if(out_f2$iter < maxit){ #Use the L2-penalized fit only when it converged before hitting maxit; iter == maxit means it did not converge, so fall back to out_f1.
       re = out_f2$beta[2]
     }
   }
@@ -414,20 +414,5 @@ Run_Firth_MultiVar_Single<-function(G1.all, obj.null, y, offset1, nMarker, l2.va
 
   results<-cbind(out_single_beta, out_multi_beta)
   return(results)
-
-}
-
-
-Run_Existing_Approach<-function(G1.all, obj.null, y, offset1, nMarker, l2.var=NULL){
-
-  out_single_ext<-rep(0,nMarker)
-  for(j in 1:nMarker){
-
-    G1<-G1.all[,j]
-
-    #source("Firth.R")
-    re<-Run_Firth_With_L2(G1, y, offset1, l2.var)
-    out_single_beta[j]<-re
-  }
 
 }
