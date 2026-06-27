@@ -31,6 +31,17 @@ std::vector<std::tuple<std::string, float, float>> consolidate_filters(
 using namespace std;
  
 namespace VCF {
+
+  struct dosage_accumulator {
+    /*
+    The number of alternate alleles is the sum after boolean conversion.
+    As an example, for GT "0/2" (multiallelic variant), dosage is 0+1
+    */
+    float operator()(const float& lhs, const float& rhs) const {
+      if(std::isnan(rhs)) return rhs;
+      return lhs + (bool)rhs;
+    };
+  };
  
   VcfClass::VcfClass(std::string t_vcfFileName,
             std::string t_vcfFileIndex,
@@ -185,18 +196,17 @@ namespace VCF {
 			  bool t_isImputation)
 			  //std::vector<double> & t_dosage) 
    {
-     bool isReadVariant = true;
+     t_isBoolRead = true;
      variant_group_iterator end{};
      if(m_it_ != end){
-       if (m_it_->alts().size() != 1)
-       {
-         std::cerr << "Warning: skipping multiallelic variant" << std::endl;
-       }
        t_chr = m_it_->chromosome();
        //t_pd = std::to_string(m_it_->position());
        t_pd = m_it_->position();
        t_ref = m_it_->ref();
        t_alt = m_it_->alts()[0];
+       for(size_t i=1; i<m_it_->alts().size(); i++) {
+         t_alt += "," + m_it_->alts()[i];
+       }
        t_marker = m_it_->id(); 
        float markerInfo = 1.f;
        if(t_isImputation){
@@ -229,7 +239,7 @@ namespace VCF {
 
        m_it_->get_format(m_fmtField, variant_dosages);
        std::size_t ploidy = m_N0 ? variant_dosages.size() / m_N0 : 1;
-       savvy::stride_reduce(variant_dosages, ploidy);
+       savvy::stride_reduce<float, dosage_accumulator>(variant_dosages, ploidy);
        for (auto dose_it = variant_dosages.begin(); dose_it != variant_dosages.end(); ++dose_it) {
         // j: offset, brings us to next dose value
         // this "offset" corresponds to column (e.g. individual)
@@ -274,11 +284,9 @@ namespace VCF {
 	 t_missingRate = 0; 
         }
      }else{
-       isReadVariant = false;	     
+       t_isBoolRead = false;	     
        std::cout << "Reach the end of the vcf file" << std::endl;
-     }
-     t_isBoolRead = isReadVariant;  
-     //return(isReadVariant);    	  
+     } 	  
    }
  
 void VcfClass::setIsSparseDosageInVcf (bool t_isSparseDosageInVcf){
