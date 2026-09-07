@@ -43,25 +43,8 @@ checkGenoInput = function(bgenFile = "",
         Check_File_Exist(bgenFileIndex, "bgenFileIndex")
         dosageFileType = "bgen"
     }else if (vcfFile != "") {
-        Check_File_Exist(vcfFile, "vcfFile")
-
-	vcfFileIndex_require = paste(vcfFile, ".csi", sep = "")
-        if(vcfFileIndex != ""){
-                if(vcfFileIndex != vcfFileIndex_require){
-                        stop("ERROR! vcfFileIndex is specfied. Please note it must be ", vcfFileIndex_require, "\n")
-                }else{
-			cat("Please note the argument vcfFileIndex will not be used in future versions because the vcf index file must has the name 'vcfFile'.csi\n")
-		}	
-        }else{
-                cat("vcfFileIndex is not specified. ", vcfFileIndex_require, " will be used\n")
-        }
-    	vcfFileIndex = vcfFileIndex_require
-
-        if (!file.exists(paste(vcfFile, ".csi", sep = ""))) {
-            stop("ERROR! vcfFileIndex ", vcfFileIndex, " does not exist\n")
-        }
+    	vcfFileIndex = paste(vcfFile, ".csi", sep = "")
         dosageFileType = "vcf"
-
     }else if (savFile != "") {
         Check_File_Exist(savFile, "savFile")
 	#Check_File_Exist(savFileIndex, "savFileIndex")
