@@ -899,13 +899,12 @@ void setBGENobjInCPP(std::string t_bgenFileName,
 void setVCFobjInCPP(std::string t_vcfFileName,
             std::string t_vcfFileIndex,
             std::string t_vcfField,
-            std::string t_vcfFilters,
+            std::string t_vcfFilterString,
             std::vector<std::string> & t_SampleInModel)
 {
   ptr_gVCFobj = new VCF::VcfClass(t_vcfFileName,
-		  	t_vcfFileIndex,
 				t_vcfField,
-				t_vcfFilters,
+				t_vcfFilterString,
 				false,
 				t_SampleInModel);
 

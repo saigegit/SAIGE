@@ -4,64 +4,102 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 
-#include "savvy/reader.hpp"
-#include "savvy/region.hpp"
-#include "variant_group_iterator.hpp" 
+#include <htslib/vcf.h>
+#include <htslib/tbx.h>
+#include <memory>
+#include <unordered_set>
 
-
+#include "bcftools_filter.hpp"
+#include "bcftools_vcfnorm.hpp"
 
 namespace VCF {
+
+  struct site_t {
+    std::string chrom;
+    int32_t pos;
+    std::string ref;
+    std::string alt;
+    bool operator==(const site_t& other_site) const {
+        return (other_site.chrom == chrom && other_site.pos == pos && other_site.ref == ref && other_site.alt == alt);
+    }
+  };
+
+  struct hash_site {
+    std::size_t operator()(const site_t& site) const {
+        return std::hash<std::string>()(site.chrom) ^ std::hash<int32_t>()(site.pos) ^ std::hash<std::string>()(site.ref) ^ std::hash<std::string>()(site.alt);
+    }
+  };
  
   class VcfClass{
   private:
 
- // vcf file and the index file (.tbi)
-   std::string m_vcfFile, m_vcfIndexFile;
-   //field in vcf to test. GT or DS 
-   std::string m_chr;
-   int32_t m_start = 0;
-   int32_t m_end = 0;
-   std::string m_markerIDsToExclude;
-   std::string m_markerIDsToInclude; 
-   std::vector<int32_t> m_posSampleInVcf;
-   std::vector<int32_t> m_SampleInModel, m_posSampleInModel;
-   bool m_isDropMissingDosages;
-   bool m_isSparseDosagesInVcf; 
-   std::vector<std::tuple<std::string, float, float>> m_vcfFilters;
-   uint32_t m_M0, m_M;
-   uint32_t m_N0, m_N;
-   std::vector<std::string> m_MarkerInVcf;     // Variant identifier  
-   std::vector<std::string> m_SampleInVcf;
+   std::string chr;
+   int32_t start = 0;
+   int32_t end = 0;
+   std::vector<int32_t> posSampleInVcf;
+   std::vector<int32_t> posSampleInModel;
+   uint32_t N0, N;
+   std::vector<std::string> SampleInVcf;
  
-   bool m_isVcfOpen; 
+   bool isVcfOpen; 
+
+   std::string vcfFileName;
+   size_t range_pos;
+   size_t range_len;
+   std::string vcfFileName_first;
+   std::string vcfFileName_last;
+   std::vector<htsFile*> vcf_file;
+   std::vector<tbx_t*> vcf_index;
+   std::vector<bcf_hdr_t*> vcf_header;
+   size_t vcf_idx;
+   bcf1_t* vcf_record;
+   kstring_t vcf_string;
+   hts_itr_t* vcf_iterator;
+   std::string iterator_string;
+   int has_line;
+   std::vector<std::string> SampleInModel;
+   bool multiple_vcf_files;
+   bool iterate_over_all_lines;
+
+   // for site iterator
+   bool use_sites;
+   std::unordered_set<site_t, hash_site> sites;
+   std::vector<site_t> vcf_first_line;
+
+   // for the (custom) filter
+   std::string vcf_filter_string;
+   std::vector<bcftools::filter_t*> vcf_filter;
+
+   // for splitting multiallelic variants into biallelic ones
+   bcf1_t* multiallelic_vcf_record;
+   int multiallelic_idx;
+   bcftools::args_t vcfnorm_args;
+
+   void setPosSampleInVcf(size_t vcf_idx);
+   void closeAll(size_t idx);
+   void nextVcfFileName();
+   void set_iterator();
+   void move_forward_iterator();
+   void copy_out_single_allele(int idx);
     
   public:
- 
-   //savvy objects for streaming vcf files
-   //savvy::reader m_marker_file{""};
-   //VcfHeader header;
-   //savvy::variant<std::vector<float>> m_record;
 
-   //savvy::variant_group_iterator m_it_;
-   std::string m_fmtField;
-   savvy::reader m_marker_file{""};
-   variant_group_iterator m_it_;
+   std::string fmtField;
 
-   VcfClass(std::string t_vcfFileName,
-            std::string t_vcfFileIndex,
-            std::string t_vcfField,
-            std::string t_vcfFilters,
-            bool t_isSparseDosageInVcf,
-            std::vector<std::string> t_SampleInModel);
+   VcfClass(std::string vcfFileName,
+            std::string vcfField,
+            std::string vcfFilterString,
+            bool isSparseDosageInVcf,
+            std::vector<std::string> SampleInModel);
+
+   ~VcfClass();
  
  
    // setup VcfClass
-   bool setVcfObj(const std::string & t_vcfFileName,
-                  const std::string & t_vcfFileIndex,
-                  const std::string & t_vcfField);
+   bool setVcfObj(size_t idx);
    //set up the iterator 
-   void set_iterator(std::string & variantList);
-   void set_iterator(std::string & chrom, int & beg_pd, int & end_pd);
+   void set_iterator(std::string& variantList);
+   void set_iterator(std::string& chrom, int & beg_pd, int & end_pd);
 
    void move_forward_iterator(int i);
 
@@ -91,14 +129,11 @@ namespace VCF {
 				  bool t_isImputation);
 
 
-    void getSampleIDlist_vcfMatrix(); 
-    uint32_t getN0(){return m_N0;}
-    uint32_t getN(){return m_N;}
-    uint32_t getM0(){return m_M0;}
-    uint32_t getM(){return m_M;}
+    void getSampleIDlist_vcfMatrix(size_t idx); 
+    uint32_t getN0(){return N0;}
+    uint32_t getN(){return N;}
 
     void closegenofile(){};
-    
 
  };
  

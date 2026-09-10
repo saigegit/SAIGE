@@ -285,16 +285,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // setVCFobjInCPP
-void setVCFobjInCPP(std::string t_vcfFileName, std::string t_vcfFileIndex, std::string t_vcfField, std::string t_vcfFilters, std::vector<std::string>& t_SampleInModel);
-RcppExport SEXP _SAIGE_setVCFobjInCPP(SEXP t_vcfFileNameSEXP, SEXP t_vcfFileIndexSEXP, SEXP t_vcfFieldSEXP, SEXP t_vcfFiltersSEXP, SEXP t_SampleInModelSEXP) {
+void setVCFobjInCPP(std::string t_vcfFileName, std::string t_vcfFileIndex, std::string t_vcfField, std::string t_vcfFilterString, std::vector<std::string>& t_SampleInModel);
+RcppExport SEXP _SAIGE_setVCFobjInCPP(SEXP t_vcfFileNameSEXP, SEXP t_vcfFileIndexSEXP, SEXP t_vcfFieldSEXP, SEXP t_vcfFilterStringSEXP, SEXP t_SampleInModelSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type t_vcfFileName(t_vcfFileNameSEXP);
     Rcpp::traits::input_parameter< std::string >::type t_vcfFileIndex(t_vcfFileIndexSEXP);
     Rcpp::traits::input_parameter< std::string >::type t_vcfField(t_vcfFieldSEXP);
-    Rcpp::traits::input_parameter< std::string >::type t_vcfFilters(t_vcfFiltersSEXP);
+    Rcpp::traits::input_parameter< std::string >::type t_vcfFilterString(t_vcfFilterStringSEXP);
     Rcpp::traits::input_parameter< std::vector<std::string>& >::type t_SampleInModel(t_SampleInModelSEXP);
-    setVCFobjInCPP(t_vcfFileName, t_vcfFileIndex, t_vcfField, t_vcfFilters, t_SampleInModel);
+    setVCFobjInCPP(t_vcfFileName, t_vcfFileIndex, t_vcfField, t_vcfFilterString, t_SampleInModel);
     return R_NilValue;
 END_RCPP
 }
