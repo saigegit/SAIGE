@@ -5,7 +5,7 @@ This release fixes three bugs that can give wrong step 1 / step 2 results. Pleas
 
 | # | Bug | Where | Affected versions | Reported |
 |---|-----|-------|-------------------|----------|
-| 1 | Deflated p-values at variants where ALT is the major allele | step 2, `--is_noadjCov=TRUE` (no sparse GRM, or `--is_fastTest=TRUE`) | 1.4.5 - 1.5.2 | #197, #206 |
+| 1 | Too-large p-values and shrunken BETA/SE at variants where ALT is the major allele | step 2, `--is_noadjCov=TRUE` (no sparse GRM, or `--is_fastTest=TRUE`) | 1.4.5 - 1.5.2 | #197, #206 |
 | 2 | Only half of the sparse GRM used | step 2 with `--sparseGRMFile` (single-variant and set-based tests) | verified on 1.5.2; the same code is in v1.3.3 and the loader in v1.0.0, so earlier versions are very likely affected (not tested) | this release |
 | 3 | Uninitialised variable in the step 1 PLINK genotype packing | step 1 (full GRM and variance ratio markers), PLINK input | present since v1.0.0 (source inspection) | #208 |
 
@@ -19,7 +19,7 @@ this release (see below). Consequence: `--is_fastTest=TRUE` without `--sparseGRM
 `--is_fastTest=TRUE` was requested). Results can
 differ slightly from `--is_noadjCov=TRUE` (up to ~0.02 in -log10 p in our tests).
 
-## Bug fix 1: deflated p-values with `--is_noadjCov=TRUE` when ALT is the major allele
+## Bug fix 1: wrong p-values, BETA and SE with `--is_noadjCov=TRUE` when ALT is the major allele
 
 **Affected versions:** 1.4.5 through 1.5.2, step 2, with `--is_noadjCov=TRUE` (the command-line default in these versions)
 **when the single-variant test does not use a sparse GRM** (no `--sparseGRMFile` given in step 2)
@@ -31,12 +31,17 @@ SAIGE <= 1.3.x is not affected (checked v1.3.3: the code path does not exist).
 `imputeGenoAndFlip()` flips genotypes to minor-allele coding but returns the ALT allele
 frequency. `scoreTestFast_noadjCov()` centred the flipped genotypes on that frequency, so the
 variance of the score statistic was overestimated at every variant where ALT is the major
-allele. This deflated p-values (lambda < 1). All trait types are affected (binary, quantitative
+allele, by a factor of about 1 + (2 - 4p)^2 / (2p(1 - p)) for minor allele frequency p (about 1.1 at
+MAF 0.45, 2.5 at 0.3, 15 at 0.1 and 195 at 0.01). P-values at those variants are too large, and BETA
+and SE are too small (BETA by the same factor); Tstat is not affected. The effect is strongest at
+lower-frequency ALT-major variants. Genome-wide lambda can therefore look normal or only mildly low
+(for example when most variants are rare, or the trait is polygenic and lambda is truly above 1), so a
+lambda close to 1 does not rule the problem out. All trait types are affected (binary, quantitative
 and survival were verified). For binary and survival traits SPA only re-tests variants whose
-(inflated) |z| exceeds `--SPAcutoff`, so most affected variants were never corrected;
-quantitative traits have no SPA step and were affected across the whole p-value range.
-Score statistics (Tstat) were not affected; only their variance and hence p-values, SEs and
-effect-size SEs at ALT-major variants.
+(inflated) |z| exceeds `--SPAcutoff`, so many affected variants were never corrected; quantitative
+traits have no SPA step. SPA p-values at ALT-major variants with minor allele frequency below about
+0.29 (the `SPA_fast` path) were also computed from the inflated variance and are not reliable in
+1.5.2; at higher frequencies the SPA p-values were already correct, but BETA and SE are still too small.
 
 Fix: `scoreTestFast_noadjCov()` now centres on the mean of the genotype vector actually tested.
 Added `tests/test_allele_swap.R`, a regression test that requires identical results when REF
@@ -73,8 +78,10 @@ In `src/SAIGE_fitGLMM_fast.cpp`, the byte that packs four 2-bit genotypes (`geno
 without an initial value, while `setGenotype()` only ORs bits in. The first packed byte of every
 marker (samples 1-4) therefore started from stale stack memory; a non-carrier (0b00) could look like
 a carrier. This affects the markers kept for the GRM and those kept for variance ratio estimation,
-so the effect is on the null model and the variance ratios (reported effect about 5% on the
-rare-variant variance ratio in #208; the size depends on the build and the data).
+so the effect is on the null model and the variance ratios. #208 reports about 5% on the rare-variant
+variance ratio; in our simulations the effect was at most 0.4% (quantitative and binary traits, also
+with the corrupted samples placed in one family). The size depends on the compiler, the stack contents
+and the data.
 
 Fix: initialise `geno2` to 0. Verified on a PLINK set with 40 copies of one MAC-12 marker: with the
 fix the variance ratios are identical with and without a compiler flag that fills uninitialised
