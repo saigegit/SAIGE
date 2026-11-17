@@ -1,4 +1,4 @@
-> **Important (2026-11-16):** SAIGE 1.4.5-1.5.2 step 2 with `--is_noadjCov=TRUE` (the default) gives deflated p-values at variants where ALT is the major allele, when step 2 is run without a sparse GRM or with `--is_fastTest=TRUE` (#197, #206). Fixed in 1.5.3; see [NEWS.md](NEWS.md). Workaround for older versions: `--is_noadjCov=FALSE`.
+> **Important (2026-11-17): SAIGE 1.5.3 fixes three bugs** (details in [NEWS.md](NEWS.md)): (1) deflated step 2 p-values at ALT-major variants with `--is_noadjCov=TRUE` in 1.4.5-1.5.2 when no sparse GRM is used or with `--is_fastTest=TRUE` (#197, #206; workaround for older versions: `--is_noadjCov=FALSE`); (2) step 2 with `--sparseGRMFile` used only half of the sparse GRM; (3) an uninitialised variable in the step 1 PLINK genotype packing (#208). Please update and re-run step 2 (and step 1 for PLINK input if variance ratios matter).
 
 HERE we are maintaining an newly improved stable version of SAIGE and SAIGE-GENE+. 
 Please find the https://saigegit.github.io/SAIGE-doc/ for documentation.
