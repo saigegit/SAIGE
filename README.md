@@ -1,3 +1,5 @@
+> **Important (2026-11-16):** SAIGE 1.4.5-1.5.2 step 2 with `--is_noadjCov=TRUE` (the default) gives deflated p-values at variants where ALT is the major allele (#197, #206). Fixed in 1.5.3; see [NEWS.md](NEWS.md). Workaround for older versions: `--is_noadjCov=FALSE`.
+
 HERE we are maintaining an newly improved stable version of SAIGE and SAIGE-GENE+. 
 Please find the https://saigegit.github.io/SAIGE-doc/ for documentation.
 
