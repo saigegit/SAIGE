@@ -22,6 +22,10 @@ setSparseSigma_new = function(sparseGRMFile,
   Check_File_Exist(sparseGRMSampleIDFile, "sparseGRMSampleIDFile")
   
   sparseGRM = Matrix:::readMM(sparseGRMFile)
+  # A symmetric MatrixMarket file (as written by createSparseGRM) stores only one triangle, and
+  # readMM keeps it that way. The C++ code builds Sigma from the stored (i, j, x) entries
+  # as-is, so expand to general storage (both triangles) before extracting them.
+  sparseGRM = as(as(sparseGRM, "generalMatrix"), "TsparseMatrix")
   sparseGRMSampleID = data.frame(
     data.table:::fread(
       sparseGRMSampleIDFile,
