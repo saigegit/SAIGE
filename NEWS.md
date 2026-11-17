@@ -12,7 +12,8 @@ SAIGE <= 1.3.x is not affected (checked v1.3.3: the code path does not exist).
 `imputeGenoAndFlip()` flips genotypes to minor-allele coding but returns the ALT allele
 frequency. `scoreTestFast_noadjCov()` centred the flipped genotypes on that frequency, so the
 variance of the score statistic was overestimated at every variant where ALT is the major
-allele. This deflated p-values (lambda < 1). For binary traits SPA only re-tests variants whose
+allele. This deflated p-values (lambda < 1). All trait types are affected (binary, quantitative
+and survival were verified). For binary and survival traits SPA only re-tests variants whose
 (inflated) |z| exceeds `--SPAcutoff`, so most affected variants were never corrected;
 quantitative traits have no SPA step and were affected across the whole p-value range.
 Score statistics (Tstat) were not affected; only their variance and hence p-values, SEs and
