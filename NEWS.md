@@ -1,8 +1,18 @@
 # SAIGE 1.5.3 (2026-11-16)
 
-## Bug fix: deflated p-values with `--is_noadjCov=TRUE` (default) when ALT is the major allele
+## Changed default: `--is_noadjCov` is now `FALSE` on the command line
 
-**Affected versions:** 1.4.5 through 1.5.2, step 2, with `--is_noadjCov=TRUE` (the default)
+`extdata/step2_SPAtests.R` now defaults to `--is_noadjCov=FALSE`, matching the R function
+`SPAGMMATtest()` (which already defaulted to `FALSE`). With `FALSE`, covariates are regressed out of
+each genotype (slower, no shortcut). `--is_noadjCov=TRUE` is the faster path and is correct again in
+this release (see below). Consequence: `--is_fastTest=TRUE` without `--sparseGRMFile` now also needs
+`--is_noadjCov=TRUE`; otherwise step 2 prints a message and turns `is_fastTest` off (the message is now only printed when
+`--is_fastTest=TRUE` was requested). Results can
+differ slightly from `--is_noadjCov=TRUE` (up to ~0.02 in -log10 p in our tests).
+
+## Bug fix: deflated p-values with `--is_noadjCov=TRUE` when ALT is the major allele
+
+**Affected versions:** 1.4.5 through 1.5.2, step 2, with `--is_noadjCov=TRUE` (the command-line default in these versions)
 **when the single-variant test does not use a sparse GRM** (no `--sparseGRMFile` given in step 2)
 **or when `--is_fastTest=TRUE`**. Step 2 runs that supply `--sparseGRMFile` with
 `--is_fastTest=FALSE` (the default) do not use the affected code path. The bug is independent of
