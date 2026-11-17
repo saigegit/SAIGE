@@ -461,7 +461,7 @@ public:
 
 	     altFreq = alleleCount/float(Nnomissing * 2);
 
-	     unsigned char geno2;
+	     unsigned char geno2 = 0; // must start at 0: setGenotype() only ORs bits in
 	     passQC = false;
 	     passVarRatio = false;
 	     float maf = std::min(altFreq, 1-altFreq);
