@@ -39,9 +39,7 @@ lower-frequency ALT-major variants. Genome-wide lambda can therefore look normal
 lambda close to 1 does not rule the problem out. All trait types are affected (binary, quantitative
 and survival were verified). For binary and survival traits SPA only re-tests variants whose
 (inflated) |z| exceeds `--SPAcutoff`, so many affected variants were never corrected; quantitative
-traits have no SPA step. SPA p-values at ALT-major variants with minor allele frequency below about
-0.29 (the `SPA_fast` path) were also computed from the inflated variance and are not reliable in
-1.5.2; at higher frequencies the SPA p-values were already correct, but BETA and SE are still too small.
+traits have no SPA step. SPA p-values at ALT-major variants that take the `SPA_fast` path (variants with a large fraction of zero genotypes) were also computed from the inflated variance and are not reliable in 1.5.2; at the other variants the SPA p-values were already correct, but BETA and SE are still too small.
 
 Fix: `scoreTestFast_noadjCov()` now centres on the mean of the genotype vector actually tested.
 Added `tests/test_allele_swap.R`, a regression test that requires identical results when REF
