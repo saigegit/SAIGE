@@ -17,7 +17,7 @@ each genotype (slower, no shortcut). `--is_noadjCov=TRUE` is the faster path and
 this release (see below). Consequence: `--is_fastTest=TRUE` without `--sparseGRMFile` now also needs
 `--is_noadjCov=TRUE`; otherwise step 2 prints a message and turns `is_fastTest` off (the message is now only printed when
 `--is_fastTest=TRUE` was requested). Results can
-differ slightly from `--is_noadjCov=TRUE` (up to ~0.05 in -log10 p in our tests).
+differ slightly from `--is_noadjCov=TRUE` (up to ~0.02 in -log10 p in our tests).
 
 ## Bug fix 1: wrong p-values, BETA and SE with `--is_noadjCov=TRUE` when ALT is the major allele
 
