@@ -347,8 +347,10 @@ SPAGMMATtest = function(bgenFile = "",
     }
 
     if(!isSparseGRM & !is_noadjCov){
+        if(is_fastTest){
+            cat("isSparseGRM is FALSE and is_noadjCov is FALSE, so is_fastTest is not working (use --sparseGRMFile or --is_noadjCov=TRUE).\n")
+        }
         is_fastTest = FALSE
-        cat("isSparseGRM is FALSE and is_noadjCov is FALSE,, so is_fastTest is not working.\n")
     }
 
 

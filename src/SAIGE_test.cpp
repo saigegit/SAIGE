@@ -331,9 +331,15 @@ void SAIGEClass::scoreTestFast_noadjCov(arma::vec & t_GVec,
     //  t_gy = dot(t_gtilde, m_y);
     // }
      
+    // t_altFreq is the ALT allele frequency, but t_GVec may have been flipped
+    // (2 - g) by imputeGenoAndFlip so that it counts the minor allele. Centering
+    // must use the mean of the genotype vector actually being tested, otherwise
+    // the variance is overestimated whenever ALT is the major allele.
+    // Zeros do not contribute to the sum, so summing g1 is sufficient.
+    double t_freqCoded = arma::accu(g1) / (2.0 * m_n);
     double var2_a = dot(m_mu21,pow(g1,2));
-    double var2_b = dot(m_mu21, 2*2*t_altFreq*g1);
-    double var2_c = arma::accu(m_mu2)*pow(2*t_altFreq, 2);
+    double var2_b = dot(m_mu21, 2*2*t_freqCoded*g1);
+    double var2_c = arma::accu(m_mu2)*pow(2*t_freqCoded, 2);
     var2 = var2_a - var2_b + var2_c;
     var2 = var2 *(m_tauvec[0]);
     //std::cout << "var2 " << var2 << std::endl;
@@ -343,7 +349,7 @@ void SAIGEClass::scoreTestFast_noadjCov(arma::vec & t_GVec,
     //std::cout << "var2 b " << var2 << std::endl;
     //S = dot(t_GVec_center, m_res);
     //std::cout << "S " << S << std::endl;
-    S = dot(g1, m_res1)  - arma::accu(m_res)*(2*t_altFreq);
+    S = dot(g1, m_res1)  - arma::accu(m_res)*(2*t_freqCoded);
     //std::cout << "S b " << S << std::endl; 
     S = S/m_tauvec[0];
 
