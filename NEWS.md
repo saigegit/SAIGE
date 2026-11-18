@@ -17,7 +17,7 @@ each genotype (slower, no shortcut). `--is_noadjCov=TRUE` is the faster path and
 this release (see below). Consequence: `--is_fastTest=TRUE` without `--sparseGRMFile` now also needs
 `--is_noadjCov=TRUE`; otherwise step 2 prints a message and turns `is_fastTest` off (the message is now only printed when
 `--is_fastTest=TRUE` was requested). Results can
-differ slightly from `--is_noadjCov=TRUE` (in a real-data check of 41,648 ALT-major variants the median difference in -log10 p was 0.00005 and the maximum 0.044).
+differ slightly from `--is_noadjCov=TRUE` (up to ~0.02 in -log10 p in our tests).
 
 ## Bug fix 1: wrong p-values, BETA and SE with `--is_noadjCov=TRUE` when ALT is the major allele
 
@@ -33,7 +33,7 @@ frequency. `scoreTestFast_noadjCov()` centred the flipped genotypes on that freq
 variance of the score statistic was overestimated at every variant where ALT is the major
 allele, by a factor of about 1 + (2 - 4p)^2 / (2p(1 - p)) for minor allele frequency p (about 1.1 at
 MAF 0.45, 2.5 at 0.3, 15 at 0.1 and 195 at 0.01). P-values at those variants are too large, and BETA
-and SE are too small (BETA by the same factor); Tstat is essentially unaffected (differences below 0.02 in raw score units in a real-data check). The effect is strongest at
+and SE are too small (BETA by the same factor); Tstat is essentially unaffected. The effect is strongest at
 lower-frequency ALT-major variants. Genome-wide lambda can therefore look normal or only mildly low
 (for example when most variants are rare, or the trait is polygenic and lambda is truly above 1), so a
 lambda close to 1 does not rule the problem out. All trait types are affected (binary, quantitative
